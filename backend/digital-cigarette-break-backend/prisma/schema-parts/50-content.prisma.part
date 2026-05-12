@@ -1,0 +1,140 @@
+// ============================================================================
+// CONTENT, FEEDBACK, INSIGHTS, RECOMMENDATIONS
+// ============================================================================
+
+model Sound {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+
+  category  String
+  duration  Int
+  audioUrl  String
+  imageUrl  String?
+  createdBy String?
+
+  isActive  Boolean  @default(true)
+  rating    Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@map("sounds")
+}
+
+model Quote {
+  id       String @id @default(cuid())
+  text     String @db.Text
+  author   String?
+  category String?
+  source   String?
+  imageUrl String?
+
+  isActive  Boolean  @default(true)
+  createdBy String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("quotes")
+}
+
+model Feedback {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      String
+  subject   String
+  message   String @db.Text
+  status    String @default("OPEN")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("feedback")
+}
+
+model ContentRating {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentType String
+  contentId   String
+  rating      Int
+  review      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, contentType, contentId])
+  @@index([contentType])
+  @@map("content_ratings")
+}
+
+model Analytics {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date             DateTime
+  moodCount        Int      @default(0)
+  avgMoodIntensity Float    @default(0)
+  topMood          String?
+  sessionCount     Int      @default(0)
+  totalSessionTime Int      @default(0)
+  meditationCount  Int      @default(0)
+  journalCount     Int      @default(0)
+  createdAt        DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@map("analytics")
+}
+
+model Insight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       String
+  title      String
+  content    String @db.Text
+  confidence Float
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@map("insights")
+}
+
+model AIInsight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       String
+  title      String
+  content    String @db.Text
+  aiProvider String
+  isUseful   Boolean?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@map("ai_insights")
+}
+
+model Recommendation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentType String
+  contentId   String
+  reason      String
+  score       Float
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@map("recommendations")
+}

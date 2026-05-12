@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./backend/digital-cigarette-break-backend/tsconfig.json"
+    }
+  ]
+}

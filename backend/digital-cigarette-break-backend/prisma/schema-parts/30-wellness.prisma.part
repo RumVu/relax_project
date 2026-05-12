@@ -1,0 +1,206 @@
+// ============================================================================
+// WELLNESS: MOODS, BREAKS, JOURNALS, MEDITATION
+// ============================================================================
+
+enum MoodType {
+  HAPPY
+  SAD
+  ANXIOUS
+  CALM
+  FRUSTRATED
+  ENERGIZED
+  TIRED
+  EXCITED
+  NEUTRAL
+  STRESSED
+}
+
+enum BreakMode {
+  POMODORO
+  SHORT_BREAK
+  LONG_BREAK
+  CUSTOM
+}
+
+model Mood {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       MoodType
+  intensity  Int
+  notes      String?
+  tags       String[]
+  activities String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("moods")
+}
+
+model BreakSession {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mode            BreakMode @default(POMODORO)
+  duration        Int
+  plannedDuration Int
+  status          String    @default("COMPLETED")
+
+  startedAt   DateTime
+  endedAt     DateTime?
+  completedAt DateTime?
+
+  notes      String?
+  activities String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("break_sessions")
+}
+
+model Journal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  content String   @db.Text
+  mood    MoodType?
+  tags    String[]
+
+  isPrivate  Boolean @default(true)
+  isFavorite Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("journals")
+}
+
+model BreathingExercise {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+
+  inhaleCount Int
+  holdCount   Int
+  exhaleCount Int
+  cycles      Int
+  duration    Int
+  difficulty  String @default("BEGINNER")
+
+  audioUrl  String?
+  imageUrl  String?
+  createdBy String?
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("breathing_exercises")
+}
+
+model MeditationSession {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  guideId String?
+  guide   MeditationGuide? @relation(fields: [guideId], references: [id], onDelete: SetNull)
+
+  duration  Int
+  startedAt DateTime
+  endedAt   DateTime?
+
+  focusArea String?
+  mood      MoodType?
+  quality   Int?
+  notes     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("meditation_sessions")
+}
+
+model MeditationGuide {
+  id          String @id @default(cuid())
+  title       String
+  description String?
+
+  duration   Int
+  focusArea  String
+  difficulty String @default("BEGINNER")
+
+  audioUrl   String?
+  imageUrl   String?
+  instructor String?
+
+  isActive  Boolean             @default(true)
+  sessions  MeditationSession[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+
+  @@map("meditation_guides")
+}
+
+model Reminder {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String?
+  type    String @default("BREAK")
+
+  scheduledTime DateTime
+  frequency     String?
+  isActive      Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([scheduledTime])
+  @@map("reminders")
+}
+
+enum NotificationType {
+  PUSH
+  EMAIL
+  SMS
+  IN_APP
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String
+  type    NotificationType
+
+  relatedEntity String?
+  relatedId     String?
+
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}

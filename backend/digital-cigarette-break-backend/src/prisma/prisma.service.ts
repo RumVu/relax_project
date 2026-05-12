@@ -36,9 +36,9 @@ export class PrismaService
     this.logger.log('Prisma disconnected');
   }
 
-  async enableShutdownHooks(app: INestApplication) {
-    process.on('beforeExit', async () => {
-      await app.close();
+  enableShutdownHooks(app: INestApplication): void {
+    process.once('beforeExit', () => {
+      void app.close();
     });
   }
 }

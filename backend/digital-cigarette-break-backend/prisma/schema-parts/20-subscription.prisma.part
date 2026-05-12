@@ -1,0 +1,94 @@
+// ============================================================================
+// SUBSCRIPTIONS & BILLING TIERS
+// ============================================================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+model SubscriptionTier {
+  id           String   @id @default(cuid())
+  name         String   @unique
+  description  String?
+  price        Float
+  billingCycle BillingCycle
+
+  features      TierFeature[]
+  limits        TierLimit[]
+  subscriptions Subscription[]
+
+  displayOrder Int     @default(0)
+  isActive     Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subscription_tiers")
+}
+
+model TierFeature {
+  id     String           @id @default(cuid())
+  tierId String
+  tier   SubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  name        String
+  included    Boolean @default(true)
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tierId, name])
+  @@index([tierId])
+  @@map("tier_features")
+}
+
+model TierLimit {
+  id     String           @id @default(cuid())
+  tierId String
+  tier   SubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  name  String
+  value Int
+  unit  String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tierId, name])
+  @@index([tierId])
+  @@map("tier_limits")
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tierId String
+  tier   SubscriptionTier @relation(fields: [tierId], references: [id])
+
+  status      SubscriptionStatus @default(ACTIVE)
+  startDate   DateTime           @default(now())
+  endDate     DateTime?
+  renewalDate DateTime?
+
+  stripeSubscriptionId String?
+  paypalSubscriptionId String?
+
+  autoRenew Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tierId])
+  @@map("subscriptions")
+}

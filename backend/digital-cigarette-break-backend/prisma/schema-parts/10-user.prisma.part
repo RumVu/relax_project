@@ -1,0 +1,100 @@
+// ============================================================================
+// USER & PREFERENCES
+// ============================================================================
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  USER
+  PREMIUM_USER
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
+  avatar   String?
+  password String
+  bio      String?
+
+  isActive      Boolean @default(true)
+  isBanned      Boolean @default(false)
+  emailVerified Boolean @default(false)
+
+  role UserRole @default(USER)
+
+  totalMoods        Int @default(0)
+  totalSessions     Int @default(0)
+  totalAchievements Int @default(0)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  lastLoginAt DateTime?
+
+  preferences            UserPreferences?
+  subscription           Subscription?
+  moods                  Mood[]
+  breakSessions          BreakSession[]
+  journals               Journal[]
+  meditations            MeditationSession[]
+  reminders              Reminder[]
+  notifications          Notification[]
+  achievements           UserAchievement[]
+  badges                 UserBadge[]
+  streak                 UserStreak?
+  points                 UserPoints?
+  userLevel              UserLevel?
+  friends                Friend[]           @relation("UserFriends")
+  friendRequestsReceived Friend[]           @relation("FriendRequests")
+  challenges             UserChallenge[]
+  leaderboardEntries     LeaderboardEntry[]
+  feedEntries            FeedEntry[]
+  feedback               Feedback[]
+  contentRatings         ContentRating[]
+  payments               Payment[]
+  integrations           IntegrationLink[]
+  aiInsights             AIInsight[]
+  analytics              Analytics[]
+  insights               Insight[]
+  recommendations        Recommendation[]
+  storageFiles           StorageFile[]
+  sessions               Session[]
+  events                 Event[]
+  rateLimitCounters      RateLimitCounter[]
+  adminLogs              AdminLog[]         @relation("AdminActorLogs")
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model UserPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  pushNotificationsEnabled  Boolean @default(true)
+  emailNotificationsEnabled Boolean @default(true)
+  smsNotificationsEnabled   Boolean @default(false)
+  inAppNotificationsEnabled Boolean @default(true)
+
+  dailyBreakGoal Int    @default(4)
+  breakDuration  Int    @default(15)
+  breakMode      String @default("POMODORO")
+
+  preferredExerciseDuration Int    @default(20)
+  exerciseFrequency         String @default("DAILY")
+
+  profilePrivacy         String  @default("PUBLIC")
+  showStatsInLeaderboard Boolean @default(true)
+  allowFriendRequests    Boolean @default(true)
+
+  timezone String @default("UTC")
+  language String @default("en")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("user_preferences")
+}
