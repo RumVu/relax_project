@@ -116,17 +116,18 @@ model AdminLog {
 }
 
 model RateLimitCounter {
-  id        String @id @default(cuid())
-  userId    String?
-  user      User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
-  ipAddress String?
+  id         String  @id @default(cuid())
+  identifier String
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress  String?
 
   endpoint String
   count    Int      @default(1)
   resetAt  DateTime
 
-  @@unique([userId, endpoint])
-  @@unique([ipAddress, endpoint])
+  @@unique([identifier, endpoint])
+  @@index([userId])
   @@index([resetAt])
   @@map("rate_limit_counters")
 }
