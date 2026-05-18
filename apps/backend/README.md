@@ -12,13 +12,13 @@ From the repository root:
 ```bash
 docker compose up -d
 npm --workspace apps/backend install
-cp apps/backend/.env.example apps/backend/.env
 npm run prisma:migrate:deploy
 npm run prisma:seed
 npm run dev:backend
 ```
 
-The local database must match the Docker Compose service:
+Create or update `apps/backend/.env` so the local database matches Docker
+Compose:
 
 ```env
 DATABASE_URL="postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public"

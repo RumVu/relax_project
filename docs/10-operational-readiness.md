@@ -48,6 +48,25 @@ Use this table when adding new APIs or DTOs.
 | Weather greeting | `UserPreference.latitude`, `longitude`, `timezone`, `locationName`, `weatherEnabled` | Backend cannot request device location by itself; client must send coordinates. |
 | Storage assets | `StorageFile` plus Supabase bucket | Public or signed URLs are controlled by bucket/path policy. |
 
+## Reserved Future Contracts
+
+These models are intentionally kept even when no current controller/service
+writes to them yet. They are not accidental trash; they are future product
+contracts for challenger, social, meditation, insight, and recommendation
+workflows.
+
+| Future area | Reserved models | Notes |
+| --- | --- | --- |
+| Challenger and gamification | `Achievement`, `UserAchievement`, `Badge`, `UserBadge`, `Challenge`, `UserChallenge`, `LeaderboardEntry`, `UserPoints`, `PointsTransaction`, `UserLevel`, `UserStreak` | Keep for badges, daily challenges, points, levels, ranks, and streak-ledger screens. |
+| Social/community | `Friend`, `FeedEntry` | Keep for friend requests, activity feed, and future sharing/community screens. |
+| Dedicated meditation | `MeditationGuide`, `MeditationSession` | Keep for a dedicated meditation library/history separate from generic relax sessions. |
+| Insights and recommendations | `AnalyticsSnapshot`, `Insight`, `AIInsight`, `Recommendation`, `ContentRating` | Keep for materialized analytics, AI insight cards, recommendation history, and content feedback. |
+| Event ledgers | `PlatformEvent`, `AppEvent` | Keep for typed backend audit events and flexible app telemetry. |
+
+Do not remove these tables from `public` just because `rg "prisma.<model>"`
+returns no current runtime usage. Move a model out only after the related
+product area is explicitly cancelled.
+
 ## Old Scaffold Status
 
 The old scaffold path `backend/digital-cigarette-break-backend` has been removed

@@ -17,7 +17,7 @@ Monorepo for the Digital Cigarette Break product suite.
 ## Quick start
 
 1. Install dependencies in the apps you want to run.
-2. Copy backend env: `cp apps/backend/.env.example apps/backend/.env`.
+2. Make sure `apps/backend/.env` exists with the local database values below.
 3. Start infrastructure with `docker compose up -d`.
 4. Apply backend migrations with `npm run prisma:migrate:deploy`.
 5. Seed sample data with `npm run prisma:seed`.
