@@ -1,0 +1,220 @@
+// ============================================================================
+// USER & AUTH
+// ============================================================================
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum AuthProvider {
+  LOCAL
+  GOOGLE
+  APPLE
+}
+
+enum ThemeMode {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum AccountTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum PushPlatform {
+  IOS
+  ANDROID
+  WEB
+}
+
+enum PushProvider {
+  FCM
+  APNS
+  EXPO
+}
+
+model User {
+  id       String  @id @default(cuid())
+  email    String  @unique
+  name     String?
+  avatar   String?
+  password String?
+
+  role          UserRole     @default(USER)
+  authProvider  AuthProvider @default(LOCAL)
+  emailVerified Boolean      @default(false)
+  isActive      Boolean      @default(true)
+
+  lastLoginAt DateTime?
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  profile               UserProfile?
+  preferences           UserPreference?
+  companion             UserCompanion?
+  sessions              Session[]
+  moodCheckins          MoodCheckin[]
+  weeklyMoodStats       WeeklyMoodStat[]
+  userAchievements      UserAchievement[]
+  userBadges            UserBadge[]
+  userStreak            UserStreak?
+  userPoints            UserPoints?
+  userLevel             UserLevel?
+  friends               Friend[]                 @relation("UserFriends")
+  friendRequestsReceived Friend[]                @relation("FriendRequests")
+  userChallenges        UserChallenge[]
+  leaderboardEntries    LeaderboardEntry[]
+  feedEntries           FeedEntry[]
+  journals              Journal[]
+  meditationSessions    MeditationSession[]
+  companionInteractions CompanionInteraction[]
+  favoriteMessages      FavoriteCompanionMessage[]
+  reminders             Reminder[]
+  notifications         Notification[]
+  relaxSessions         RelaxSession[]
+  soundSessions         SoundSession[]
+  breathingSessions     BreathingSession[]
+  sleepSessions         SleepSession[]
+  subscriptions         Subscription[]
+  payments              Payment[]
+  feedbacks             Feedback[]
+  contentRatings        ContentRating[]
+  analyticsSnapshots    AnalyticsSnapshot[]
+  integrations          IntegrationLink[]
+  aiInsights            AIInsight[]
+  insightCards          Insight[]
+  recommendations       Recommendation[]
+  storageFiles          StorageFile[]
+  appEvents             AppEvent[]
+  platformEvents        PlatformEvent[]
+  messageLogs           CompanionMessageLog[]
+  accountTokens         AccountToken[]
+  pushDevices           PushDevice[]
+  rateLimitCounters     RateLimitCounter[]
+  adminLogs             AdminLog[]               @relation("AdminActorLogs")
+
+  @@index([email])
+  @@index([role])
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model UserProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  displayName String?
+  bio         String?
+  birthday    DateTime?
+  zodiacSign  String?
+  chineseZodiac String?
+
+  totalMoodCheckins Int @default(0)
+  totalJournalPosts Int @default(0)
+  currentStreak     Int @default(0)
+  longestStreak     Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_profiles")
+}
+
+model UserPreference {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  language String @default("vi")
+  timezone String @default("Asia/Ho_Chi_Minh")
+  latitude Float?
+  longitude Float?
+  locationName String?
+  weatherEnabled Boolean @default(true)
+
+  themeMode ThemeMode @default(SYSTEM)
+  themeId   String?
+  theme     AppTheme? @relation(fields: [themeId], references: [id], onDelete: SetNull)
+
+  enableCompanionBubble   Boolean @default(true)
+  bubbleIntervalSeconds   Int     @default(30)
+  enableSound             Boolean @default(true)
+  enableHaptics           Boolean @default(true)
+  pushNotificationsEnabled  Boolean @default(true)
+  emailNotificationsEnabled Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([themeId])
+  @@index([timezone])
+  @@map("user_preferences")
+}
+
+model Session {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  refreshToken String   @unique
+  userAgent    String?
+  ipAddress    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model AccountToken {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type      AccountTokenType
+  tokenHash String           @unique
+  expiresAt DateTime
+  consumedAt DateTime?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([expiresAt])
+  @@index([consumedAt])
+  @@map("account_tokens")
+}
+
+model PushDevice {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  token    String       @unique
+  platform PushPlatform
+  provider PushProvider @default(FCM)
+
+  deviceId   String?
+  deviceName String?
+  appVersion String?
+  timezone   String?
+  enabled    Boolean @default(true)
+
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+  @@index([platform])
+  @@index([provider])
+  @@index([enabled])
+  @@map("push_devices")
+}

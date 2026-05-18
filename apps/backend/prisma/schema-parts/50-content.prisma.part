@@ -1,0 +1,153 @@
+// ============================================================================
+// REMINDERS & NOTIFICATIONS
+// ============================================================================
+
+enum ReminderType {
+  WATER
+  REST
+  BREATHING
+  JOURNAL
+  SLEEP
+  CUSTOM
+}
+
+enum NotificationType {
+  IN_APP
+  PUSH
+  EMAIL
+  SMS
+}
+
+model Reminder {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String?
+  type    ReminderType @default(CUSTOM)
+
+  scheduledAt DateTime
+  repeatRule  String?
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([scheduledAt])
+  @@index([isActive])
+  @@map("reminders")
+}
+
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title   String
+  message String
+  type    NotificationType @default(IN_APP)
+
+  relatedEntity String?
+  relatedId     String?
+
+  isRead Boolean @default(false)
+  readAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model ContentRating {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentType String
+  contentId   String
+  rating      Int
+  review      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, contentType, contentId])
+  @@index([contentType])
+  @@map("content_ratings")
+}
+
+model AnalyticsSnapshot {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  date             DateTime
+  moodCount        Int      @default(0)
+  avgMoodIntensity Float    @default(0)
+  topMood          String?
+  sessionCount     Int      @default(0)
+  totalSessionTime Int      @default(0)
+  meditationCount  Int      @default(0)
+  journalCount     Int      @default(0)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId])
+  @@index([date])
+  @@map("analytics")
+}
+
+model Insight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       String
+  title      String
+  content    String @db.Text
+  confidence Float
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("insights")
+}
+
+model AIInsight {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type       String
+  title      String
+  content    String @db.Text
+  aiProvider String
+  isUseful   Boolean?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("ai_insights")
+}
+
+model Recommendation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  contentType String
+  contentId   String
+  reason      String
+  score       Float
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("recommendations")
+}

@@ -1,0 +1,64 @@
+// ============================================================================
+// ONBOARDING / APP CONTENT
+// ============================================================================
+
+enum MoodType {
+  HAPPY
+  CALM
+  TIRED
+  SAD
+  ANXIOUS
+  STRESSED
+  EXCITED
+  NEUTRAL
+  LONELY
+  GRATEFUL
+}
+
+model OnboardingSlide {
+  id String @id @default(cuid())
+
+  title       String
+  subtitle    String?
+  description String?
+
+  imageUrl     String?
+  animationUrl String?
+  displayOrder Int @default(0)
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([displayOrder])
+  @@index([isActive])
+  @@map("onboarding_slides")
+}
+
+model AppTheme {
+  id String @id @default(cuid())
+
+  name String @unique
+  mode ThemeMode
+
+  backgroundColor String
+  surfaceColor    String
+  primaryColor    String
+  secondaryColor  String?
+  accentColor     String?
+  textColor       String
+  mutedTextColor  String?
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  preferences UserPreference[]
+
+  @@index([mode])
+  @@index([isActive])
+  @@map("app_themes")
+}

@@ -1,0 +1,219 @@
+// ============================================================================
+// COMPANION: PIXEL PET / CAT SYSTEM
+// ============================================================================
+
+enum CompanionType {
+  CAT
+  DOG
+  RABBIT
+  BIRD
+  CUSTOM
+}
+
+enum CompanionMood {
+  CHILL
+  HAPPY
+  SLEEPY
+  CURIOUS
+  HUNGRY
+  PLAYFUL
+  CALM
+  SAD
+}
+
+enum CompanionAction {
+  IDLE
+  SLEEPING
+  WALKING
+  STRETCHING
+  SITTING
+  LOOKING
+  TYPING
+  PLAYING
+}
+
+enum CompanionPersonalizationMode {
+  DEFAULT
+  ZODIAC
+  CHINESE_ZODIAC
+  CUSTOM
+}
+
+enum MessageTriggerType {
+  RANDOM
+  TIME_BASED
+  MOOD_BASED
+  FIRST_OPEN
+  RETURNING_USER
+  LONG_SESSION
+  NIGHT_TIME
+  MORNING
+  AFTER_CHECKIN
+}
+
+model CompanionAsset {
+  id String @id @default(cuid())
+
+  name        String
+  type        CompanionType @default(CAT)
+  description String?
+
+  previewImageUrl   String?
+  spriteSheetUrl    String?
+  idleAnimationUrl  String?
+  sleepAnimationUrl String?
+  walkAnimationUrl  String?
+
+  primaryColor   String?
+  secondaryColor String?
+  accentColor    String?
+
+  zodiacSign    String?
+  chineseZodiac String?
+
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userCompanions UserCompanion[]
+
+  @@index([type])
+  @@index([zodiacSign])
+  @@index([chineseZodiac])
+  @@index([isActive])
+  @@map("companion_assets")
+}
+
+model UserCompanion {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  assetId String?
+  asset   CompanionAsset? @relation(fields: [assetId], references: [id], onDelete: SetNull)
+
+  name String @default("Mon Leo")
+  type CompanionType @default(CAT)
+  personalizationMode CompanionPersonalizationMode @default(DEFAULT)
+
+  mood   CompanionMood   @default(CHILL)
+  action CompanionAction @default(IDLE)
+
+  level      Int @default(1)
+  affection  Int @default(0)
+  energy     Int @default(100)
+  lastSeenAt DateTime?
+  lastFedAt  DateTime?
+  lastMoodAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  states       CompanionState[]
+  interactions CompanionInteraction[]
+
+  @@index([userId])
+  @@index([assetId])
+  @@map("user_companions")
+}
+
+model CompanionState {
+  id          String @id @default(cuid())
+  companionId String
+  companion   UserCompanion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  mood      CompanionMood?
+  action    CompanionAction
+  animation String?
+  metadata  Json?
+
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  @@index([companionId])
+  @@index([startedAt])
+  @@map("companion_states")
+}
+
+model CompanionMessage {
+  id String @id @default(cuid())
+
+  content String @db.Text
+
+  triggerType   MessageTriggerType @default(RANDOM)
+  mood          MoodType?
+  companionMood CompanionMood?
+
+  minHour Int?
+  maxHour Int?
+
+  weight   Int     @default(1)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  favorites FavoriteCompanionMessage[]
+  logs      CompanionMessageLog[]
+
+  @@index([triggerType])
+  @@index([mood])
+  @@index([isActive])
+  @@map("companion_messages")
+}
+
+model CompanionMessageLog {
+  id String @id @default(cuid())
+
+  userId    String
+  messageId String
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message CompanionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  shownAt     DateTime @default(now())
+  clickedAt   DateTime?
+  dismissedAt DateTime?
+
+  @@index([userId])
+  @@index([messageId])
+  @@index([shownAt])
+  @@map("companion_message_logs")
+}
+
+model FavoriteCompanionMessage {
+  id String @id @default(cuid())
+
+  userId    String
+  messageId String
+
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message CompanionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, messageId])
+  @@index([userId])
+  @@map("favorite_companion_messages")
+}
+
+model CompanionInteraction {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  companionId String
+  companion   UserCompanion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+
+  type     String
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([companionId])
+  @@index([createdAt])
+  @@map("companion_interactions")
+}

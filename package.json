@@ -1,0 +1,25 @@
+{
+  "name": "digital-cigarette-break",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/backend",
+    "apps/web",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:backend": "npm --workspace apps/backend run dev",
+    "dev:web": "npm --workspace apps/web run dev",
+    "build": "npm run build --workspaces --if-present",
+    "build:backend": "npm --workspace apps/backend run build",
+    "build:web": "npm --workspace apps/web run build",
+    "prisma:generate": "npm --workspace apps/backend run prisma:generate",
+    "prisma:migrate:deploy": "npm --workspace apps/backend run prisma:migrate:deploy",
+    "prisma:seed": "npm --workspace apps/backend run prisma:seed"
+  },
+  "dependencies": {
+    "@nestjs/platform-express": "^11.1.21",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.15.1"
+  }
+}

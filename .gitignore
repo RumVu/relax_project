@@ -14,9 +14,14 @@ node_modules/
 dist/
 build/
 coverage/
+.next/
+out/
+*.tsbuildinfo
 **/dist/
 **/build/
 **/coverage/
+**/.next/
+**/out/
 
 # Logs
 *.log
@@ -24,3 +29,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# Workspace caches
+.turbo/
+.claude/
+
+# Local database backups are rescue artifacts only.
+apps/backend/prisma/backups/*.sql

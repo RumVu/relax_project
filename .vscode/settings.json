@@ -1,5 +1,5 @@
 {
   "prisma.pinToPrisma6": true,
-  "typescript.tsdk": "backend/digital-cigarette-break-backend/node_modules/typescript/lib",
+  "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true
 }

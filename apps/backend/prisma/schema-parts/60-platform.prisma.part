@@ -1,0 +1,298 @@
+// ============================================================================
+// BILLING & PLATFORM SUPPORT
+// ============================================================================
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum EventType {
+  MOOD_CREATED
+  SESSION_STARTED
+  SESSION_COMPLETED
+  ACHIEVEMENT_UNLOCKED
+  BADGE_EARNED
+  STREAK_UPDATED
+  FRIEND_ADDED
+  CHALLENGE_JOINED
+  CHALLENGE_COMPLETED
+}
+
+enum BillingCycle {
+  MONTHLY
+  ANNUAL
+}
+
+model SubscriptionTier {
+  id String @id @default(cuid())
+
+  name          String       @unique
+  description   String?
+  price         Float
+  currency      String       @default("VND")
+  billingCycle  BillingCycle
+  displayOrder  Int          @default(0)
+  isActive      Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  features      TierFeature[]
+  limits        TierLimit[]
+  subscriptions Subscription[]
+
+  @@index([billingCycle])
+  @@index([isActive])
+  @@index([displayOrder])
+  @@map("subscription_tiers")
+}
+
+model TierFeature {
+  id String @id @default(cuid())
+
+  tierId String
+  tier   SubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  name        String
+  included    Boolean @default(true)
+  description String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tierId, name])
+  @@index([tierId])
+  @@map("tier_features")
+}
+
+model TierLimit {
+  id String @id @default(cuid())
+
+  tierId String
+  tier   SubscriptionTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  name  String
+  value Int
+  unit  String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tierId, name])
+  @@index([tierId])
+  @@map("tier_limits")
+}
+
+model Subscription {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tierId String?
+  tier   SubscriptionTier? @relation(fields: [tierId], references: [id], onDelete: SetNull)
+
+  status SubscriptionStatus @default(PENDING)
+
+  planName String @default("FREE")
+  price    Float  @default(0)
+  currency String @default("VND")
+
+  startDate DateTime @default(now())
+  endDate   DateTime?
+
+  externalSubscriptionId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([tierId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount   Float
+  currency String @default("VND")
+  status   PaymentStatus @default(PENDING)
+
+  provider          String?
+  method            String?
+  externalPaymentId String?
+  stripePaymentId   String?
+  paypalPaymentId   String?
+  description       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("payments")
+}
+
+model IntegrationLink {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type String
+
+  isActive       Boolean   @default(true)
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, type])
+  @@index([userId])
+  @@map("integration_links")
+}
+
+model Feedback {
+  id     String @id @default(cuid())
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  subject String?
+  message String @db.Text
+  status  String @default("OPEN")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("feedbacks")
+}
+
+model StorageFile {
+  id     String @id @default(cuid())
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  filename  String
+  mimetype  String
+  size      Int
+  provider  String @default("supabase")
+  path      String?
+  url       String
+  publicUrl String?
+  bucket    String?
+  isPublic  Boolean @default(true)
+  expiresAt DateTime?
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([bucket])
+  @@index([expiresAt])
+  @@map("storage_files")
+}
+
+model PlatformEvent {
+  id     String @id @default(cuid())
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  type EventType
+  data Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("events")
+}
+
+model AdminLog {
+  id      String @id @default(cuid())
+  adminId String
+  admin   User   @relation("AdminActorLogs", fields: [adminId], references: [id], onDelete: Cascade)
+
+  action     String
+  targetId   String?
+  targetType String?
+  details    String @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@map("admin_logs")
+}
+
+model RateLimitCounter {
+  id         String @id @default(cuid())
+  identifier String
+  userId     String?
+  user       User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress  String?
+
+  endpoint String
+  count    Int      @default(1)
+  resetAt  DateTime
+
+  @@unique([identifier, endpoint])
+  @@index([userId])
+  @@index([resetAt])
+  @@map("rate_limit_counters")
+}
+
+model SearchIndex {
+  id         String @id @default(cuid())
+  entityType String
+  entityId   String
+  title      String
+  content    String   @db.Text
+  tags       String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+  @@map("search_indices")
+}
+
+model CacheEntry {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("cache_entries")
+}
+
+model AppEvent {
+  id     String @id @default(cuid())
+  userId String?
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  type String
+  data Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+  @@map("app_events")
+}
