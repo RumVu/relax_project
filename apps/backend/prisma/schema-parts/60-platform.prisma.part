@@ -205,6 +205,8 @@ model StorageFile {
   @@map("storage_files")
 }
 
+/// Typed backend-emitted platform audit events.
+/// Use this when the event maps to EventType.
 model PlatformEvent {
   id     String @id @default(cuid())
   userId String?
@@ -281,6 +283,8 @@ model CacheEntry {
   @@map("cache_entries")
 }
 
+/// Flexible raw app/client telemetry events.
+/// Promote events to PlatformEvent only after the backend contract is stable.
 model AppEvent {
   id     String @id @default(cuid())
   userId String?

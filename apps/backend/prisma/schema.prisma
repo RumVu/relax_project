@@ -127,6 +127,9 @@ model UserProfile {
 
   totalMoodCheckins Int @default(0)
   totalJournalPosts Int @default(0)
+
+  /// Denormalized profile counters for quick setup/profile rendering.
+  /// Mood analytics should derive streaks from MoodCheckin/WeeklyMoodStat.
   currentStreak     Int @default(0)
   longestStreak     Int @default(0)
 
@@ -653,6 +656,8 @@ model UserBadge {
   @@map("user_badges")
 }
 
+/// Gamification/social streak ledger.
+/// Product mood charts should use MoodCheckin-derived stats and WeeklyMoodStat.
 model UserStreak {
   id     String @id @default(cuid())
   userId String @unique
@@ -913,6 +918,8 @@ model BreathingSession {
   @@map("breathing_sessions")
 }
 
+/// Dedicated meditation content imported from the legacy contract.
+/// The general relax flow should use RelaxActivity/RelaxSession first.
 model MeditationGuide {
   id String @id @default(cuid())
 
@@ -938,6 +945,8 @@ model MeditationGuide {
   @@map("meditation_guides")
 }
 
+/// Meditation-specific history kept for a future focused meditation screen.
+/// Do not use this as the generic relax activity session table.
 model MeditationSession {
   id     String @id @default(cuid())
   userId String
@@ -979,6 +988,7 @@ enum RelaxSessionStatus {
   CANCELLED
 }
 
+/// Canonical Play/Finish relax activity flow used by the app.
 model RelaxSession {
   id     String @id @default(cuid())
   userId String
@@ -1410,6 +1420,8 @@ model StorageFile {
   @@map("storage_files")
 }
 
+/// Typed backend-emitted platform audit events.
+/// Use this when the event maps to EventType.
 model PlatformEvent {
   id     String @id @default(cuid())
   userId String?
@@ -1486,6 +1498,8 @@ model CacheEntry {
   @@map("cache_entries")
 }
 
+/// Flexible raw app/client telemetry events.
+/// Promote events to PlatformEvent only after the backend contract is stable.
 model AppEvent {
   id     String @id @default(cuid())
   userId String?

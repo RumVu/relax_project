@@ -116,6 +116,9 @@ model UserProfile {
 
   totalMoodCheckins Int @default(0)
   totalJournalPosts Int @default(0)
+
+  /// Denormalized profile counters for quick setup/profile rendering.
+  /// Mood analytics should derive streaks from MoodCheckin/WeeklyMoodStat.
   currentStreak     Int @default(0)
   longestStreak     Int @default(0)
 

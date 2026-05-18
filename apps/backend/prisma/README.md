@@ -68,6 +68,10 @@ The merge script copies supported legacy data into the current schema:
 Keep `public` as the source of truth for the app runtime. Keep `legacy` as a
 read-only archive unless a future migration explicitly maps more data forward.
 
+See `../../../docs/10-operational-readiness.md` for the canonical ownership map
+between mood stats, streak ledgers, events, relax sessions, meditation history,
+weather, storage, and optional provider readiness.
+
 ## Suggested workflow
 
 1. Edit one or more files in `prisma/schema-parts/`
