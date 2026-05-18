@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from './redis/redis.service';
 import { StorageService } from './storage/storage.service';
 
 export type ApiAuthMode = 'PUBLIC' | 'BEARER' | 'ADMIN';
@@ -30,6 +31,7 @@ export interface ApiIndexResponse {
   database: {
     configured: boolean;
   };
+  redis: ReturnType<RedisService['getStatus']>;
   storage: ReturnType<StorageService['getStatus']>;
   resources: ApiResourceSummary[];
 }
@@ -207,6 +209,12 @@ const API_RESOURCES: ApiResourceSummary[] = [
         purpose: 'Kiểm tra cấu hình Supabase Storage.',
       },
       {
+        method: 'GET',
+        path: '/redis/health',
+        auth: 'PUBLIC',
+        purpose: 'Kiểm tra cấu hình Redis và PING khi dùng deep=true.',
+      },
+      {
         method: 'POST',
         path: '/jobs/weekly-mood-stats/run',
         auth: 'ADMIN',
@@ -257,6 +265,7 @@ const API_RESOURCES: ApiResourceSummary[] = [
 export class AppService {
   constructor(
     private readonly configService: ConfigService,
+    private readonly redisService: RedisService,
     private readonly storageService: StorageService,
   ) {}
 
@@ -276,6 +285,7 @@ export class AppService {
           this.configService.get<string>('prisma.databaseUrl'),
         ),
       },
+      redis: this.redisService.getStatus(),
       storage: this.storageService.getStatus(),
       resources: API_RESOURCES,
     };
@@ -290,6 +300,7 @@ export class AppService {
           this.configService.get<string>('prisma.databaseUrl'),
         ),
       },
+      redis: this.redisService.getStatus(),
       storage: this.storageService.getStatus(),
     };
   }

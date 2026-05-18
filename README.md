@@ -29,6 +29,7 @@ Default local backend:
 - Swagger UI: `http://localhost:6823/docs`
 - OpenAPI JSON: `http://localhost:6823/docs-json`
 - Database URL: `postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public`
+- Redis URL: `redis://localhost:6379`
 
 Storage setup is documented in `docs/08-storage-supabase.md`.
 User/auth APIs are documented in `docs/09-user-auth-api.md`.

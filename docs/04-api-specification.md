@@ -241,6 +241,7 @@ Storage is backed by Supabase bucket `public-assets`.
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | `GET` | `/storage/health` | Public | Storage env/config status. Use `?deep=true` to test Supabase connectivity and bucket existence. |
+| `GET` | `/redis/health` | Public | Redis config status. Use `?deep=true` to run a real Redis PING. |
 | `POST` | `/storage/signed-upload-url` | Public | Create signed upload URL for a path. |
 | `GET` | `/storage/signed-url` | Public | Create signed read URL for a path. |
 | `GET` | `/storage/public-url` | Public | Get public URL for a path. |

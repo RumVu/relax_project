@@ -21,5 +21,17 @@ export function validateEnv(config: Env) {
     config.PORT = '6823';
   }
 
+  if (!config.REDIS_URL) {
+    config.REDIS_URL = 'redis://localhost:6379';
+  }
+
+  if (!config.REDIS_KEY_PREFIX) {
+    config.REDIS_KEY_PREFIX = 'dcb:';
+  }
+
+  if (!config.REDIS_DEFAULT_TTL_SECONDS) {
+    config.REDIS_DEFAULT_TTL_SECONDS = '300';
+  }
+
   return config;
 }

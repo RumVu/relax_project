@@ -23,6 +23,7 @@ Compose:
 ```env
 DATABASE_URL="postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public"
 PORT="6823"
+REDIS_URL="redis://localhost:6379"
 ```
 
 ## Local URLs
@@ -30,6 +31,7 @@ PORT="6823"
 - API index: `http://localhost:6823`
 - API index alias: `http://localhost:6823/api`
 - Health: `http://localhost:6823/health`
+- Redis health: `http://localhost:6823/redis/health?deep=true`
 - Swagger UI: `http://localhost:6823/docs`
 - OpenAPI JSON: `http://localhost:6823/docs-json`
 

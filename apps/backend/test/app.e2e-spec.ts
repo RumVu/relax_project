@@ -36,6 +36,7 @@ describe('AppController (e2e)', () => {
       .expect(({ body }) => {
         expect(body.name).toBe('Digital Cigarette Break API');
         expect(body.docs.swagger).toBe('/docs');
+        expect(body.redis.provider).toBe('redis');
         expect(body.resources.length).toBeGreaterThan(0);
       });
   });
@@ -47,6 +48,16 @@ describe('AppController (e2e)', () => {
       .expect(({ body }) => {
         expect(body.name).toBe('Digital Cigarette Break API');
         expect(body.docs.openApiJson).toBe('/docs-json');
+      });
+  });
+
+  it('/redis/health (GET)', () => {
+    return request(app.getHttpServer())
+      .get('/redis/health')
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.provider).toBe('redis');
+        expect(body.configured).toBe(true);
       });
   });
 });

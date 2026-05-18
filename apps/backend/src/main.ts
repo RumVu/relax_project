@@ -270,6 +270,10 @@ async function bootstrap() {
       'Kiểm tra tình trạng backend, database, storage và cấu hình hạ tầng.',
     )
     .addTag(
+      'Redis',
+      'Redis cache/session/queue infrastructure: kiểm tra cấu hình và kết nối PING.',
+    )
+    .addTag(
       'Storage',
       'Supabase Storage: kiểm tra kết nối bucket, tạo URL public/signed và metadata file.',
     )

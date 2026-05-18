@@ -31,6 +31,7 @@ they stay disabled until real production secrets are provided.
 | Stripe billing | `STRIPE_SECRET_KEY` | `GET /billing/providers` | Billing provider reports missing key. |
 | App Store billing | `APPLE_SHARED_SECRET`, `APP_STORE_CONNECT_API_KEY` | `GET /billing/providers` | Billing provider reports missing keys. |
 | Google Play billing | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | `GET /billing/providers` | Billing provider reports missing key. |
+| Redis infrastructure | `REDIS_URL`, optional `REDIS_KEY_PREFIX`, `REDIS_DEFAULT_TTL_SECONDS` | `GET /redis/health?deep=true` | Cache helpers degrade gracefully if Redis is unavailable. |
 | Weekly stats job loop | `WEEKLY_STATS_JOB_ENABLED=true` | `GET /jobs/status` | Manual recalculation APIs still work; background loop stays off. |
 
 ## Canonical Data Ownership

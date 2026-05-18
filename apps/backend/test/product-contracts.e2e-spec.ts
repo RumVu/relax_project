@@ -94,6 +94,14 @@ describe('Product backend contracts (e2e)', () => {
         expect(body.email).toBeDefined();
       });
 
+    await request(app.getHttpServer())
+      .get('/redis/health')
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.provider).toBe('redis');
+        expect(body.enabled).toBe(true);
+      });
+
     await request(app.getHttpServer()).get('/billing/plans').expect(200);
     await request(app.getHttpServer())
       .get('/billing/me')

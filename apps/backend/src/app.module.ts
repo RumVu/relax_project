@@ -8,8 +8,10 @@ import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import { validateEnv } from './config/env.validation';
 import prismaConfig from './config/prisma.config';
+import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
 import { PrismaModule } from './prisma/prisma.module';
+import { RedisModule } from './redis/redis.module';
 import { AmbientSoundsModule } from './ambient-sounds/ambient-sounds.module';
 import { AppThemesModule } from './app-themes/app-themes.module';
 import { BreathingExercisesModule } from './breathing-exercises/breathing-exercises.module';
@@ -38,7 +40,7 @@ import { BillingModule } from './billing/billing.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, prismaConfig, storageConfig],
+      load: [appConfig, authConfig, prismaConfig, redisConfig, storageConfig],
       envFilePath: ['apps/backend/.env', '.env'],
       validate: validateEnv,
     }),
@@ -49,6 +51,7 @@ import { BillingModule } from './billing/billing.module';
       },
     ]),
     PrismaModule,
+    RedisModule,
     StorageModule,
     UsersModule,
     AuthModule,

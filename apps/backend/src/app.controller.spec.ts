@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
+import { RedisService } from './redis/redis.service';
 import { StorageService } from './storage/storage.service';
 
 describe('AppController', () => {
@@ -16,6 +17,19 @@ describe('AppController', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn(),
+          },
+        },
+        {
+          provide: RedisService,
+          useValue: {
+            getStatus: jest.fn(() => ({
+              configured: true,
+              enabled: true,
+              provider: 'redis',
+              url: 'redis://localhost:6379',
+              keyPrefix: 'test:',
+              defaultTtlSeconds: 300,
+            })),
           },
         },
         {
