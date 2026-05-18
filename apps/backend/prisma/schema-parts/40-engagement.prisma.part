@@ -398,7 +398,7 @@ model BreathingSession {
   @@map("breathing_sessions")
 }
 
-/// Dedicated meditation content imported from the legacy contract.
+/// Dedicated meditation content reserved for the meditation contract.
 /// The general relax flow should use RelaxActivity/RelaxSession first.
 model MeditationGuide {
   id String @id @default(cuid())

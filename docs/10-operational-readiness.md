@@ -1,20 +1,22 @@
 # Backend Operational Readiness
 
 This note locks the current backend operating contract so the project does not
-drift between the active Prisma schema, the archived legacy schema, and optional
+drift between the active Prisma schema, old import scripts, and optional
 external services.
 
 ## Runtime Source Of Truth
 
 - Runtime database schema: `public`
-- Archived reference schema: `legacy`
+- Archived reference schema: none in the live DB
 - Local database: `digital_cigarette_break`
 - Local backend port: `6823`
-- Canonical Prisma migration: `20260518050000_merged_baseline_legacy`
+- Canonical Prisma migrations: `20260518050000_merged_baseline_legacy`, then
+  `20260518162700_drop_legacy_schema`
 
-The `legacy` schema is intentionally kept as a read-only archive for audit and
-future data mapping. Do not drop it unless the team explicitly decides the old
-snapshot is no longer needed.
+The old `legacy` schema was backed up locally and dropped from the live database.
+Runtime databases should only carry the `public` schema plus PostgreSQL system
+schemas. If the old snapshot is ever needed again, restore it into a temporary
+database first.
 
 ## Optional Provider Matrix
 

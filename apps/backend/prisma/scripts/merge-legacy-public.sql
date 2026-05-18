@@ -1,5 +1,5 @@
--- Merge the archived legacy schema into the current Prisma-owned public schema.
--- Run against digital_cigarette_break after the legacy schema has been restored.
+-- Merge a temporarily restored legacy schema into the current Prisma-owned
+-- public schema. The normal live database should not keep the legacy schema.
 -- Idempotent by primary key / unique keys so it is safe to rerun.
 
 BEGIN;

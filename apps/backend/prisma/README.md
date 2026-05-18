@@ -29,6 +29,7 @@ Database commands that actually connect to a DB still expect a real `DATABASE_UR
 Canonical migration history is currently squashed into:
 
 - `20260518050000_merged_baseline_legacy`
+- `20260518162700_drop_legacy_schema`
 
 This migration represents the merged backend schema after combining the original
 app schema and the legacy/Claude database contracts. The local development
@@ -43,10 +44,12 @@ Prisma report pending/duplicate migrations and can trigger reset prompts.
 ## Legacy database merge
 
 The current Prisma-owned schema is `public` in `digital_cigarette_break`.
-The old database snapshot is archived under the `legacy` schema in the same
-database so it can be audited later without polluting Prisma models.
+The old database snapshot is no longer kept as a live schema. It was exported
+to a local, gitignored backup before being dropped from the active database.
+Only `public` should remain after running migrations.
 
-After restoring the `legacy` schema, run:
+If a future audit needs the old snapshot, restore the backup into a temporary
+database or recreate the `legacy` schema, then run:
 
 ```bash
 DB_URL="${DATABASE_URL%%\?*}"
@@ -65,8 +68,8 @@ The merge script copies supported legacy data into the current schema:
 - insight/content contracts: analytics snapshots, AI insights, recommendations,
   content ratings, meditation guides/sessions
 
-Keep `public` as the source of truth for the app runtime. Keep `legacy` as a
-read-only archive unless a future migration explicitly maps more data forward.
+Keep `public` as the only live source of truth for the app runtime. Do not keep
+`legacy` mounted in normal local or deployed databases.
 
 See `../../../docs/10-operational-readiness.md` for the canonical ownership map
 between mood stats, streak ledgers, events, relax sessions, meditation history,

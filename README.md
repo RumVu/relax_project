@@ -32,7 +32,7 @@ Default local backend:
 
 Storage setup is documented in `docs/08-storage-supabase.md`.
 User/auth APIs are documented in `docs/09-user-auth-api.md`.
-Backend provider readiness, legacy schema rules, and canonical data ownership
+Backend provider readiness, schema cleanup rules, and canonical data ownership
 are documented in `docs/10-operational-readiness.md`.
 
 ## Workspace scripts
