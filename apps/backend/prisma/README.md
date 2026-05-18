@@ -26,16 +26,14 @@ Database commands that actually connect to a DB still expect a real `DATABASE_UR
 
 ## Migration history
 
-Canonical migration history is currently squashed into:
+Canonical migration history is currently squashed into one migration:
 
-- `20260518050000_merged_baseline_legacy`
-- `20260518162700_drop_legacy_schema`
+- `20260519000000_initial_schema`
 
-This migration represents the merged backend schema after combining the original
-app schema and the legacy/Claude database contracts. The local development
-database was already shaped before the squash, so it is marked as applied in
-`_prisma_migrations`; fresh databases can apply this migration normally with
-`npm run prisma:migrate:deploy`.
+This migration creates the current live `public` schema from an empty database.
+The local development database migration history has been normalized to this
+single migration, so fresh and existing local databases use the same Prisma
+history shape.
 
 Do not re-add the old split migrations on top of this branch without a deliberate
 migration-history reset. Mixing the old two-step history with the squash makes

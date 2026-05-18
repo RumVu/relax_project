@@ -1,7 +1,5 @@
--- Consolidated (squashed) migration.
--- Fusion of 20260518034500_baseline_current + 20260518043000_merge_claude_legacy_contracts.
--- Recreates the full 61-table live schema from an empty database.
--- NotificationType enum folded inline with SMS (originally added via ALTER TYPE in the merge migration).
+-- Initial consolidated Prisma migration.
+-- Recreates the full live public schema from an empty database.
 
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "public";
@@ -1641,4 +1639,3 @@ ALTER TABLE "admin_logs" ADD CONSTRAINT "admin_logs_adminId_fkey" FOREIGN KEY ("
 
 -- AddForeignKey
 ALTER TABLE "rate_limit_counters" ADD CONSTRAINT "rate_limit_counters_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-

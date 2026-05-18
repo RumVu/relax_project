@@ -10,8 +10,7 @@ external services.
 - Archived reference schema: none in the live DB
 - Local database: `digital_cigarette_break`
 - Local backend port: `6823`
-- Canonical Prisma migrations: `20260518050000_merged_baseline_legacy`, then
-  `20260518162700_drop_legacy_schema`
+- Canonical Prisma migration: `20260519000000_initial_schema`
 
 The old `legacy` schema was backed up locally and dropped from the live database.
 Runtime databases should only carry the `public` schema plus PostgreSQL system
