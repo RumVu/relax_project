@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigService } from '@nestjs/config';
+import { QueuesService } from './queues/queues.service';
+import { RealtimeService } from './realtime/realtime.service';
 import { RedisService } from './redis/redis.service';
 import { StorageService } from './storage/storage.service';
 
@@ -17,6 +19,32 @@ describe('AppController', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn(),
+          },
+        },
+        {
+          provide: QueuesService,
+          useValue: {
+            getStatus: jest.fn(() => ({
+              configured: true,
+              enabled: true,
+              provider: 'bullmq',
+              redisUrl: 'redis://localhost:6379',
+              prefix: 'dcb',
+              defaultAttempts: 3,
+              backoffDelayMs: 1000,
+              registeredQueues: [],
+            })),
+          },
+        },
+        {
+          provide: RealtimeService,
+          useValue: {
+            getStatus: jest.fn(() => ({
+              configured: true,
+              provider: 'socket.io',
+              namespace: '/realtime',
+              connectedClients: 0,
+            })),
           },
         },
         {

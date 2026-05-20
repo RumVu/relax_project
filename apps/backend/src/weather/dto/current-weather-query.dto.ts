@@ -31,7 +31,7 @@ export class WeatherForecastQueryDto extends CurrentWeatherQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(16)
+  @Max(7)
   forecastDays?: number;
 }
 

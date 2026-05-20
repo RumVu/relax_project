@@ -12,7 +12,7 @@ describe('Weather APIs (e2e)', () => {
   let prisma: PrismaService;
   const tag = `e2e-weather-${Date.now()}`;
   const email = `${tag}@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -45,6 +45,26 @@ describe('Weather APIs (e2e)', () => {
       .send({ email, password, name: 'Weather User' })
       .expect(201);
     const accessToken = registered.body.accessToken as string;
+
+    await request(app.getHttpServer())
+      .get('/weather/current')
+      .query({ latitude: 10.7769, longitude: 106.7009 })
+      .expect(401);
+
+    await request(app.getHttpServer())
+      .get('/weather/reverse-geocode')
+      .query({ latitude: 10.7769, longitude: 106.7009 })
+      .expect(401);
+
+    await request(app.getHttpServer())
+      .get('/weather/forecast')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .query({
+        latitude: 10.7769,
+        longitude: 106.7009,
+        forecastDays: 30,
+      })
+      .expect(400);
 
     await request(app.getHttpServer())
       .get('/weather/me/current')

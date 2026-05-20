@@ -11,6 +11,7 @@ import {
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -37,6 +38,7 @@ export class StorageController {
     summary: 'Get storage configuration and optional deep connectivity health',
   })
   @ApiOkResponse({ description: 'Storage health payload.' })
+  @AdminOnly()
   @Get('health')
   getHealth(@Query() query: StorageHealthQueryDto) {
     if (query.deep) {
@@ -51,6 +53,7 @@ export class StorageController {
     description:
       'Storage conventions for public catalog assets, user uploads, and signed URLs.',
   })
+  @AdminOnly()
   @Get('cdn-strategy')
   getCdnStrategy() {
     return this.storageService.getCdnStrategy();
@@ -62,24 +65,78 @@ export class StorageController {
   @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
   @UseGuards(JwtAuthGuard)
   @Post('signed-upload-url')
-  createSignedUploadUrl(@Body() dto: CreateSignedUploadUrlDto) {
-    return this.storageService.createSignedUploadUrl(dto.path, dto.upsert);
+  createSignedUploadUrl(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreateSignedUploadUrlDto,
+  ) {
+    return this.storageService.createUserSignedUploadUrl(
+      user.id,
+      dto.path,
+      dto.upsert,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Create a signed upload URL for catalog/admin paths',
+  })
+  @ApiCreatedResponse({ description: 'Signed upload URL and storage path.' })
+  @AdminOnly()
+  @Post('admin/signed-upload-url')
+  createAdminSignedUploadUrl(@Body() dto: CreateSignedUploadUrlDto) {
+    return this.storageService.createAdminSignedUploadUrl(dto.path, dto.upsert);
   }
 
   @ApiOperation({ summary: 'Create a signed read URL for a storage object' })
   @ApiOkResponse({ description: 'Signed read URL.' })
   @ApiBearerAuth('access-token')
   @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
+  @ApiForbiddenResponse({
+    description: 'User storage paths must stay scoped to the current user.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('signed-url')
-  createSignedUrl(@Query() query: CreateSignedUrlQueryDto) {
+  createSignedUrl(
+    @CurrentUser() user: AuthUser,
+    @Query() query: CreateSignedUrlQueryDto,
+  ) {
+    return this.storageService.createUserSignedUrl(
+      user.id,
+      query.path,
+      query.expiresIn,
+    );
+  }
+
+  @ApiOperation({
+    summary: 'Create a signed read URL for an admin/catalog storage object',
+  })
+  @ApiOkResponse({ description: 'Signed read URL.' })
+  @AdminOnly()
+  @Get('admin/signed-url')
+  createAdminSignedUrl(@Query() query: CreateSignedUrlQueryDto) {
     return this.storageService.createSignedUrl(query.path, query.expiresIn);
   }
 
   @ApiOperation({ summary: 'Get the public URL for a storage object' })
   @ApiOkResponse({ description: 'Public URL.' })
+  @ApiBearerAuth('access-token')
+  @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
+  @ApiForbiddenResponse({
+    description: 'User storage paths must stay scoped to the current user.',
+  })
+  @UseGuards(JwtAuthGuard)
   @Get('public-url')
-  getPublicUrl(@Query() query: GetPublicUrlQueryDto) {
+  getPublicUrl(
+    @CurrentUser() user: AuthUser,
+    @Query() query: GetPublicUrlQueryDto,
+  ) {
+    return this.storageService.getUserPublicUrl(user.id, query.path);
+  }
+
+  @ApiOperation({ summary: 'Get the public URL for an admin/catalog object' })
+  @ApiOkResponse({ description: 'Public URL.' })
+  @AdminOnly()
+  @Get('admin/public-url')
+  getAdminPublicUrl(@Query() query: GetPublicUrlQueryDto) {
     return this.storageService.getPublicUrl(query.path);
   }
 

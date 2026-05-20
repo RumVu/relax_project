@@ -13,7 +13,7 @@ describe('Product backend contracts (e2e)', () => {
   const tag = `e2e-contract-${Date.now()}`;
   const email = `${tag}@example.com`;
   const adminEmail = `${tag}-admin@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
   let accessToken: string;
   let adminToken: string;
   let userId: string;
@@ -71,6 +71,7 @@ describe('Product backend contracts (e2e)', () => {
   it('exposes analytics, storage, provider, billing, and job contracts', async () => {
     await request(app.getHttpServer())
       .get('/analytics/contracts')
+      .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => {
         expect(body.weeklyMoodStat.weekStartsOn).toBe('MONDAY');
@@ -79,6 +80,7 @@ describe('Product backend contracts (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/storage/cdn-strategy')
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect(({ body }) => {
         expect(body.provider).toBe('supabase');
@@ -96,6 +98,7 @@ describe('Product backend contracts (e2e)', () => {
 
     await request(app.getHttpServer())
       .get('/redis/health')
+      .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
       .expect(({ body }) => {
         expect(body.provider).toBe('redis');
@@ -172,6 +175,25 @@ describe('Product backend contracts (e2e)', () => {
       })
       .expect(201);
 
+    const otherRegistered = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: `${tag}-push-hijack@example.com`,
+        password,
+        name: 'Push Hijack',
+      })
+      .expect(201);
+    await request(app.getHttpServer())
+      .post('/notifications/me/devices')
+      .set('Authorization', `Bearer ${otherRegistered.body.accessToken}`)
+      .send({
+        token: `${tag}-device-token`,
+        platform: 'IOS',
+        provider: 'FCM',
+      })
+      .expect(403)
+      .expect(({ body }) => expect(body.code).toBe('AUTH_FORBIDDEN'));
+
     await request(app.getHttpServer())
       .post('/notifications/me/test')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -245,13 +267,16 @@ describe('Product backend contracts (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
         planName: 'CHILL_PLUS',
-        amount: 49000,
-        currency: 'VND',
+        amount: 1,
+        currency: 'USD',
         provider: 'STRIPE',
       })
       .expect(201)
       .expect(({ body }) => {
         expect(body.payment.status).toBe('PENDING');
+        expect(body.payment.amount).toBe(49000);
+        expect(body.payment.currency).toBe('VND');
+        expect(body.plan.price).toBe(49000);
         expect(body.checkout.status).toBeDefined();
       });
   });

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { AuthForm } from '@/components/auth/auth-form';
 import { Card } from '@/components/ui/card';
 
 export default function LoginPage() {
@@ -8,11 +8,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <p className="text-sm uppercase tracking-[0.2em] text-ember">Welcome back</p>
         <h1 className="mt-3 text-3xl font-bold text-ink">Sign in to the recovery dashboard</h1>
-        <div className="mt-6 space-y-4">
-          <input className="w-full rounded-2xl border bg-white/70 px-4 py-3" placeholder="Email" />
-          <input className="w-full rounded-2xl border bg-white/70 px-4 py-3" placeholder="Password" type="password" />
-          <Button className="w-full">Login</Button>
-        </div>
+        <AuthForm mode="login" />
         <p className="mt-6 text-sm text-ink/60">
           No account yet? <Link className="font-semibold text-moss" href="/auth/register">Create one</Link>
         </p>

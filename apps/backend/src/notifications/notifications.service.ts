@@ -84,10 +84,36 @@ export class NotificationsService {
 
   async registerDevice(userId: string, dto: RegisterPushDeviceDto) {
     await this.usersService.findOne(userId);
-
-    return this.prisma.pushDevice.upsert({
+    const existing = await this.prisma.pushDevice.findUnique({
       where: { token: dto.token },
-      create: {
+    });
+
+    if (existing && existing.userId !== userId) {
+      throw new AppException(
+        ErrorCode.AUTH_FORBIDDEN,
+        'Push device token is already bound to another user',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    if (existing) {
+      return this.prisma.pushDevice.update({
+        where: { id: existing.id },
+        data: {
+          platform: dto.platform,
+          provider: dto.provider ?? existing.provider,
+          deviceId: dto.deviceId,
+          deviceName: dto.deviceName,
+          appVersion: dto.appVersion,
+          timezone: dto.timezone,
+          enabled: dto.enabled ?? true,
+          lastSeenAt: new Date(),
+        },
+      });
+    }
+
+    return this.prisma.pushDevice.create({
+      data: {
         userId,
         token: dto.token,
         platform: dto.platform,
@@ -97,17 +123,6 @@ export class NotificationsService {
         appVersion: dto.appVersion,
         timezone: dto.timezone,
         enabled: dto.enabled ?? true,
-      },
-      update: {
-        userId,
-        platform: dto.platform,
-        provider: dto.provider ?? PushProvider.FCM,
-        deviceId: dto.deviceId,
-        deviceName: dto.deviceName,
-        appVersion: dto.appVersion,
-        timezone: dto.timezone,
-        enabled: dto.enabled ?? true,
-        lastSeenAt: new Date(),
       },
     });
   }

@@ -36,12 +36,12 @@ Recommended folders:
 
 ```text
 app-themes/
-onboarding-slides/
-companion-assets/
-ambient-sounds/
+onboarding/
+companions/
+sounds/
 breathing-exercises/
-cozy-quotes/
-users/{userId}/
+quotes/
+user-uploads/{userId}/
 ```
 
 If the bucket is public, frontend can use the public URL returned by the backend. If the bucket is private, use signed read URLs.
@@ -52,12 +52,14 @@ Health check:
 
 ```http
 GET /storage/health
+Authorization: Bearer <admin-access-token>
 ```
 
 Deep health check, including a real Supabase bucket lookup:
 
 ```http
 GET /storage/health?deep=true
+Authorization: Bearer <admin-access-token>
 ```
 
 Create signed upload URL:
@@ -67,23 +69,39 @@ POST /storage/signed-upload-url
 Content-Type: application/json
 
 {
-  "path": "companion-assets/cat-idle.png",
-  "upsert": true
+  "path": "avatars/avatar.png",
+  "upsert": false
 }
 ```
 
-Response includes `signedUrl`, `token`, `bucket`, and normalized `path`.
+Response includes `signedUrl`, `token`, `bucket`, and the normalized path under
+`user-uploads/{userId}/...`.
 
 Get public URL:
 
 ```http
-GET /storage/public-url?path=companion-assets/cat-idle.png
+GET /storage/public-url?path=avatars/avatar.png
+Authorization: Bearer <access-token>
 ```
+
+User read URLs are scoped by the backend to
+`user-uploads/{authenticatedUserId}/...`. Catalog public paths such as
+`companions/...`, `onboarding/...`, `sounds/...`, `breathing/...`, and
+`quotes/...` are allowed through the public URL route. Arbitrary bucket paths use
+the admin routes.
 
 Get signed read URL:
 
 ```http
-GET /storage/signed-url?path=companion-assets/cat-idle.png&expiresIn=3600
+GET /storage/signed-url?path=avatars/avatar.png&expiresIn=3600
+Authorization: Bearer <access-token>
+```
+
+Admin/catalog read URL:
+
+```http
+GET /storage/admin/public-url?path=companions/cat/idle.png
+Authorization: Bearer <admin-access-token>
 ```
 
 Register uploaded file metadata:
@@ -96,7 +114,7 @@ Content-Type: application/json
   "filename": "cat-idle.png",
   "mimetype": "image/png",
   "size": 123456,
-  "path": "companion-assets/cat-idle.png"
+  "path": "avatars/avatar.png"
 }
 ```
 
@@ -119,17 +137,20 @@ DELETE /storage/objects
 Content-Type: application/json
 
 {
-  "paths": ["companion-assets/cat-idle.png"]
+  "paths": ["companions/old-pixel-cat.png"]
 }
 ```
 
 ## Frontend Upload Flow
 
-1. Call `POST /storage/signed-upload-url` with the target path.
-2. Upload the file to the returned `signedUrl` using Supabase's signed upload flow or a raw upload request compatible with Supabase Storage.
-3. Call `GET /storage/public-url` for public buckets, or `GET /storage/signed-url` for private buckets.
-4. Call `POST /storage/files` to save metadata in the backend database.
-5. Store the returned URL/path on the related catalog item, such as `CompanionAsset.previewImageUrl` or `AmbientSound.soundUrl`.
+1. Call `POST /storage/signed-upload-url` with the target path. User uploads
+   are always scoped by the backend to `user-uploads/{userId}/...`.
+2. For catalog assets such as `companions/...`, use
+   `POST /storage/admin/signed-upload-url` with an admin token.
+3. Upload the file to the returned `signedUrl` using Supabase's signed upload flow or a raw upload request compatible with Supabase Storage.
+4. Call `GET /storage/public-url` for public user/catalog paths, or `GET /storage/signed-url` for private user uploads. User routes always scope `user-uploads/` to the current user. Use `/storage/admin/public-url` or `/storage/admin/signed-url` for arbitrary catalog/admin paths.
+5. Call `POST /storage/files` to save metadata in the backend database.
+6. Store the returned URL/path on the related profile or catalog item.
 
 ## Error Codes
 
@@ -147,6 +168,8 @@ DATABASE_RECORD_NOT_FOUND
 Invalid paths include empty paths, parent traversal like `../file.png`, and backslash paths.
 
 ## Troubleshooting
+
+`GET /storage/health` and `GET /storage/health?deep=true` require an admin bearer token.
 
 If `GET /storage/health` returns `configured: false`, fill the missing keys shown in `missingKeys`.
 

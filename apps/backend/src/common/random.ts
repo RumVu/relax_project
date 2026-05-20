@@ -5,18 +5,29 @@ export function pickWeighted<T extends { weight?: number | null }>(
     return null;
   }
 
-  const totalWeight = items.reduce(
-    (sum, item) => sum + Math.max(item.weight ?? 1, 1),
+  const weightedItems = items
+    .map((item) => ({
+      item,
+      weight: Math.max(item.weight ?? 1, 0),
+    }))
+    .filter(({ weight }) => weight > 0);
+
+  if (weightedItems.length === 0) {
+    return null;
+  }
+
+  const totalWeight = weightedItems.reduce(
+    (sum, { weight }) => sum + weight,
     0,
   );
   let ticket = Math.random() * totalWeight;
 
-  for (const item of items) {
-    ticket -= Math.max(item.weight ?? 1, 1);
+  for (const { item, weight } of weightedItems) {
+    ticket -= weight;
     if (ticket <= 0) {
       return item;
     }
   }
 
-  return items[items.length - 1];
+  return weightedItems[weightedItems.length - 1].item;
 }

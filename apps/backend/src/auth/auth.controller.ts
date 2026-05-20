@@ -32,7 +32,7 @@ import { VerifyEmailDto } from './dto/verify-email.dto';
 
 @ApiTags('Auth')
 @Throttle({
-  default: { ttl: minutes(1), limit: 30, blockDuration: minutes(1) },
+  default: { ttl: minutes(1), limit: 20, blockDuration: minutes(2) },
 })
 @Controller('auth')
 export class AuthController {
@@ -40,6 +40,9 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Register a local user and create a session' })
   @ApiCreatedResponse({ description: 'User, access token, and refresh token.' })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
+  })
   @Post('register')
   register(
     @Body() dto: RegisterDto,
@@ -53,6 +56,9 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'User, access token, and refresh token.' })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials or inactive user.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
   })
   @Post('login')
   login(
@@ -90,6 +96,9 @@ export class AuthController {
   @ApiCreatedResponse({
     description:
       'Password reset request accepted. In development, devToken is returned if no email provider is configured.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
   })
   @Post('password-reset/request')
   requestPasswordReset(@Body() dto: RequestPasswordResetDto) {

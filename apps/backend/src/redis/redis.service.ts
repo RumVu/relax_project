@@ -1,5 +1,6 @@
 import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { ThrottlerStorageRecord } from '@nestjs/throttler/dist/throttler-storage-record.interface';
 import Redis from 'ioredis';
 
 export interface RedisStatus {
@@ -17,10 +18,21 @@ export interface RedisHealth extends RedisStatus {
   error?: string;
 }
 
+interface LocalThrottleBucket {
+  totalHits: number;
+  expiresAt: number;
+  blockedUntil: number;
+}
+
 @Injectable()
 export class RedisService implements OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   private client: Redis | null = null;
+  private connectPromise: Promise<Redis> | null = null;
+  private readonly localThrottleBuckets = new Map<
+    string,
+    LocalThrottleBucket
+  >();
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -95,6 +107,37 @@ export class RedisService implements OnModuleDestroy {
     }
   }
 
+  async acquireLock(
+    key: string,
+    value: string,
+    ttlSeconds = this.defaultTtlSeconds,
+  ): Promise<boolean> {
+    try {
+      const client = await this.ensureConnected();
+      const result = await client.set(key, value, 'EX', ttlSeconds, 'NX');
+      return result === 'OK';
+    } catch (error) {
+      this.warn('Redis lock acquire failed', error);
+      return false;
+    }
+  }
+
+  async releaseLock(key: string, value: string): Promise<boolean> {
+    try {
+      const client = await this.ensureConnected();
+      const released = await client.eval(
+        "if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) else return 0 end",
+        1,
+        key,
+        value,
+      );
+      return released === 1;
+    } catch (error) {
+      this.warn('Redis lock release failed', error);
+      return false;
+    }
+  }
+
   async del(...keys: string[]): Promise<number> {
     if (keys.length === 0) {
       return 0;
@@ -146,10 +189,73 @@ export class RedisService implements OnModuleDestroy {
     return value;
   }
 
+  async incrementThrottle(
+    key: string,
+    ttlMs: number,
+    limit: number,
+    blockDurationMs: number,
+    throttlerName: string,
+  ): Promise<ThrottlerStorageRecord> {
+    try {
+      const client = await this.ensureConnected();
+      const baseKey = `throttle:${throttlerName}:${key}`;
+      const blockKey = `${baseKey}:blocked`;
+      const [totalHits, timeToExpireMs, blocked, timeToBlockExpireMs] =
+        (await client.eval(
+          [
+            'local baseKey = KEYS[1]',
+            'local blockKey = KEYS[2]',
+            'local ttlMs = tonumber(ARGV[1])',
+            'local limit = tonumber(ARGV[2])',
+            'local blockDurationMs = tonumber(ARGV[3])',
+            "local blockTtl = redis.call('PTTL', blockKey)",
+            'if blockTtl > 0 then',
+            "  local hits = tonumber(redis.call('GET', baseKey) or (limit + 1))",
+            "  local ttl = redis.call('PTTL', baseKey)",
+            '  return { hits, ttl, 1, blockTtl }',
+            'end',
+            "local hits = redis.call('INCR', baseKey)",
+            'if hits == 1 then',
+            "  redis.call('PEXPIRE', baseKey, ttlMs)",
+            'end',
+            "local ttl = redis.call('PTTL', baseKey)",
+            'if hits > limit then',
+            "  redis.call('SET', blockKey, '1', 'PX', blockDurationMs)",
+            '  return { hits, ttl, 1, blockDurationMs }',
+            'end',
+            'return { hits, ttl, 0, 0 }',
+          ].join('\n'),
+          2,
+          baseKey,
+          blockKey,
+          ttlMs,
+          limit,
+          blockDurationMs,
+        )) as [number, number, 0 | 1, number];
+
+      return {
+        totalHits,
+        timeToExpire: this.msToSeconds(timeToExpireMs),
+        isBlocked: blocked === 1,
+        timeToBlockExpire: this.msToSeconds(timeToBlockExpireMs),
+      };
+    } catch (error) {
+      this.warn('Redis throttle increment failed', error);
+      return this.incrementLocalThrottle(
+        key,
+        ttlMs,
+        limit,
+        blockDurationMs,
+        throttlerName,
+      );
+    }
+  }
+
   onModuleDestroy() {
     if (this.client) {
       this.client.disconnect();
       this.client = null;
+      this.connectPromise = null;
     }
   }
 
@@ -198,8 +304,57 @@ export class RedisService implements OnModuleDestroy {
       return client;
     }
 
-    await this.withTimeout(client.connect(), 1000);
-    return client;
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+
+    if (this.isConnecting(client.status)) {
+      await this.waitUntilReady(client, 1000);
+      return client;
+    }
+
+    this.connectPromise = this.withTimeout(client.connect(), 1000)
+      .then(() => client)
+      .finally(() => {
+        this.connectPromise = null;
+      });
+
+    return this.connectPromise;
+  }
+
+  private isConnecting(status: string) {
+    return (
+      status === 'connecting' ||
+      status === 'connect' ||
+      status === 'reconnecting'
+    );
+  }
+
+  private waitUntilReady(client: Redis, timeoutMs: number) {
+    if (client.status === 'ready') {
+      return Promise.resolve();
+    }
+
+    return this.withTimeout(
+      new Promise<void>((resolve, reject) => {
+        const cleanup = () => {
+          client.off('ready', onReady);
+          client.off('error', onError);
+        };
+        const onReady = () => {
+          cleanup();
+          resolve();
+        };
+        const onError = (error: Error) => {
+          cleanup();
+          reject(error);
+        };
+
+        client.once('ready', onReady);
+        client.once('error', onError);
+      }),
+      timeoutMs,
+    );
   }
 
   private async withTimeout<T>(promise: Promise<T>, timeoutMs: number) {
@@ -219,6 +374,66 @@ export class RedisService implements OnModuleDestroy {
         clearTimeout(timeout);
       }
     }
+  }
+
+  private incrementLocalThrottle(
+    key: string,
+    ttlMs: number,
+    limit: number,
+    blockDurationMs: number,
+    throttlerName: string,
+  ): ThrottlerStorageRecord {
+    this.cleanupLocalThrottleBuckets();
+
+    const now = Date.now();
+    const localKey = `${throttlerName}:${key}`;
+    const existing = this.localThrottleBuckets.get(localKey);
+
+    if (existing && existing.blockedUntil > now) {
+      return {
+        totalHits: existing.totalHits,
+        timeToExpire: this.msToSeconds(existing.expiresAt - now),
+        isBlocked: true,
+        timeToBlockExpire: this.msToSeconds(existing.blockedUntil - now),
+      };
+    }
+
+    const bucket =
+      existing && existing.expiresAt > now
+        ? existing
+        : {
+            totalHits: 0,
+            expiresAt: now + ttlMs,
+            blockedUntil: 0,
+          };
+
+    bucket.totalHits += 1;
+    if (bucket.totalHits > limit) {
+      bucket.blockedUntil = now + blockDurationMs;
+    }
+
+    this.localThrottleBuckets.set(localKey, bucket);
+
+    return {
+      totalHits: bucket.totalHits,
+      timeToExpire: this.msToSeconds(bucket.expiresAt - now),
+      isBlocked: bucket.blockedUntil > now,
+      timeToBlockExpire: this.msToSeconds(bucket.blockedUntil - now),
+    };
+  }
+
+  private cleanupLocalThrottleBuckets() {
+    const now = Date.now();
+
+    for (const [key, bucket] of this.localThrottleBuckets) {
+      if (bucket.expiresAt <= now && bucket.blockedUntil <= now) {
+        this.localThrottleBuckets.delete(key);
+      }
+    }
+  }
+
+  private msToSeconds(value: number) {
+    return Math.max(0, Math.ceil(value / 1000));
   }
 
   private maskUrl(value: string) {

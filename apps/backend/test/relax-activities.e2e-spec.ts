@@ -12,7 +12,7 @@ describe('Relax Activities APIs (e2e)', () => {
   let prisma: PrismaService;
   const tag = `e2e-relax-${Date.now()}`;
   const email = `${tag}@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -79,6 +79,15 @@ describe('Relax Activities APIs (e2e)', () => {
     const userId = registered.body.user.id as string;
     const startedAt = new Date(Date.now() - 25 * 60 * 1000);
 
+    await request(app.getHttpServer())
+      .post('/relax-activities/sessions/start')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        activityType: 'MUSIC',
+        startedAt: startedAt.toISOString(),
+      })
+      .expect(400);
+
     const started = await request(app.getHttpServer())
       .post('/relax-activities/sessions/start')
       .set('Authorization', `Bearer ${accessToken}`)
@@ -86,7 +95,6 @@ describe('Relax Activities APIs (e2e)', () => {
         activityType: 'MUSIC',
         title: 'Lo-fi Chill',
         moodBefore: MoodType.STRESSED,
-        startedAt: startedAt.toISOString(),
       })
       .expect(201)
       .expect(({ body }) => {
@@ -94,6 +102,11 @@ describe('Relax Activities APIs (e2e)', () => {
         expect(body.activityType).toBe('MUSIC');
         expect(body.id).toBeTruthy();
       });
+
+    await prisma.relaxSession.update({
+      where: { id: started.body.id },
+      data: { startedAt },
+    });
 
     await request(app.getHttpServer())
       .post(`/relax-activities/sessions/${started.body.id}/finish`)
@@ -110,6 +123,22 @@ describe('Relax Activities APIs (e2e)', () => {
         expect(body.postCheckin.title).toBe('Mức độ giảm tải');
         expect(body.nextSuggestion).toBeTruthy();
       });
+
+    const tamperedSession = await request(app.getHttpServer())
+      .post('/relax-activities/sessions/start')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ activityType: 'BREATHING' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/relax-activities/sessions/${tamperedSession.body.id}/finish`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        moodAfter: MoodType.CALM,
+        durationSeconds: 9999,
+        endedAt: new Date().toISOString(),
+      })
+      .expect(400);
 
     await request(app.getHttpServer())
       .get('/relax-activities/me/sessions')

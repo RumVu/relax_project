@@ -3,15 +3,20 @@ import { APP_GUARD } from '@nestjs/core';
 import { minutes, ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import appConfig from './config/app.config';
 import authConfig from './config/auth.config';
 import { validateEnv } from './config/env.validation';
 import prismaConfig from './config/prisma.config';
+import queueConfig from './config/queue.config';
 import redisConfig from './config/redis.config';
 import storageConfig from './config/storage.config';
+import { RedisThrottlerStorage } from './common/rate-limit/redis-throttler-storage';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { RedisService } from './redis/redis.service';
+import { QueuesModule } from './queues/queues.module';
+import { RealtimeModule } from './realtime/realtime.module';
 import { AmbientSoundsModule } from './ambient-sounds/ambient-sounds.module';
 import { AppThemesModule } from './app-themes/app-themes.module';
 import { BreathingExercisesModule } from './breathing-exercises/breathing-exercises.module';
@@ -40,18 +45,39 @@ import { BillingModule } from './billing/billing.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, prismaConfig, redisConfig, storageConfig],
+      load: [
+        appConfig,
+        authConfig,
+        prismaConfig,
+        queueConfig,
+        redisConfig,
+        storageConfig,
+      ],
       envFilePath: ['apps/backend/.env', '.env'],
       validate: validateEnv,
     }),
-    ThrottlerModule.forRoot([
-      {
-        ttl: minutes(1),
-        limit: 300,
-      },
-    ]),
     PrismaModule,
     RedisModule,
+    ThrottlerModule.forRootAsync({
+      imports: [RedisModule],
+      inject: [RedisService, ConfigService],
+      useFactory: (
+        redisService: RedisService,
+        configService: ConfigService,
+      ) => ({
+        storage: new RedisThrottlerStorage(redisService),
+        skipIf: () => configService.get<string>('app.nodeEnv') === 'test',
+        throttlers: [
+          {
+            ttl: minutes(1),
+            limit: 300,
+            blockDuration: minutes(1),
+          },
+        ],
+      }),
+    }),
+    QueuesModule,
+    RealtimeModule,
     StorageModule,
     UsersModule,
     AuthModule,

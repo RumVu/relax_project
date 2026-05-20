@@ -25,6 +25,13 @@ export interface StorageStatus {
 
 @Injectable()
 export class StorageService {
+  private readonly publicCatalogPrefixes = [
+    'companions/',
+    'onboarding/',
+    'sounds/',
+    'breathing/',
+    'quotes/',
+  ];
   private readonly supabaseUrl?: string;
   private readonly supabasePublishableKey?: string;
   private readonly supabaseSecretKey?: string;
@@ -97,11 +104,13 @@ export class StorageService {
         sounds: 'sounds/{category}/{sound-key}.mp3',
         breathing: 'breathing/{exercise-key}.png',
         quotes: 'quotes/{mood-key}.png',
-        avatars: 'avatars/{user-id}.png',
+        userUploads: 'user-uploads/{user-id}/{filename}',
       },
       accessRules: {
-        catalogAssets: 'public-url',
-        userUploads: 'signed-url-or-owner-metadata',
+        catalogAssets:
+          'public-url readable by users; writes and arbitrary path reads are admin-only',
+        userUploads:
+          'signed/public read URLs are scoped to user-uploads/{authenticatedUserId}/',
         adminDeletes: 'admin-only',
       },
       configured: this.getStatus().configured,
@@ -160,7 +169,18 @@ export class StorageService {
     return this.supabaseBucket;
   }
 
-  async createSignedUploadUrl(path: string, upsert = false) {
+  createUserSignedUploadUrl(userId: string, path: string, upsert = false) {
+    return this.createSignedUploadUrl(
+      this.normalizeUserUploadPath(userId, path),
+      upsert,
+    );
+  }
+
+  createAdminSignedUploadUrl(path: string, upsert = false) {
+    return this.createSignedUploadUrl(this.normalizePath(path), upsert);
+  }
+
+  private async createSignedUploadUrl(path: string, upsert = false) {
     const normalizedPath = this.normalizePath(path);
     const { data, error } = await this.getClient()
       .storage.from(this.getBucket())
@@ -196,6 +216,13 @@ export class StorageService {
     };
   }
 
+  createUserSignedUrl(userId: string, path: string, expiresIn = 3600) {
+    return this.createSignedUrl(
+      this.normalizeUserUploadPath(userId, path),
+      expiresIn,
+    );
+  }
+
   getPublicUrl(path: string) {
     const normalizedPath = this.normalizePath(path);
     const { data } = this.getClient()
@@ -209,6 +236,11 @@ export class StorageService {
     };
   }
 
+  getUserPublicUrl(userId: string, path: string) {
+    const normalizedPath = this.normalizeReadablePathForUser(userId, path);
+    return this.getPublicUrl(normalizedPath);
+  }
+
   findFiles(userId?: string) {
     return this.prisma.storageFile.findMany({
       where: userId ? { userId } : undefined,
@@ -217,7 +249,9 @@ export class StorageService {
   }
 
   registerFile(dto: RegisterStorageFileDto, ownerUserId?: string) {
-    const normalizedPath = this.normalizePath(dto.path);
+    const normalizedPath = ownerUserId
+      ? this.normalizeUserUploadPath(ownerUserId, dto.path)
+      : this.normalizePath(dto.path);
     const isPublic = dto.isPublic ?? true;
     const publicUrl = isPublic
       ? (dto.publicUrl ?? this.getPublicUrl(normalizedPath).publicUrl)
@@ -277,6 +311,39 @@ export class StorageService {
     }
 
     return normalizedPath;
+  }
+
+  private normalizeUserUploadPath(userId: string, path: string) {
+    const normalizedPath = this.normalizePath(path);
+    const userPrefix = `user-uploads/${userId}/`;
+
+    if (normalizedPath.startsWith(userPrefix)) {
+      return normalizedPath;
+    }
+
+    if (normalizedPath.startsWith('user-uploads/')) {
+      throw new AppException(
+        ErrorCode.STORAGE_INVALID_PATH,
+        'Storage path must be scoped to the authenticated user',
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    return `${userPrefix}${normalizedPath}`;
+  }
+
+  private normalizeReadablePathForUser(userId: string, path: string) {
+    const normalizedPath = this.normalizePath(path);
+
+    if (this.isPublicCatalogPath(normalizedPath)) {
+      return normalizedPath;
+    }
+
+    return this.normalizeUserUploadPath(userId, normalizedPath);
+  }
+
+  private isPublicCatalogPath(path: string) {
+    return this.publicCatalogPrefixes.some((prefix) => path.startsWith(prefix));
   }
 
   private throwStorageOperationError(message: string): never {

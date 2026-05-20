@@ -36,8 +36,9 @@ describe('AppController (e2e)', () => {
       .expect(({ body }) => {
         expect(body.name).toBe('Digital Cigarette Break API');
         expect(body.docs.swagger).toBe('/docs');
-        expect(body.redis.provider).toBe('redis');
-        expect(body.resources.length).toBeGreaterThan(0);
+        expect(body.health).toBe('/health');
+        expect(body.redis).toBeUndefined();
+        expect(body.resources).toBeUndefined();
       });
   });
 
@@ -48,16 +49,30 @@ describe('AppController (e2e)', () => {
       .expect(({ body }) => {
         expect(body.name).toBe('Digital Cigarette Break API');
         expect(body.docs.openApiJson).toBe('/docs-json');
+        expect(body.storage).toBeUndefined();
       });
   });
 
-  it('/redis/health (GET)', () => {
+  it('/health (GET)', () => {
     return request(app.getHttpServer())
-      .get('/redis/health')
+      .get('/health')
       .expect(200)
       .expect(({ body }) => {
-        expect(body.provider).toBe('redis');
-        expect(body.configured).toBe(true);
+        expect(body.status).toBe('ok');
+        expect(body.timestamp).toBeDefined();
+        expect(body.database).toBeUndefined();
       });
+  });
+
+  it('/redis/health (GET) requires auth', () => {
+    return request(app.getHttpServer()).get('/redis/health').expect(401);
+  });
+
+  it('/queues/health (GET) requires auth', () => {
+    return request(app.getHttpServer()).get('/queues/health').expect(401);
+  });
+
+  it('/realtime/health (GET) requires auth', () => {
+    return request(app.getHttpServer()).get('/realtime/health').expect(401);
   });
 });

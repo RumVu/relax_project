@@ -1,7 +1,6 @@
 import {
   ArrayMaxSize,
   IsArray,
-  IsDate,
   IsEnum,
   IsInt,
   IsOptional,
@@ -11,7 +10,6 @@ import {
   Min,
 } from 'class-validator';
 import { MoodType } from '@prisma/client';
-import { Type } from 'class-transformer';
 
 export class UpdateMoodCheckinDto {
   @IsOptional()
@@ -23,23 +21,6 @@ export class UpdateMoodCheckinDto {
   @Min(1)
   @Max(5)
   intensity?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  rawScore?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  finalScore?: number;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  scoredAt?: Date;
 
   @IsOptional()
   @IsString()

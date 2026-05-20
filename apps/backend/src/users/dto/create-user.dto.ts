@@ -5,8 +5,8 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
+import { StrongPassword } from '../../common/validation/strong-password.decorator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -22,7 +22,7 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @StrongPassword()
   password?: string;
 
   @IsOptional()

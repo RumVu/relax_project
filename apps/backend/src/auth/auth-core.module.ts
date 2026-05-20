@@ -9,13 +9,24 @@ import { RolesGuard } from './guards/roles.guard';
   imports: [
     JwtModule.registerAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('auth.jwtSecret'),
-        signOptions: {
-          expiresIn: (configService.get<string>('auth.jwtExpiresIn') ??
-            '7d') as JwtSignOptions['expiresIn'],
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const issuer = configService.get<string>('auth.jwtIssuer');
+        const audience = configService.get<string>('auth.jwtAudience');
+
+        return {
+          secret: configService.get<string>('auth.jwtSecret'),
+          signOptions: {
+            expiresIn: (configService.get<string>('auth.jwtExpiresIn') ??
+              '15m') as JwtSignOptions['expiresIn'],
+            issuer,
+            audience,
+          },
+          verifyOptions: {
+            issuer,
+            audience,
+          },
+        };
+      },
     }),
   ],
   providers: [JwtAuthGuard, RolesGuard],

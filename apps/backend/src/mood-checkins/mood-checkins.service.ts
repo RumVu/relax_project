@@ -11,9 +11,17 @@ import {
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
 import {
-  getTimezoneOffsetMinutes,
+  addLocalDays,
+  createTimezoneContext,
+  endOfLocalDay as getEndOfLocalDay,
+  getLocalDayLabel,
+  getLocalWeekStart as getTimezoneLocalWeekStart,
+  getTimezoneContextOffsetMinutes,
   normalizeTimezone,
+  startOfLocalDay as getStartOfLocalDay,
+  toLocalDateKey as getLocalDateKey,
 } from '../common/timezone';
+import type { TimezoneContext } from '../common/timezone';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import type { AuthUser } from '../auth/auth.types';
@@ -31,6 +39,16 @@ type MoodCheckinAnalyticsInput = Pick<
   MoodCheckin,
   'mood' | 'intensity' | 'rawScore' | 'finalScore' | 'scoredAt' | 'createdAt'
 >;
+
+type SystemMoodCheckinFields = {
+  allowSystemScoring?: boolean;
+  rawScore?: number;
+  finalScore?: number;
+  scoredAt?: Date;
+  checkedAt?: Date;
+};
+
+type CreateMoodCheckinInput = CreateMoodCheckinDto & SystemMoodCheckinFields;
 
 interface MoodDateRange {
   from: Date;
@@ -101,21 +119,31 @@ export class MoodCheckinsService {
     return checkin;
   }
 
-  async create(userId: string, dto: CreateMoodCheckinDto) {
+  async create(userId: string, dto: CreateMoodCheckinInput) {
     await this.usersService.findOne(userId);
+    const now = new Date();
+    const baseScore = this.scoreFromMood(dto.mood);
+    const rawScore = dto.allowSystemScoring
+      ? this.clampScore(dto.rawScore ?? baseScore)
+      : baseScore;
+    const finalScore = dto.allowSystemScoring
+      ? this.clampScore(dto.finalScore ?? rawScore)
+      : rawScore;
+    const scoredAt = dto.allowSystemScoring
+      ? (dto.scoredAt ?? dto.checkedAt ?? now)
+      : now;
 
     const checkin = await this.prisma.moodCheckin.create({
       data: {
         userId,
         mood: dto.mood,
         intensity: dto.intensity,
-        rawScore: dto.rawScore ?? this.scoreFromMood(dto.mood),
-        finalScore:
-          dto.finalScore ?? dto.rawScore ?? this.scoreFromMood(dto.mood),
-        scoredAt: dto.scoredAt ?? dto.checkedAt ?? new Date(),
+        rawScore,
+        finalScore,
+        scoredAt,
         note: dto.note,
         tags: dto.tags ?? [],
-        createdAt: dto.checkedAt,
+        createdAt: dto.allowSystemScoring ? dto.checkedAt : undefined,
       },
     });
 
@@ -131,7 +159,15 @@ export class MoodCheckinsService {
 
     const updated = await this.prisma.moodCheckin.update({
       where: { id },
-      data: dto,
+      data: {
+        ...dto,
+        ...(dto.mood
+          ? {
+              rawScore: this.scoreFromMood(dto.mood),
+              finalScore: this.scoreFromMood(dto.mood),
+            }
+          : {}),
+      },
     });
     const nextScoreDate = this.getCheckinDate(updated);
 
@@ -163,7 +199,7 @@ export class MoodCheckinsService {
   async getStats(userId: string, query: MoodCheckinQueryDto) {
     await this.usersService.findOne(userId);
     const timezone = await this.resolveTimezone(userId);
-    const timezoneOffsetMinutes = getTimezoneOffsetMinutes(timezone);
+    const timezoneContext = createTimezoneContext(timezone);
     const where = this.buildWhere(userId, query);
 
     const [total, byMood, average, latest, checkinsForStreak] =
@@ -198,7 +234,7 @@ export class MoodCheckinsService {
         count: entry._count.mood,
       })),
       latest,
-      streak: this.calculateStreaks(checkinsForStreak, timezoneOffsetMinutes),
+      streak: this.calculateStreaks(checkinsForStreak, timezoneContext),
     };
   }
 
@@ -217,8 +253,8 @@ export class MoodCheckinsService {
   ) {
     await this.usersService.findOne(userId);
     const timezone = await this.resolveTimezone(userId, dto.timezone);
-    const timezoneOffsetMinutes = getTimezoneOffsetMinutes(timezone);
-    const range = this.resolveRecalculateRange(dto, timezoneOffsetMinutes);
+    const timezoneContext = createTimezoneContext(timezone);
+    const range = this.resolveRecalculateRange(dto, timezoneContext);
     const dateWhere = range
       ? this.buildScoredAtRangeWhere(range.from, range.to)
       : undefined;
@@ -235,8 +271,8 @@ export class MoodCheckinsService {
           where: {
             userId,
             weekStart: {
-              gte: this.getLocalWeekStart(range.from, timezoneOffsetMinutes),
-              lte: this.getLocalWeekStart(range.to, timezoneOffsetMinutes),
+              gte: this.getLocalWeekStart(range.from, timezoneContext),
+              lte: this.getLocalWeekStart(range.to, timezoneContext),
             },
           },
           select: { weekStart: true },
@@ -251,16 +287,12 @@ export class MoodCheckinsService {
       this.addAffectedWeekStarts(
         weekStarts,
         this.getCheckinDate(checkin),
-        timezoneOffsetMinutes,
+        timezoneContext,
       );
     }
 
     for (const stat of existingStats) {
-      this.addAffectedWeekStarts(
-        weekStarts,
-        stat.weekStart,
-        timezoneOffsetMinutes,
-      );
+      this.addAffectedWeekStarts(weekStarts, stat.weekStart, timezoneContext);
     }
 
     await this.syncProfileStats(userId);
@@ -268,14 +300,14 @@ export class MoodCheckinsService {
       return {
         userId,
         timezone,
-        timezoneOffsetMinutes,
+        timezoneOffsetMinutes: getTimezoneContextOffsetMinutes(timezoneContext),
         recalculatedCount: 0,
         recalculatedWeeks: [],
       };
     }
 
     for (const weekStart of weekStarts.values()) {
-      await this.upsertWeeklyStat(userId, weekStart, timezoneOffsetMinutes);
+      await this.upsertWeeklyStat(userId, weekStart, timezoneContext);
     }
 
     const recalculatedWeeks = await this.prisma.weeklyMoodStat.findMany({
@@ -289,7 +321,7 @@ export class MoodCheckinsService {
     return {
       userId,
       timezone,
-      timezoneOffsetMinutes,
+      timezoneOffsetMinutes: getTimezoneContextOffsetMinutes(timezoneContext),
       recalculatedCount: recalculatedWeeks.length,
       recalculatedWeeks,
     };
@@ -355,9 +387,11 @@ export class MoodCheckinsService {
   async getAnalytics(userId: string, query: MoodAnalyticsQueryDto) {
     await this.usersService.findOne(userId);
     const timezone = await this.resolveTimezone(userId, query.timezone);
-    const timezoneOffsetMinutes =
-      query.timezoneOffsetMinutes ?? getTimezoneOffsetMinutes(timezone);
-    const range = this.resolveAnalyticsRange(query, timezoneOffsetMinutes);
+    const timezoneContext = createTimezoneContext(
+      timezone,
+      query.timezoneOffsetMinutes,
+    );
+    const range = this.resolveAnalyticsRange(query, timezoneContext);
     const previousRange = this.getPreviousRange(range);
 
     const [currentCheckins, previousCheckins, allCheckins] = await Promise.all([
@@ -374,11 +408,11 @@ export class MoodCheckinsService {
 
     const summary = this.buildAnalyticsSummary(
       currentCheckins,
-      timezoneOffsetMinutes,
+      timezoneContext,
     );
     const previousSummary = this.buildAnalyticsSummary(
       previousCheckins,
-      timezoneOffsetMinutes,
+      timezoneContext,
     );
 
     return {
@@ -386,20 +420,16 @@ export class MoodCheckinsService {
       range,
       previousRange: query.compare === false ? null : previousRange,
       timezone,
-      timezoneOffsetMinutes,
+      timezoneOffsetMinutes: getTimezoneContextOffsetMinutes(timezoneContext),
       summary,
       previousSummary: query.compare === false ? null : previousSummary,
       delta:
         query.compare === false
           ? null
           : this.buildAnalyticsDelta(summary, previousSummary),
-      timeline: this.buildTimeline(
-        currentCheckins,
-        range,
-        timezoneOffsetMinutes,
-      ),
+      timeline: this.buildTimeline(currentCheckins, range, timezoneContext),
       distribution: this.buildDistribution(currentCheckins),
-      streak: this.calculateStreaks(allCheckins, timezoneOffsetMinutes),
+      streak: this.calculateStreaks(allCheckins, timezoneContext),
       insights: this.buildInsights(summary, previousSummary),
     };
   }
@@ -489,12 +519,12 @@ export class MoodCheckinsService {
 
   private resolveAnalyticsRange(
     query: MoodAnalyticsQueryDto,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
     if (query.period === MoodAnalyticsPeriod.CUSTOM && query.from && query.to) {
       return {
-        from: this.startOfLocalDay(query.from, timezoneOffsetMinutes),
-        to: this.endOfLocalDay(query.to, timezoneOffsetMinutes),
+        from: this.startOfLocalDay(query.from, timezoneContext),
+        to: this.endOfLocalDay(query.to, timezoneContext),
       };
     }
 
@@ -510,15 +540,12 @@ export class MoodCheckinsService {
     };
     const days =
       period === MoodAnalyticsPeriod.CUSTOM ? 7 : daysByPeriod[period];
-    const to = this.endOfLocalDay(
-      query.to ?? new Date(),
-      timezoneOffsetMinutes,
-    );
+    const to = this.endOfLocalDay(query.to ?? new Date(), timezoneContext);
     const from = new Date(to);
     from.setUTCDate(from.getUTCDate() - days + 1);
 
     return {
-      from: this.startOfLocalDay(from, timezoneOffsetMinutes),
+      from: this.startOfLocalDay(from, timezoneContext),
       to,
     };
   }
@@ -533,15 +560,12 @@ export class MoodCheckinsService {
 
   private buildAnalyticsSummary(
     checkins: MoodCheckinAnalyticsInput[],
-    timezoneOffsetMinutes = 0,
+    timezoneContext: TimezoneContext,
   ) {
     const total = checkins.length;
     const activeDays = new Set(
       checkins.map((checkin) =>
-        this.toLocalDateKey(
-          this.getCheckinDate(checkin),
-          timezoneOffsetMinutes,
-        ),
+        this.toLocalDateKey(this.getCheckinDate(checkin), timezoneContext),
       ),
     ).size;
     const averageIntensity =
@@ -624,22 +648,17 @@ export class MoodCheckinsService {
   private buildTimeline(
     checkins: MoodCheckinAnalyticsInput[],
     range: MoodDateRange,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
-    const buckets = this.listLocalDays(range, timezoneOffsetMinutes);
+    const buckets = this.listLocalDays(range, timezoneContext);
 
     return buckets.map((bucket) => {
       const dayCheckins = checkins.filter(
         (checkin) =>
-          this.toLocalDateKey(
-            this.getCheckinDate(checkin),
-            timezoneOffsetMinutes,
-          ) === bucket.date,
+          this.toLocalDateKey(this.getCheckinDate(checkin), timezoneContext) ===
+          bucket.date,
       );
-      const summary = this.buildAnalyticsSummary(
-        dayCheckins,
-        timezoneOffsetMinutes,
-      );
+      const summary = this.buildAnalyticsSummary(dayCheckins, timezoneContext);
 
       return {
         date: bucket.date,
@@ -692,46 +711,40 @@ export class MoodCheckinsService {
     return insights;
   }
 
-  private listLocalDays(range: MoodDateRange, timezoneOffsetMinutes: number) {
+  private listLocalDays(
+    range: MoodDateRange,
+    timezoneContext: TimezoneContext,
+  ) {
     const days: Array<{ date: string; label: string }> = [];
-    let cursor = this.startOfLocalDay(range.from, timezoneOffsetMinutes);
-    const end = this.startOfLocalDay(range.to, timezoneOffsetMinutes);
+    let cursor = this.startOfLocalDay(range.from, timezoneContext);
+    const end = this.startOfLocalDay(range.to, timezoneContext);
 
     while (cursor.getTime() <= end.getTime()) {
-      const date = this.toLocalDateKey(cursor, timezoneOffsetMinutes);
+      const date = this.toLocalDateKey(cursor, timezoneContext);
       days.push({
         date,
-        label: this.getDayLabel(cursor, timezoneOffsetMinutes),
+        label: this.getDayLabel(cursor, timezoneContext),
       });
-      cursor = new Date(cursor.getTime() + 1000 * 60 * 60 * 24);
+      cursor = addLocalDays(cursor, 1, timezoneContext);
     }
 
     return days;
   }
 
-  private startOfLocalDay(date: Date, timezoneOffsetMinutes: number) {
-    const shifted = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    shifted.setUTCHours(0, 0, 0, 0);
-    return new Date(shifted.getTime() - timezoneOffsetMinutes * 60_000);
+  private startOfLocalDay(date: Date, timezoneContext: TimezoneContext) {
+    return getStartOfLocalDay(date, timezoneContext);
   }
 
-  private endOfLocalDay(date: Date, timezoneOffsetMinutes: number) {
-    const shifted = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    shifted.setUTCHours(23, 59, 59, 999);
-    return new Date(shifted.getTime() - timezoneOffsetMinutes * 60_000);
+  private endOfLocalDay(date: Date, timezoneContext: TimezoneContext) {
+    return getEndOfLocalDay(date, timezoneContext);
   }
 
-  private toLocalDateKey(date: Date, timezoneOffsetMinutes: number) {
-    return new Date(date.getTime() + timezoneOffsetMinutes * 60_000)
-      .toISOString()
-      .slice(0, 10);
+  private toLocalDateKey(date: Date, timezoneContext: TimezoneContext) {
+    return getLocalDateKey(date, timezoneContext);
   }
 
-  private getDayLabel(date: Date, timezoneOffsetMinutes: number) {
-    const local = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    const day = local.getUTCDay();
-    const labels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    return labels[day];
+  private getDayLabel(date: Date, timezoneContext: TimezoneContext) {
+    return getLocalDayLabel(date, timezoneContext);
   }
 
   private getCheckinDate(checkin: Pick<MoodCheckin, 'scoredAt' | 'createdAt'>) {
@@ -770,6 +783,10 @@ export class MoodCheckinsService {
     };
 
     return stressScores[mood];
+  }
+
+  private clampScore(score: number) {
+    return Math.max(0, Math.min(100, Math.round(score)));
   }
 
   private getEffectiveScore(checkin: MoodCheckinAnalyticsInput) {
@@ -1010,13 +1027,13 @@ export class MoodCheckinsService {
 
   private async syncProfileStats(userId: string) {
     const timezone = await this.resolveTimezone(userId);
-    const timezoneOffsetMinutes = getTimezoneOffsetMinutes(timezone);
+    const timezoneContext = createTimezoneContext(timezone);
     const checkins = await this.prisma.moodCheckin.findMany({
       where: { userId },
       select: { createdAt: true, scoredAt: true },
       orderBy: { createdAt: 'desc' },
     });
-    const streak = this.calculateStreaks(checkins, timezoneOffsetMinutes);
+    const streak = this.calculateStreaks(checkins, timezoneContext);
 
     await this.prisma.userProfile.updateMany({
       where: { userId },
@@ -1030,25 +1047,24 @@ export class MoodCheckinsService {
 
   private async syncWeeklyStatsAroundDate(userId: string, date: Date) {
     const timezone = await this.resolveTimezone(userId);
-    const timezoneOffsetMinutes = getTimezoneOffsetMinutes(timezone);
+    const timezoneContext = createTimezoneContext(timezone);
     const weekStarts = new Map<string, Date>();
-    this.addAffectedWeekStarts(weekStarts, date, timezoneOffsetMinutes);
+    this.addAffectedWeekStarts(weekStarts, date, timezoneContext);
 
     for (const weekStart of weekStarts.values()) {
-      await this.upsertWeeklyStat(userId, weekStart, timezoneOffsetMinutes);
+      await this.upsertWeeklyStat(userId, weekStart, timezoneContext);
     }
   }
 
   private addAffectedWeekStarts(
     weekStarts: Map<string, Date>,
     date: Date,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
-    const weekStart = this.getLocalWeekStart(date, timezoneOffsetMinutes);
+    const weekStart = this.getLocalWeekStart(date, timezoneContext);
 
     for (const offsetDays of [-7, 0, 7]) {
-      const affected = new Date(weekStart);
-      affected.setUTCDate(affected.getUTCDate() + offsetDays);
+      const affected = addLocalDays(weekStart, offsetDays, timezoneContext);
       weekStarts.set(affected.toISOString(), affected);
     }
   }
@@ -1056,17 +1072,15 @@ export class MoodCheckinsService {
   private async upsertWeeklyStat(
     userId: string,
     weekStart: Date,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
-    const weekEnd = new Date(weekStart);
-    weekEnd.setUTCDate(weekEnd.getUTCDate() + 7);
-    weekEnd.setUTCMilliseconds(weekEnd.getUTCMilliseconds() - 1);
+    const weekEnd = new Date(
+      addLocalDays(weekStart, 7, timezoneContext).getTime() - 1,
+    );
 
-    const previousWeekStart = new Date(weekStart);
-    previousWeekStart.setUTCDate(previousWeekStart.getUTCDate() - 7);
-    const previousWeekEnd = new Date(weekStart);
-    previousWeekEnd.setUTCMilliseconds(
-      previousWeekEnd.getUTCMilliseconds() - 1,
+    const previousWeekStart = addLocalDays(weekStart, -7, timezoneContext);
+    const previousWeekEnd = new Date(
+      addLocalDays(previousWeekStart, 7, timezoneContext).getTime() - 1,
     );
 
     const [checkins, previousCheckins, streakCheckins] = await Promise.all([
@@ -1125,54 +1139,46 @@ export class MoodCheckinsService {
         weekStart,
         avgScore,
         stressReducePct: this.round(previousAvgScore - avgScore),
-        streakDays: this.calculateStreaks(streakCheckins, timezoneOffsetMinutes)
+        streakDays: this.calculateStreaks(streakCheckins, timezoneContext)
           .current,
         dominantMood: this.getTopMood(checkins),
       },
       update: {
         avgScore,
         stressReducePct: this.round(previousAvgScore - avgScore),
-        streakDays: this.calculateStreaks(streakCheckins, timezoneOffsetMinutes)
+        streakDays: this.calculateStreaks(streakCheckins, timezoneContext)
           .current,
         dominantMood: this.getTopMood(checkins),
       },
     });
   }
 
-  private getLocalWeekStart(date: Date, timezoneOffsetMinutes: number) {
-    const start = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    start.setUTCHours(0, 0, 0, 0);
-    const day = start.getUTCDay();
-    const daysFromMonday = day === 0 ? 6 : day - 1;
-    start.setUTCDate(start.getUTCDate() - daysFromMonday);
-    return new Date(start.getTime() - timezoneOffsetMinutes * 60_000);
+  private getLocalWeekStart(date: Date, timezoneContext: TimezoneContext) {
+    return getTimezoneLocalWeekStart(date, timezoneContext);
   }
 
   private resolveRecalculateRange(
     dto: RecalculateWeeklyMoodStatsDto,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ): MoodDateRange | null {
     if (!dto.from && !dto.to) {
       return null;
     }
 
     return {
-      from: this.startOfLocalDay(dto.from ?? dto.to!, timezoneOffsetMinutes),
-      to: this.endOfLocalDay(dto.to ?? dto.from!, timezoneOffsetMinutes),
+      from: this.startOfLocalDay(dto.from ?? dto.to!, timezoneContext),
+      to: this.endOfLocalDay(dto.to ?? dto.from!, timezoneContext),
     };
   }
 
   private calculateStreaks(
     checkins: Array<Pick<MoodCheckin, 'createdAt' | 'scoredAt'>>,
-    timezoneOffsetMinutes = 0,
+    timezoneContext: TimezoneContext,
   ) {
     const days = Array.from(
       new Set(
         checkins.map((checkin) =>
-          this.toLocalDateKey(
-            this.getCheckinDate(checkin),
-            timezoneOffsetMinutes,
-          ),
+          this.toLocalDateKey(this.getCheckinDate(checkin), timezoneContext),
         ),
       ),
     ).sort();
@@ -1194,10 +1200,10 @@ export class MoodCheckinsService {
       previous = current;
     }
 
-    const today = this.toLocalDateKey(new Date(), timezoneOffsetMinutes);
+    const today = this.toLocalDateKey(new Date(), timezoneContext);
     const yesterday = this.toLocalDateKey(
       new Date(Date.now() - 1000 * 60 * 60 * 24),
-      timezoneOffsetMinutes,
+      timezoneContext,
     );
     const latest = days.at(-1);
     const current =

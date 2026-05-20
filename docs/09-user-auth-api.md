@@ -17,7 +17,7 @@ Register body:
 ```json
 {
   "email": "user@example.com",
-  "password": "secret123",
+  "password": "Secret123!x",
   "name": "Relax User"
 }
 ```
@@ -27,7 +27,7 @@ Login body:
 ```json
 {
   "email": "user@example.com",
-  "password": "secret123"
+  "password": "Secret123!x"
 }
 ```
 
@@ -47,7 +47,10 @@ Auth responses include:
 }
 ```
 
-The API never returns `password` in safe user responses.
+The API never returns `password` in safe user responses. New passwords must be
+at least 10 characters and include uppercase, lowercase, number, and special
+character. Password inputs that create a new password are capped at 72
+characters to avoid bcrypt truncation surprises.
 
 ## Users
 

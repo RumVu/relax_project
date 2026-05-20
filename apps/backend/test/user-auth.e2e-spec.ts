@@ -15,7 +15,7 @@ describe('User and Auth APIs (e2e)', () => {
   const tag = `e2e-user-${Date.now()}`;
   const email = `${tag}@example.com`;
   const adminEmail = `${tag}-admin@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -56,12 +56,33 @@ describe('User and Auth APIs (e2e)', () => {
         expect(body.user.preferences.language).toBe('vi');
       });
     const { accessToken, refreshToken, user } = registered.body;
+    const storedSession = await prisma.session.findFirstOrThrow({
+      where: { userId: user.id },
+    });
+    expect(storedSession.refreshToken).not.toBe(refreshToken);
+    expect(storedSession.refreshToken).toMatch(/^[a-f0-9]{64}$/);
 
     await request(app.getHttpServer())
       .get('/auth/me')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => expect(body.id).toBe(user.id));
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isActive: false },
+    });
+    await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(401)
+      .expect(({ body }) =>
+        expect(body.code).toBe(ErrorCode.AUTH_INACTIVE_USER),
+      );
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { isActive: true },
+    });
 
     const admin = await prisma.user.create({
       data: {
@@ -157,7 +178,7 @@ describe('User and Auth APIs (e2e)', () => {
 
     await request(app.getHttpServer())
       .post('/auth/login')
-      .send({ email: `${tag}-duplicate@example.com`, password: 'wrong123' })
+      .send({ email: `${tag}-duplicate@example.com`, password: 'Wrong123!x' })
       .expect(401)
       .expect(({ body }) => {
         expect(body.code).toBe(ErrorCode.AUTH_INVALID_CREDENTIALS);

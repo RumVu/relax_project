@@ -31,13 +31,13 @@ export class AnalyticsService {
       this.moodCheckinsService.getAnalytics(userId, {
         period: period as unknown as MoodAnalyticsPeriod,
         timezone,
-        timezoneOffsetMinutes,
+        timezoneOffsetMinutes: query.timezoneOffsetMinutes,
       }),
       this.journalsService.getStats(userId, {}),
       this.relaxActivitiesService.getStats(userId, {
         period: period as unknown as RelaxStatsPeriod,
         timezone,
-        timezoneOffsetMinutes,
+        timezoneOffsetMinutes: query.timezoneOffsetMinutes,
       }),
       this.userCompanionsService.getStats(userId),
     ]);

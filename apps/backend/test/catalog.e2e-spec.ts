@@ -13,8 +13,11 @@ describe('Catalog APIs (e2e)', () => {
   let prisma: PrismaService;
   const tag = `e2e-${Date.now()}`;
   const adminEmail = `${tag}-admin@example.com`;
+  const userEmail = `${tag}-user@example.com`;
   const adminPassword = 'Password123!';
   let adminToken: string;
+  let adminUserId: string;
+  let userToken: string;
   const asAdmin = (testRequest: SupertestRequest) =>
     testRequest.set('Authorization', `Bearer ${adminToken}`);
 
@@ -43,6 +46,7 @@ describe('Catalog APIs (e2e)', () => {
         name: `${tag}-admin`,
       })
       .expect(201);
+    adminUserId = registered.body.user.id;
     await prisma.user.update({
       where: { id: registered.body.user.id },
       data: { role: UserRole.ADMIN },
@@ -52,6 +56,16 @@ describe('Catalog APIs (e2e)', () => {
       .send({ email: adminEmail, password: adminPassword })
       .expect(201);
     adminToken = loggedIn.body.accessToken;
+
+    const registeredUser = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: userEmail,
+        password: adminPassword,
+        name: `${tag}-user`,
+      })
+      .expect(201);
+    userToken = registeredUser.body.accessToken;
   });
 
   afterAll(async () => {
@@ -387,16 +401,24 @@ describe('Catalog APIs (e2e)', () => {
   });
 
   it('returns storage health, public URLs, and registers file metadata', async () => {
-    await request(app.getHttpServer()).get('/storage/health').expect(200);
+    const storageHealth = await asAdmin(
+      request(app.getHttpServer()).get('/storage/health'),
+    ).expect(200);
 
-    await request(app.getHttpServer())
-      .get('/storage/public-url')
-      .query({ path: `${tag}/image.png` })
-      .expect(200)
-      .expect(({ body }) => {
+    const publicUrlRequest = asAdmin(
+      request(app.getHttpServer()).get('/storage/admin/public-url'),
+    ).query({ path: `${tag}/image.png` });
+
+    if (storageHealth.body.configured) {
+      await publicUrlRequest.expect(200).expect(({ body }) => {
         expect(body.path).toBe(`${tag}/image.png`);
         expect(body.publicUrl).toContain(`${tag}/image.png`);
       });
+    } else {
+      await publicUrlRequest.expect(503).expect(({ body }) => {
+        expect(body.code).toBe(ErrorCode.STORAGE_NOT_CONFIGURED);
+      });
+    }
 
     const created = await request(app.getHttpServer())
       .post('/storage/files')
@@ -406,10 +428,14 @@ describe('Catalog APIs (e2e)', () => {
         mimetype: 'image/png',
         size: 128,
         path: `${tag}/image.png`,
+        isPublic: false,
       })
       .expect(201);
 
     expect(created.body.userId).toBeDefined();
+    expect(created.body.path).toBe(
+      `user-uploads/${created.body.userId}/${tag}/image.png`,
+    );
 
     await request(app.getHttpServer())
       .get('/storage/files')
@@ -425,5 +451,25 @@ describe('Catalog APIs (e2e)', () => {
       .delete(`/storage/files/${created.body.id}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
+  });
+
+  it('scopes user storage read URLs to the authenticated user', async () => {
+    await request(app.getHttpServer())
+      .get('/storage/public-url')
+      .set('Authorization', `Bearer ${userToken}`)
+      .query({ path: `user-uploads/${adminUserId}/${tag}/image.png` })
+      .expect(403)
+      .expect(({ body }) => {
+        expect(body.code).toBe(ErrorCode.STORAGE_INVALID_PATH);
+      });
+
+    await request(app.getHttpServer())
+      .get('/storage/signed-url')
+      .set('Authorization', `Bearer ${userToken}`)
+      .query({ path: `user-uploads/${adminUserId}/${tag}/image.png` })
+      .expect(403)
+      .expect(({ body }) => {
+        expect(body.code).toBe(ErrorCode.STORAGE_INVALID_PATH);
+      });
   });
 });

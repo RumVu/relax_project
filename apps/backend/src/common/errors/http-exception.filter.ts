@@ -147,7 +147,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: HttpStatus.CONFLICT,
         code: ErrorCode.DATABASE_UNIQUE_CONSTRAINT,
         message: 'A record with this unique value already exists',
-        details: error.meta,
+        details: { reason: 'unique_constraint' },
       };
     }
 
@@ -156,7 +156,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: HttpStatus.CONFLICT,
         code: ErrorCode.DATABASE_FOREIGN_KEY_CONSTRAINT,
         message: 'This record is still referenced by related data',
-        details: error.meta,
+        details: { reason: 'foreign_key_constraint' },
       };
     }
 
@@ -165,7 +165,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode: HttpStatus.NOT_FOUND,
         code: ErrorCode.DATABASE_RECORD_NOT_FOUND,
         message: 'Database record not found',
-        details: error.meta,
+        details: { reason: 'record_not_found' },
       };
     }
 
@@ -173,7 +173,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       code: ErrorCode.INTERNAL_SERVER_ERROR,
       message: 'Database request failed',
-      details: { prismaCode: error.code, meta: error.meta },
+      details: { reason: 'database_request_failed' },
     };
   }
 }

@@ -16,7 +16,7 @@ describe('Mood Check-ins APIs (e2e)', () => {
   const email = `${tag}@example.com`;
   const otherEmail = `${tag}-other@example.com`;
   const adminEmail = `${tag}-admin@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -78,6 +78,19 @@ describe('Mood Check-ins APIs (e2e)', () => {
         createdAt: yesterday,
       },
     });
+
+    await request(app.getHttpServer())
+      .post('/mood-checkins/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        mood: MoodType.CALM,
+        rawScore: 99,
+        checkedAt: yesterday.toISOString(),
+      })
+      .expect(400)
+      .expect(({ body }) => {
+        expect(body.code).toBe(ErrorCode.VALIDATION_FAILED);
+      });
 
     const created = await request(app.getHttpServer())
       .post('/mood-checkins/me')
@@ -387,5 +400,56 @@ describe('Mood Check-ins APIs (e2e)', () => {
       .query({ period: 'week' })
       .expect(200)
       .expect(({ body }) => expect(body.summary.total).toBe(3));
+  });
+
+  it('groups analytics by the timezone offset for each historical check-in date', async () => {
+    const registered = await request(app.getHttpServer())
+      .post('/auth/register')
+      .send({
+        email: `${tag}-dst@example.com`,
+        password,
+        name: 'DST User',
+      })
+      .expect(201);
+    const accessToken = registered.body.accessToken as string;
+    const userId = registered.body.user.id as string;
+
+    await prisma.userPreference.update({
+      where: { userId },
+      data: { timezone: 'America/New_York' },
+    });
+    await prisma.moodCheckin.create({
+      data: {
+        userId,
+        mood: MoodType.CALM,
+        intensity: 4,
+        rawScore: 10,
+        finalScore: 10,
+        scoredAt: new Date('2026-01-02T04:30:00.000Z'),
+        createdAt: new Date('2026-01-02T04:30:00.000Z'),
+      },
+    });
+
+    await request(app.getHttpServer())
+      .get('/mood-checkins/me/analytics')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .query({
+        period: 'custom',
+        from: '2026-01-01T12:00:00.000Z',
+        to: '2026-01-01T12:00:00.000Z',
+        timezone: 'America/New_York',
+        compare: false,
+      })
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.summary.total).toBe(1);
+        expect(body.timeline).toEqual([
+          expect.objectContaining({
+            date: '2026-01-01',
+            total: 1,
+            dominantMood: MoodType.CALM,
+          }),
+        ]);
+      });
   });
 });

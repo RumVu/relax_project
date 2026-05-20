@@ -1,12 +1,22 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import type {
+  CorsOptions,
+  CustomOrigin,
+} from '@nestjs/common/interfaces/external/cors-options.interface';
+import { ConfigService } from '@nestjs/config';
 import type { OpenAPIObject } from '@nestjs/swagger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
+import { createHash, timingSafeEqual } from 'node:crypto';
+import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/errors/http-exception.filter';
 import { ErrorCode } from './common/errors/error-code';
 import { applyExampleDocumentation } from './docs/swagger.examples';
 import { PrismaService } from './prisma/prisma.service';
+import { RedisIoAdapter } from './realtime/redis-io.adapter';
+import { RealtimeService } from './realtime/realtime.service';
 
 const HTTP_METHODS = new Set([
   'get',
@@ -181,8 +191,172 @@ function applyErrorDocumentation(document: OpenAPIObject) {
   }
 }
 
+function configureHttpSecurity(
+  app: INestApplication,
+  configService: ConfigService,
+) {
+  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'development';
+  const isProduction = nodeEnv === 'production';
+  const allowedOrigins = parseCsv(
+    configService.get<string>('app.corsOrigins') ?? '',
+  );
+
+  const corsOrigin: CustomOrigin = (origin, callback) => {
+    if (!origin || isAllowedOrigin(origin, allowedOrigins, isProduction)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(null, false);
+  };
+  const corsOptions: CorsOptions = {
+    credentials: true,
+    origin: corsOrigin,
+  };
+
+  app.enableCors(corsOptions);
+
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+}
+
+function configureTrustProxy(
+  app: INestApplication,
+  configService: ConfigService,
+) {
+  const trustProxy = parseTrustProxy(
+    configService.get<string>('app.trustProxy') ?? 'loopback',
+  );
+  const httpInstance = app.getHttpAdapter().getInstance() as {
+    set?: (setting: string, value: unknown) => void;
+  };
+
+  httpInstance.set?.('trust proxy', trustProxy);
+}
+
+function setupSwaggerProtection(
+  app: INestApplication,
+  configService: ConfigService,
+) {
+  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'development';
+  const isProduction = nodeEnv === 'production';
+  const publicSwagger =
+    configService.get<string>('app.swaggerPublic') === 'true';
+  const username = configService.get<string>('app.swaggerBasicUser');
+  const password = configService.get<string>('app.swaggerBasicPassword');
+
+  if (!isProduction || publicSwagger || !username || !password) {
+    return;
+  }
+
+  app.use(
+    ['/docs', '/docs-json'],
+    (req: Request, res: Response, next: NextFunction) => {
+      const authorization = req.headers.authorization ?? '';
+      const [scheme, encoded] = authorization.split(' ');
+
+      if (scheme === 'Basic' && encoded) {
+        const [providedUser, providedPassword] = Buffer.from(encoded, 'base64')
+          .toString('utf8')
+          .split(':');
+
+        if (
+          timingSafeStringEqual(providedUser ?? '', username) &&
+          timingSafeStringEqual(providedPassword ?? '', password)
+        ) {
+          next();
+          return;
+        }
+      }
+
+      res.setHeader('WWW-Authenticate', 'Basic realm="API Docs"');
+      res.status(401).send('Authentication required');
+    },
+  );
+}
+
+function shouldEnableSwagger(configService: ConfigService) {
+  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'development';
+  const configured = configService.get<string>('app.swaggerEnabled');
+
+  if (configured === 'false') {
+    return false;
+  }
+
+  if (nodeEnv !== 'production') {
+    return true;
+  }
+
+  return (
+    configured === 'true' ||
+    configService.get<string>('app.swaggerPublic') === 'true' ||
+    Boolean(
+      configService.get<string>('app.swaggerBasicUser') &&
+      configService.get<string>('app.swaggerBasicPassword'),
+    )
+  );
+}
+
+function parseCsv(value: string) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function parseTrustProxy(value: string): boolean | number | string {
+  const normalized = value.trim().toLowerCase();
+
+  if (normalized === 'true') {
+    return true;
+  }
+
+  if (normalized === 'false') {
+    return false;
+  }
+
+  const numeric = Number(normalized);
+  if (Number.isInteger(numeric) && numeric >= 0) {
+    return numeric;
+  }
+
+  return value;
+}
+
+function timingSafeStringEqual(left: string, right: string) {
+  const leftDigest = createHash('sha256').update(left).digest();
+  const rightDigest = createHash('sha256').update(right).digest();
+  return timingSafeEqual(leftDigest, rightDigest);
+}
+
+function isAllowedOrigin(
+  origin: string,
+  allowedOrigins: string[],
+  isProduction: boolean,
+) {
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  if (
+    !isProduction &&
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
+  ) {
+    return true;
+  }
+
+  return !isProduction && allowedOrigins.includes('*');
+}
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
+  configureTrustProxy(app, configService);
+  configureHttpSecurity(app, configService);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -274,6 +448,14 @@ async function bootstrap() {
       'Redis cache/session/queue infrastructure: kiểm tra cấu hình và kết nối PING.',
     )
     .addTag(
+      'Realtime',
+      'Socket.IO realtime cho app: namespace /realtime, auth bằng JWT và Redis adapter để scale nhiều instance.',
+    )
+    .addTag(
+      'Queues',
+      'BullMQ queue nền Redis cho job nặng, worker sau này và kiểm tra queue health.',
+    )
+    .addTag(
       'Storage',
       'Supabase Storage: kiểm tra kết nối bucket, tạo URL public/signed và metadata file.',
     )
@@ -303,26 +485,38 @@ async function bootstrap() {
       'Kho quote chữa lành, quote random và quote theo mood.',
     )
     .build();
-  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
-  applyErrorDocumentation(swaggerDocument);
-  applyExampleDocumentation(swaggerDocument);
-  SwaggerModule.setup('docs', app, swaggerDocument, {
-    jsonDocumentUrl: 'docs-json',
-    swaggerUrl: '/docs-json',
-    swaggerOptions: {
-      persistAuthorization: true,
-      operationsSorter: 'method',
-    },
-    customSiteTitle: 'Digital Cigarette Break API Docs',
-  });
+  const swaggerEnabled = shouldEnableSwagger(configService);
+  if (swaggerEnabled) {
+    setupSwaggerProtection(app, configService);
+    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+    applyErrorDocumentation(swaggerDocument);
+    applyExampleDocumentation(swaggerDocument);
+    SwaggerModule.setup('docs', app, swaggerDocument, {
+      jsonDocumentUrl: 'docs-json',
+      swaggerUrl: '/docs-json',
+      swaggerOptions: {
+        persistAuthorization: true,
+        operationsSorter: 'method',
+      },
+      customSiteTitle: 'Digital Cigarette Break API Docs',
+    });
+  }
+
+  const realtimeService = app.get(RealtimeService);
+  const websocketAdapter = new RedisIoAdapter(app, configService);
+  const realtimeAdapterStatus = await websocketAdapter.connectToRedis();
+  realtimeService.setAdapterStatus(realtimeAdapterStatus);
+  app.useWebSocketAdapter(websocketAdapter);
 
   const prismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
 
-  const port = Number(process.env.PORT ?? 6823);
+  const port = configService.get<number>('app.port') ?? 6823;
   await app.listen(port);
   console.log(`Server is running on http://localhost:${port}`);
-  console.log(`Swagger docs available at http://localhost:${port}/docs`);
+  if (swaggerEnabled) {
+    console.log(`Swagger docs available at http://localhost:${port}/docs`);
+  }
 }
 
 void bootstrap();

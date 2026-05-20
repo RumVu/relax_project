@@ -1,10 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { RedisService } from './redis.service';
 
 @ApiTags('Redis')
@@ -22,6 +24,8 @@ export class RedisController {
     description: 'Set true to run a real Redis PING.',
   })
   @ApiOkResponse({ description: 'Redis health payload.' })
+  @ApiBearerAuth('access-token')
+  @AdminOnly()
   @Get('health')
   health(@Query('deep') deep?: string) {
     if (deep === 'true') {

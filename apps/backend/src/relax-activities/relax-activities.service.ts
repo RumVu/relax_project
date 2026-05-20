@@ -8,9 +8,16 @@ import {
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import {
-  getTimezoneOffsetMinutes,
+  addLocalDays,
+  createTimezoneContext,
+  endOfLocalDay as getEndOfLocalDay,
+  getLocalDayLabel,
+  getTimezoneContextOffsetMinutes,
   normalizeTimezone,
+  startOfLocalDay as getStartOfLocalDay,
+  toLocalDateKey as getLocalDateKey,
 } from '../common/timezone';
+import type { TimezoneContext } from '../common/timezone';
 import { MoodCheckinsService } from '../mood-checkins/mood-checkins.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
@@ -29,6 +36,8 @@ interface RelaxRange {
   from: Date;
   to: Date;
 }
+
+const MAX_RELAX_SESSION_DURATION_SECONDS = 60 * 60 * 12;
 
 @Injectable()
 export class RelaxActivitiesService {
@@ -74,7 +83,6 @@ export class RelaxActivitiesService {
       );
     }
 
-    const startedAt = dto.startedAt ?? new Date();
     const session = await this.prisma.relaxSession.create({
       data: {
         userId,
@@ -82,7 +90,7 @@ export class RelaxActivitiesService {
         resourceId: dto.resourceId,
         title: dto.title ?? option.title,
         moodBefore: dto.moodBefore,
-        startedAt,
+        startedAt: new Date(),
       },
     });
 
@@ -99,13 +107,11 @@ export class RelaxActivitiesService {
   ) {
     await this.usersService.findOne(userId);
     const started = await this.findStartedSession(userId, sessionId);
-    const endedAt = dto.endedAt ?? new Date();
-    const durationSeconds =
-      dto.durationSeconds ??
-      Math.max(
-        0,
-        Math.round((endedAt.getTime() - started.startedAt.getTime()) / 1000),
-      );
+    const endedAt = new Date();
+    const durationSeconds = this.resolveDurationSeconds(
+      started.startedAt,
+      endedAt,
+    );
     const activityType = started.activityType;
     const option = getRelaxActivityOption(activityType);
     const stressReliefPercent = this.getStressReliefPercent(
@@ -138,6 +144,7 @@ export class RelaxActivitiesService {
         note: dto.note,
         tags: ['relax-finish', activityType.toLowerCase(), session.id],
         checkedAt: endedAt,
+        allowSystemScoring: true,
       });
     }
 
@@ -166,9 +173,11 @@ export class RelaxActivitiesService {
   async getStats(userId: string, query: RelaxActivityQueryDto) {
     await this.usersService.findOne(userId);
     const timezone = await this.resolveTimezone(userId, query.timezone);
-    const timezoneOffsetMinutes =
-      query.timezoneOffsetMinutes ?? getTimezoneOffsetMinutes(timezone);
-    const range = this.resolveRange(query, timezoneOffsetMinutes);
+    const timezoneContext = createTimezoneContext(
+      timezone,
+      query.timezoneOffsetMinutes,
+    );
+    const range = this.resolveRange(query, timezoneContext);
     const sessions = await this.findFinishedSessions(userId, {
       ...query,
       from: range.from,
@@ -185,13 +194,14 @@ export class RelaxActivitiesService {
       period: query.period ?? RelaxStatsPeriod.WEEK,
       range,
       timezone,
-      streak: this.calculateActivityStreak(payloads, timezoneOffsetMinutes),
+      timezoneOffsetMinutes: getTimezoneContextOffsetMinutes(timezoneContext),
+      streak: this.calculateActivityStreak(payloads, timezoneContext),
       totalDurationSeconds,
       totalDurationLabel: this.formatDuration(totalDurationSeconds),
       totalSessions: payloads.length,
       favoriteActivities: this.buildFavoriteActivities(payloads),
       recentMoments: payloads.slice(0, query.limit ?? 5),
-      timeline: this.buildTimeline(payloads, range, timezoneOffsetMinutes),
+      timeline: this.buildTimeline(payloads, range, timezoneContext),
       relief: this.buildReliefSummary(payloads),
     };
   }
@@ -324,6 +334,15 @@ export class RelaxActivitiesService {
     return stressScores[mood];
   }
 
+  private resolveDurationSeconds(startedAt: Date, endedAt: Date) {
+    const elapsedSeconds = Math.max(
+      0,
+      Math.round((endedAt.getTime() - startedAt.getTime()) / 1000),
+    );
+
+    return Math.min(elapsedSeconds, MAX_RELAX_SESSION_DURATION_SECONDS);
+  }
+
   private getNextSuggestion(completedType: RelaxActivityType) {
     const fallback = RELAX_ACTIVITY_OPTIONS.find(
       (option) => option.type !== completedType,
@@ -334,12 +353,12 @@ export class RelaxActivitiesService {
 
   private resolveRange(
     query: RelaxActivityQueryDto,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
     if (query.period === RelaxStatsPeriod.CUSTOM && query.from && query.to) {
       return {
-        from: this.startOfLocalDay(query.from, timezoneOffsetMinutes),
-        to: this.endOfLocalDay(query.to, timezoneOffsetMinutes),
+        from: this.startOfLocalDay(query.from, timezoneContext),
+        to: this.endOfLocalDay(query.to, timezoneContext),
       };
     }
 
@@ -351,15 +370,12 @@ export class RelaxActivitiesService {
       [RelaxStatsPeriod.YEAR]: 365,
     };
     const days = period === RelaxStatsPeriod.CUSTOM ? 7 : daysByPeriod[period];
-    const to = this.endOfLocalDay(
-      query.to ?? new Date(),
-      timezoneOffsetMinutes,
-    );
+    const to = this.endOfLocalDay(query.to ?? new Date(), timezoneContext);
     const from = new Date(to);
     from.setUTCDate(from.getUTCDate() - days + 1);
 
     return {
-      from: this.startOfLocalDay(from, timezoneOffsetMinutes),
+      from: this.startOfLocalDay(from, timezoneContext),
       to,
     };
   }
@@ -390,16 +406,16 @@ export class RelaxActivitiesService {
   private buildTimeline(
     sessions: Array<ReturnType<typeof this.toSessionPayload>>,
     range: RelaxRange,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
-    const days = this.listLocalDays(range, timezoneOffsetMinutes);
+    const days = this.listLocalDays(range, timezoneContext);
 
     return days.map((day) => {
       const daySessions = sessions.filter(
         (session) =>
           this.toLocalDateKey(
             new Date(session.endedAt ?? session.createdAt),
-            timezoneOffsetMinutes,
+            timezoneContext,
           ) === day.date,
       );
       const durationSeconds = daySessions.reduce(
@@ -440,14 +456,14 @@ export class RelaxActivitiesService {
 
   private calculateActivityStreak(
     sessions: Array<ReturnType<typeof this.toSessionPayload>>,
-    timezoneOffsetMinutes: number,
+    timezoneContext: TimezoneContext,
   ) {
     const days = Array.from(
       new Set(
         sessions.map((session) =>
           this.toLocalDateKey(
             new Date(session.endedAt ?? session.createdAt),
-            timezoneOffsetMinutes,
+            timezoneContext,
           ),
         ),
       ),
@@ -474,44 +490,36 @@ export class RelaxActivitiesService {
     };
   }
 
-  private listLocalDays(range: RelaxRange, timezoneOffsetMinutes: number) {
+  private listLocalDays(range: RelaxRange, timezoneContext: TimezoneContext) {
     const days: Array<{ date: string; label: string }> = [];
-    let cursor = this.startOfLocalDay(range.from, timezoneOffsetMinutes);
-    const end = this.startOfLocalDay(range.to, timezoneOffsetMinutes);
+    let cursor = this.startOfLocalDay(range.from, timezoneContext);
+    const end = this.startOfLocalDay(range.to, timezoneContext);
 
     while (cursor.getTime() <= end.getTime()) {
       days.push({
-        date: this.toLocalDateKey(cursor, timezoneOffsetMinutes),
-        label: this.getDayLabel(cursor, timezoneOffsetMinutes),
+        date: this.toLocalDateKey(cursor, timezoneContext),
+        label: this.getDayLabel(cursor, timezoneContext),
       });
-      cursor = new Date(cursor.getTime() + 1000 * 60 * 60 * 24);
+      cursor = addLocalDays(cursor, 1, timezoneContext);
     }
 
     return days;
   }
 
-  private startOfLocalDay(date: Date, timezoneOffsetMinutes: number) {
-    const shifted = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    shifted.setUTCHours(0, 0, 0, 0);
-    return new Date(shifted.getTime() - timezoneOffsetMinutes * 60_000);
+  private startOfLocalDay(date: Date, timezoneContext: TimezoneContext) {
+    return getStartOfLocalDay(date, timezoneContext);
   }
 
-  private endOfLocalDay(date: Date, timezoneOffsetMinutes: number) {
-    const shifted = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    shifted.setUTCHours(23, 59, 59, 999);
-    return new Date(shifted.getTime() - timezoneOffsetMinutes * 60_000);
+  private endOfLocalDay(date: Date, timezoneContext: TimezoneContext) {
+    return getEndOfLocalDay(date, timezoneContext);
   }
 
-  private toLocalDateKey(date: Date, timezoneOffsetMinutes: number) {
-    return new Date(date.getTime() + timezoneOffsetMinutes * 60_000)
-      .toISOString()
-      .slice(0, 10);
+  private toLocalDateKey(date: Date, timezoneContext: TimezoneContext) {
+    return getLocalDateKey(date, timezoneContext);
   }
 
-  private getDayLabel(date: Date, timezoneOffsetMinutes: number) {
-    const local = new Date(date.getTime() + timezoneOffsetMinutes * 60_000);
-    const labels = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
-    return labels[local.getUTCDay()];
+  private getDayLabel(date: Date, timezoneContext: TimezoneContext) {
+    return getLocalDayLabel(date, timezoneContext);
   }
 
   private formatDuration(totalSeconds: number) {

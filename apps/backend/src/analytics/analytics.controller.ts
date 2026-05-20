@@ -22,6 +22,7 @@ export class AnalyticsController {
     description:
       'Stable chart/card contract for mood score, weekly stats, and dashboard analytics.',
   })
+  @UseGuards(JwtAuthGuard)
   @Get('contracts')
   getContracts() {
     return this.analyticsService.getContracts();

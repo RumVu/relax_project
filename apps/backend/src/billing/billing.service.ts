@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentStatus, SubscriptionStatus } from '@prisma/client';
+import { AppException } from '../common/errors/app.exception';
+import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
@@ -119,22 +121,29 @@ export class BillingService {
     await this.usersService.findOne(userId);
     const provider = dto.provider ?? 'MANUAL';
     const providerStatus = this.getProviderStatus();
-    const tier = await this.findTierByPlanName(dto.planName);
+    const plan = await this.resolvePlan(dto.planName);
     const payment = await this.prisma.payment.create({
       data: {
         userId,
-        amount: dto.amount,
-        currency: dto.currency ?? 'VND',
+        amount: plan.price,
+        currency: plan.currency,
         status: PaymentStatus.PENDING,
         provider,
-        description: dto.description ?? `Upgrade to ${dto.planName}`,
+        description: dto.description ?? `Upgrade to ${plan.title}`,
       },
     });
 
     return {
       configured: providerStatus.configured,
       provider,
-      tier,
+      tier: plan.tier,
+      plan: {
+        name: plan.name,
+        title: plan.title,
+        price: plan.price,
+        currency: plan.currency,
+        source: plan.source,
+      },
       payment,
       checkout: providerStatus.configured
         ? {
@@ -165,6 +174,44 @@ export class BillingService {
           this.normalizePlanName(this.toPlanTitle(tier.name)) ===
             normalizedPlanName,
       ) ?? null
+    );
+  }
+
+  private async resolvePlan(planName: string) {
+    const tier = await this.findTierByPlanName(planName);
+    if (tier) {
+      return {
+        source: 'subscription_tier' as const,
+        tier,
+        name: tier.name,
+        title: this.toPlanTitle(tier.name),
+        price: tier.price,
+        currency: tier.currency,
+      };
+    }
+
+    const fallback = this.getFallbackPlans().find(
+      (plan) =>
+        this.normalizePlanName(plan.name) ===
+          this.normalizePlanName(planName) ||
+        this.normalizePlanName(plan.title) === this.normalizePlanName(planName),
+    );
+
+    if (fallback) {
+      return {
+        source: 'fallback_catalog' as const,
+        tier: null,
+        name: fallback.name,
+        title: fallback.title,
+        price: fallback.price,
+        currency: fallback.currency,
+      };
+    }
+
+    throw new AppException(
+      ErrorCode.VALIDATION_FAILED,
+      'Subscription plan is not available',
+      HttpStatus.BAD_REQUEST,
     );
   }
 

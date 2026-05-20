@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AccountTokenType, AuthProvider, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +22,9 @@ import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+
+const DUMMY_PASSWORD_HASH =
+  '$2b$12$CwTycUXWue0Thq9StjUM0uJ8GQp/NxYMd6xiDfV3QzL/XU0.D1lu.';
 
 @Injectable()
 export class AuthService {
@@ -59,8 +62,10 @@ export class AuthService {
 
   async login(dto: LoginDto, userAgent?: string, ipAddress?: string) {
     const user = await this.usersService.findByEmailWithPassword(dto.email);
+    const passwordHash = user?.password ?? DUMMY_PASSWORD_HASH;
+    const validPassword = await bcrypt.compare(dto.password, passwordHash);
 
-    if (!user?.password) {
+    if (!user?.password || !validPassword) {
       this.throwInvalidCredentials();
     }
 
@@ -69,11 +74,6 @@ export class AuthService {
         code: ErrorCode.AUTH_INACTIVE_USER,
         message: 'User account is inactive',
       });
-    }
-
-    const validPassword = await bcrypt.compare(dto.password, user.password);
-    if (!validPassword) {
-      this.throwInvalidCredentials();
     }
 
     await this.prisma.user.update({
@@ -86,7 +86,7 @@ export class AuthService {
 
   async refresh(dto: RefreshTokenDto, userAgent?: string, ipAddress?: string) {
     const session = await this.prisma.session.findUnique({
-      where: { refreshToken: dto.refreshToken },
+      where: { refreshToken: this.hashToken(dto.refreshToken) },
       include: { user: { include: { profile: true, preferences: true } } },
     });
 
@@ -103,7 +103,9 @@ export class AuthService {
   }
 
   async logout(refreshToken: string) {
-    await this.prisma.session.deleteMany({ where: { refreshToken } });
+    await this.prisma.session.deleteMany({
+      where: { refreshToken: this.hashToken(refreshToken) },
+    });
     return { success: true };
   }
 
@@ -171,7 +173,6 @@ export class AuthService {
 
     return {
       success: true,
-      expiresAt: token.expiresAt,
       delivery: this.buildEmailDelivery('PASSWORD_RESET', token.plainToken),
     };
   }
@@ -187,7 +188,7 @@ export class AuthService {
       await prisma.session.deleteMany({ where: { userId: token.userId } });
       return prisma.user.update({
         where: { id: token.userId },
-        data: { password, authProvider: AuthProvider.LOCAL, isActive: true },
+        data: { password, authProvider: AuthProvider.LOCAL },
         select: userSelect,
       });
     });
@@ -254,15 +255,16 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      typ: 'access',
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    const refreshToken = randomUUID();
+    const refreshToken = randomBytes(32).toString('base64url');
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
     await this.prisma.session.create({
       data: {
         userId: user.id,
-        refreshToken,
+        refreshToken: this.hashToken(refreshToken),
         userAgent,
         ipAddress,
         expiresAt,
@@ -373,7 +375,7 @@ export class AuthService {
       configured,
       queued: configured,
       devToken:
-        !configured && nodeEnv !== 'production' ? plainToken : undefined,
+        !configured && nodeEnv === 'development' ? plainToken : undefined,
     };
   }
 

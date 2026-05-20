@@ -30,6 +30,10 @@ Default local backend:
 - OpenAPI JSON: `http://localhost:6823/docs-json`
 - Database URL: `postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public`
 - Redis URL: `redis://localhost:6379`
+- Redis health: `http://localhost:6823/redis/health?deep=true` (`ADMIN`)
+- Queue health: `http://localhost:6823/queues/health?deep=true` (`ADMIN`)
+- Realtime health: `http://localhost:6823/realtime/health` (`ADMIN`)
+- Socket.IO namespace: `ws://localhost:6823/realtime`
 
 Storage setup is documented in `docs/08-storage-supabase.md`.
 User/auth APIs are documented in `docs/09-user-auth-api.md`.

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const protectedPrefixes = ['/dashboard', '/admin'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('relax_session')?.value;
 

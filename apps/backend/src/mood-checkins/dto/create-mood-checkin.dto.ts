@@ -1,8 +1,6 @@
-import { Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
-  IsDate,
   IsEnum,
   IsInt,
   IsOptional,
@@ -24,23 +22,6 @@ export class CreateMoodCheckinDto {
   intensity?: number;
 
   @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  rawScore?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Max(100)
-  finalScore?: number;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  scoredAt?: Date;
-
-  @IsOptional()
   @IsString()
   @MaxLength(120)
   note?: string;
@@ -50,9 +31,4 @@ export class CreateMoodCheckinDto {
   @ArrayMaxSize(10)
   @IsString({ each: true })
   tags?: string[];
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  checkedAt?: Date;
 }

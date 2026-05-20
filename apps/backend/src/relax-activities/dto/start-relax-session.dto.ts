@@ -1,12 +1,5 @@
 import { MoodType, RelaxActivityType } from '@prisma/client';
-import { Type } from 'class-transformer';
-import {
-  IsDate,
-  IsEnum,
-  IsOptional,
-  IsString,
-  MaxLength,
-} from 'class-validator';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class StartRelaxSessionDto {
   @IsEnum(RelaxActivityType)
@@ -24,9 +17,4 @@ export class StartRelaxSessionDto {
   @IsOptional()
   @IsEnum(MoodType)
   moodBefore?: MoodType;
-
-  @IsOptional()
-  @Type(() => Date)
-  @IsDate()
-  startedAt?: Date;
 }

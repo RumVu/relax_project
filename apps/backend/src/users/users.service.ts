@@ -8,6 +8,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { userSelect } from './user.select';
 
+const userWithPasswordSelect = {
+  ...userSelect,
+  password: true,
+} satisfies Prisma.UserSelect;
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -35,7 +40,7 @@ export class UsersService {
   findByEmailWithPassword(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
-      include: { profile: true, preferences: true },
+      select: userWithPasswordSelect,
     });
   }
 

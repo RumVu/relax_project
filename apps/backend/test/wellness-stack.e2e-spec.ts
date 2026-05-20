@@ -14,7 +14,7 @@ describe('Wellness stack APIs (e2e)', () => {
   const tag = `e2e-stack-${Date.now()}`;
   const email = `${tag}@example.com`;
   const otherEmail = `${tag}-other@example.com`;
-  const password = 'secret123';
+  const password = 'Secret123!x';
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -113,13 +113,17 @@ describe('Wellness stack APIs (e2e)', () => {
       .send({ activityType: 'JOURNAL', moodBefore: MoodType.STRESSED })
       .expect(201);
 
+    await prisma.relaxSession.update({
+      where: { id: session.body.id },
+      data: { startedAt: new Date(Date.now() - 15 * 60 * 1000) },
+    });
+
     await request(app.getHttpServer())
       .post(`/relax-sessions/${session.body.id}/finish`)
       .set('Authorization', `Bearer ${accessToken}`)
       .send({
         moodAfter: MoodType.CALM,
         reliefLevel: 5,
-        durationSeconds: 900,
       })
       .expect(201)
       .expect(({ body }) => {
@@ -133,7 +137,7 @@ describe('Wellness stack APIs (e2e)', () => {
       .expect(200)
       .expect(({ body }) => {
         expect(body.totalSessions).toBe(1);
-        expect(body.totalDurationSeconds).toBe(900);
+        expect(body.totalDurationSeconds).toBeGreaterThan(0);
       });
 
     await request(app.getHttpServer())

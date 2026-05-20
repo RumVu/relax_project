@@ -110,63 +110,11 @@ const apiIndexExample = {
   name: 'Digital Cigarette Break API',
   status: 'ok',
   version: '1.0.0',
-  port: 6823,
   docs: {
     swagger: '/docs',
     openApiJson: '/docs-json',
   },
   health: '/health',
-  database: {
-    configured: true,
-  },
-  storage: {
-    configured: true,
-    provider: 'supabase',
-    bucket: 'public-assets',
-    missingKeys: [],
-    invalidKeys: [],
-    urlValid: true,
-  },
-  resources: [
-    {
-      group: 'Auth',
-      description:
-        'Đăng ký, đăng nhập, refresh token, verify email, reset mật khẩu.',
-      endpoints: [
-        {
-          method: 'POST',
-          path: '/auth/register',
-          auth: 'PUBLIC',
-          purpose: 'Tạo tài khoản, profile, preferences và session đầu tiên.',
-        },
-        {
-          method: 'GET',
-          path: '/auth/me',
-          auth: 'BEARER',
-          purpose: 'Lấy user hiện tại từ access token.',
-        },
-      ],
-    },
-    {
-      group: 'Mood & Relax',
-      description:
-        'Mood check-in, scoring, journal, relax session và weekly stats.',
-      endpoints: [
-        {
-          method: 'POST',
-          path: '/mood-checkins/me',
-          auth: 'BEARER',
-          purpose: 'Tạo mood check-in với rawScore/finalScore.',
-        },
-        {
-          method: 'GET',
-          path: '/mood-checkins/me/weekly-stats',
-          auth: 'BEARER',
-          purpose: 'Dữ liệu thống kê tuần materialized.',
-        },
-      ],
-    },
-  ],
 };
 
 const sessionExample = {
@@ -195,7 +143,6 @@ const moodCheckinExample = {
   scoredAt: ISO_NOW,
   note: 'Stress quá mới tìm đến tui hở?',
   tags: ['deadline', 'work'],
-  checkedAt: ISO_NOW,
   createdAt: ISO_NOW,
   updatedAt: ISO_NOW,
 };
@@ -558,17 +505,17 @@ const weatherForecastExample = {
 const storageFileExample = {
   id: 'clx_storage_file_01',
   userId: USER_ID,
-  filename: 'pixel-cat.png',
+  filename: 'avatar.png',
   mimetype: 'image/png',
   size: 245760,
   provider: 'supabase',
   bucket: 'public-assets',
-  path: 'companions/pixel-cat.png',
-  url: `${PUBLIC_ASSET_URL}/companions/pixel-cat.png`,
-  publicUrl: `${PUBLIC_ASSET_URL}/companions/pixel-cat.png`,
+  path: `user-uploads/${USER_ID}/avatars/avatar.png`,
+  url: `${PUBLIC_ASSET_URL}/user-uploads/${USER_ID}/avatars/avatar.png`,
+  publicUrl: `${PUBLIC_ASSET_URL}/user-uploads/${USER_ID}/avatars/avatar.png`,
   isPublic: true,
   expiresAt: null,
-  metadata: { domain: 'companion', state: 'idle' },
+  metadata: { domain: 'profile', state: 'avatar' },
   createdAt: ISO_NOW,
   updatedAt: ISO_NOW,
 };
@@ -682,6 +629,31 @@ const weeklyMoodStatsJobExample = {
   errors: [],
 };
 
+const queueStatusExample = {
+  configured: true,
+  enabled: true,
+  provider: 'bullmq',
+  redisUrl: 'redis://localhost:6379',
+  prefix: 'dcb',
+  defaultAttempts: 3,
+  backoffDelayMs: 1000,
+  registeredQueues: ['weekly-mood-stats'],
+};
+
+const realtimeStatusExample = {
+  configured: true,
+  provider: 'socket.io',
+  namespace: '/realtime',
+  adapter: {
+    provider: 'socket.io',
+    namespace: '/realtime',
+    mode: 'redis',
+    redisConfigured: true,
+    redisConnected: true,
+  },
+  connectedClients: 0,
+};
+
 const analyticsContractsExample = {
   moodScore: {
     scale: '0-100',
@@ -703,12 +675,12 @@ const analyticsContractsExample = {
 const schemaRequestExamples: Record<string, JsonValue> = {
   RegisterDto: {
     email: 'thiai.chill@example.com',
-    password: 'secret123',
+    password: 'Secret123!x',
     name: 'Thì Ai',
   },
   LoginDto: {
     email: 'thiai.chill@example.com',
-    password: 'secret123',
+    password: 'Secret123!x',
   },
   RefreshTokenDto: {
     refreshToken: '2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1',
@@ -718,20 +690,20 @@ const schemaRequestExamples: Record<string, JsonValue> = {
   },
   ResetPasswordDto: {
     token: 'dev-reset-token-from-request',
-    password: 'newSecret123',
+    password: 'NewSecret123!x',
   },
   VerifyEmailDto: {
     token: 'dev-email-verification-token-from-request',
   },
   DeleteAccountDto: {
     mode: 'SOFT',
-    password: 'secret123',
+    password: 'Secret123!x',
   },
   CreateUserDto: {
     email: 'friend@example.com',
     name: 'Bạn Chill',
     avatar: `${PUBLIC_ASSET_URL}/avatars/friend.png`,
-    password: 'secret123',
+    password: 'Secret123!x',
     role: 'USER',
     authProvider: 'LOCAL',
     emailVerified: false,
@@ -766,18 +738,12 @@ const schemaRequestExamples: Record<string, JsonValue> = {
   CreateMoodCheckinDto: {
     mood: 'STRESSED',
     intensity: 4,
-    rawScore: 78,
-    finalScore: 61,
-    scoredAt: ISO_NOW,
     note: 'Stress quá mới tìm đến tui hở?',
     tags: ['deadline', 'work'],
-    checkedAt: ISO_NOW,
   },
   UpdateMoodCheckinDto: {
     mood: 'CALM',
     intensity: 2,
-    finalScore: 45,
-    scoredAt: ISO_NOW,
     note: 'Đã nhẹ hơn sau khi nghe nhạc.',
     tags: ['music', 'relieved'],
   },
@@ -806,11 +772,8 @@ const schemaRequestExamples: Record<string, JsonValue> = {
     resourceId: 'ambient_lofi_chill',
     title: 'Lo-fi Chill - Pixel Beats',
     moodBefore: 'STRESSED',
-    startedAt: '2026-05-16T15:05:00.000Z',
   },
   FinishRelaxSessionDto: {
-    endedAt: ISO_NOW,
-    durationSeconds: 1500,
     moodAfter: 'CALM',
     reliefLevel: 4,
     note: 'Nghe nhạc xong thấy nhẹ đầu hơn.',
@@ -860,23 +823,21 @@ const schemaRequestExamples: Record<string, JsonValue> = {
   },
   CreateCheckoutSessionDto: {
     planName: 'CHILL_PLUS',
-    amount: 49000,
-    currency: 'VND',
     provider: 'STRIPE',
     description: 'Upgrade to Chill Plus monthly',
   },
   CreateSignedUploadUrlDto: {
-    path: 'companions/pixel-cat.png',
-    upsert: true,
+    path: 'avatars/avatar.png',
+    upsert: false,
   },
   RegisterStorageFileDto: {
-    filename: 'pixel-cat.png',
+    filename: 'avatar.png',
     mimetype: 'image/png',
     size: 245760,
-    path: 'companions/pixel-cat.png',
-    publicUrl: `${PUBLIC_ASSET_URL}/companions/pixel-cat.png`,
+    path: 'avatars/avatar.png',
+    publicUrl: `${PUBLIC_ASSET_URL}/user-uploads/${USER_ID}/avatars/avatar.png`,
     isPublic: true,
-    metadata: { domain: 'companion', state: 'idle' },
+    metadata: { domain: 'profile', state: 'avatar' },
   },
   RemoveStorageObjectDto: {
     paths: ['companions/old-pixel-cat.png'],
@@ -1129,16 +1090,8 @@ function getResponseExample(
   if (path === '/health') {
     return {
       status: 'ok',
-      port: 6823,
-      database: { configured: true },
-      storage: {
-        configured: true,
-        provider: 'supabase',
-        bucket: 'public-assets',
-        missingKeys: [],
-        invalidKeys: [],
-        urlValid: true,
-      },
+      timestamp: ISO_NOW,
+      uptimeSeconds: 42,
     };
   }
 
@@ -1147,7 +1100,6 @@ function getResponseExample(
     if (path === '/auth/password-reset/request') {
       return {
         success: true,
-        expiresAt: '2026-05-16T16:00:00.000Z',
         delivery: {
           channel: 'email',
           purpose: 'PASSWORD_RESET',
@@ -1415,12 +1367,28 @@ function getResponseExample(
           enabled: false,
           intervalMs: 21600000,
           batchSize: 500,
+          queue: {
+            name: 'weekly-mood-stats',
+            jobName: 'recalculate-weekly-mood-stats',
+            workerEnabled: false,
+            workerConcurrency: 2,
+          },
           lastRun: null,
         },
       };
     }
+    if (path.includes('/enqueue')) {
+      return {
+        queued: true,
+        queue: 'weekly-mood-stats',
+        jobName: 'recalculate-weekly-mood-stats',
+        jobId: '42',
+      };
+    }
     return weeklyMoodStatsJobExample;
   }
+  if (tag === 'Queues') return queueStatusExample;
+  if (tag === 'Realtime') return realtimeStatusExample;
   if (tag === 'Billing') {
     if (path.includes('/providers')) return billingProviderStatusExample;
     if (path.includes('/plans')) return [billingPlanExample];
@@ -1439,6 +1407,13 @@ function getResponseExample(
     return {
       configured: false,
       provider: 'STRIPE',
+      plan: {
+        name: 'CHILL_PLUS',
+        title: 'Chill Plus',
+        price: 49000,
+        currency: 'VND',
+        source: 'subscription_tier',
+      },
       payment: {
         id: 'clx_payment_01',
         userId: USER_ID,
@@ -1515,18 +1490,20 @@ function getStorageResponseExample(path: string): JsonValue {
         sounds: 'sounds/{category}/{sound-key}.mp3',
         breathing: 'breathing/{exercise-key}.png',
         quotes: 'quotes/{mood-key}.png',
-        avatars: 'avatars/{user-id}.png',
+        userUploads: 'user-uploads/{user-id}/{filename}',
       },
       accessRules: {
-        catalogAssets: 'public-url',
-        userUploads: 'signed-url-or-owner-metadata',
+        catalogAssets:
+          'public-url readable by users; writes and arbitrary path reads are admin-only',
+        userUploads:
+          'signed/public read URLs are scoped to user-uploads/{authenticatedUserId}/',
         adminDeletes: 'admin-only',
       },
       configured: true,
     };
   }
 
-  if (path.includes('/signed-upload-url')) {
+  if (path.includes('/admin/signed-upload-url')) {
     return {
       bucket: 'public-assets',
       path: 'companions/pixel-cat.png',
@@ -1536,7 +1513,17 @@ function getStorageResponseExample(path: string): JsonValue {
     };
   }
 
-  if (path.includes('/signed-url')) {
+  if (path.includes('/signed-upload-url')) {
+    return {
+      bucket: 'public-assets',
+      path: `user-uploads/${USER_ID}/avatars/avatar.png`,
+      signedUrl:
+        'https://example.supabase.co/storage/v1/object/upload/sign/public-assets/user-uploads/user-id/avatars/avatar.png?token=...',
+      token: 'signed-upload-token',
+    };
+  }
+
+  if (path.includes('/admin/signed-url')) {
     return {
       bucket: 'public-assets',
       path: 'companions/pixel-cat.png',
@@ -1546,11 +1533,29 @@ function getStorageResponseExample(path: string): JsonValue {
     };
   }
 
-  if (path.includes('/public-url')) {
+  if (path.includes('/signed-url')) {
+    return {
+      bucket: 'public-assets',
+      path: `user-uploads/${USER_ID}/avatars/avatar.png`,
+      signedUrl:
+        'https://example.supabase.co/storage/v1/object/sign/public-assets/user-uploads/user-id/avatars/avatar.png?token=...',
+      expiresIn: 3600,
+    };
+  }
+
+  if (path.includes('/admin/public-url')) {
     return {
       bucket: 'public-assets',
       path: 'companions/pixel-cat.png',
       publicUrl: `${PUBLIC_ASSET_URL}/companions/pixel-cat.png`,
+    };
+  }
+
+  if (path.includes('/public-url')) {
+    return {
+      bucket: 'public-assets',
+      path: `user-uploads/${USER_ID}/avatars/avatar.png`,
+      publicUrl: `${PUBLIC_ASSET_URL}/user-uploads/user-id/avatars/avatar.png`,
     };
   }
 

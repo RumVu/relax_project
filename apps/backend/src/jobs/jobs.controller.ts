@@ -33,4 +33,17 @@ export class JobsController {
   runWeeklyMoodStats(@Body() dto: RunWeeklyMoodStatsJobDto) {
     return this.jobsService.runWeeklyMoodStats(dto);
   }
+
+  @ApiOperation({
+    summary: 'Enqueue weekly mood stats materialization job (admin)',
+  })
+  @ApiCreatedResponse({
+    description:
+      'BullMQ enqueue result. Job is processed when WEEKLY_STATS_QUEUE_WORKER_ENABLED=true.',
+  })
+  @AdminOnly()
+  @Post('weekly-mood-stats/enqueue')
+  enqueueWeeklyMoodStats(@Body() dto: RunWeeklyMoodStatsJobDto) {
+    return this.jobsService.enqueueWeeklyMoodStats(dto);
+  }
 }

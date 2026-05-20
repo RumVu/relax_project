@@ -80,6 +80,8 @@ export class WeatherController {
   @ApiOkResponse({
     description: 'Weather payload for an explicit latitude and longitude.',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Get('current')
   getCurrent(@Query() query: CurrentWeatherQueryDto) {
     return this.weatherService.getCurrentForCoordinates(query);
@@ -89,6 +91,8 @@ export class WeatherController {
   @ApiOkResponse({
     description: 'Forecast payload for an explicit latitude and longitude.',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Get('forecast')
   getForecast(@Query() query: WeatherForecastQueryDto) {
     return this.weatherService.getForecastForCoordinates(query);
@@ -99,6 +103,8 @@ export class WeatherController {
     description:
       'Reverse geocoded city/locality payload for mobile location setup.',
   })
+  @ApiBearerAuth('access-token')
+  @UseGuards(JwtAuthGuard)
   @Get('reverse-geocode')
   reverseGeocode(@Query() query: ReverseGeocodeQueryDto) {
     return this.weatherService.reverseGeocode(query);

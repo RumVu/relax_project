@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export enum DeleteAccountMode {
   SOFT = 'SOFT',
@@ -12,6 +12,6 @@ export class DeleteAccountDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @IsNotEmpty()
   password?: string;
 }

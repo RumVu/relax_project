@@ -11,9 +11,9 @@ The Swagger UI supports Bearer auth. Register or login through `/auth/register` 
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/` | Public | API index with docs links and exposed module map. |
+| `GET` | `/` | Public | Minimal API index with docs and health links. |
 | `GET` | `/api` | Public | Alias of `/` for API discovery. |
-| `GET` | `/health` | Public | App health, database config, and storage config status. |
+| `GET` | `/health` | Public | Minimal liveness payload only. Infrastructure status lives behind admin endpoints. |
 
 ## Auth
 
@@ -86,23 +86,18 @@ Create payload:
 {
   "mood": "CALM",
   "intensity": 4,
-  "rawScore": 80,
-  "finalScore": 35,
-  "scoredAt": "2026-05-15T06:15:00.000Z",
   "note": "Feeling lighter",
-  "tags": ["relax", "finish"],
-  "checkedAt": "2026-05-15T06:00:00.000Z"
+  "tags": ["relax", "finish"]
 }
 ```
 
 Rules:
 
 - `intensity` is optional, from `1` to `5`.
-- `rawScore` and `finalScore` are optional stress scores from `0` to `100`; lower `finalScore` means the activity helped reduce stress.
-- If score fields are omitted, backend derives them from mood. `scoredAt` defaults to check-in time.
+- `rawScore`, `finalScore`, `scoredAt`, `checkedAt`, and `createdAt` are server-owned; client payloads containing these fields are rejected.
+- Backend derives `rawScore`, `finalScore`, and `scoredAt` from mood/session context.
 - `note` is optional, max `120` characters.
 - `tags` is optional, max `10` items.
-- `checkedAt` is optional; when present it writes the check-in `createdAt`.
 - Query filters support `mood`, `from`, `to`, `skip`, and `limit` (`1` to `100`).
 - Analytics query supports `period=week|month|quarter|year|custom`, optional `from`, `to`, `compare`, and `timezoneOffsetMinutes`.
 - Creating and deleting mood check-ins sync `UserProfile.totalMoodCheckins`, `currentStreak`, and `longestStreak`.
@@ -163,8 +158,7 @@ Start payload:
   "activityType": "MUSIC",
   "resourceId": "optional-catalog-id",
   "title": "Lo-fi Chill",
-  "moodBefore": "STRESSED",
-  "startedAt": "2026-05-15T12:00:00.000Z"
+  "moodBefore": "STRESSED"
 }
 ```
 
@@ -174,14 +168,14 @@ Finish payload:
 {
   "moodAfter": "CALM",
   "reliefLevel": 4,
-  "note": "Nhẹ hơn nhiều",
-  "durationSeconds": 1500
+  "note": "Nhẹ hơn nhiều"
 }
 ```
 
 Rules:
 
 - `reliefLevel` is optional, from `1` to `5`; backend maps it to `stressReliefPercent`.
+- `startedAt`, `endedAt`, and `durationSeconds` are server-owned; client payloads containing these fields are rejected.
 - Finishing a session updates the `RelaxSession` row and, when `moodAfter` is present, creates a mood check-in tagged `relax-finish`, activity type, and session id.
 - Stats query supports `period=week|month|quarter|year|custom`, optional `from`, `to`, `limit`, and `timezoneOffsetMinutes`.
 
@@ -221,6 +215,7 @@ Analytics aggregates mood, journal, relax, and companion data into one backend p
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
+| `GET` | `/analytics/contracts` | Bearer token | Get stable response contracts for charts/cards. |
 | `GET` | `/analytics/me/overview` | Bearer token | Get current user's mood analytics, journal stats, relax stats, companion stats, and summary cards. |
 
 ## Weather
@@ -229,7 +224,9 @@ Weather is used for the home greeting shown near the top of the mood screen. The
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/weather/current` | Public | Get current weather by `latitude`, `longitude`, and optional `timezone`. |
+| `GET` | `/weather/current` | Bearer token | Get current weather by `latitude`, `longitude`, and optional `timezone`. |
+| `GET` | `/weather/forecast` | Bearer token | Get weather forecast by coordinates. `forecastDays` is capped at `7`. |
+| `GET` | `/weather/reverse-geocode` | Bearer token | Reverse geocode coordinates into a location name. |
 | `GET` | `/weather/me/current` | Bearer token | Get current weather using saved preferences; query coordinates override saved location. |
 
 If location is missing or weather is disabled, the endpoint still returns a fallback greeting based on timezone so the UI can render safely.
@@ -240,15 +237,43 @@ Storage is backed by Supabase bucket `public-assets`.
 
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
-| `GET` | `/storage/health` | Public | Storage env/config status. Use `?deep=true` to test Supabase connectivity and bucket existence. |
-| `GET` | `/redis/health` | Public | Redis config status. Use `?deep=true` to run a real Redis PING. |
-| `POST` | `/storage/signed-upload-url` | Public | Create signed upload URL for a path. |
-| `GET` | `/storage/signed-url` | Public | Create signed read URL for a path. |
-| `GET` | `/storage/public-url` | Public | Get public URL for a path. |
-| `GET` | `/storage/files` | Public | List registered file metadata. |
-| `POST` | `/storage/files` | Public | Register file metadata in Prisma. |
-| `DELETE` | `/storage/files/:id` | Public | Delete file metadata. |
-| `DELETE` | `/storage/objects` | Public | Delete objects from Supabase storage. |
+| `GET` | `/storage/health` | `ADMIN` | Storage env/config status. Use `?deep=true` to test Supabase connectivity and bucket existence. |
+| `GET` | `/storage/cdn-strategy` | `ADMIN` | Storage/CDN path conventions and access strategy. |
+| `POST` | `/storage/signed-upload-url` | Bearer token | Create signed upload URL scoped to `user-uploads/{userId}/...`. |
+| `POST` | `/storage/admin/signed-upload-url` | `ADMIN` | Create signed upload URL for catalog/admin asset paths. |
+| `GET` | `/storage/signed-url` | Bearer token | Create signed read URL scoped to `user-uploads/{userId}/...`. |
+| `GET` | `/storage/public-url` | Bearer token | Get public URL for current user uploads or catalog public prefixes. |
+| `GET` | `/storage/admin/signed-url` | `ADMIN` | Create signed read URL for arbitrary catalog/admin paths. |
+| `GET` | `/storage/admin/public-url` | `ADMIN` | Get public URL for arbitrary catalog/admin paths. |
+| `GET` | `/storage/files` | `ADMIN` | List registered file metadata. |
+| `GET` | `/storage/me/files` | Bearer token | List current user's registered file metadata. |
+| `POST` | `/storage/files` | Bearer token | Register file metadata in Prisma under current user scope. |
+| `DELETE` | `/storage/files/:id` | `ADMIN` | Delete file metadata. |
+| `DELETE` | `/storage/objects` | `ADMIN` | Delete objects from Supabase storage. |
+
+## Infrastructure
+
+The backend remains a modular monolith. Redis is the shared infrastructure for
+cache/session helpers, Socket.IO fan-out, and BullMQ queue jobs. Microservices
+are intentionally deferred until traffic or operational needs justify splitting
+workers out of the main API process.
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/redis/health` | `ADMIN` | Redis config status. Use `?deep=true` to run a real Redis PING. |
+| `GET` | `/queues/health` | `ADMIN` | BullMQ queue config status. Use `?deep=true` to test Redis connectivity for queues. |
+| `GET` | `/realtime/health` | `ADMIN` | Socket.IO namespace status, connected client count, and Redis adapter mode. |
+| `GET` | `/jobs/status` | `ADMIN` | Backend job status, weekly stats timer settings, and queue worker readiness. |
+| `POST` | `/jobs/weekly-mood-stats/run` | `ADMIN` | Run weekly mood stats materialization immediately in the API process. |
+| `POST` | `/jobs/weekly-mood-stats/enqueue` | `ADMIN` | Enqueue weekly mood stats materialization through BullMQ. |
+
+Socket.IO clients connect to namespace `/realtime` and provide JWT through
+`auth.token` or `Authorization: Bearer ...`. Query-string tokens are not accepted
+because they are easy to leak into logs. Authenticated clients
+are automatically joined to `user:{userId}` and `role:{role}` rooms. When Redis
+is available, the Socket.IO adapter uses Redis for multi-instance fan-out; if
+Redis is off or unavailable, it falls back to in-memory mode and reports that in
+`GET /realtime/health`.
 
 ## Catalog APIs
 

@@ -5,8 +5,8 @@ import {
   IsEnum,
   IsOptional,
   IsString,
-  MinLength,
 } from 'class-validator';
+import { StrongPassword } from '../../common/validation/strong-password.decorator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -23,7 +23,7 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  @MinLength(6)
+  @StrongPassword()
   password?: string;
 
   @IsOptional()
