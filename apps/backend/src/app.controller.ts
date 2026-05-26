@@ -1,5 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Query } from '@nestjs/common';
+import {
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AppService } from './app.service';
 
 @ApiTags('Health')
@@ -27,12 +32,32 @@ export class AppController {
     return this.appService.getApiIndex();
   }
 
-  @ApiOperation({ summary: 'Get API health status' })
+  @ApiOperation({ summary: 'Get shallow API liveness status' })
+  @ApiQuery({
+    name: 'deep',
+    required: false,
+    description:
+      'Set true to include database/storage readiness without changing the /ready contract.',
+  })
   @ApiOkResponse({
-    description: 'Returns app, database, and storage configuration health.',
+    description:
+      'Returns process liveness. With deep=true it returns the same readiness payload as GET /ready.',
   })
   @Get('health')
-  getHealth() {
+  getHealth(@Query('deep') deep?: string) {
+    if (deep === 'true' || deep === '1') {
+      return this.appService.getReady();
+    }
+
     return this.appService.getHealth();
+  }
+
+  @ApiOperation({ summary: 'Get deep API readiness status' })
+  @ApiOkResponse({
+    description: 'Returns database and storage configuration readiness checks.',
+  })
+  @Get('ready')
+  getReady() {
+    return this.appService.getReady();
   }
 }

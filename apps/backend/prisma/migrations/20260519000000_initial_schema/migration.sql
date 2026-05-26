@@ -620,7 +620,7 @@ CREATE TABLE "subscriptions" (
 CREATE TABLE "payments" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "amount" DOUBLE PRECISION NOT NULL,
+    "amount" INTEGER NOT NULL,
     "currency" TEXT NOT NULL DEFAULT 'VND',
     "status" "PaymentStatus" NOT NULL DEFAULT 'PENDING',
     "provider" TEXT,

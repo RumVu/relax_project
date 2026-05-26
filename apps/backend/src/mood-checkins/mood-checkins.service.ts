@@ -10,6 +10,7 @@ import {
 } from '@prisma/client';
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
+import { buildPage } from '../common/pagination/page';
 import {
   addLocalDays,
   createTimezoneContext,
@@ -62,22 +63,28 @@ export class MoodCheckinsService {
     private readonly usersService: UsersService,
   ) {}
 
-  findAll(query: MoodCheckinQueryDto) {
-    return this.prisma.moodCheckin.findMany({
-      where: this.buildWhere(undefined, query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit ?? 50,
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+  async findAll(query: MoodCheckinQueryDto) {
+    const where = this.buildWhere(undefined, query);
+    const [items, total] = await Promise.all([
+      this.prisma.moodCheckin.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.moodCheckin.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   getOptions() {
@@ -87,12 +94,18 @@ export class MoodCheckinsService {
   async findByUserId(userId: string, query: MoodCheckinQueryDto) {
     await this.usersService.findOne(userId);
 
-    return this.prisma.moodCheckin.findMany({
-      where: this.buildWhere(userId, query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit ?? 50,
-    });
+    const where = this.buildWhere(userId, query);
+    const [items, total] = await Promise.all([
+      this.prisma.moodCheckin.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.moodCheckin.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findLatest(userId: string) {

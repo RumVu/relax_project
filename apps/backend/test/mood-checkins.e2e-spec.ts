@@ -117,8 +117,9 @@ describe('Mood Check-ins APIs (e2e)', () => {
       .query({ mood: MoodType.CALM, limit: 10 })
       .expect(200)
       .expect(({ body }) => {
-        expect(body).toHaveLength(1);
-        expect(body[0].id).toBe(created.body.id);
+        expect(body.total).toBe(1);
+        expect(body.items).toHaveLength(1);
+        expect(body.items[0].id).toBe(created.body.id);
       });
 
     await request(app.getHttpServer())
@@ -174,14 +175,20 @@ describe('Mood Check-ins APIs (e2e)', () => {
       .get(`/mood-checkins/user/${userId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200)
-      .expect(({ body }) => expect(body.length).toBeGreaterThanOrEqual(2));
+      .expect(({ body }) => {
+        expect(body.total).toBeGreaterThanOrEqual(2);
+        expect(body.items.length).toBeGreaterThanOrEqual(2);
+      });
 
     await request(app.getHttpServer())
       .get('/mood-checkins')
       .set('Authorization', `Bearer ${adminToken}`)
       .query({ limit: 10 })
       .expect(200)
-      .expect(({ body }) => expect(body.length).toBeGreaterThanOrEqual(2));
+      .expect(({ body }) => {
+        expect(body.total).toBeGreaterThanOrEqual(2);
+        expect(body.items.length).toBeGreaterThanOrEqual(2);
+      });
 
     await request(app.getHttpServer())
       .get('/mood-checkins/me/stats')

@@ -3,6 +3,7 @@
 import { FormEvent, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiFetch, type AuthResponse, persistAuthSession } from '@/lib/api';
+import { authRoutes } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
 
 type AuthFormMode = 'login' | 'register';
@@ -39,7 +40,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       );
 
       persistAuthSession(auth);
-      router.push('/dashboard');
+      router.push(auth.user.role === 'ADMIN' ? authRoutes.admin : authRoutes.dashboard);
       router.refresh();
     } catch {
       setError(

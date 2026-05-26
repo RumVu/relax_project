@@ -531,6 +531,19 @@ const notificationExample = {
   createdAt: ISO_NOW,
 };
 
+const reminderExample = {
+  id: 'clx_reminder_01',
+  userId: USER_ID,
+  title: 'Uống nước một chút nha',
+  message: 'Một ngụm nước nhỏ cũng giúp cơ thể dịu lại.',
+  type: 'WATER',
+  scheduledAt: '2026-05-17T09:00:00.000Z',
+  repeatRule: '0 9 * * *',
+  isActive: true,
+  createdAt: ISO_NOW,
+  updatedAt: ISO_NOW,
+};
+
 const pushDeviceExample = {
   id: 'clx_push_device_01',
   userId: USER_ID,
@@ -671,6 +684,16 @@ const analyticsContractsExample = {
       'previousWeekAvgScore - currentWeekAvgScore. Số dương nghĩa là stress giảm.',
   },
 };
+
+function pageExample<T extends JsonValue>(items: T[], total = items.length) {
+  return {
+    items,
+    total,
+    skip: 0,
+    limit: 20,
+    hasMore: false,
+  };
+}
 
 const schemaRequestExamples: Record<string, JsonValue> = {
   RegisterDto: {
@@ -813,6 +836,18 @@ const schemaRequestExamples: Record<string, JsonValue> = {
     title: 'Đến giờ check-in rồi nè',
     message: 'Dừng lại một chút để hỏi lòng mình đang thế nào nha.',
     type: 'PUSH',
+  },
+  CreateReminderDto: {
+    title: 'Uống nước một chút nha',
+    message: 'Một ngụm nước nhỏ cũng giúp cơ thể dịu lại.',
+    type: 'WATER',
+    scheduledAt: '2026-05-17T09:00:00.000Z',
+    repeatRule: '0 9 * * *',
+    isActive: true,
+  },
+  UpdateReminderDto: {
+    scheduledAt: '2026-05-17T10:00:00.000Z',
+    isActive: true,
   },
   RunWeeklyMoodStatsJobDto: {
     userId: USER_ID,
@@ -1094,6 +1129,16 @@ function getResponseExample(
       uptimeSeconds: 42,
     };
   }
+  if (path === '/ready') {
+    return {
+      status: 'ok',
+      timestamp: ISO_NOW,
+      checks: {
+        database: { ok: true, latencyMs: 8 },
+        storage: { configured: true, bucket: 'public-assets' },
+      },
+    };
+  }
 
   if (tag === 'Auth') {
     if (path === '/auth/logout') return { success: true };
@@ -1144,7 +1189,9 @@ function getResponseExample(
   }
 
   if (tag === 'Users')
-    return method === 'get' && path === '/users' ? [userExample] : userExample;
+    return method === 'get' && path === '/users'
+      ? pageExample([userExample])
+      : userExample;
   if (tag === 'User Profiles') return profileExample;
   if (tag === 'User Preferences') return preferenceExample;
   if (tag === 'Sessions') {
@@ -1197,9 +1244,11 @@ function getResponseExample(
     if (path.includes('/stats')) return moodStatsExample;
     if (
       method === 'get' &&
-      (path === '/mood-checkins' || path.includes('/user/'))
+      (path === '/mood-checkins' ||
+        path === '/mood-checkins/me' ||
+        path.includes('/user/'))
     ) {
-      return [moodCheckinExample];
+      return pageExample([moodCheckinExample]);
     }
     return moodCheckinExample;
   }
@@ -1210,7 +1259,7 @@ function getResponseExample(
       method === 'get' &&
       (path === '/journals/me' || path.includes('/user/'))
     ) {
-      return [journalExample];
+      return pageExample([journalExample]);
     }
     return journalExample;
   }
@@ -1219,7 +1268,7 @@ function getResponseExample(
     if (path === '/relax-activities') return [relaxActivityExample];
     if (path.includes('/stats')) return relaxStatsExample;
     if (path.includes('/sessions') && method === 'get')
-      return [relaxSessionExample];
+      return pageExample([relaxSessionExample]);
     return relaxSessionExample;
   }
 
@@ -1358,7 +1407,26 @@ function getResponseExample(
         },
       };
     }
-    return method === 'get' ? [notificationExample] : notificationExample;
+    return method === 'get'
+      ? pageExample([notificationExample])
+      : notificationExample;
+  }
+  if (tag === 'Reminders') {
+    if (path.includes('/stats')) {
+      return {
+        total: 3,
+        active: 3,
+        upcoming: 3,
+        byType: [
+          { type: 'WATER', count: 1 },
+          { type: 'REST', count: 1 },
+          { type: 'JOURNAL', count: 1 },
+        ],
+      };
+    }
+    if (method === 'get') return pageExample([reminderExample]);
+    if (method === 'delete') return { success: true, id: reminderExample.id };
+    return reminderExample;
   }
   if (tag === 'Jobs') {
     if (path.includes('/status')) {

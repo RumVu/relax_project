@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PrismaService } from './prisma/prisma.service';
 
 export interface ApiIndexResponse {
   name: string;
@@ -18,9 +19,28 @@ export interface HealthResponse {
   uptimeSeconds: number;
 }
 
+export interface ReadyResponse {
+  status: 'ok' | 'degraded';
+  timestamp: string;
+  checks: {
+    database: {
+      ok: boolean;
+      latencyMs?: number;
+      error?: string;
+    };
+    storage: {
+      configured: boolean;
+      bucket?: string;
+    };
+  };
+}
+
 @Injectable()
 export class AppService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   getApiIndex(): ApiIndexResponse {
     return {
@@ -40,6 +60,39 @@ export class AppService {
       status: 'ok',
       timestamp: new Date().toISOString(),
       uptimeSeconds: Math.round(process.uptime()),
+    };
+  }
+
+  async getReady(): Promise<ReadyResponse> {
+    const startedAt = Date.now();
+    const database: ReadyResponse['checks']['database'] = { ok: false };
+
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+      database.ok = true;
+      database.latencyMs = Date.now() - startedAt;
+    } catch (error) {
+      database.error =
+        error instanceof Error ? error.message : 'Database check failed';
+    }
+
+    const bucket = this.configService.get<string>('storage.supabaseBucket');
+    const storageConfigured = Boolean(
+      this.configService.get<string>('storage.supabaseUrl') &&
+      this.configService.get<string>('storage.supabasePublishableKey') &&
+      bucket,
+    );
+
+    return {
+      status: database.ok ? 'ok' : 'degraded',
+      timestamp: new Date().toISOString(),
+      checks: {
+        database,
+        storage: {
+          configured: storageConfigured,
+          bucket,
+        },
+      },
     };
   }
 }

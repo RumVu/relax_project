@@ -145,9 +145,10 @@ describe('Relax Activities APIs (e2e)', () => {
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => {
-        expect(body).toHaveLength(1);
-        expect(body[0].activityType).toBe('MUSIC');
-        expect(body[0].durationSeconds).toBeGreaterThan(0);
+        expect(body.total).toBe(1);
+        expect(body.items).toHaveLength(1);
+        expect(body.items[0].activityType).toBe('MUSIC');
+        expect(body.items[0].durationSeconds).toBeGreaterThan(0);
       });
 
     await request(app.getHttpServer())

@@ -7,6 +7,30 @@ import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
 
+async function waitForAdminLog(
+  prisma: PrismaService,
+  adminId: string,
+  actionFragment: string,
+) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const log = await prisma.adminLog.findFirst({
+      where: {
+        adminId,
+        action: { contains: actionFragment, mode: 'insensitive' },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (log) {
+      return log;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+
+  return null;
+}
+
 describe('Product backend contracts (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
@@ -17,6 +41,7 @@ describe('Product backend contracts (e2e)', () => {
   let accessToken: string;
   let adminToken: string;
   let userId: string;
+  let adminId: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -46,8 +71,9 @@ describe('Product backend contracts (e2e)', () => {
       .post('/auth/register')
       .send({ email: adminEmail, password, name: 'Contract Admin' })
       .expect(201);
+    adminId = admin.body.user.id;
     await prisma.user.update({
-      where: { id: admin.body.user.id },
+      where: { id: adminId },
       data: { role: UserRole.ADMIN },
     });
     const loggedInAdmin = await request(app.getHttpServer())
@@ -76,6 +102,19 @@ describe('Product backend contracts (e2e)', () => {
       .expect(({ body }) => {
         expect(body.weeklyMoodStat.weekStartsOn).toBe('MONDAY');
         expect(body.moodScore.effectiveScore).toContain('finalScore');
+      });
+
+    await request(app.getHttpServer())
+      .get('/auth/me/export')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.formatVersion).toBe(
+          'digital-cigarette-break-user-export-v1',
+        );
+        expect(body.excludedFields).toContain('User.password');
+        expect(body.data.password).toBeUndefined();
+        expect(body.data.sessions[0].refreshToken).toBeUndefined();
       });
 
     await request(app.getHttpServer())
@@ -120,6 +159,29 @@ describe('Product backend contracts (e2e)', () => {
       .expect(({ body }) => {
         expect(body.job).toBe('weekly-mood-stats');
         expect(body.processedUsers).toBe(1);
+      });
+
+    const auditLog = await waitForAdminLog(prisma, adminId, 'weekly-mood');
+    expect(auditLog?.details).toContain('"outcome":"success"');
+
+    await request(app.getHttpServer())
+      .get(`/admin-logs?adminId=${adminId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.total).toBeGreaterThan(0);
+        expect(
+          body.items.every(
+            (item: { adminId?: string }) => item.adminId === adminId,
+          ),
+        ).toBe(true);
+      });
+
+    await request(app.getHttpServer())
+      .get('/health?deep=true')
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.checks.database.ok).toBe(true);
       });
   });
 
@@ -212,10 +274,11 @@ describe('Product backend contracts (e2e)', () => {
       .get('/notifications/me')
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200);
-    expect(list.body.length).toBeGreaterThan(0);
+    expect(list.body.total).toBeGreaterThan(0);
+    expect(list.body.items.length).toBeGreaterThan(0);
 
     await request(app.getHttpServer())
-      .patch(`/notifications/me/${list.body[0].id}/read`)
+      .patch(`/notifications/me/${list.body.items[0].id}/read`)
       .set('Authorization', `Bearer ${accessToken}`)
       .expect(200)
       .expect(({ body }) => expect(body.isRead).toBe(true));

@@ -3,12 +3,17 @@ import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { normalizeTimezone } from '../common/timezone';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import {
   CurrentWeatherQueryDto,
   ReverseGeocodeQueryDto,
   UpdateWeatherLocationDto,
   WeatherForecastQueryDto,
 } from './dto/current-weather-query.dto';
+
+const CURRENT_WEATHER_CACHE_TTL_SECONDS = 10 * 60;
+const FORECAST_CACHE_TTL_SECONDS = 30 * 60;
+const REVERSE_GEOCODE_CACHE_TTL_SECONDS = 24 * 60 * 60;
 
 interface OpenMeteoCurrentPayload {
   current?: {
@@ -73,7 +78,10 @@ export interface ReverseGeocodeResult {
 
 @Injectable()
 export class WeatherService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redisService: RedisService,
+  ) {}
 
   async getCurrentForUser(userId: string, query: CurrentWeatherQueryDto) {
     const user = await this.getExistingUserWeatherContext(userId);
@@ -247,6 +255,24 @@ export class WeatherService {
     longitude: number,
     timezone: string,
   ) {
+    return this.redisService.remember(
+      [
+        'weather',
+        'current',
+        this.coordinateCachePart(latitude),
+        this.coordinateCachePart(longitude),
+        timezone,
+      ].join(':'),
+      CURRENT_WEATHER_CACHE_TTL_SECONDS,
+      () => this.fetchOpenMeteoDirect(latitude, longitude, timezone),
+    );
+  }
+
+  private async fetchOpenMeteoDirect(
+    latitude: number,
+    longitude: number,
+    timezone: string,
+  ): Promise<OpenMeteoCurrentPayload> {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     url.searchParams.set('latitude', String(latitude));
     url.searchParams.set('longitude', String(longitude));
@@ -342,6 +368,32 @@ export class WeatherService {
     timezone: string,
     forecastDays: number,
   ) {
+    return this.redisService.remember(
+      [
+        'weather',
+        'forecast',
+        this.coordinateCachePart(latitude),
+        this.coordinateCachePart(longitude),
+        timezone,
+        forecastDays,
+      ].join(':'),
+      FORECAST_CACHE_TTL_SECONDS,
+      () =>
+        this.fetchOpenMeteoForecastDirect(
+          latitude,
+          longitude,
+          timezone,
+          forecastDays,
+        ),
+    );
+  }
+
+  private async fetchOpenMeteoForecastDirect(
+    latitude: number,
+    longitude: number,
+    timezone: string,
+    forecastDays: number,
+  ): Promise<OpenMeteoForecastPayload> {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     url.searchParams.set('latitude', String(latitude));
     url.searchParams.set('longitude', String(longitude));
@@ -392,6 +444,25 @@ export class WeatherService {
     longitude: number,
     localityLanguage = 'vi',
   ): Promise<ReverseGeocodeResult | null> {
+    return this.redisService.remember(
+      [
+        'weather',
+        'reverse-geocode',
+        this.coordinateCachePart(latitude),
+        this.coordinateCachePart(longitude),
+        localityLanguage,
+      ].join(':'),
+      REVERSE_GEOCODE_CACHE_TTL_SECONDS,
+      () =>
+        this.fetchReverseGeocodeDirect(latitude, longitude, localityLanguage),
+    );
+  }
+
+  private async fetchReverseGeocodeDirect(
+    latitude: number,
+    longitude: number,
+    localityLanguage = 'vi',
+  ): Promise<ReverseGeocodeResult | null> {
     const url = new URL(
       'https://api.bigdatacloud.net/data/reverse-geocode-client',
     );
@@ -438,6 +509,10 @@ export class WeatherService {
       payload.countryName ||
       null
     );
+  }
+
+  private coordinateCachePart(value: number) {
+    return value.toFixed(4);
   }
 
   private assertCoordinatePair(

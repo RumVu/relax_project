@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NotificationType, PushProvider } from '@prisma/client';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
@@ -153,17 +154,22 @@ export class NotificationsService {
 
   async listMine(userId: string, query: NotificationQueryDto) {
     await this.usersService.findOne(userId);
+    const where = {
+      userId,
+      type: query.type,
+      isRead: query.isRead,
+    };
+    const [items, total] = await Promise.all([
+      this.prisma.notification.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.notification.count({ where }),
+    ]);
 
-    return this.prisma.notification.findMany({
-      where: {
-        userId,
-        type: query.type,
-        isRead: query.isRead,
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit ?? 50,
-    });
+    return buildPage(items, total, query);
   }
 
   async getUnreadCount(userId: string) {

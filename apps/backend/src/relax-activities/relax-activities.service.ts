@@ -7,6 +7,7 @@ import {
 } from '@prisma/client';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import {
   addLocalDays,
   createTimezoneContext,
@@ -165,9 +166,22 @@ export class RelaxActivitiesService {
 
   async listSessions(userId: string, query: RelaxActivityQueryDto) {
     await this.usersService.findOne(userId);
-    const sessions = await this.findFinishedSessions(userId, query);
+    const where = this.buildFinishedSessionWhere(userId, query);
+    const [sessions, total] = await Promise.all([
+      this.prisma.relaxSession.findMany({
+        where,
+        orderBy: { endedAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.relaxSession.count({ where }),
+    ]);
 
-    return sessions.map((session) => this.toSessionPayload(session));
+    return buildPage(
+      sessions.map((session) => this.toSessionPayload(session)),
+      total,
+      query,
+    );
   }
 
   async getStats(userId: string, query: RelaxActivityQueryDto) {
@@ -240,18 +254,26 @@ export class RelaxActivitiesService {
 
   private findFinishedSessions(userId: string, query: RelaxActivityQueryDto) {
     return this.prisma.relaxSession.findMany({
-      where: {
-        userId,
-        status: RelaxSessionStatus.FINISHED,
-        activityType: query.activityType,
-        endedAt: {
-          gte: query.from,
-          lte: query.to,
-        },
-      },
+      where: this.buildFinishedSessionWhere(userId, query),
       orderBy: { endedAt: 'desc' },
+      skip: query.skip,
       take: query.limit ?? 50,
     });
+  }
+
+  private buildFinishedSessionWhere(
+    userId: string,
+    query: RelaxActivityQueryDto,
+  ) {
+    return {
+      userId,
+      status: RelaxSessionStatus.FINISHED,
+      activityType: query.activityType,
+      endedAt: {
+        gte: query.from,
+        lte: query.to,
+      },
+    };
   }
 
   private toSessionPayload(session: RelaxSession) {
@@ -391,6 +413,18 @@ export class RelaxActivitiesService {
         (sum, session) => sum + (session.durationSeconds ?? 0),
         0,
       );
+      const sessionsWithRelief = activitySessions.filter(
+        (session) => typeof session.stressReliefPercent === 'number',
+      );
+      const stressReliefPercent =
+        sessionsWithRelief.length > 0
+          ? Math.round(
+              sessionsWithRelief.reduce(
+                (sum, session) => sum + (session.stressReliefPercent ?? 0),
+                0,
+              ) / sessionsWithRelief.length,
+            )
+          : 0;
 
       return {
         type: option.type,
@@ -399,6 +433,7 @@ export class RelaxActivitiesService {
         count: activitySessions.length,
         durationSeconds,
         durationLabel: this.formatDuration(durationSeconds),
+        stressReliefPercent,
       };
     }).sort((left, right) => right.durationSeconds - left.durationSeconds);
   }

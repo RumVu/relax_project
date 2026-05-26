@@ -2,21 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+html[data-theme='light'] {
   color-scheme: light;
+  --app-bg-start: #faf9ff;
+  --app-bg-end: #eef1f8;
+  --app-text: #171334;
+  --app-muted: #536071;
+  --panel-bg: rgba(255, 255, 255, 0.9);
+  --panel-strong: #ffffff;
+  --panel-border: rgba(255, 255, 255, 0.7);
+  --field-bg: #ffffff;
+  --field-border: #ddd5ff;
+  --hero-bg:
+    linear-gradient(120deg, rgba(220, 214, 255, 0.38), transparent 34%),
+    linear-gradient(240deg, rgba(64, 201, 162, 0.18), transparent 32%),
+    rgba(255, 255, 255, 0.72);
+  --brand-primary: #7357f6;
+  --brand-secondary: #40c9a2;
+  --brand-accent: #ff9b8a;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --app-bg-start: #101425;
+  --app-bg-end: #171c2f;
+  --app-text: #eef1ff;
+  --app-muted: #aab4c7;
+  --panel-bg: rgba(26, 31, 52, 0.86);
+  --panel-strong: #202642;
+  --panel-border: rgba(238, 241, 255, 0.12);
+  --field-bg: #151a2d;
+  --field-border: rgba(180, 166, 255, 0.32);
+  --hero-bg:
+    radial-gradient(circle at top left, rgba(115, 87, 246, 0.2), transparent 32%),
+    radial-gradient(circle at top right, rgba(64, 201, 162, 0.13), transparent 28%),
+    rgba(26, 31, 52, 0.82);
+  --brand-primary: #8574ff;
+  --brand-secondary: #40c9a2;
+  --brand-accent: #ff9b8a;
 }
 
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at top left, rgba(255, 248, 238, 0.95), transparent 30%),
-    radial-gradient(circle at top right, rgba(83, 124, 95, 0.16), transparent 26%),
-    linear-gradient(180deg, #f7f3eb 0%, #edf3eb 100%);
-  color: #112218;
+    linear-gradient(120deg, rgba(220, 214, 255, 0.38), transparent 34%),
+    linear-gradient(240deg, rgba(64, 201, 162, 0.18), transparent 32%),
+    linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg-end) 100%);
+  color: var(--app-text);
 }
 
-* {
-  border-color: rgba(17, 34, 24, 0.08);
+html[data-theme='dark'] body {
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--brand-primary) 18%, transparent), transparent 28%),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--brand-secondary) 12%, transparent), transparent 24%),
+    linear-gradient(180deg, var(--app-bg-start) 0%, var(--app-bg-end) 100%);
+  color: var(--app-text);
+}
+
+input,
+select,
+textarea {
+  background: var(--field-bg);
+  border-color: var(--field-border);
+  color: var(--app-text);
 }
 
 a {

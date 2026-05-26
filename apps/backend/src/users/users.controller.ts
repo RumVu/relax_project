@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserQueryDto } from './dto/user-query.dto';
 import { UsersService } from './users.service';
 
 @ApiTags('Users')
@@ -36,8 +38,8 @@ export class UsersController {
   @ApiOkResponse({ description: 'Users with profile and preferences.' })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query: UserQueryDto) {
+    return this.usersService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get one user by id (admin)' })

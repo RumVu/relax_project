@@ -125,7 +125,7 @@ export class BillingService {
     const payment = await this.prisma.payment.create({
       data: {
         userId,
-        amount: plan.price,
+        amount: this.toPaymentAmount(plan.price),
         currency: plan.currency,
         status: PaymentStatus.PENDING,
         provider,
@@ -253,5 +253,9 @@ export class BillingService {
       .split('_')
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
+  }
+
+  private toPaymentAmount(value: number) {
+    return Math.round(value);
   }
 }

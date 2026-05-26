@@ -15,7 +15,8 @@
     "build:web": "npm --workspace apps/web run build",
     "prisma:generate": "npm --workspace apps/backend run prisma:generate",
     "prisma:migrate:deploy": "npm --workspace apps/backend run prisma:migrate:deploy",
-    "prisma:seed": "npm --workspace apps/backend run prisma:seed"
+    "prisma:seed": "npm --workspace apps/backend run prisma:seed",
+    "prisma:cleanup-test-data": "node apps/backend/prisma/scripts/cleanup-test-data.cjs"
   },
   "dependencies": {
     "@nestjs/platform-express": "^11.1.21",

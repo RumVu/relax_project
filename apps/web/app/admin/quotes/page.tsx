@@ -1,13 +1,12 @@
-import { DashboardShell } from '@/components/layout/dashboard-shell';
-import { Card } from '@/components/ui/card';
+import { AdminCatalogPage } from '@/components/dashboard/admin-catalog-page';
 
 export default function AdminQuotesPage() {
   return (
-    <DashboardShell admin eyebrow="Content" title="Quotes">
-      <Card>
-        <p className="text-sm font-semibold text-ink">Quote library scaffold</p>
-        <p className="mt-2 text-sm text-ink/70">Ready for CRUD over inspiration content and activation states.</p>
-      </Card>
-    </DashboardShell>
+    <AdminCatalogPage
+      copy="CRUD cozy quotes theo mood, weight, trạng thái active và nội dung hiển thị."
+      endpoint="/cozy-quotes"
+      kind="quotes"
+      title="Quotes"
+    />
   );
 }

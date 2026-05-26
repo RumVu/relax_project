@@ -1,14 +1,23 @@
 // @ts-nocheck
 const {
   AchievementType,
+  AuthProvider,
   BillingCycle,
   CompanionMood,
+  CompanionPersonalizationMode,
   CompanionType,
+  NotificationType,
   MessageTriggerType,
   MoodType,
   PrismaClient,
+  RelaxActivityType,
+  RelaxSessionStatus,
+  ReminderType,
+  SubscriptionStatus,
   ThemeMode,
+  UserRole,
 } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 
 const prisma = new PrismaClient();
 const ASSET_BASE =
@@ -28,6 +37,42 @@ async function upsertByField(model, field, value, data) {
   }
 
   return model.create({ data });
+}
+
+async function upsertSearchIndex({ entityType, entityId, title, content, tags }) {
+  await prisma.searchIndex.upsert({
+    where: {
+      entityType_entityId: {
+        entityType,
+        entityId,
+      },
+    },
+    update: {
+      title: clip(title, 96),
+      content,
+      tags: normalizeTags(tags),
+    },
+    create: {
+      entityType,
+      entityId,
+      title: clip(title, 96),
+      content,
+      tags: normalizeTags(tags),
+    },
+  });
+}
+
+function normalizeTags(tags) {
+  return [...new Set(tags.filter(Boolean).map((tag) => String(tag).toLowerCase()))];
+}
+
+function compactText(parts) {
+  return parts.filter(Boolean).join(' ');
+}
+
+function clip(value, length) {
+  const text = String(value ?? '').trim();
+  return text.length <= length ? text : `${text.slice(0, length - 1)}...`;
 }
 
 async function seedSubscriptionTiers() {
@@ -230,6 +275,97 @@ async function seedThemes() {
       isDefault: false,
       isActive: true,
     },
+    {
+      name: 'Peach Tea Afternoon',
+      mode: ThemeMode.LIGHT,
+      backgroundColor: '#FFF6EC',
+      surfaceColor: '#FFFFFF',
+      primaryColor: '#C76E4B',
+      secondaryColor: '#FFD8B5',
+      accentColor: '#7AB8A8',
+      textColor: '#3E2419',
+      mutedTextColor: '#8B6F61',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Forest Rain Reset',
+      mode: ThemeMode.DARK,
+      backgroundColor: '#0E1F1A',
+      surfaceColor: '#153129',
+      primaryColor: '#78D6A3',
+      secondaryColor: '#30594C',
+      accentColor: '#F0C987',
+      textColor: '#EAF8F0',
+      mutedTextColor: '#A7C8B6',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Ocean Nap',
+      mode: ThemeMode.LIGHT,
+      backgroundColor: '#EFF9FF',
+      surfaceColor: '#FFFFFF',
+      primaryColor: '#2E7AAE',
+      secondaryColor: '#A8D8F0',
+      accentColor: '#F7B267',
+      textColor: '#14324A',
+      mutedTextColor: '#5E7A90',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Cozy Ember Night',
+      mode: ThemeMode.DARK,
+      backgroundColor: '#17100F',
+      surfaceColor: '#241817',
+      primaryColor: '#FF9F6E',
+      secondaryColor: '#5B3430',
+      accentColor: '#FFD166',
+      textColor: '#FFF4EC',
+      mutedTextColor: '#D2B6A8',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Matcha Desk Light',
+      mode: ThemeMode.LIGHT,
+      backgroundColor: '#F7FAEF',
+      surfaceColor: '#FFFFFF',
+      primaryColor: '#5F8F3E',
+      secondaryColor: '#DDEBCB',
+      accentColor: '#E7A977',
+      textColor: '#243619',
+      mutedTextColor: '#6E7D60',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Sky Pillow',
+      mode: ThemeMode.LIGHT,
+      backgroundColor: '#F2F7FF',
+      surfaceColor: '#FFFFFF',
+      primaryColor: '#5D7CFB',
+      secondaryColor: '#C8D7FF',
+      accentColor: '#F5B7C8',
+      textColor: '#1C2D5A',
+      mutedTextColor: '#65759B',
+      isDefault: false,
+      isActive: true,
+    },
+    {
+      name: 'Night Train Soft',
+      mode: ThemeMode.DARK,
+      backgroundColor: '#111827',
+      surfaceColor: '#1F2937',
+      primaryColor: '#9CC9FF',
+      secondaryColor: '#35465F',
+      accentColor: '#F4B860',
+      textColor: '#F8FAFC',
+      mutedTextColor: '#C7D2E1',
+      isDefault: false,
+      isActive: true,
+    },
   ];
 
   for (const theme of themes) {
@@ -417,6 +553,234 @@ async function seedCompanionMessages() {
       weight: 6,
       isActive: true,
     },
+    {
+      content: 'Não đang mở 47 tab rồi đó. Mình đóng giùm tab "tự trách" nha?',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.PLAYFUL,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Buồn thì mình ngồi cạnh thôi, chưa cần nói gì cũng được.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.SAD,
+      companionMood: CompanionMood.SAD,
+      weight: 9,
+      isActive: true,
+    },
+    {
+      content: 'Lo lắng là chuông báo, không phải bản án. Mình nghe nó rồi thở chậm lại nha.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.ANXIOUS,
+      companionMood: CompanionMood.CALM,
+      weight: 9,
+      isActive: true,
+    },
+    {
+      content: 'Mệt thì được phép tiết kiệm pin. Linh thú cũng có chế độ ngủ mà.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.TIRED,
+      companionMood: CompanionMood.SLEEPY,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Hôm nay vui hả? Mình xin một miếng năng lượng long lanh đó nha.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.HAPPY,
+      companionMood: CompanionMood.HAPPY,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Biết ơn là một cái chăn nhỏ. Đắp lên tim một chút nè.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.GRATEFUL,
+      companionMood: CompanionMood.CALM,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Sáng rồi. Mình không cần thắng ngày hôm nay ngay từ phút đầu đâu.',
+      triggerType: MessageTriggerType.MORNING,
+      minHour: 5,
+      maxHour: 10,
+      companionMood: CompanionMood.CURIOUS,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Trưa ghé ngang: uống nước đi, đừng cosplay cây xương rồng nữa.',
+      triggerType: MessageTriggerType.TIME_BASED,
+      minHour: 11,
+      maxHour: 14,
+      companionMood: CompanionMood.HUNGRY,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Chiều xuống rồi, vai có đang gồng như đang ôm deadline không?',
+      triggerType: MessageTriggerType.TIME_BASED,
+      minHour: 15,
+      maxHour: 18,
+      companionMood: CompanionMood.CURIOUS,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Tối nay mình chỉ cần nhẹ hơn hôm qua một chút là thắng rồi.',
+      triggerType: MessageTriggerType.NIGHT_TIME,
+      minHour: 19,
+      maxHour: 23,
+      companionMood: CompanionMood.CHILL,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Bạn quay lại là tốt rồi. App không chấm công cảm xúc đâu.',
+      triggerType: MessageTriggerType.RETURNING_USER,
+      companionMood: CompanionMood.HAPPY,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Check-in xong rồi đó. Một tick nhỏ, một cái ôm to.',
+      triggerType: MessageTriggerType.AFTER_CHECKIN,
+      companionMood: CompanionMood.HAPPY,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Ở đây lâu quá là mình phát hiện nha. Đứng dậy duỗi vai 20 giây đi.',
+      triggerType: MessageTriggerType.LONG_SESSION,
+      companionMood: CompanionMood.CURIOUS,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Không cần làm người lớn quá lâu. Nghỉ 1 phút cũng hợp pháp.',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.CHILL,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Nếu tim đang chạy sprint, mình chuyển nó về đi bộ cùng nhau nha.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.STRESSED,
+      companionMood: CompanionMood.CALM,
+      weight: 10,
+      isActive: true,
+    },
+    {
+      content: 'Cô đơn không có nghĩa là bị bỏ lại. Mình canh góc nhỏ này với bạn.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.LONELY,
+      companionMood: CompanionMood.SAD,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Bình thường cũng là một mood rất xịn. Không drama là phước báu.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.NEUTRAL,
+      companionMood: CompanionMood.CHILL,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Hào hứng thì tốt, nhưng nhớ để dành chút pin cho tối nha đại ca.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.EXCITED,
+      companionMood: CompanionMood.PLAYFUL,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Mình đề xuất một nghi thức: hít vào "được rồi", thở ra "từ từ".',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.CALM,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Nếu hôm nay chỉ sống sót thôi cũng được. Mai tính tiếp, mình giữ ghế cho.',
+      triggerType: MessageTriggerType.NIGHT_TIME,
+      minHour: 20,
+      maxHour: 23,
+      companionMood: CompanionMood.SLEEPY,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Bạn không phải sửa mình để xứng đáng được nghỉ.',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.CALM,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Một ngụm nước, một hơi thở, một dòng nhật ký. Combo hồi máu nhẹ.',
+      triggerType: MessageTriggerType.TIME_BASED,
+      minHour: 8,
+      maxHour: 22,
+      companionMood: CompanionMood.PLAYFUL,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Tạm dừng không phải bỏ cuộc. Nó là nút save game của cơ thể.',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.CHILL,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Mình vừa phủ một lớp bình tĩnh lên màn hình. Bạn thử chạm vào hơi thở xem.',
+      triggerType: MessageTriggerType.FIRST_OPEN,
+      companionMood: CompanionMood.CALM,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Nếu không biết bắt đầu từ đâu, bắt đầu từ vai: thả nó xuống trước.',
+      triggerType: MessageTriggerType.RANDOM,
+      companionMood: CompanionMood.CURIOUS,
+      weight: 6,
+      isActive: true,
+    },
+    {
+      content: 'Deadline dữ ha. Nhưng mình không cho nó ăn hết bữa tối của bạn đâu.',
+      triggerType: MessageTriggerType.TIME_BASED,
+      minHour: 18,
+      maxHour: 21,
+      companionMood: CompanionMood.PLAYFUL,
+      weight: 5,
+      isActive: true,
+    },
+    {
+      content: 'Có chuyện gì thì mình nghe từng chút. Không cần kể phiên bản hoàn hảo.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.SAD,
+      companionMood: CompanionMood.CALM,
+      weight: 8,
+      isActive: true,
+    },
+    {
+      content: 'Bạn đã quay về với mình. Đó là một động tác chăm sóc bản thân rồi.',
+      triggerType: MessageTriggerType.RETURNING_USER,
+      companionMood: CompanionMood.HAPPY,
+      weight: 7,
+      isActive: true,
+    },
+    {
+      content: 'Căng quá thì mình bật chế độ mèo nằm dài: không phán xét, chỉ thở.',
+      triggerType: MessageTriggerType.MOOD_BASED,
+      mood: MoodType.STRESSED,
+      companionMood: CompanionMood.SLEEPY,
+      weight: 9,
+      isActive: true,
+    },
   ];
 
   for (const message of messages) {
@@ -458,6 +822,150 @@ async function seedAmbientSounds() {
       duration: 1200,
       isActive: true,
     },
+    {
+      title: 'Podcast 5 Phút: Dọn Não Trước Khi Ngủ',
+      description: 'Một giọng đọc ngắn giúp gom suy nghĩ lại và đặt ngày xuống.',
+      category: 'podcast',
+      soundUrl: `${ASSET_BASE}/sounds/podcast-don-nao-truoc-khi-ngu.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/podcast-night-cover.png`,
+      duration: 300,
+      isActive: true,
+    },
+    {
+      title: 'Podcast 7 Phút: Không Cần Ổn Liền',
+      description: 'Một đoạn thủ thỉ cho lúc cảm xúc chưa muốn hợp tác.',
+      category: 'podcast',
+      soundUrl: `${ASSET_BASE}/sounds/podcast-khong-can-on-lien.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/podcast-soft-cover.png`,
+      duration: 420,
+      isActive: true,
+    },
+    {
+      title: 'Soft Piano For Overthinking',
+      description: 'Piano chậm để kéo não khỏi vòng lặp nghĩ quá nhiều.',
+      category: 'music',
+      soundUrl: `${ASSET_BASE}/sounds/soft-piano-overthinking.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/soft-piano-cover.png`,
+      duration: 960,
+      isActive: true,
+    },
+    {
+      title: 'Tiny Forest Walk',
+      description: 'Tiếng lá, chim nhỏ và một đường mòn đủ yên để thở.',
+      category: 'nature',
+      soundUrl: `${ASSET_BASE}/sounds/tiny-forest-walk.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/forest-walk-cover.png`,
+      duration: 1200,
+      isActive: true,
+    },
+    {
+      title: 'Ocean Slow Breathing',
+      description: 'Sóng chậm giúp đồng bộ nhịp thở khi căng.',
+      category: 'ocean',
+      soundUrl: `${ASSET_BASE}/sounds/ocean-slow-breathing.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/ocean-breathing-cover.png`,
+      duration: 1080,
+      isActive: true,
+    },
+    {
+      title: 'Warm Cafe Morning',
+      description: 'Tiếng quán cà phê buổi sáng cho chế độ làm việc nhẹ nhàng.',
+      category: 'cafe',
+      soundUrl: `${ASSET_BASE}/sounds/warm-cafe-morning.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/warm-cafe-cover.png`,
+      duration: 1500,
+      isActive: true,
+    },
+    {
+      title: 'Keyboard Rain Focus',
+      description: 'Mưa nhỏ pha tiếng gõ phím, hợp lúc cần vào flow.',
+      category: 'focus',
+      soundUrl: `${ASSET_BASE}/sounds/keyboard-rain-focus.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/keyboard-rain-cover.png`,
+      duration: 1800,
+      isActive: true,
+    },
+    {
+      title: 'Brown Noise Blanket',
+      description: 'Nền trầm êm như chăn nặng cho lúc đầu quá ồn.',
+      category: 'sleep',
+      soundUrl: `${ASSET_BASE}/sounds/brown-noise-blanket.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/brown-noise-cover.png`,
+      duration: 1800,
+      isActive: true,
+    },
+    {
+      title: 'Wind Chime Balcony',
+      description: 'Chuông gió và ban công yên, giảm cảm giác mắc kẹt.',
+      category: 'ambient',
+      soundUrl: `${ASSET_BASE}/sounds/wind-chime-balcony.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/wind-chime-cover.png`,
+      duration: 900,
+      isActive: true,
+    },
+    {
+      title: 'Bamboo Garden Drip',
+      description: 'Giọt nước trong vườn tre, hợp với thiền ngắn.',
+      category: 'nature',
+      soundUrl: `${ASSET_BASE}/sounds/bamboo-garden-drip.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/bamboo-garden-cover.png`,
+      duration: 840,
+      isActive: true,
+    },
+    {
+      title: 'Lo-fi Cat Desk',
+      description: 'Beat rất mềm cho lúc làm việc cùng linh thú.',
+      category: 'music',
+      soundUrl: `${ASSET_BASE}/sounds/lofi-cat-desk.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/lofi-cat-desk-cover.png`,
+      duration: 1320,
+      isActive: true,
+    },
+    {
+      title: 'Podcast 3 Phút: Dẹp Deadline Qua Một Bên',
+      description: 'Một bài nói cực ngắn để hạ áp lực trước khi quay lại việc.',
+      category: 'podcast',
+      soundUrl: `${ASSET_BASE}/sounds/podcast-dep-deadline.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/podcast-deadline-cover.png`,
+      duration: 180,
+      isActive: true,
+    },
+    {
+      title: 'Rainy Bus Home',
+      description: 'Tiếng xe buýt mưa đêm, cảm giác đang được chở về nhà.',
+      category: 'rain',
+      soundUrl: `${ASSET_BASE}/sounds/rainy-bus-home.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/rainy-bus-cover.png`,
+      duration: 1100,
+      isActive: true,
+    },
+    {
+      title: 'Morning Birds Light',
+      description: 'Chim sáng nhẹ, không quá vui tới mức làm mình áp lực.',
+      category: 'nature',
+      soundUrl: `${ASSET_BASE}/sounds/morning-birds-light.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/morning-birds-cover.png`,
+      duration: 780,
+      isActive: true,
+    },
+    {
+      title: 'Deep Focus Hum',
+      description: 'Drone nền sạch để gom sự chú ý về một điểm.',
+      category: 'focus',
+      soundUrl: `${ASSET_BASE}/sounds/deep-focus-hum.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/deep-focus-cover.png`,
+      duration: 2100,
+      isActive: true,
+    },
+    {
+      title: 'Sleepy Cat Purr',
+      description: 'Tiếng mèo rừ rừ nhỏ, dành cho lúc cần được dỗ ngủ.',
+      category: 'sleep',
+      soundUrl: `${ASSET_BASE}/sounds/sleepy-cat-purr.mp3`,
+      imageUrl: `${ASSET_BASE}/sounds/sleepy-cat-cover.png`,
+      duration: 1000,
+      isActive: true,
+    },
   ];
 
   for (const sound of sounds) {
@@ -487,6 +995,138 @@ async function seedBreathingExercises() {
       cycles: 8,
       duration: 112,
       imageUrl: `${ASSET_BASE}/breathing/long-exhale-reset.png`,
+      isActive: true,
+    },
+    {
+      title: '4-7-8 Sleepy Cat',
+      description: 'Nhịp thở ru cơ thể xuống chế độ ngủ, hợp cuối ngày.',
+      inhaleSeconds: 4,
+      holdSeconds: 7,
+      exhaleSeconds: 8,
+      cycles: 4,
+      duration: 76,
+      imageUrl: `${ASSET_BASE}/breathing/478-sleepy-cat.png`,
+      isActive: true,
+    },
+    {
+      title: 'Physiological Sigh Mini Reset',
+      description: 'Hai lần hít ngắn rồi thở dài để xả căng nhanh.',
+      inhaleSeconds: 2,
+      holdSeconds: 1,
+      exhaleSeconds: 6,
+      cycles: 8,
+      duration: 72,
+      imageUrl: `${ASSET_BASE}/breathing/physiological-sigh.png`,
+      isActive: true,
+    },
+    {
+      title: 'Anxiety Downshift 3-3-6',
+      description: 'Thở ra gấp đôi để báo cho hệ thần kinh rằng mình an toàn.',
+      inhaleSeconds: 3,
+      holdSeconds: 3,
+      exhaleSeconds: 6,
+      cycles: 8,
+      duration: 96,
+      imageUrl: `${ASSET_BASE}/breathing/anxiety-downshift.png`,
+      isActive: true,
+    },
+    {
+      title: 'Coherent Breath 5-5',
+      description: 'Nhịp đều giúp ổn định năng lượng trước khi làm việc.',
+      inhaleSeconds: 5,
+      holdSeconds: 0,
+      exhaleSeconds: 5,
+      cycles: 12,
+      duration: 120,
+      imageUrl: `${ASSET_BASE}/breathing/coherent-5-5.png`,
+      isActive: true,
+    },
+    {
+      title: 'Shoulder Drop Breath',
+      description: 'Mỗi hơi thở ra thả lỏng vai, gáy và hàm.',
+      inhaleSeconds: 4,
+      holdSeconds: 1,
+      exhaleSeconds: 7,
+      cycles: 6,
+      duration: 72,
+      imageUrl: `${ASSET_BASE}/breathing/shoulder-drop.png`,
+      isActive: true,
+    },
+    {
+      title: 'Counting Clouds',
+      description: 'Đếm mây tưởng tượng để kéo tâm trí khỏi vòng lặp.',
+      inhaleSeconds: 4,
+      holdSeconds: 2,
+      exhaleSeconds: 6,
+      cycles: 10,
+      duration: 120,
+      imageUrl: `${ASSET_BASE}/breathing/counting-clouds.png`,
+      isActive: true,
+    },
+    {
+      title: 'Morning Soft Start',
+      description: 'Một bài thở nhẹ trước khi mở ngày, không ép năng suất.',
+      inhaleSeconds: 4,
+      holdSeconds: 2,
+      exhaleSeconds: 5,
+      cycles: 8,
+      duration: 88,
+      imageUrl: `${ASSET_BASE}/breathing/morning-soft-start.png`,
+      isActive: true,
+    },
+    {
+      title: 'Panic Grounding Breath',
+      description: 'Nhịp ngắn, chắc, kèm cảm giác đặt chân xuống đất.',
+      inhaleSeconds: 3,
+      holdSeconds: 2,
+      exhaleSeconds: 5,
+      cycles: 12,
+      duration: 120,
+      imageUrl: `${ASSET_BASE}/breathing/panic-grounding.png`,
+      isActive: true,
+    },
+    {
+      title: 'One Minute Micro Break',
+      description: 'Một phút reset nhanh giữa hai tác vụ.',
+      inhaleSeconds: 3,
+      holdSeconds: 1,
+      exhaleSeconds: 4,
+      cycles: 8,
+      duration: 64,
+      imageUrl: `${ASSET_BASE}/breathing/one-minute-break.png`,
+      isActive: true,
+    },
+    {
+      title: 'Gratitude Exhale',
+      description: 'Gắn mỗi hơi thở ra với một điều nhỏ còn ổn.',
+      inhaleSeconds: 4,
+      holdSeconds: 2,
+      exhaleSeconds: 6,
+      cycles: 6,
+      duration: 72,
+      imageUrl: `${ASSET_BASE}/breathing/gratitude-exhale.png`,
+      isActive: true,
+    },
+    {
+      title: 'Ocean Wave Breath',
+      description: 'Hít vào như sóng lên, thở ra như sóng rút.',
+      inhaleSeconds: 5,
+      holdSeconds: 1,
+      exhaleSeconds: 7,
+      cycles: 8,
+      duration: 104,
+      imageUrl: `${ASSET_BASE}/breathing/ocean-wave.png`,
+      isActive: true,
+    },
+    {
+      title: 'Anger Cooldown',
+      description: 'Kéo nhiệt trong người xuống trước khi phản hồi ai đó.',
+      inhaleSeconds: 4,
+      holdSeconds: 4,
+      exhaleSeconds: 8,
+      cycles: 7,
+      duration: 112,
+      imageUrl: `${ASSET_BASE}/breathing/anger-cooldown.png`,
       isActive: true,
     },
   ];
@@ -525,11 +1165,922 @@ async function seedCozyQuotes() {
       imageUrl: `${ASSET_BASE}/quotes/one-breath.png`,
       isActive: true,
     },
+    {
+      content: 'Nghỉ không làm bạn yếu đi. Nghỉ là cách cơ thể nói: mình vẫn muốn đi tiếp.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.TIRED,
+      imageUrl: `${ASSET_BASE}/quotes/rest-to-continue.png`,
+      isActive: true,
+    },
+    {
+      content: 'Không phải suy nghĩ nào ghé qua cũng cần được mời ngồi uống trà.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.ANXIOUS,
+      imageUrl: `${ASSET_BASE}/quotes/thoughts-pass-by.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bạn được phép làm chậm. Đời không phải lúc nào cũng cần chạy deadline mode.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/slow-permission.png`,
+      isActive: true,
+    },
+    {
+      content: 'Nếu hôm nay chỉ còn 20% pin, dùng 20% đó thật hiền với mình.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.TIRED,
+      imageUrl: `${ASSET_BASE}/quotes/twenty-percent.png`,
+      isActive: true,
+    },
+    {
+      content: 'Có những ngày không cần rực rỡ. Chỉ cần không bỏ mình lại phía sau.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.SAD,
+      imageUrl: `${ASSET_BASE}/quotes/do-not-leave-yourself.png`,
+      isActive: true,
+    },
+    {
+      content: 'Một hơi thở không giải quyết hết mọi thứ, nhưng nó mở cửa cho hơi thở tiếp theo.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.CALM,
+      imageUrl: `${ASSET_BASE}/quotes/next-breath.png`,
+      isActive: true,
+    },
+    {
+      content: 'Mình không cần thắng cảm xúc. Mình chỉ cần ngồi cạnh nó đủ lâu để nó dịu xuống.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.NEUTRAL,
+      imageUrl: `${ASSET_BASE}/quotes/sit-with-feelings.png`,
+      isActive: true,
+    },
+    {
+      content: 'Tự thương mình không phải phần thưởng sau khi hoàn hảo. Nó là điều kiện để mình bền hơn.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.GRATEFUL,
+      imageUrl: `${ASSET_BASE}/quotes/self-kindness.png`,
+      isActive: true,
+    },
+    {
+      content: 'Căng quá thì bỏ cái vai xuống trước. Chuyện lớn tính sau, cái vai cứu trước.',
+      author: 'Mồn Lèo',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/drop-shoulders.png`,
+      isActive: true,
+    },
+    {
+      content: 'Có thể hôm nay chưa tốt. Nhưng bạn đã nhận ra mình đang không ổn, vậy là đã quay về rồi.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.SAD,
+      imageUrl: `${ASSET_BASE}/quotes/you-returned.png`,
+      isActive: true,
+    },
+    {
+      content: 'Đừng tin deadline khi nó nói bạn không được nghỉ. Deadline không có bằng tâm lý học.',
+      author: 'Mồn Lèo',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/deadline-no-degree.png`,
+      isActive: true,
+    },
+    {
+      content: 'Niềm vui nhỏ vẫn là niềm vui thật. Đừng bắt nó phải hoành tráng mới được ghi nhận.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.HAPPY,
+      imageUrl: `${ASSET_BASE}/quotes/small-joy.png`,
+      isActive: true,
+    },
+    {
+      content: 'Biết ơn không xoá khó khăn, nhưng nó thắp một cái đèn nhỏ trong phòng.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.GRATEFUL,
+      imageUrl: `${ASSET_BASE}/quotes/gratitude-lamp.png`,
+      isActive: true,
+    },
+    {
+      content: 'Nếu lòng đang mưa, mình không cần tạnh ngay. Chỉ cần có mái hiên.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.SAD,
+      imageUrl: `${ASSET_BASE}/quotes/rain-shelter.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bình yên không phải im lặng tuyệt đối. Nó là biết quay về dù ngoài kia còn ồn.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.CALM,
+      imageUrl: `${ASSET_BASE}/quotes/return-calm.png`,
+      isActive: true,
+    },
+    {
+      content: 'Một ngày bình thường cũng đáng được lưu lại. Không phải chương nào cũng cần plot twist.',
+      author: 'Mồn Lèo',
+      mood: MoodType.NEUTRAL,
+      imageUrl: `${ASSET_BASE}/quotes/no-plot-twist.png`,
+      isActive: true,
+    },
+    {
+      content: 'Lo lắng thích nói to. Mình đáp nhỏ thôi: cảm ơn, mình đã nghe.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.ANXIOUS,
+      imageUrl: `${ASSET_BASE}/quotes/thank-anxiety.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bạn không lười. Có thể hệ thần kinh của bạn đang cần được thuyết phục rằng nó an toàn.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.TIRED,
+      imageUrl: `${ASSET_BASE}/quotes/not-lazy.png`,
+      isActive: true,
+    },
+    {
+      content: 'Vui thì cứ vui cho trọn. Đừng mở họp kiểm điểm niềm vui quá sớm.',
+      author: 'Mồn Lèo',
+      mood: MoodType.EXCITED,
+      imageUrl: `${ASSET_BASE}/quotes/dont-audit-joy.png`,
+      isActive: true,
+    },
+    {
+      content: 'Cô đơn là một tín hiệu cần kết nối, không phải bằng chứng rằng bạn không đáng yêu.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.LONELY,
+      imageUrl: `${ASSET_BASE}/quotes/lonely-signal.png`,
+      isActive: true,
+    },
+    {
+      content: 'Hôm nay nếu chưa làm được nhiều, hãy làm được nhẹ.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.NEUTRAL,
+      imageUrl: `${ASSET_BASE}/quotes/do-gently.png`,
+      isActive: true,
+    },
+    {
+      content: 'Không cần tự biến mình thành dự án cần sửa. Bạn là người cần được chăm.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.SAD,
+      imageUrl: `${ASSET_BASE}/quotes/not-a-project.png`,
+      isActive: true,
+    },
+    {
+      content: 'Một ly nước không cứu thế giới, nhưng cứu cái đầu đang khô như sa mạc của mình đó.',
+      author: 'Mồn Lèo',
+      mood: MoodType.TIRED,
+      imageUrl: `${ASSET_BASE}/quotes/water-desert-brain.png`,
+      isActive: true,
+    },
+    {
+      content: 'Khi mọi thứ rối, hãy làm một việc có mép: gấp chăn, rửa ly, viết một dòng.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.ANXIOUS,
+      imageUrl: `${ASSET_BASE}/quotes/one-edged-task.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bạn có quyền chọn một buổi tối không tối ưu, chỉ ấm áp thôi.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.CALM,
+      imageUrl: `${ASSET_BASE}/quotes/warm-evening.png`,
+      isActive: true,
+    },
+    {
+      content: 'Cái gì chưa xong vẫn có thể nằm yên tới mai. Não mình không phải kho chứa hàng 24/7.',
+      author: 'Mồn Lèo',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/not-warehouse.png`,
+      isActive: true,
+    },
+    {
+      content: 'Nếu đang run trong lòng, đặt tay lên ngực. Mình ở đây, cơ thể cũng ở đây.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.ANXIOUS,
+      imageUrl: `${ASSET_BASE}/quotes/hand-on-chest.png`,
+      isActive: true,
+    },
+    {
+      content: 'Một điều tốt nhỏ hôm nay vẫn tính. Hệ thống đã ghi nhận, linh thú đã vỗ tay.',
+      author: 'Mồn Lèo',
+      mood: MoodType.HAPPY,
+      imageUrl: `${ASSET_BASE}/quotes/pet-applause.png`,
+      isActive: true,
+    },
+    {
+      content: 'Dịu dàng với mình không làm bạn kém mạnh mẽ. Nó làm bạn ít phải gồng hơn.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.CALM,
+      imageUrl: `${ASSET_BASE}/quotes/less-bracing.png`,
+      isActive: true,
+    },
+    {
+      content: 'Cảm xúc đến rồi đi. Bạn là căn nhà, không phải cơn gió.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.NEUTRAL,
+      imageUrl: `${ASSET_BASE}/quotes/house-not-wind.png`,
+      isActive: true,
+    },
+    {
+      content: 'Khi bạn hít vào, không cần kéo cả tương lai vào theo.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/no-future-inhale.png`,
+      isActive: true,
+    },
+    {
+      content: 'Nếu chưa biết mình cần gì, thử hỏi: cơ thể mình đang xin điều gì nhỏ nhất?',
+      author: 'Thì Ai Chill',
+      mood: MoodType.TIRED,
+      imageUrl: `${ASSET_BASE}/quotes/body-small-ask.png`,
+      isActive: true,
+    },
+    {
+      content: 'Có những ngày chỉ cần sạch mặt, uống nước, ngủ sớm. Đơn giản mà anh hùng.',
+      author: 'Mồn Lèo',
+      mood: MoodType.NEUTRAL,
+      imageUrl: `${ASSET_BASE}/quotes/simple-hero.png`,
+      isActive: true,
+    },
+    {
+      content: 'Hạnh phúc không cần xin lỗi vì nó bé. Bé cũng sáng.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.HAPPY,
+      imageUrl: `${ASSET_BASE}/quotes/tiny-bright.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bạn không bị trễ so với đời mình. Bạn đang ở đúng đoạn cần được thở.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.LONELY,
+      imageUrl: `${ASSET_BASE}/quotes/not-late.png`,
+      isActive: true,
+    },
+    {
+      content: 'Bớt gồng một chút không làm sập vũ trụ. Vũ trụ tự chống đỡ được mà.',
+      author: 'Mồn Lèo',
+      mood: MoodType.STRESSED,
+      imageUrl: `${ASSET_BASE}/quotes/universe-can-stand.png`,
+      isActive: true,
+    },
+    {
+      content: 'Mỗi lần quay lại check-in là một lần bạn nói với mình: mình vẫn quan trọng.',
+      author: 'Thì Ai Chill',
+      mood: MoodType.GRATEFUL,
+      imageUrl: `${ASSET_BASE}/quotes/i-matter.png`,
+      isActive: true,
+    },
   ];
 
   for (const quote of quotes) {
     await upsertByField(prisma.cozyQuote, 'content', quote.content, quote);
   }
+}
+
+async function seedSearchIndex() {
+  const [
+    quotes,
+    sounds,
+    exercises,
+    themes,
+    onboardingSlides,
+    companionAssets,
+    companionMessages,
+  ] = await Promise.all([
+    prisma.cozyQuote.findMany(),
+    prisma.ambientSound.findMany(),
+    prisma.breathingExercise.findMany(),
+    prisma.appTheme.findMany(),
+    prisma.onboardingSlide.findMany(),
+    prisma.companionAsset.findMany(),
+    prisma.companionMessage.findMany(),
+  ]);
+
+  const entries = [
+    ...quotes.map((quote) => ({
+      entityType: 'COZY_QUOTE',
+      entityId: quote.id,
+      title: quote.content,
+      content: compactText([
+        quote.content,
+        quote.author,
+        quote.mood,
+        quote.imageUrl,
+        quote.isActive ? 'active' : 'draft',
+      ]),
+      tags: ['quote', 'cozy', quote.mood, quote.author, quote.isActive ? 'active' : 'draft'],
+    })),
+    ...sounds.map((sound) => ({
+      entityType: 'AMBIENT_SOUND',
+      entityId: sound.id,
+      title: sound.title,
+      content: compactText([
+        sound.title,
+        sound.description,
+        sound.category,
+        sound.soundUrl,
+        sound.duration ? `${sound.duration}s` : null,
+        sound.isActive ? 'active' : 'draft',
+      ]),
+      tags: ['sound', 'ambient', sound.category, sound.isActive ? 'active' : 'draft'],
+    })),
+    ...exercises.map((exercise) => ({
+      entityType: 'BREATHING_EXERCISE',
+      entityId: exercise.id,
+      title: exercise.title,
+      content: compactText([
+        exercise.title,
+        exercise.description,
+        `inhale ${exercise.inhaleSeconds}`,
+        `hold ${exercise.holdSeconds}`,
+        `exhale ${exercise.exhaleSeconds}`,
+        `cycles ${exercise.cycles}`,
+        exercise.isActive ? 'active' : 'draft',
+      ]),
+      tags: [
+        'breathing',
+        'exercise',
+        `${exercise.inhaleSeconds}-${exercise.holdSeconds}-${exercise.exhaleSeconds}`,
+        exercise.isActive ? 'active' : 'draft',
+      ],
+    })),
+    ...themes.map((theme) => ({
+      entityType: 'APP_THEME',
+      entityId: theme.id,
+      title: theme.name,
+      content: compactText([
+        theme.name,
+        theme.mode,
+        theme.backgroundColor,
+        theme.surfaceColor,
+        theme.primaryColor,
+        theme.secondaryColor,
+        theme.accentColor,
+        theme.isDefault ? 'default' : null,
+        theme.isActive ? 'active' : 'draft',
+      ]),
+      tags: [
+        'theme',
+        theme.mode,
+        theme.isDefault ? 'default' : null,
+        theme.isActive ? 'active' : 'draft',
+      ],
+    })),
+    ...onboardingSlides.map((slide) => ({
+      entityType: 'ONBOARDING_SLIDE',
+      entityId: slide.id,
+      title: slide.title,
+      content: compactText([
+        slide.title,
+        slide.subtitle,
+        slide.description,
+        slide.imageUrl,
+        slide.animationUrl,
+        `order ${slide.displayOrder}`,
+        slide.isActive ? 'active' : 'draft',
+      ]),
+      tags: [
+        'onboarding',
+        'slide',
+        `order-${slide.displayOrder}`,
+        slide.isActive ? 'active' : 'draft',
+      ],
+    })),
+    ...companionAssets.map((asset) => ({
+      entityType: 'COMPANION_ASSET',
+      entityId: asset.id,
+      title: asset.name,
+      content: compactText([
+        asset.name,
+        asset.type,
+        asset.description,
+        asset.previewImageUrl,
+        asset.primaryColor,
+        asset.secondaryColor,
+        asset.accentColor,
+        asset.isDefault ? 'default' : null,
+        asset.isActive ? 'active' : 'draft',
+      ]),
+      tags: [
+        'companion',
+        'asset',
+        asset.type,
+        asset.isDefault ? 'default' : null,
+        asset.isActive ? 'active' : 'draft',
+      ],
+    })),
+    ...companionMessages.map((message) => {
+      const hourRange =
+        message.minHour === null && message.maxHour === null
+          ? 'all-day'
+          : `${message.minHour ?? 0}-${message.maxHour ?? 23}`;
+
+      return {
+        entityType: 'COMPANION_MESSAGE',
+        entityId: message.id,
+        title: message.content,
+        content: compactText([
+          message.content,
+          message.triggerType,
+          message.mood,
+          message.companionMood,
+          hourRange,
+          `weight ${message.weight}`,
+          message.isActive ? 'active' : 'draft',
+        ]),
+        tags: [
+          'companion',
+          'message',
+          message.triggerType,
+          message.mood,
+          message.companionMood,
+          hourRange,
+          message.isActive ? 'active' : 'draft',
+        ],
+      };
+    }),
+  ];
+
+  for (const entry of entries) {
+    await upsertSearchIndex(entry);
+  }
+
+  console.log(`Seeded ${entries.length} search index entries`);
+}
+
+const DEMO_USER_EMAIL = 'demo@digital-break.local';
+const DEMO_USER_PASSWORD = 'Demo123456!';
+const ADMIN_USER_EMAIL = 'dashboard.demo@relax.local';
+const ADMIN_USER_PASSWORD = 'Relax123!@#';
+
+function daysAgo(days, hour = 20, minute = 30) {
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  date.setDate(date.getDate() - days);
+  return date;
+}
+
+function getStressScore(mood) {
+  const scores = {
+    [MoodType.STRESSED]: 90,
+    [MoodType.ANXIOUS]: 80,
+    [MoodType.SAD]: 65,
+    [MoodType.TIRED]: 60,
+    [MoodType.LONELY]: 55,
+    [MoodType.NEUTRAL]: 40,
+    [MoodType.EXCITED]: 30,
+    [MoodType.GRATEFUL]: 20,
+    [MoodType.HAPPY]: 15,
+    [MoodType.CALM]: 10,
+  };
+
+  return scores[mood] ?? 40;
+}
+
+function getWeekStart(date) {
+  const cursor = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+  const day = cursor.getUTCDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  cursor.setUTCDate(cursor.getUTCDate() + diff);
+  return cursor;
+}
+
+function summarizeWeeklyStats(checkins) {
+  const grouped = new Map();
+
+  for (const checkin of checkins) {
+    const weekStart = getWeekStart(checkin.scoredAt).toISOString();
+    const bucket = grouped.get(weekStart) ?? [];
+    bucket.push(checkin);
+    grouped.set(weekStart, bucket);
+  }
+
+  const weeks = Array.from(grouped.entries())
+    .map(([weekStart, rows]) => {
+      const avgScore =
+        rows.reduce((sum, row) => sum + row.finalScore, 0) / rows.length;
+      const moodCounts = rows.reduce((acc, row) => {
+        acc[row.mood] = (acc[row.mood] ?? 0) + 1;
+        return acc;
+      }, {});
+      const dominantMood = Object.entries(moodCounts).sort(
+        (left, right) => right[1] - left[1],
+      )[0]?.[0];
+
+      return {
+        weekStart: new Date(weekStart),
+        avgScore,
+        stressReducePct: 0,
+        streakDays: rows.length,
+        dominantMood,
+      };
+    })
+    .sort(
+      (left, right) => left.weekStart.getTime() - right.weekStart.getTime(),
+    );
+
+  return weeks.map((week, index) => {
+    const previous = weeks[index - 1];
+    const stressReducePct = previous
+      ? Math.max(
+          -100,
+          Math.min(
+            100,
+            Math.round(
+              ((previous.avgScore - week.avgScore) / previous.avgScore) * 100,
+            ),
+          ),
+        )
+      : 0;
+
+    return {
+      ...week,
+      stressReducePct,
+    };
+  });
+}
+
+async function seedDemoUserData() {
+  const existing = await prisma.user.findUnique({
+    where: { email: DEMO_USER_EMAIL },
+    select: { id: true },
+  });
+
+  if (existing) {
+    await prisma.user.delete({ where: { id: existing.id } });
+  }
+
+  const defaultAsset = await prisma.companionAsset.findFirst({
+    where: { isDefault: true, isActive: true },
+    orderBy: { createdAt: 'asc' },
+  });
+  const freeTier = await prisma.subscriptionTier.findUnique({
+    where: { name: 'FREE' },
+  });
+  const password = await bcrypt.hash(DEMO_USER_PASSWORD, 12);
+
+  const demoUser = await prisma.user.create({
+    data: {
+      email: DEMO_USER_EMAIL,
+      name: 'Thi Ái Demo',
+      avatar: `${ASSET_BASE}/avatars/demo-thi-ai.png`,
+      password,
+      role: UserRole.USER,
+      authProvider: AuthProvider.LOCAL,
+      emailVerified: true,
+      isActive: true,
+      lastLoginAt: daysAgo(0, 9, 15),
+      profile: {
+        create: {
+          displayName: 'Thi Ái',
+          bio: 'Tài khoản demo có dữ liệu mood, journal và relax để dựng dashboard.',
+          birthday: new Date('2002-05-14T00:00:00.000Z'),
+          zodiacSign: 'Taurus',
+          chineseZodiac: 'Horse',
+          totalMoodCheckins: 24,
+          totalJournalPosts: 7,
+          currentStreak: 8,
+          longestStreak: 12,
+        },
+      },
+      preferences: {
+        create: {
+          language: 'vi',
+          timezone: 'Asia/Ho_Chi_Minh',
+          latitude: 10.7769,
+          longitude: 106.7009,
+          locationName: 'Ho Chi Minh City',
+          weatherEnabled: true,
+          themeMode: ThemeMode.SYSTEM,
+          enableCompanionBubble: true,
+          enableSound: true,
+          pushNotificationsEnabled: true,
+          emailNotificationsEnabled: false,
+        },
+      },
+      companion: {
+        create: {
+          assetId: defaultAsset?.id,
+          name: 'Mochi',
+          type: CompanionType.CAT,
+          personalizationMode: CompanionPersonalizationMode.DEFAULT,
+          mood: CompanionMood.CHILL,
+          level: 4,
+          affection: 72,
+          energy: 88,
+          lastSeenAt: daysAgo(0, 9, 20),
+          lastFedAt: daysAgo(0, 8, 45),
+          lastMoodAt: daysAgo(0, 9, 5),
+        },
+      },
+    },
+  });
+
+  const moodPattern = [
+    MoodType.STRESSED,
+    MoodType.ANXIOUS,
+    MoodType.TIRED,
+    MoodType.NEUTRAL,
+    MoodType.CALM,
+    MoodType.HAPPY,
+    MoodType.GRATEFUL,
+    MoodType.STRESSED,
+    MoodType.SAD,
+    MoodType.NEUTRAL,
+    MoodType.CALM,
+    MoodType.HAPPY,
+    MoodType.EXCITED,
+    MoodType.GRATEFUL,
+    MoodType.TIRED,
+    MoodType.LONELY,
+    MoodType.ANXIOUS,
+    MoodType.NEUTRAL,
+    MoodType.CALM,
+    MoodType.HAPPY,
+    MoodType.GRATEFUL,
+    MoodType.CALM,
+    MoodType.HAPPY,
+    MoodType.GRATEFUL,
+  ];
+  const moodCheckins = moodPattern.map((mood, index) => {
+    const createdAt = daysAgo(moodPattern.length - index - 1, 20, 15);
+    const rawScore = getStressScore(mood);
+    const relief = index % 4 === 0 ? 12 : index % 5 === 0 ? 8 : 0;
+    const finalScore = Math.max(0, rawScore - relief);
+
+    return {
+      userId: demoUser.id,
+      mood,
+      intensity: Math.max(1, Math.min(5, Math.round(rawScore / 20))),
+      rawScore,
+      finalScore,
+      scoredAt: createdAt,
+      note:
+        index % 3 === 0
+          ? 'Demo note: hôm nay có chút biến động nhưng đã dịu hơn.'
+          : null,
+      tags: index % 2 === 0 ? ['demo', 'dashboard'] : ['demo'],
+      createdAt,
+      updatedAt: createdAt,
+    };
+  });
+
+  await prisma.moodCheckin.createMany({ data: moodCheckins });
+
+  const weeklyStats = summarizeWeeklyStats(moodCheckins);
+  await prisma.weeklyMoodStat.createMany({
+    data: weeklyStats.map((stat) => ({
+      userId: demoUser.id,
+      weekStart: stat.weekStart,
+      avgScore: stat.avgScore,
+      stressReducePct: stat.stressReducePct,
+      streakDays: stat.streakDays,
+      dominantMood: stat.dominantMood,
+    })),
+  });
+
+  await prisma.journal.createMany({
+    data: [
+      ['Reset nhẹ buổi tối', MoodType.CALM, ['sleep', 'demo'], true],
+      ['Một ngày hơi quá tải', MoodType.STRESSED, ['work', 'demo'], false],
+      [
+        'Biết ơn vì đã nghỉ đúng lúc',
+        MoodType.GRATEFUL,
+        ['gratitude', 'demo'],
+        true,
+      ],
+      [
+        'Viết vài dòng sau khi thở',
+        MoodType.NEUTRAL,
+        ['breathing', 'demo'],
+        false,
+      ],
+      ['Mình đã quay lại được', MoodType.HAPPY, ['reflection', 'demo'], true],
+      ['Ngày chậm hơn một chút', MoodType.CALM, ['slow', 'demo'], false],
+      ['Có lúc buồn nhưng không sao', MoodType.SAD, ['feeling', 'demo'], false],
+    ].map(([title, mood, tags, isFavorite], index) => ({
+      userId: demoUser.id,
+      title,
+      content:
+        'Đây là journal demo để dashboard có dữ liệu lọc theo mood, tag và yêu thích.',
+      mood,
+      tags,
+      isPrivate: true,
+      isFavorite,
+      createdAt: daysAgo(index * 3, 21, 10),
+    })),
+  });
+
+  await prisma.relaxSession.createMany({
+    data: [
+      [RelaxActivityType.MUSIC, MoodType.STRESSED, MoodType.CALM, 1260, 42],
+      [
+        RelaxActivityType.BREATHING,
+        MoodType.ANXIOUS,
+        MoodType.NEUTRAL,
+        420,
+        35,
+      ],
+      [RelaxActivityType.JOURNAL, MoodType.SAD, MoodType.CALM, 900, 28],
+      [RelaxActivityType.MEDITATION, MoodType.TIRED, MoodType.CALM, 960, 33],
+      [RelaxActivityType.PODCAST, MoodType.NEUTRAL, MoodType.HAPPY, 1500, 18],
+      [RelaxActivityType.MYSTERY, MoodType.STRESSED, MoodType.NEUTRAL, 600, 22],
+      [RelaxActivityType.MUSIC, MoodType.CALM, MoodType.HAPPY, 1320, 16],
+      [RelaxActivityType.BREATHING, MoodType.ANXIOUS, MoodType.CALM, 360, 40],
+    ].map(([activityType, moodBefore, moodAfter, duration, relief], index) => {
+      const startedAt = daysAgo(index * 2, 19, 30);
+      const endedAt = new Date(startedAt.getTime() + duration * 1000);
+
+      return {
+        userId: demoUser.id,
+        activityType,
+        status: RelaxSessionStatus.FINISHED,
+        title: `${activityType.toLowerCase()} demo`,
+        startedAt,
+        endedAt,
+        duration,
+        moodBefore,
+        moodAfter,
+        reliefLevel: Math.max(1, Math.min(5, Math.round(relief / 20))),
+        stressReliefPercent: relief,
+        note: 'Phiên demo cho biểu đồ relax và recent moments.',
+        nextActionAccepted: index % 2 === 0 ? 'continue' : 'back_to_work',
+        createdAt: startedAt,
+      };
+    }),
+  });
+
+  await prisma.reminder.createMany({
+    data: [
+      [ReminderType.WATER, 'Uống nước một chút nha', '0 9 * * *', 9],
+      [ReminderType.REST, 'Đứng dậy duỗi vai', '0 15 * * 1-5', 15],
+      [ReminderType.JOURNAL, 'Viết vài dòng cuối ngày', '0 21 * * *', 21],
+    ].map(([type, title, repeatRule, hour]) => ({
+      userId: demoUser.id,
+      type,
+      title,
+      message: 'Reminder demo để màn settings có dữ liệu.',
+      scheduledAt: daysAgo(-1, hour, 0),
+      repeatRule,
+      isActive: true,
+    })),
+  });
+
+  await prisma.notification.createMany({
+    data: [
+      ['Chào mừng quay lại', 'Mochi đang đợi bạn check-in hôm nay.', false],
+      [
+        'Nhắc nghỉ nhẹ',
+        'Một hơi thở ngắn cũng tính là chăm sóc bản thân.',
+        true,
+      ],
+      ['Dashboard demo đã sẵn sàng', 'Có dữ liệu mẫu để test biểu đồ.', false],
+    ].map(([title, message, isRead], index) => ({
+      userId: demoUser.id,
+      title,
+      message,
+      type: NotificationType.IN_APP,
+      isRead,
+      readAt: isRead ? daysAgo(index, 10, 0) : null,
+      createdAt: daysAgo(index, 10, 0),
+    })),
+  });
+
+  if (freeTier) {
+    await prisma.subscription.create({
+      data: {
+        userId: demoUser.id,
+        tierId: freeTier.id,
+        status: SubscriptionStatus.ACTIVE,
+        planName: freeTier.name,
+        price: freeTier.price,
+        currency: freeTier.currency,
+        startDate: daysAgo(20, 9, 0),
+      },
+    });
+  }
+
+  await prisma.userStreak.create({
+    data: {
+      userId: demoUser.id,
+      currentStreak: 8,
+      longestStreak: 12,
+      streakType: 'MOOD_TRACKING',
+      lastActivityDate: daysAgo(0, 20, 15),
+      startDate: daysAgo(23, 20, 15),
+    },
+  });
+  await prisma.userPoints.create({
+    data: {
+      userId: demoUser.id,
+      totalPoints: 420,
+      pointsHistory: {
+        create: [
+          { amount: 200, reason: 'Demo mood streak' },
+          { amount: 220, reason: 'Demo relax sessions' },
+        ],
+      },
+    },
+  });
+  await prisma.userLevel.create({
+    data: {
+      userId: demoUser.id,
+      level: 4,
+      experience: 420,
+      nextLevelExp: 600,
+    },
+  });
+
+  console.log(
+    `Seeded demo user ${DEMO_USER_EMAIL} with password ${DEMO_USER_PASSWORD}`,
+  );
+}
+
+async function seedAdminUser() {
+  const password = await bcrypt.hash(ADMIN_USER_PASSWORD, 12);
+
+  const existing = await prisma.user.findUnique({
+    where: { email: ADMIN_USER_EMAIL },
+    select: { id: true, profile: { select: { id: true } }, preferences: { select: { id: true } } },
+  });
+
+  if (existing) {
+    await prisma.user.update({
+      where: { id: existing.id },
+      data: {
+        name: 'Dashboard Admin',
+        password,
+        role: UserRole.ADMIN,
+        authProvider: AuthProvider.LOCAL,
+        emailVerified: true,
+        isActive: true,
+      },
+    });
+
+    await prisma.userProfile.upsert({
+      where: { userId: existing.id },
+      update: {
+        displayName: 'Dashboard Admin',
+        bio: 'Tài khoản admin seed sẵn để kiểm tra dashboard quản trị.',
+      },
+      create: {
+        userId: existing.id,
+        displayName: 'Dashboard Admin',
+        bio: 'Tài khoản admin seed sẵn để kiểm tra dashboard quản trị.',
+      },
+    });
+
+    await prisma.userPreference.upsert({
+      where: { userId: existing.id },
+      update: {
+        language: 'vi',
+        timezone: 'Asia/Ho_Chi_Minh',
+        themeMode: ThemeMode.SYSTEM,
+        weatherEnabled: true,
+        enableSound: true,
+        pushNotificationsEnabled: true,
+      },
+      create: {
+        userId: existing.id,
+        language: 'vi',
+        timezone: 'Asia/Ho_Chi_Minh',
+        themeMode: ThemeMode.SYSTEM,
+        weatherEnabled: true,
+        enableSound: true,
+        pushNotificationsEnabled: true,
+      },
+    });
+
+    return;
+  }
+
+  await prisma.user.create({
+    data: {
+      email: ADMIN_USER_EMAIL,
+      name: 'Dashboard Admin',
+      password,
+      role: UserRole.ADMIN,
+      authProvider: AuthProvider.LOCAL,
+      emailVerified: true,
+      isActive: true,
+      profile: {
+        create: {
+          displayName: 'Dashboard Admin',
+          bio: 'Tài khoản admin seed sẵn để kiểm tra dashboard quản trị.',
+        },
+      },
+      preferences: {
+        create: {
+          language: 'vi',
+          timezone: 'Asia/Ho_Chi_Minh',
+          themeMode: ThemeMode.SYSTEM,
+          weatherEnabled: true,
+          enableSound: true,
+          pushNotificationsEnabled: true,
+        },
+      },
+    },
+  });
+
+  console.log(
+    `Seeded admin user ${ADMIN_USER_EMAIL} with password ${ADMIN_USER_PASSWORD}`,
+  );
 }
 
 async function main() {
@@ -543,6 +2094,9 @@ async function main() {
   await seedAmbientSounds();
   await seedBreathingExercises();
   await seedCozyQuotes();
+  await seedSearchIndex();
+  await seedAdminUser();
+  await seedDemoUserData();
 }
 
 main()

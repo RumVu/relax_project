@@ -1,5 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  Logger as NestLogger,
+  ValidationPipe,
+} from '@nestjs/common';
 import type {
   CorsOptions,
   CustomOrigin,
@@ -8,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import type { OpenAPIObject } from '@nestjs/swagger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { Logger as PinoLogger } from 'nestjs-pino';
 import { createHash, timingSafeEqual } from 'node:crypto';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
@@ -63,6 +68,7 @@ const STANDARD_ERROR_RESPONSES: Record<
       ErrorCode.SESSION_NOT_FOUND,
       ErrorCode.NOTIFICATION_NOT_FOUND,
       ErrorCode.PUSH_DEVICE_NOT_FOUND,
+      ErrorCode.REMINDER_NOT_FOUND,
       ErrorCode.MOOD_CHECKIN_NOT_FOUND,
       ErrorCode.JOURNAL_NOT_FOUND,
       ErrorCode.USER_COMPANION_NOT_FOUND,
@@ -354,6 +360,7 @@ function isAllowedOrigin(
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useLogger(app.get(PinoLogger));
   const configService = app.get(ConfigService);
   configureTrustProxy(app, configService);
   configureHttpSecurity(app, configService);
@@ -424,12 +431,24 @@ async function bootstrap() {
       'Tổng hợp thống kê: streak, biểu đồ cảm xúc, hoạt động yêu thích và weekly stats.',
     )
     .addTag(
+      'Admin Dashboard',
+      'Tổng hợp vận hành cho admin: DAU/WAU/MAU, doanh thu, retention, engagement, search và health widgets.',
+    )
+    .addTag(
+      'Admin Logs',
+      'Audit trail cho hành động admin: tạo, sửa, xoá nội dung, user, session và job.',
+    )
+    .addTag(
       'Weather',
       'Thời tiết hiện tại theo vị trí/timezone để hiển thị lời chào ở màn hình home.',
     )
     .addTag(
       'Notifications',
       'Thông báo trong app, device token push, provider readiness cho FCM/APNs/Expo và mark read.',
+    )
+    .addTag(
+      'Reminders',
+      'Nhắc lịch uống nước, nghỉ mắt, thở, journal, ngủ hoặc custom theo người dùng.',
     )
     .addTag(
       'Jobs',
@@ -513,9 +532,10 @@ async function bootstrap() {
 
   const port = configService.get<number>('app.port') ?? 6823;
   await app.listen(port);
-  console.log(`Server is running on http://localhost:${port}`);
+  const logger = new NestLogger('Bootstrap');
+  logger.log(`Server is running on http://localhost:${port}`);
   if (swaggerEnabled) {
-    console.log(`Swagger docs available at http://localhost:${port}/docs`);
+    logger.log(`Swagger docs available at http://localhost:${port}/docs`);
   }
 }
 

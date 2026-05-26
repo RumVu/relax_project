@@ -134,6 +134,18 @@ export class AuthController {
   }
 
   @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Export current user personal data' })
+  @ApiOkResponse({
+    description:
+      'GDPR-style JSON export for the authenticated user. Secret hashes and provider tokens are excluded.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/export')
+  exportMine(@CurrentUser() user: AuthUser) {
+    return this.authService.exportMine(user.id);
+  }
+
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Request current user email verification token' })
   @ApiCreatedResponse({
     description:

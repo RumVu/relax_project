@@ -4,6 +4,7 @@ export interface AuthUser {
   id: string;
   email: string;
   role: UserRole;
+  sessionId?: string;
 }
 
 export interface JwtPayload {
@@ -11,4 +12,5 @@ export interface JwtPayload {
   email: string;
   role: UserRole;
   typ: 'access';
+  sessionId?: string;
 }

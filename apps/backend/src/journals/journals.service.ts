@@ -3,6 +3,7 @@ import { Journal, Prisma, UserRole } from '@prisma/client';
 import type { AuthUser } from '../auth/auth.types';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { CreateJournalDto } from './dto/create-journal.dto';
@@ -18,22 +19,34 @@ export class JournalsService {
 
   async findMine(userId: string, query: JournalQueryDto) {
     await this.usersService.findOne(userId);
-    return this.prisma.journal.findMany({
-      where: this.buildWhere(userId, query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit ?? 50,
-    });
+    const where = this.buildWhere(userId, query);
+    const [items, total] = await Promise.all([
+      this.prisma.journal.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.journal.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findByUserId(userId: string, query: JournalQueryDto) {
     await this.usersService.findOne(userId);
-    return this.prisma.journal.findMany({
-      where: this.buildWhere(userId, query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit ?? 50,
-    });
+    const where = this.buildWhere(userId, query);
+    const [items, total] = await Promise.all([
+      this.prisma.journal.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.journal.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findOne(id: string, user: AuthUser) {

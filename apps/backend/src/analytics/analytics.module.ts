@@ -3,6 +3,7 @@ import { AuthCoreModule } from '../auth/auth-core.module';
 import { MoodCheckinsModule } from '../mood-checkins/mood-checkins.module';
 import { JournalsModule } from '../journals/journals.module';
 import { RelaxActivitiesModule } from '../relax-activities/relax-activities.module';
+import { RedisModule } from '../redis/redis.module';
 import { UserCompanionsModule } from '../user-companions/user-companions.module';
 import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './analytics.service';
@@ -13,6 +14,7 @@ import { AnalyticsService } from './analytics.service';
     MoodCheckinsModule,
     JournalsModule,
     RelaxActivitiesModule,
+    RedisModule,
     UserCompanionsModule,
   ],
   controllers: [AnalyticsController],

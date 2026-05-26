@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint .",
+    "openapi:types": "mkdir -p lib/generated && npx --yes openapi-typescript ${NEXT_PUBLIC_API_URL:-http://localhost:6823}/docs-json -o lib/generated/openapi-types.ts"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -16,6 +17,7 @@
     "react-dom": "^18.3.1",
     "react-is": "^18.3.1",
     "recharts": "^3.8.1",
+    "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.6.0",
     "zustand": "^5.0.13"
   },

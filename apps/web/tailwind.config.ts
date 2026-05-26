@@ -11,18 +11,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: '#112218',
-        moss: '#355f42',
-        mist: '#f3f6ef',
-        clay: '#d9c5aa',
-        ember: '#a6492d',
+        ink: '#171334',
+        night: '#0f1028',
+        plum: '#4b36a8',
+        violet: '#7357f6',
+        lilac: '#dcd6ff',
+        mint: '#40c9a2',
+        coral: '#ef767a',
+        sun: '#f8c66d',
+        mist: '#f8f7ff',
+        cloud: '#eef1f8',
+        slate: '#536071',
       },
       boxShadow: {
-        panel: '0 24px 60px rgba(17, 34, 24, 0.12)',
+        panel: '0 18px 50px rgba(23, 19, 52, 0.12)',
       },
       backgroundImage: {
         grain:
-          "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.6), transparent 40%), radial-gradient(circle at 80% 0%, rgba(166,73,45,0.14), transparent 32%), linear-gradient(180deg, rgba(243,246,239,0.96), rgba(233,240,231,0.96))",
+          "linear-gradient(180deg, rgba(248,247,255,0.98), rgba(238,241,248,0.98))",
       },
     },
   },

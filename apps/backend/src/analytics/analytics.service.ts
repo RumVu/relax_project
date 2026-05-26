@@ -9,8 +9,11 @@ import { JournalsService } from '../journals/journals.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RelaxStatsPeriod } from '../relax-activities/dto/relax-activity-query.dto';
 import { RelaxActivitiesService } from '../relax-activities/relax-activities.service';
+import { RedisService } from '../redis/redis.service';
 import { UserCompanionsService } from '../user-companions/user-companions.service';
 import { AnalyticsPeriod, AnalyticsQueryDto } from './analytics-query.dto';
+
+const ANALYTICS_OVERVIEW_CACHE_TTL_SECONDS = 60;
 
 @Injectable()
 export class AnalyticsService {
@@ -20,6 +23,7 @@ export class AnalyticsService {
     private readonly relaxActivitiesService: RelaxActivitiesService,
     private readonly userCompanionsService: UserCompanionsService,
     private readonly prisma: PrismaService,
+    private readonly redisService: RedisService,
   ) {}
 
   async getOverview(userId: string, query: AnalyticsQueryDto) {
@@ -27,37 +31,51 @@ export class AnalyticsService {
     const timezone = await this.resolveTimezone(userId, query.timezone);
     const timezoneOffsetMinutes =
       query.timezoneOffsetMinutes ?? getTimezoneOffsetMinutes(timezone);
-    const [mood, journals, relax, companion] = await Promise.all([
-      this.moodCheckinsService.getAnalytics(userId, {
-        period: period as unknown as MoodAnalyticsPeriod,
-        timezone,
-        timezoneOffsetMinutes: query.timezoneOffsetMinutes,
-      }),
-      this.journalsService.getStats(userId, {}),
-      this.relaxActivitiesService.getStats(userId, {
-        period: period as unknown as RelaxStatsPeriod,
-        timezone,
-        timezoneOffsetMinutes: query.timezoneOffsetMinutes,
-      }),
-      this.userCompanionsService.getStats(userId),
-    ]);
 
-    return {
-      period,
-      timezone,
-      timezoneOffsetMinutes,
-      mood,
-      journals,
-      relax,
-      companion,
-      summaryCards: {
-        currentStreak: mood.streak.current,
-        totalRelaxTime: relax.totalDurationLabel,
-        totalJournals: journals.total,
-        companionAffection: companion.companion.affection,
-        stressReduction: mood.delta?.stressReduction ?? 0,
+    return this.redisService.remember(
+      [
+        'analytics',
+        'overview',
+        userId,
+        period,
+        timezone,
+        timezoneOffsetMinutes,
+      ].join(':'),
+      ANALYTICS_OVERVIEW_CACHE_TTL_SECONDS,
+      async () => {
+        const [mood, journals, relax, companion] = await Promise.all([
+          this.moodCheckinsService.getAnalytics(userId, {
+            period: period as unknown as MoodAnalyticsPeriod,
+            timezone,
+            timezoneOffsetMinutes,
+          }),
+          this.journalsService.getStats(userId, {}),
+          this.relaxActivitiesService.getStats(userId, {
+            period: period as unknown as RelaxStatsPeriod,
+            timezone,
+            timezoneOffsetMinutes,
+          }),
+          this.userCompanionsService.getStats(userId),
+        ]);
+
+        return {
+          period,
+          timezone,
+          timezoneOffsetMinutes,
+          mood,
+          journals,
+          relax,
+          companion,
+          summaryCards: {
+            currentStreak: mood.streak.current,
+            totalRelaxTime: relax.totalDurationLabel,
+            totalJournals: journals.total,
+            companionAffection: companion.companion.affection,
+            stressReduction: mood.delta?.stressReduction ?? 0,
+          },
+        };
       },
-    };
+    );
   }
 
   getContracts() {

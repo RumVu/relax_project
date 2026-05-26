@@ -15,18 +15,83 @@ export class OnboardingSlidesService {
     });
   }
 
-  create(dto: CreateOnboardingSlideDto) {
-    return this.prisma.onboardingSlide.create({ data: dto });
+  async create(dto: CreateOnboardingSlideDto) {
+    const slide = await this.prisma.onboardingSlide.create({ data: dto });
+    await this.upsertSearchIndex(slide);
+
+    return slide;
   }
 
   async update(id: string, dto: UpdateOnboardingSlideDto) {
     await this.ensureExists(id);
-    return this.prisma.onboardingSlide.update({ where: { id }, data: dto });
+    const slide = await this.prisma.onboardingSlide.update({
+      where: { id },
+      data: dto,
+    });
+    await this.upsertSearchIndex(slide);
+
+    return slide;
   }
 
   async remove(id: string) {
     await this.ensureExists(id);
-    return this.prisma.onboardingSlide.delete({ where: { id } });
+    const slide = await this.prisma.onboardingSlide.delete({ where: { id } });
+    await this.prisma.searchIndex.deleteMany({
+      where: { entityType: 'ONBOARDING_SLIDE', entityId: id },
+    });
+
+    return slide;
+  }
+
+  private upsertSearchIndex(slide: {
+    id: string;
+    title: string;
+    subtitle: string | null;
+    description: string | null;
+    displayOrder: number;
+    isActive: boolean;
+  }) {
+    return this.prisma.searchIndex.upsert({
+      where: {
+        entityType_entityId: {
+          entityType: 'ONBOARDING_SLIDE',
+          entityId: slide.id,
+        },
+      },
+      update: this.searchIndexPayload(slide),
+      create: {
+        entityType: 'ONBOARDING_SLIDE',
+        entityId: slide.id,
+        ...this.searchIndexPayload(slide),
+      },
+    });
+  }
+
+  private searchIndexPayload(slide: {
+    title: string;
+    subtitle: string | null;
+    description: string | null;
+    displayOrder: number;
+    isActive: boolean;
+  }) {
+    return {
+      title: slide.title,
+      content: [
+        slide.title,
+        slide.subtitle,
+        slide.description,
+        `order ${slide.displayOrder}`,
+        slide.isActive ? 'active' : 'draft',
+      ]
+        .filter(Boolean)
+        .join(' '),
+      tags: [
+        'onboarding',
+        'slide',
+        `order-${slide.displayOrder}`,
+        slide.isActive ? 'active' : 'draft',
+      ],
+    };
   }
 
   private async ensureExists(id: string) {

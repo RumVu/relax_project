@@ -6,6 +6,7 @@ import { QueuesService } from './queues/queues.service';
 import { RealtimeService } from './realtime/realtime.service';
 import { RedisService } from './redis/redis.service';
 import { StorageService } from './storage/storage.service';
+import { PrismaService } from './prisma/prisma.service';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -18,7 +19,21 @@ describe('AppController', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: jest.fn((key: string) => {
+              const values: Record<string, string> = {
+                'storage.supabaseBucket': 'test',
+                'storage.supabaseUrl': 'https://example.supabase.co',
+                'storage.supabasePublishableKey': 'sb_publishable_test',
+              };
+
+              return values[key];
+            }),
+          },
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            $queryRaw: jest.fn(() => Promise.resolve([{ '?column?': 1 }])),
           },
         },
         {
@@ -87,6 +102,16 @@ describe('AppController', () => {
         docs: {
           swagger: '/docs',
           openApiJson: '/docs-json',
+        },
+      });
+    });
+
+    it('should return deep readiness checks', async () => {
+      await expect(appController.getReady()).resolves.toMatchObject({
+        status: 'ok',
+        checks: {
+          database: { ok: true },
+          storage: { configured: true, bucket: 'test' },
         },
       });
     });
