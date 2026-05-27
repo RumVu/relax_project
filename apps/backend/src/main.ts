@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import {
   INestApplication,
   Logger as NestLogger,
+  RequestMethod,
   ValidationPipe,
 } from '@nestjs/common';
 import type {
@@ -370,6 +371,16 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   configureTrustProxy(app, configService);
   configureHttpSecurity(app, configService);
+  // Version all API routes under /v1 so the contract can evolve without
+  // breaking shipped mobile clients. Infra/index routes stay unversioned.
+  app.setGlobalPrefix('v1', {
+    exclude: [
+      { path: '/', method: RequestMethod.GET },
+      { path: 'api', method: RequestMethod.GET },
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'ready', method: RequestMethod.GET },
+    ],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
