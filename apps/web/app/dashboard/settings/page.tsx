@@ -30,7 +30,7 @@ import {
   type DashboardThemeMode,
   type DashboardThemePalette,
 } from '@/components/providers/theme-provider';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, extractList } from '@/lib/api';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
@@ -301,10 +301,9 @@ export default function SettingsPage() {
         );
       }
 
-      if (assetsResult.status === 'fulfilled' && Array.isArray(assetsResult.value)) {
+      if (assetsResult.status === 'fulfilled') {
         setCustomAssets(
-          assetsResult.value
-            .map((asset) => asset as Record<string, unknown>)
+          extractList<Record<string, unknown>>(assetsResult.value)
             .filter(
               (asset) =>
                 !asset.zodiacSign &&
@@ -324,10 +323,9 @@ export default function SettingsPage() {
         );
       }
 
-      if (themesResult.status === 'fulfilled' && Array.isArray(themesResult.value)) {
+      if (themesResult.status === 'fulfilled') {
         setThemeCatalog(
-          themesResult.value
-            .map((theme) => theme as Record<string, unknown>)
+          extractList<Record<string, unknown>>(themesResult.value)
             .filter((theme) => Boolean(theme.isActive ?? true))
             .map((theme) => ({
               id: String(theme.id ?? ''),
