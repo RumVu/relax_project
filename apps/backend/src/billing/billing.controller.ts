@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -10,6 +10,7 @@ import type { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
+import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
 @ApiTags('Billing')
@@ -53,5 +54,22 @@ export class BillingController {
     @Body() dto: CreateCheckoutSessionDto,
   ) {
     return this.billingService.createCheckoutSession(user.id, dto);
+  }
+
+  @ApiOperation({
+    summary: 'Confirm a pending payment and activate the subscription',
+  })
+  @ApiCreatedResponse({
+    description:
+      'Settled payment plus the newly activated subscription. Used by the manual/dev flow and by provider webhooks once wired.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('me/payments/:id/confirm')
+  confirmPayment(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+    @Body() dto: ConfirmPaymentDto,
+  ) {
+    return this.billingService.confirmPayment(user.id, id, dto);
   }
 }

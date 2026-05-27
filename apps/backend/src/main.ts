@@ -40,7 +40,11 @@ const STANDARD_ERROR_RESPONSES: Record<
 > = {
   '400': {
     description: 'Bad request or validation failed.',
-    codes: [ErrorCode.VALIDATION_FAILED, ErrorCode.STORAGE_INVALID_PATH],
+    codes: [
+      ErrorCode.VALIDATION_FAILED,
+      ErrorCode.STORAGE_INVALID_PATH,
+      ErrorCode.PAYMENT_PLAN_MISMATCH,
+    ],
   },
   '401': {
     description: 'Bearer token is missing, invalid, or expired.',
@@ -84,6 +88,7 @@ const STANDARD_ERROR_RESPONSES: Record<
       ErrorCode.CATALOG_BREATHING_EXERCISE_NOT_FOUND,
       ErrorCode.CATALOG_COZY_QUOTE_NOT_FOUND,
       ErrorCode.CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND,
+      ErrorCode.PAYMENT_NOT_FOUND,
       ErrorCode.DATABASE_RECORD_NOT_FOUND,
     ],
   },
@@ -91,6 +96,7 @@ const STANDARD_ERROR_RESPONSES: Record<
     description: 'Conflict with existing or related data.',
     codes: [
       ErrorCode.USER_EMAIL_ALREADY_EXISTS,
+      ErrorCode.PAYMENT_NOT_PENDING,
       ErrorCode.DATABASE_UNIQUE_CONSTRAINT,
       ErrorCode.DATABASE_FOREIGN_KEY_CONSTRAINT,
     ],
