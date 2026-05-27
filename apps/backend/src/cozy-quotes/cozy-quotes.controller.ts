@@ -7,6 +7,7 @@ import {
   ParseEnumPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -16,6 +17,7 @@ import {
 } from '@nestjs/swagger';
 import { MoodType } from '@prisma/client';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CozyQuotesService } from './cozy-quotes.service';
 import { CreateCozyQuoteDto } from './dto/create-cozy-quote.dto';
 import { UpdateCozyQuoteDto } from './dto/update-cozy-quote.dto';
@@ -28,8 +30,8 @@ export class CozyQuotesController {
   @ApiOperation({ summary: 'List cozy quotes' })
   @ApiOkResponse({ description: 'Cozy quote catalog list.' })
   @Get()
-  findAll() {
-    return this.cozyQuotesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.cozyQuotesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get a random active cozy quote' })

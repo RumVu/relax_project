@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { MoodType } from '@prisma/client';
+import { MoodType, Prisma } from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,9 +11,12 @@ import { UpdateCozyQuoteDto } from './dto/update-cozy-quote.dto';
 export class CozyQuotesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(query: CatalogQueryDto = {}) {
     return this.prisma.cozyQuote.findMany({
+      where: this.buildWhere(query),
       orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
     });
   }
 
@@ -123,6 +127,32 @@ export class CozyQuotesService {
         ].filter((tag): tag is string => Boolean(tag)),
       },
     });
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.CozyQuoteWhereInput = {};
+    const q = query.q?.trim();
+    const mood = q ? this.asMood(q) : undefined;
+
+    if (q) {
+      where.OR = [
+        { content: { contains: q, mode: 'insensitive' } },
+        { author: { contains: q, mode: 'insensitive' } },
+        ...(mood ? [{ mood }] : []),
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
+  }
+
+  private asMood(value: string) {
+    return Object.values(MoodType).find(
+      (mood) => mood.toLowerCase() === value.toLowerCase(),
+    );
   }
 
   private truncate(value: string, length: number) {

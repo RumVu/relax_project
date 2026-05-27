@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AmbientSoundsService } from './ambient-sounds.service';
 import { CreateAmbientSoundDto } from './dto/create-ambient-sound.dto';
 import { UpdateAmbientSoundDto } from './dto/update-ambient-sound.dto';
@@ -26,8 +28,8 @@ export class AmbientSoundsController {
   @ApiOperation({ summary: 'List ambient sounds' })
   @ApiOkResponse({ description: 'Ambient sound catalog list.' })
   @Get()
-  findAll() {
-    return this.ambientSoundsService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.ambientSoundsService.findAll(query);
   }
 
   @ApiOperation({ summary: 'List ambient sounds by category' })

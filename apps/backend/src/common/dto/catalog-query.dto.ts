@@ -1,8 +1,6 @@
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
-  IsEnum,
-  IsIn,
   IsInt,
   IsOptional,
   IsString,
@@ -10,31 +8,17 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { UserRole } from '@prisma/client';
 
-export class UserQueryDto {
+export class CatalogQueryDto {
   @IsOptional()
   @IsString()
   @MaxLength(120)
-  search?: string;
-
-  @IsOptional()
-  @IsEnum(UserRole)
-  role?: UserRole;
-
-  @IsOptional()
-  @IsIn(['ACTIVE', 'INACTIVE'])
-  status?: 'ACTIVE' | 'INACTIVE';
+  q?: string;
 
   @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
-  emailVerified?: boolean;
-
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  includeDeleted?: boolean;
+  isActive?: boolean;
 
   @IsOptional()
   @Type(() => Number)

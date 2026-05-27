@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { BreathingExercisesService } from './breathing-exercises.service';
 import { CreateBreathingExerciseDto } from './dto/create-breathing-exercise.dto';
 import { UpdateBreathingExerciseDto } from './dto/update-breathing-exercise.dto';
@@ -28,8 +30,8 @@ export class BreathingExercisesController {
   @ApiOperation({ summary: 'List breathing exercises' })
   @ApiOkResponse({ description: 'Breathing exercise catalog list.' })
   @Get()
-  findAll() {
-    return this.breathingExercisesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.breathingExercisesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Create a breathing exercise' })

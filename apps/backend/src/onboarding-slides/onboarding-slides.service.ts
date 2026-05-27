@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
@@ -9,9 +11,12 @@ import { UpdateOnboardingSlideDto } from './dto/update-onboarding-slide.dto';
 export class OnboardingSlidesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(query: CatalogQueryDto = {}) {
     return this.prisma.onboardingSlide.findMany({
+      where: this.buildWhere(query),
       orderBy: [{ displayOrder: 'asc' }, { createdAt: 'asc' }],
+      skip: query.skip,
+      take: query.limit,
     });
   }
 
@@ -106,5 +111,24 @@ export class OnboardingSlidesService {
         'Onboarding slide not found',
       );
     }
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.OnboardingSlideWhereInput = {};
+    const q = query.q?.trim();
+
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { subtitle: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
   }
 }

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { CompanionType, Prisma } from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
@@ -10,9 +11,12 @@ import { UpdateCompanionAssetDto } from './dto/update-companion-asset.dto';
 export class CompanionAssetsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(query: CatalogQueryDto = {}) {
     return this.prisma.companionAsset.findMany({
+      where: this.buildWhere(query),
       orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+      skip: query.skip,
+      take: query.limit,
     });
   }
 
@@ -96,6 +100,33 @@ export class CompanionAssetsService {
         'Companion asset not found',
       );
     }
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.CompanionAssetWhereInput = {};
+    const q = query.q?.trim();
+    const companionType = q ? this.asCompanionType(q) : undefined;
+
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { primaryColor: { contains: q, mode: 'insensitive' } },
+        ...(companionType ? [{ type: companionType }] : []),
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
+  }
+
+  private asCompanionType(value: string) {
+    return Object.values(CompanionType).find(
+      (type) => type.toLowerCase() === value.toLowerCase(),
+    );
   }
 
   private async ensureDefault(

@@ -13,6 +13,10 @@ import { MoodType } from '@prisma/client';
 
 export class JournalQueryDto {
   @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
   @IsEnum(MoodType)
   mood?: MoodType;
 

@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CompanionAssetsService } from './companion-assets.service';
 import { CreateCompanionAssetDto } from './dto/create-companion-asset.dto';
 import { UpdateCompanionAssetDto } from './dto/update-companion-asset.dto';
@@ -28,8 +30,8 @@ export class CompanionAssetsController {
   @ApiOperation({ summary: 'List companion assets' })
   @ApiOkResponse({ description: 'Companion asset catalog list.' })
   @Get()
-  findAll() {
-    return this.companionAssetsService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.companionAssetsService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get the default companion asset' })

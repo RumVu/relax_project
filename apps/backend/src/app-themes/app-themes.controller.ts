@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppThemesService } from './app-themes.service';
 import { CreateAppThemeDto } from './dto/create-app-theme.dto';
 import { UpdateAppThemeDto } from './dto/update-app-theme.dto';
@@ -26,8 +28,8 @@ export class AppThemesController {
   @ApiOperation({ summary: 'List app themes' })
   @ApiOkResponse({ description: 'Theme catalog list.' })
   @Get()
-  findAll() {
-    return this.appThemesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.appThemesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get the default app theme' })

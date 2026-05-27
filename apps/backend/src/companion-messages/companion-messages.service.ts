@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { CompanionMood, MessageTriggerType, MoodType } from '@prisma/client';
+import {
+  CompanionMood,
+  MessageTriggerType,
+  MoodType,
+  Prisma,
+} from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { pickWeighted } from '../common/random';
@@ -11,9 +17,12 @@ import { UpdateCompanionMessageDto } from './dto/update-companion-message.dto';
 export class CompanionMessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
+  findAll(query: CatalogQueryDto = {}) {
     return this.prisma.companionMessage.findMany({
+      where: this.buildWhere(query),
       orderBy: { createdAt: 'desc' },
+      skip: query.skip,
+      take: query.limit,
     });
   }
 
@@ -125,6 +134,47 @@ export class CompanionMessagesService {
         ...payload,
       },
     });
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.CompanionMessageWhereInput = {};
+    const q = query.q?.trim();
+    const mood = q ? this.asMood(q) : undefined;
+    const companionMood = q ? this.asCompanionMood(q) : undefined;
+    const triggerType = q ? this.asTriggerType(q) : undefined;
+
+    if (q) {
+      where.OR = [
+        { content: { contains: q, mode: 'insensitive' } },
+        ...(mood ? [{ mood }] : []),
+        ...(companionMood ? [{ companionMood }] : []),
+        ...(triggerType ? [{ triggerType }] : []),
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
+  }
+
+  private asMood(value: string) {
+    return Object.values(MoodType).find(
+      (mood) => mood.toLowerCase() === value.toLowerCase(),
+    );
+  }
+
+  private asCompanionMood(value: string) {
+    return Object.values(CompanionMood).find(
+      (mood) => mood.toLowerCase() === value.toLowerCase(),
+    );
+  }
+
+  private asTriggerType(value: string) {
+    return Object.values(MessageTriggerType).find(
+      (trigger) => trigger.toLowerCase() === value.toLowerCase(),
+    );
   }
 
   private truncate(value: string, length: number) {

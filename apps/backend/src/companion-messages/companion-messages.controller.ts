@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CompanionMessagesService } from './companion-messages.service';
 import { CreateCompanionMessageDto } from './dto/create-companion-message.dto';
 import { UpdateCompanionMessageDto } from './dto/update-companion-message.dto';
@@ -28,8 +30,8 @@ export class CompanionMessagesController {
   @ApiOperation({ summary: 'List companion messages' })
   @ApiOkResponse({ description: 'Companion message catalog list.' })
   @Get()
-  findAll() {
-    return this.companionMessagesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.companionMessagesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get a random active companion message' })

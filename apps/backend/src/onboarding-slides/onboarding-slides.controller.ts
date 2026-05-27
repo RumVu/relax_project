@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CreateOnboardingSlideDto } from './dto/create-onboarding-slide.dto';
 import { UpdateOnboardingSlideDto } from './dto/update-onboarding-slide.dto';
 import { OnboardingSlidesService } from './onboarding-slides.service';
@@ -28,8 +30,8 @@ export class OnboardingSlidesController {
   @ApiOperation({ summary: 'List onboarding slides' })
   @ApiOkResponse({ description: 'Active onboarding slide list.' })
   @Get()
-  findAll() {
-    return this.onboardingSlidesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.onboardingSlidesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Create an onboarding slide' })
