@@ -73,6 +73,17 @@ type CheckoutResult = {
   };
 };
 
+type ConfirmResult = {
+  payment?: {
+    id?: string;
+    status?: string;
+  };
+  subscription?: {
+    status?: string;
+    planName?: string;
+  };
+};
+
 type CompanionMode = 'DEFAULT' | 'ZODIAC' | 'CHINESE_ZODIAC' | 'CUSTOM';
 
 type CompanionAsset = {
@@ -1507,18 +1518,58 @@ export default function SettingsPage() {
                 }),
               })) as CheckoutResult;
               setCheckoutResult(result);
-              triggerRefresh();
-              pushToast({
-                tone: 'info',
-                title: `Đã tạo yêu cầu ${checkoutPlan.title}`,
-                message:
-                  result.checkout?.note ??
-                  'Backend đã ghi nhận checkout intent cho gói này.',
-              });
+
+              // No external payment provider is wired yet, so settle the
+              // pending payment through the manual confirmation endpoint to
+              // actually activate the subscription instead of leaving it
+              // PENDING forever.
+              const paymentId = result.payment?.id;
+              if (!result.configured && paymentId) {
+                const activated = (await apiFetch(
+                  `/billing/me/payments/${paymentId}/confirm`,
+                  {
+                    method: 'POST',
+                    body: JSON.stringify({
+                      planName: result.plan?.name ?? checkoutPlan.name,
+                    }),
+                  },
+                )) as ConfirmResult;
+                setCheckoutResult({
+                  ...result,
+                  payment: {
+                    ...result.payment,
+                    status: activated.payment?.status ?? result.payment?.status,
+                  },
+                  checkout: {
+                    status: 'ACTIVATED',
+                    note: `Đã kích hoạt gói ${
+                      activated.subscription?.planName ?? checkoutPlan.title
+                    }. Subscription chuyển sang ${
+                      activated.subscription?.status ?? 'ACTIVE'
+                    }.`,
+                  },
+                });
+                triggerRefresh();
+                pushToast({
+                  tone: 'success',
+                  title: `Đã kích hoạt ${checkoutPlan.title}`,
+                  message:
+                    'Thanh toán đã được xác nhận và gói đã được kích hoạt.',
+                });
+              } else {
+                triggerRefresh();
+                pushToast({
+                  tone: 'info',
+                  title: `Đã tạo yêu cầu ${checkoutPlan.title}`,
+                  message:
+                    result.checkout?.note ??
+                    'Backend đã ghi nhận checkout intent cho gói này.',
+                });
+              }
             } catch {
               pushToast({
                 tone: 'error',
-                title: 'Không tạo được checkout intent',
+                title: 'Không hoàn tất được nâng cấp',
                 message: 'Kiểm tra backend billing rồi thử lại.',
               });
             } finally {
