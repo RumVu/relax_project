@@ -12,6 +12,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { SessionResponseDto } from './dto/session-response.dto';
 import { SessionsService } from './sessions.service';
 
 @ApiTags('Sessions')
@@ -21,7 +22,11 @@ export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
   @ApiOperation({ summary: 'List all sessions (admin)' })
-  @ApiOkResponse({ description: 'All sessions with a user summary.' })
+  @ApiOkResponse({
+    type: SessionResponseDto,
+    isArray: true,
+    description: 'All sessions with a user summary.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -31,7 +36,11 @@ export class SessionsController {
   }
 
   @ApiOperation({ summary: 'List sessions for one user (admin)' })
-  @ApiOkResponse({ description: 'Sessions for the requested user.' })
+  @ApiOkResponse({
+    type: SessionResponseDto,
+    isArray: true,
+    description: 'Sessions for the requested user.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Get('user/:userId')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -41,7 +50,11 @@ export class SessionsController {
   }
 
   @ApiOperation({ summary: 'List sessions for the current user' })
-  @ApiOkResponse({ description: 'Current user sessions.' })
+  @ApiOkResponse({
+    type: SessionResponseDto,
+    isArray: true,
+    description: 'Current user sessions.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   findMine(@CurrentUser() user: AuthUser) {
@@ -49,7 +62,7 @@ export class SessionsController {
   }
 
   @ApiOperation({ summary: 'Revoke one session (admin)' })
-  @ApiOkResponse({ description: 'Deleted session payload.' })
+  @ApiOkResponse({ type: SessionResponseDto, description: 'Deleted session payload.' })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
