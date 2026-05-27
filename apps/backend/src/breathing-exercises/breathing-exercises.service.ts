@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateBreathingExerciseDto } from './dto/create-breathing-exercise.dto';
 import { UpdateBreathingExerciseDto } from './dto/update-breathing-exercise.dto';
@@ -11,13 +12,19 @@ import { UpdateBreathingExerciseDto } from './dto/update-breathing-exercise.dto'
 export class BreathingExercisesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(query: CatalogQueryDto = {}) {
-    return this.prisma.breathingExercise.findMany({
-      where: this.buildWhere(query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit,
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.breathingExercise.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.breathingExercise.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   create(dto: CreateBreathingExerciseDto) {

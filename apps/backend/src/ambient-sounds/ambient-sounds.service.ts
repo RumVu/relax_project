@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAmbientSoundDto } from './dto/create-ambient-sound.dto';
 import { UpdateAmbientSoundDto } from './dto/update-ambient-sound.dto';
@@ -11,13 +12,19 @@ import { UpdateAmbientSoundDto } from './dto/update-ambient-sound.dto';
 export class AmbientSoundsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(query: CatalogQueryDto = {}) {
-    return this.prisma.ambientSound.findMany({
-      where: this.buildWhere(query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit,
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.ambientSound.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.ambientSound.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   findByCategory(category: string) {

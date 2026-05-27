@@ -9,6 +9,7 @@ import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { pickWeighted } from '../common/random';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanionMessageDto } from './dto/create-companion-message.dto';
 import { UpdateCompanionMessageDto } from './dto/update-companion-message.dto';
@@ -17,13 +18,19 @@ import { UpdateCompanionMessageDto } from './dto/update-companion-message.dto';
 export class CompanionMessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(query: CatalogQueryDto = {}) {
-    return this.prisma.companionMessage.findMany({
-      where: this.buildWhere(query),
-      orderBy: { createdAt: 'desc' },
-      skip: query.skip,
-      take: query.limit,
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.companionMessage.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.companionMessage.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findRandom() {

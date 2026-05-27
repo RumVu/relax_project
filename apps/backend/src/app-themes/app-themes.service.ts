@@ -3,6 +3,7 @@ import { Prisma, ThemeMode } from '@prisma/client';
 import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppThemeDto } from './dto/create-app-theme.dto';
 import { UpdateAppThemeDto } from './dto/update-app-theme.dto';
@@ -11,13 +12,19 @@ import { UpdateAppThemeDto } from './dto/update-app-theme.dto';
 export class AppThemesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll(query: CatalogQueryDto = {}) {
-    return this.prisma.appTheme.findMany({
-      where: this.buildWhere(query),
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
-      skip: query.skip,
-      take: query.limit,
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.appTheme.findMany({
+        where,
+        orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.appTheme.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findDefault() {
