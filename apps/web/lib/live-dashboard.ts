@@ -696,6 +696,7 @@ function mapMoodHistory(items: Array<Record<string, unknown>> | undefined) {
   return items.map((item) => ({
     id: asString(item.id) ?? crypto.randomUUID(),
     createdAt: formatDateTime(asString(item.createdAt)) ?? '--',
+    moodType: asString(item.mood) ?? 'NEUTRAL',
     mood: toMoodLabel(asString(item.mood)) ?? 'Unknown',
     note:
       truncate(asString(item.note), 120) ??
@@ -790,6 +791,8 @@ function mapJournalRecent(items: Array<Record<string, unknown>> | undefined) {
   return items.map((item) => ({
     id: asString(item.id) ?? crypto.randomUUID(),
     title: asString(item.title) ?? 'Nhật ký',
+    content: asString(item.content) ?? '',
+    moodType: asString(item.mood) ?? 'NEUTRAL',
     mood: toMoodLabel(asString(item.mood)) ?? 'Neutral',
     tags: asStringArray(item.tags),
     excerpt:

@@ -259,6 +259,7 @@ export function AdminCatalogPage({
   const pushToast = useUiStore((state) => state.pushToast);
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [query, setQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DRAFT'>('ALL');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -270,7 +271,9 @@ export function AdminCatalogPage({
     }
 
     try {
-      const payload = await apiFetch<CatalogItem[]>(endpoint);
+      const payload = await apiFetch<CatalogItem[]>(endpoint, undefined, {
+        query: catalogQuery(query, statusFilter),
+      });
       setItems(Array.isArray(payload) ? payload : []);
     } catch {
       pushToast({
@@ -288,7 +291,9 @@ export function AdminCatalogPage({
 
     async function bootstrap() {
       try {
-        const payload = await apiFetch<CatalogItem[]>(endpoint);
+        const payload = await apiFetch<CatalogItem[]>(endpoint, undefined, {
+          query: catalogQuery(query, statusFilter),
+        });
         if (!cancelled) {
           setItems(Array.isArray(payload) ? payload : []);
         }
@@ -312,17 +317,11 @@ export function AdminCatalogPage({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, pushToast, title]);
+  }, [endpoint, pushToast, query, statusFilter, title]);
 
   const rows = useMemo(
-    () =>
-      items
-        .map(config.buildRow)
-        .filter((row) => {
-          const haystack = `${row.name} ${row.secondary} ${row.config}`.toLowerCase();
-          return haystack.includes(query.toLowerCase());
-        }),
-    [config, items, query],
+    () => items.map(config.buildRow),
+    [config, items],
   );
   const activeCount = items.filter(isActive).length;
   const draftCount = items.length - activeCount;
@@ -440,6 +439,17 @@ export function AdminCatalogPage({
                     value={query}
                   />
                 </div>
+                <select
+                  className="h-10 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
+                  onChange={(event) =>
+                    setStatusFilter(event.target.value as 'ALL' | 'ACTIVE' | 'DRAFT')
+                  }
+                  value={statusFilter}
+                >
+                  <option value="ALL">Tất cả</option>
+                  <option value="ACTIVE">Đang publish</option>
+                  <option value="DRAFT">Draft/ẩn</option>
+                </select>
                 <Button onClick={() => void loadItems(false)} variant="secondary">
                   <RefreshCcw className="h-4 w-4" />
                   Reload
@@ -524,6 +534,14 @@ export function AdminCatalogPage({
       </div>
     </DashboardShell>
   );
+}
+
+function catalogQuery(query: string, statusFilter: 'ALL' | 'ACTIVE' | 'DRAFT') {
+  return {
+    q: query.trim() || undefined,
+    isActive: statusFilter === 'ALL' ? undefined : statusFilter === 'ACTIVE',
+    limit: 100,
+  };
 }
 
 function CatalogField({

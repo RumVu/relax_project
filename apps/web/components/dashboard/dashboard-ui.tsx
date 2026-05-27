@@ -94,7 +94,11 @@ export function DataSyncBadge({ endpoint }: { endpoint: string }) {
   );
 }
 
-export function RealtimeStatusBadge() {
+export function RealtimeStatusBadge({
+  onEvent,
+}: {
+  onEvent?: (eventName: string) => void;
+}) {
   const [state, setState] = useState<'idle' | 'connecting' | 'live' | 'offline'>('idle');
   const [lastEvent, setLastEvent] = useState('Realtime đang kết nối');
 
@@ -146,14 +150,17 @@ export function RealtimeStatusBadge() {
       'relax-session.updated',
       'journal.created',
     ]) {
-      socket.on(eventName, () => setLastEvent(eventName));
+      socket.on(eventName, () => {
+        setLastEvent(eventName);
+        onEvent?.(eventName);
+      });
     }
 
     return () => {
       window.clearTimeout(connectingTimer);
       socket.disconnect();
     };
-  }, []);
+  }, [onEvent]);
 
   const Icon = state === 'live' ? Wifi : state === 'connecting' ? RefreshCcw : WifiOff;
 

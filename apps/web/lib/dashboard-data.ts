@@ -35,6 +35,8 @@ export type UserDashboardData = {
       recent: Array<{
         id: string;
         title: string;
+        content: string;
+        moodType: string;
         mood: string;
         tags: string[];
         excerpt: string;
@@ -109,6 +111,7 @@ export type UserDashboardData = {
   moodHistory: Array<{
     id: string;
     createdAt: string;
+    moodType: string;
     mood: string;
     note: string;
     intensity: number;

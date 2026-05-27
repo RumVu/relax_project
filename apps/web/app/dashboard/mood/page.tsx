@@ -10,6 +10,7 @@ import {
   Save,
   Sparkles,
   Sun,
+  Trash2,
   Zap,
 } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
@@ -54,6 +55,8 @@ export default function MoodPage() {
   });
   const [selectedMood, setSelectedMood] = useState(data.moodOptions[0]?.type ?? 'NEUTRAL');
   const [note, setNote] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingIntensity, setEditingIntensity] = useState(3);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [modalOpen, setModalOpen] = useState(false);
   const selected =
@@ -65,8 +68,43 @@ export default function MoodPage() {
         item.mood,
         `${item.intensity || '-'} / 5`,
         item.note,
+        <div className="flex flex-wrap gap-2" key={item.id}>
+          <Button
+            className="h-8 px-3 text-xs"
+            onClick={() => {
+              setEditingId(item.id);
+              setSelectedMood(item.moodType);
+              setEditingIntensity(item.intensity || 3);
+              setNote(item.note === 'Không có ghi chú' ? '' : item.note);
+            }}
+            variant="secondary"
+          >
+            Sửa
+          </Button>
+          <Button
+            className="h-8 px-3 text-xs"
+            onClick={async () => {
+              try {
+                await apiFetch(`/mood-checkins/${item.id}`, { method: 'DELETE' });
+                triggerRefresh();
+                pushToast({
+                  tone: 'success',
+                  title: 'Đã xoá mood check-in',
+                });
+              } catch {
+                pushToast({
+                  tone: 'error',
+                  title: 'Không xoá được check-in',
+                });
+              }
+            }}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            Xoá
+          </Button>
+        </div>,
       ]),
-    [data.moodHistory],
+    [data.moodHistory, pushToast, triggerRefresh],
   );
 
   return (
@@ -119,7 +157,7 @@ export default function MoodPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <Card>
           <SectionTitle
-            title="Check-in mới"
+            title={editingId ? 'Chỉnh sửa check-in' : 'Check-in mới'}
             copy="Chọn cảm xúc gần nhất của anh rồi ghi vài dòng để hệ thống hiểu nhịp tâm trạng tốt hơn."
             action={<Plus className="h-5 w-5 text-violet" />}
           />
@@ -163,30 +201,46 @@ export default function MoodPage() {
             <p className="text-sm font-semibold text-slate">
               Selected: {selected?.label} • {note.length}/120
             </p>
+            {editingId ? (
+              <label className="flex items-center gap-2 text-sm font-semibold text-slate">
+                Cường độ
+                <input
+                  className="h-10 w-20 rounded-lg border border-lilac bg-white/85 px-3 text-sm text-ink outline-none focus:border-violet"
+                  max={5}
+                  min={1}
+                  onChange={(event) => setEditingIntensity(Number(event.target.value))}
+                  type="number"
+                  value={editingIntensity}
+                />
+              </label>
+            ) : null}
             <Button
               disabled={saveState === 'saving'}
               onClick={async () => {
                 setSaveState('saving');
                 try {
-                  await apiFetch('/mood-checkins/me', {
-                    method: 'POST',
+                  await apiFetch(editingId ? `/mood-checkins/${editingId}` : '/mood-checkins/me', {
+                    method: editingId ? 'PATCH' : 'POST',
                     body: JSON.stringify({
                       mood: selectedMood,
-                      intensity: Math.max(
-                        1,
-                        Math.min(5, Math.round((selected?.value ?? 60) / 20)),
-                      ),
+                      intensity: editingId
+                        ? Math.max(1, Math.min(5, editingIntensity))
+                        : Math.max(
+                            1,
+                            Math.min(5, Math.round((selected?.value ?? 60) / 20)),
+                          ),
                       note: note || undefined,
                       tags: ['web-dashboard'],
                   }),
-                });
+                  });
                   setSaveState('saved');
+                  setEditingId(null);
                   setNote('');
                   triggerRefresh();
                   setModalOpen(true);
                   pushToast({
                     tone: 'success',
-                    title: 'Đã lưu mood check-in',
+                    title: editingId ? 'Đã cập nhật mood check-in' : 'Đã lưu mood check-in',
                     message: 'Biểu đồ và lịch sử đang được làm mới.',
                   });
                 } catch {
@@ -200,9 +254,23 @@ export default function MoodPage() {
               }}
             >
               <Save className="h-4 w-4" />
-              {saveState === 'saving' ? 'Đang lưu' : 'Lưu check-in'}
+              {saveState === 'saving' ? 'Đang lưu' : editingId ? 'Cập nhật' : 'Lưu check-in'}
             </Button>
           </div>
+          {editingId ? (
+            <Button
+              className="mt-3"
+              onClick={() => {
+                setEditingId(null);
+                setNote('');
+                setEditingIntensity(3);
+                setSelectedMood(data.moodOptions[0]?.type ?? 'NEUTRAL');
+              }}
+              variant="secondary"
+            >
+              Huỷ sửa
+            </Button>
+          ) : null}
           {saveState === 'saved' || saveState === 'error' ? (
             <p
               className={cn(
@@ -253,7 +321,7 @@ export default function MoodPage() {
         />
         <div className="mt-5">
           <DataTable
-            columns={['Thời điểm', 'Mood', 'Cường độ', 'Ghi chú']}
+            columns={['Thời điểm', 'Mood', 'Cường độ', 'Ghi chú', 'Hành động']}
             rows={historyRows}
           />
         </div>
