@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { apiFetch, getStoredAccessToken, syncAuthRouteCookie } from '@/lib/api';
+import {
+  apiFetch,
+  extractList,
+  getStoredAccessToken,
+  syncAuthRouteCookie,
+} from '@/lib/api';
 
 export type DashboardThemeMode = 'light' | 'dark' | 'system';
 
@@ -183,7 +188,7 @@ export function ThemeProvider() {
     if (getStoredAccessToken()) {
       void Promise.allSettled([
         apiFetch<Record<string, unknown>>('/user-preferences/me/preferences'),
-        apiFetch<Array<Record<string, unknown>>>('/app-themes'),
+        apiFetch<unknown>('/app-themes'),
       ])
         .then(([preferencesResult, themesResult]) => {
           if (cancelled) {
@@ -193,8 +198,8 @@ export function ThemeProvider() {
           const preferences =
             preferencesResult.status === 'fulfilled' ? preferencesResult.value : {};
           const themes =
-            themesResult.status === 'fulfilled' && Array.isArray(themesResult.value)
-              ? themesResult.value
+            themesResult.status === 'fulfilled'
+              ? extractList<Record<string, unknown>>(themesResult.value)
               : [];
           const nextMode = String(preferences.themeMode ?? 'SYSTEM').toLowerCase();
           if (nextMode === 'light' || nextMode === 'dark' || nextMode === 'system') {

@@ -6,7 +6,7 @@ import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { DataTable, MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, extractList } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
 
 type Kind =
@@ -271,10 +271,10 @@ export function AdminCatalogPage({
     }
 
     try {
-      const payload = await apiFetch<CatalogItem[]>(endpoint, undefined, {
+      const payload = await apiFetch<unknown>(endpoint, undefined, {
         query: catalogQuery(query, statusFilter),
       });
-      setItems(Array.isArray(payload) ? payload : []);
+      setItems(extractList<CatalogItem>(payload));
     } catch {
       pushToast({
         tone: 'error',
@@ -291,11 +291,11 @@ export function AdminCatalogPage({
 
     async function bootstrap() {
       try {
-        const payload = await apiFetch<CatalogItem[]>(endpoint, undefined, {
+        const payload = await apiFetch<unknown>(endpoint, undefined, {
           query: catalogQuery(query, statusFilter),
         });
         if (!cancelled) {
-          setItems(Array.isArray(payload) ? payload : []);
+          setItems(extractList<CatalogItem>(payload));
         }
       } catch {
         if (!cancelled) {

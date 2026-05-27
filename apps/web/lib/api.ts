@@ -158,6 +158,20 @@ export function clampSkip(value: number | string | undefined, fallback = 0) {
   return Math.max(0, Math.trunc(numeric));
 }
 
+/**
+ * Normalizes a list API response into an array. List endpoints return either a
+ * bare array or a paginated page ({ items, total, ... }); this accepts both so
+ * callers do not break when an endpoint switches to the paginated shape.
+ */
+export function extractList<T = unknown>(payload: unknown): T[] {
+  if (Array.isArray(payload)) {
+    return payload as T[];
+  }
+
+  const items = (payload as { items?: unknown } | null | undefined)?.items;
+  return Array.isArray(items) ? (items as T[]) : [];
+}
+
 export function persistAuthSession(auth: AuthResponse) {
   if (typeof window === 'undefined') {
     return;
