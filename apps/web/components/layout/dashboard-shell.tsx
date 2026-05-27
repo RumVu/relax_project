@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -74,6 +74,18 @@ export function DashboardShell({
     title: string;
     time: string;
   } | null>(null);
+  const lastRealtimeRefreshRef = useRef(0);
+
+  // Realtime events arrive on /realtime; refetch dashboard + chrome data,
+  // throttled so a burst of events does not trigger a refetch storm.
+  const handleRealtimeEvent = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRealtimeRefreshRef.current < 1500) {
+      return;
+    }
+    lastRealtimeRefreshRef.current = now;
+    triggerRefresh();
+  }, [triggerRefresh]);
 
   const loadChromeData = useCallback(async () => {
     try {
@@ -217,7 +229,7 @@ export function DashboardShell({
                 </h2>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <RealtimeStatusBadge />
+                <RealtimeStatusBadge onEvent={handleRealtimeEvent} />
                 <button
                   className="inline-flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
                   onClick={() => {

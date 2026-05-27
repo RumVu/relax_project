@@ -31,22 +31,24 @@ export default function AdminUsersPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [query, setQuery] = useState('');
   const [filterRole, setFilterRole] = useState<'ALL' | 'ADMIN' | 'USER'>('ALL');
+  const [filterStatus, setFilterStatus] = useState<'ALL' | 'ACTIVE' | 'INACTIVE'>('ALL');
+  const [filterVerified, setFilterVerified] = useState<'ALL' | 'VERIFIED' | 'UNVERIFIED'>('ALL');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const users = useAdminDashboardData({
     refreshKey,
-    usersQuery: { limit: 24 },
+    usersQuery: {
+      limit: 50,
+      search: query.trim() || undefined,
+      role: filterRole === 'ALL' ? undefined : filterRole,
+      status: filterStatus === 'ALL' ? undefined : filterStatus,
+      emailVerified:
+        filterVerified === 'ALL' ? undefined : filterVerified === 'VERIFIED',
+    },
   }).users as AdminUserRow[];
 
   const filteredUsers = useMemo(
-    () =>
-      users.filter((user) => {
-        const matchesQuery =
-          user.name.toLowerCase().includes(query.toLowerCase()) ||
-          user.email.toLowerCase().includes(query.toLowerCase());
-        const matchesRole = filterRole === 'ALL' || user.role === filterRole;
-        return matchesQuery && matchesRole;
-      }),
-    [filterRole, query, users],
+    () => users,
+    [users],
   );
 
   return (
@@ -99,6 +101,28 @@ export default function AdminUsersPage() {
                 <option value="ALL">Tất cả role</option>
                 <option value="ADMIN">Admin</option>
                 <option value="USER">User</option>
+              </select>
+              <select
+                className="h-10 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
+                onChange={(event) =>
+                  setFilterStatus(event.target.value as 'ALL' | 'ACTIVE' | 'INACTIVE')
+                }
+                value={filterStatus}
+              >
+                <option value="ALL">Tất cả trạng thái</option>
+                <option value="ACTIVE">Đang mở</option>
+                <option value="INACTIVE">Đã khoá</option>
+              </select>
+              <select
+                className="h-10 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
+                onChange={(event) =>
+                  setFilterVerified(event.target.value as 'ALL' | 'VERIFIED' | 'UNVERIFIED')
+                }
+                value={filterVerified}
+              >
+                <option value="ALL">Tất cả xác thực</option>
+                <option value="VERIFIED">Đã xác thực</option>
+                <option value="UNVERIFIED">Chưa xác thực</option>
               </select>
             </div>
           }

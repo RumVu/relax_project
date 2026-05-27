@@ -1,7 +1,16 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { BookHeart, BookOpenText, Heart, PenLine, Search, Star } from 'lucide-react';
+import {
+  BookHeart,
+  BookOpenText,
+  Edit3,
+  Heart,
+  PenLine,
+  Search,
+  Star,
+  Trash2,
+} from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   MetricCard,
@@ -16,18 +25,35 @@ import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 
+const moodTypeOptions = [
+  'HAPPY',
+  'CALM',
+  'TIRED',
+  'SAD',
+  'ANXIOUS',
+  'STRESSED',
+  'EXCITED',
+  'NEUTRAL',
+  'LONELY',
+  'GRATEFUL',
+];
+
 export default function JournalPage() {
   const journalFilters = useDashboardFilters('/journals/me', 'journal');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const pushToast = useUiStore((state) => state.pushToast);
+  const [query, setQuery] = useState('');
   const journals = useUserDashboardData({
     refreshKey: refreshNonce,
-    journalQuery: journalFilters.query,
+    journalQuery: { ...journalFilters.query, q: query.trim() || undefined },
   }).overview.journals;
-  const [query, setQuery] = useState('');
   const [moodFilter, setMoodFilter] = useState('ALL');
   const [draft, setDraft] = useState('');
+  const [draftTitle, setDraftTitle] = useState('');
+  const [draftMood, setDraftMood] = useState('NEUTRAL');
+  const [draftTags, setDraftTags] = useState('web-dashboard');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const filtered = useMemo(
     () =>
@@ -136,6 +162,65 @@ export default function JournalPage() {
                     </span>
                   ))}
                 </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <Button
+                    className="h-8 px-3 text-xs"
+                    onClick={() => {
+                      setEditingId(journal.id);
+                      setDraftTitle(journal.title);
+                      setDraft(journal.content || journal.excerpt);
+                      setDraftMood(journal.moodType || 'NEUTRAL');
+                      setDraftTags(journal.tags.join(', '));
+                    }}
+                    variant="secondary"
+                  >
+                    <Edit3 className="h-3.5 w-3.5" />
+                    Sửa
+                  </Button>
+                  <Button
+                    className="h-8 px-3 text-xs"
+                    onClick={async () => {
+                      try {
+                        await apiFetch(`/journals/${journal.id}`, {
+                          method: 'PATCH',
+                          body: JSON.stringify({ isFavorite: !journal.favorite }),
+                        });
+                        triggerRefresh();
+                        pushToast({
+                          tone: 'success',
+                          title: journal.favorite
+                            ? 'Đã bỏ yêu thích'
+                            : 'Đã đánh dấu yêu thích',
+                        });
+                      } catch {
+                        pushToast({ tone: 'error', title: 'Không đổi được favorite' });
+                      }
+                    }}
+                    variant="secondary"
+                  >
+                    <Heart className="h-3.5 w-3.5" />
+                    {journal.favorite ? 'Bỏ favorite' : 'Favorite'}
+                  </Button>
+                  <Button
+                    className="h-8 px-3 text-xs"
+                    onClick={async () => {
+                      try {
+                        await apiFetch(`/journals/${journal.id}`, { method: 'DELETE' });
+                        triggerRefresh();
+                        pushToast({
+                          tone: 'success',
+                          title: 'Đã xoá nhật ký',
+                          message: journal.title,
+                        });
+                      } catch {
+                        pushToast({ tone: 'error', title: 'Không xoá được nhật ký' });
+                      }
+                    }}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Xoá
+                  </Button>
+                </div>
               </article>
             )) : (
               <div className="rounded-lg border border-dashed border-lilac bg-white/70 p-6 text-sm font-medium text-slate">
@@ -147,12 +232,37 @@ export default function JournalPage() {
 
         <Card>
           <SectionTitle
-            title="Viết nhanh"
-            copy="Lưu một đoạn ngắn khi cần trút bớt suy nghĩ ngay, không cần đặt tiêu đề quá cầu kỳ."
+            title={editingId ? 'Chỉnh sửa nhật ký' : 'Viết nhanh'}
+            copy="Tạo mới, sửa nội dung, đổi mood/tag hoặc đánh dấu yêu thích đều ghi trực tiếp vào backend."
             action={<PenLine className="h-5 w-5 text-violet" />}
           />
+          <input
+            className="mt-5 h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
+            onChange={(event) => setDraftTitle(event.target.value)}
+            placeholder="Tiêu đề nhật ký"
+            value={draftTitle}
+          />
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <select
+              className="h-11 rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
+              onChange={(event) => setDraftMood(event.target.value)}
+              value={draftMood}
+            >
+              {moodTypeOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            <input
+              className="h-11 rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
+              onChange={(event) => setDraftTags(event.target.value)}
+              placeholder="tag1, tag2"
+              value={draftTags}
+            />
+          </div>
           <textarea
-            className="mt-5 min-h-[220px] w-full rounded-lg border border-lilac bg-white/85 p-3 text-sm outline-none focus:border-violet"
+            className="mt-3 min-h-[220px] w-full rounded-lg border border-lilac bg-white/85 p-3 text-sm outline-none focus:border-violet"
             onChange={(event) => setDraft(event.target.value)}
             placeholder="Hôm nay điều gì làm anh nhẹ hơn?"
             value={draft}
@@ -164,22 +274,44 @@ export default function JournalPage() {
               onClick={async () => {
                 setSaveState('saving');
                 try {
-                  await apiFetch('/journals/me', {
-                    method: 'POST',
-                    body: JSON.stringify({
-                      title: draft.trim().slice(0, 60) || 'Quick reflection',
-                      content: draft,
-                      mood: 'NEUTRAL',
-                      tags: ['web-dashboard'],
-                      isPrivate: true,
-                    }),
-                  });
+                  const payload = {
+                    title:
+                      draftTitle.trim() ||
+                      draft.trim().slice(0, 60) ||
+                      'Quick reflection',
+                    content: draft,
+                    mood: draftMood,
+                    tags: draftTags
+                      .split(',')
+                      .map((tag) => tag.trim().replace(/^#/, ''))
+                      .filter(Boolean)
+                      .slice(0, 10),
+                  };
+
+                  if (editingId) {
+                    await apiFetch(`/journals/${editingId}`, {
+                      method: 'PATCH',
+                      body: JSON.stringify(payload),
+                    });
+                  } else {
+                    await apiFetch('/journals/me', {
+                      method: 'POST',
+                      body: JSON.stringify({
+                        ...payload,
+                        isPrivate: true,
+                      }),
+                    });
+                  }
                   setSaveState('saved');
+                  setEditingId(null);
+                  setDraftTitle('');
                   setDraft('');
+                  setDraftMood('NEUTRAL');
+                  setDraftTags('web-dashboard');
                   triggerRefresh();
                   pushToast({
                     tone: 'success',
-                    title: 'Đã lưu nhật ký',
+                    title: editingId ? 'Đã cập nhật nhật ký' : 'Đã lưu nhật ký',
                     message: 'Danh sách recent entries đang được làm mới.',
                   });
                 } catch {
@@ -192,9 +324,24 @@ export default function JournalPage() {
               }}
             >
               <PenLine className="h-4 w-4" />
-              {saveState === 'saving' ? 'Đang lưu' : 'Lưu nhật ký'}
+              {saveState === 'saving' ? 'Đang lưu' : editingId ? 'Cập nhật' : 'Lưu nhật ký'}
             </Button>
           </div>
+          {editingId ? (
+            <Button
+              className="mt-3"
+              onClick={() => {
+                setEditingId(null);
+                setDraftTitle('');
+                setDraft('');
+                setDraftMood('NEUTRAL');
+                setDraftTags('web-dashboard');
+              }}
+              variant="secondary"
+            >
+              Huỷ sửa
+            </Button>
+          ) : null}
           {saveState === 'saved' || saveState === 'error' ? (
             <p
               className={`mt-3 text-sm font-semibold ${
