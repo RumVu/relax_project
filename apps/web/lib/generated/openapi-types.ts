@@ -72,7 +72,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/redis/health": {
+    "/v1/redis/health": {
         parameters: {
             query?: never;
             header?: never;
@@ -89,7 +89,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/queues/health": {
+    "/v1/queues/health": {
         parameters: {
             query?: never;
             header?: never;
@@ -106,7 +106,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/realtime/health": {
+    "/v1/realtime/health": {
         parameters: {
             query?: never;
             header?: never;
@@ -123,7 +123,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/health": {
+    "/v1/storage/health": {
         parameters: {
             query?: never;
             header?: never;
@@ -140,7 +140,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/cdn-strategy": {
+    "/v1/storage/cdn-strategy": {
         parameters: {
             query?: never;
             header?: never;
@@ -157,7 +157,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/signed-upload-url": {
+    "/v1/storage/signed-upload-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -174,7 +174,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/admin/signed-upload-url": {
+    "/v1/storage/admin/signed-upload-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -191,7 +191,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/signed-url": {
+    "/v1/storage/signed-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -208,7 +208,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/admin/signed-url": {
+    "/v1/storage/admin/signed-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -225,7 +225,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/public-url": {
+    "/v1/storage/public-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -242,7 +242,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/admin/public-url": {
+    "/v1/storage/admin/public-url": {
         parameters: {
             query?: never;
             header?: never;
@@ -259,7 +259,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/files": {
+    "/v1/storage/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -277,7 +277,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/me/files": {
+    "/v1/storage/me/files": {
         parameters: {
             query?: never;
             header?: never;
@@ -294,7 +294,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/files/{id}": {
+    "/v1/storage/files/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -311,7 +311,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/storage/objects": {
+    "/v1/storage/objects": {
         parameters: {
             query?: never;
             header?: never;
@@ -328,7 +328,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users": {
+    "/v1/users": {
         parameters: {
             query?: never;
             header?: never;
@@ -346,7 +346,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users/{id}": {
+    "/v1/users/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -365,7 +365,7 @@ export interface paths {
         patch: operations["UsersController_update"];
         trace?: never;
     };
-    "/auth/register": {
+    "/v1/auth/register": {
         parameters: {
             query?: never;
             header?: never;
@@ -382,7 +382,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/login": {
+    "/v1/auth/login": {
         parameters: {
             query?: never;
             header?: never;
@@ -399,7 +399,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/refresh": {
+    "/v1/auth/refresh": {
         parameters: {
             query?: never;
             header?: never;
@@ -416,7 +416,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/logout": {
+    "/v1/auth/logout": {
         parameters: {
             query?: never;
             header?: never;
@@ -433,7 +433,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/password-reset/request": {
+    "/v1/auth/password-reset/request": {
         parameters: {
             query?: never;
             header?: never;
@@ -450,7 +450,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/password-reset/confirm": {
+    "/v1/auth/password-reset/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -467,7 +467,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/email/verify": {
+    "/v1/auth/email/verify": {
         parameters: {
             query?: never;
             header?: never;
@@ -484,7 +484,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me": {
+    "/v1/auth/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -502,7 +502,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/me/email-verification": {
+    "/v1/auth/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export current user personal data */
+        get: operations["AuthController_exportMine"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/auth/me/email-verification": {
         parameters: {
             query?: never;
             header?: never;
@@ -519,7 +536,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user-profiles/{userId}": {
+    "/v1/user-profiles/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -537,7 +554,7 @@ export interface paths {
         patch: operations["UserProfilesController_upsert"];
         trace?: never;
     };
-    "/user-profiles/me/profile": {
+    "/v1/user-profiles/me/profile": {
         parameters: {
             query?: never;
             header?: never;
@@ -555,7 +572,7 @@ export interface paths {
         patch: operations["UserProfilesController_upsertMine"];
         trace?: never;
     };
-    "/user-preferences/{userId}": {
+    "/v1/user-preferences/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -573,7 +590,7 @@ export interface paths {
         patch: operations["UserPreferencesController_upsert"];
         trace?: never;
     };
-    "/user-preferences/me/preferences": {
+    "/v1/user-preferences/me/preferences": {
         parameters: {
             query?: never;
             header?: never;
@@ -591,7 +608,7 @@ export interface paths {
         patch: operations["UserPreferencesController_upsertMine"];
         trace?: never;
     };
-    "/sessions": {
+    "/v1/sessions": {
         parameters: {
             query?: never;
             header?: never;
@@ -608,7 +625,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sessions/user/{userId}": {
+    "/v1/sessions/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -626,7 +643,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sessions/me": {
+    "/v1/sessions/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -643,7 +660,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/sessions/{id}": {
+    "/v1/sessions/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -660,7 +677,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/options": {
+    "/v1/mood-checkins/options": {
         parameters: {
             query?: never;
             header?: never;
@@ -677,7 +694,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins": {
+    "/v1/mood-checkins": {
         parameters: {
             query?: never;
             header?: never;
@@ -694,7 +711,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me": {
+    "/v1/mood-checkins/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -712,7 +729,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/latest": {
+    "/v1/mood-checkins/me/latest": {
         parameters: {
             query?: never;
             header?: never;
@@ -729,7 +746,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/stats": {
+    "/v1/mood-checkins/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -746,7 +763,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/weekly-stats": {
+    "/v1/mood-checkins/me/weekly-stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -763,7 +780,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/weekly-stats/recalculate": {
+    "/v1/mood-checkins/me/weekly-stats/recalculate": {
         parameters: {
             query?: never;
             header?: never;
@@ -780,7 +797,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/analytics": {
+    "/v1/mood-checkins/me/analytics": {
         parameters: {
             query?: never;
             header?: never;
@@ -797,7 +814,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/dashboard": {
+    "/v1/mood-checkins/me/dashboard": {
         parameters: {
             query?: never;
             header?: never;
@@ -814,7 +831,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/me/recommendations": {
+    "/v1/mood-checkins/me/recommendations": {
         parameters: {
             query?: never;
             header?: never;
@@ -831,7 +848,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/user/{userId}": {
+    "/v1/mood-checkins/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -848,7 +865,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/user/{userId}/stats": {
+    "/v1/mood-checkins/user/{userId}/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -865,7 +882,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/user/{userId}/weekly-stats": {
+    "/v1/mood-checkins/user/{userId}/weekly-stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -882,7 +899,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/user/{userId}/weekly-stats/recalculate": {
+    "/v1/mood-checkins/user/{userId}/weekly-stats/recalculate": {
         parameters: {
             query?: never;
             header?: never;
@@ -899,7 +916,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/user/{userId}/analytics": {
+    "/v1/mood-checkins/user/{userId}/analytics": {
         parameters: {
             query?: never;
             header?: never;
@@ -916,7 +933,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/mood-checkins/{id}": {
+    "/v1/mood-checkins/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -935,7 +952,7 @@ export interface paths {
         patch: operations["MoodCheckinsController_update"];
         trace?: never;
     };
-    "/relax-activities": {
+    "/v1/relax-activities": {
         parameters: {
             query?: never;
             header?: never;
@@ -952,7 +969,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-activities/sessions/start": {
+    "/v1/relax-activities/sessions/start": {
         parameters: {
             query?: never;
             header?: never;
@@ -969,7 +986,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-activities/sessions/{id}/finish": {
+    "/v1/relax-activities/sessions/{id}/finish": {
         parameters: {
             query?: never;
             header?: never;
@@ -986,7 +1003,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-activities/me/sessions": {
+    "/v1/relax-activities/me/sessions": {
         parameters: {
             query?: never;
             header?: never;
@@ -1003,7 +1020,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-activities/me/stats": {
+    "/v1/relax-activities/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1020,7 +1037,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-sessions/start": {
+    "/v1/relax-sessions/start": {
         parameters: {
             query?: never;
             header?: never;
@@ -1037,7 +1054,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-sessions/{id}/finish": {
+    "/v1/relax-sessions/{id}/finish": {
         parameters: {
             query?: never;
             header?: never;
@@ -1054,7 +1071,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-sessions/me": {
+    "/v1/relax-sessions/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1071,7 +1088,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/relax-sessions/me/stats": {
+    "/v1/relax-sessions/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1088,7 +1105,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/journals/me": {
+    "/v1/journals/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1106,7 +1123,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/journals/me/stats": {
+    "/v1/journals/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1123,7 +1140,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/journals/user/{userId}": {
+    "/v1/journals/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1140,7 +1157,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/journals/{id}": {
+    "/v1/journals/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1159,7 +1176,7 @@ export interface paths {
         patch: operations["JournalsController_update"];
         trace?: never;
     };
-    "/user-companions/me": {
+    "/v1/user-companions/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1177,7 +1194,7 @@ export interface paths {
         patch: operations["UserCompanionsController_upsertMine"];
         trace?: never;
     };
-    "/user-companions/me/personalization-options": {
+    "/v1/user-companions/me/personalization-options": {
         parameters: {
             query?: never;
             header?: never;
@@ -1194,7 +1211,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user-companions/me/personalization-mode": {
+    "/v1/user-companions/me/personalization-mode": {
         parameters: {
             query?: never;
             header?: never;
@@ -1211,7 +1228,7 @@ export interface paths {
         patch: operations["UserCompanionsController_switchPersonalization"];
         trace?: never;
     };
-    "/user-companions/me/interactions": {
+    "/v1/user-companions/me/interactions": {
         parameters: {
             query?: never;
             header?: never;
@@ -1228,7 +1245,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user-companions/me/stats": {
+    "/v1/user-companions/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1245,7 +1262,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/analytics/contracts": {
+    "/v1/analytics/contracts": {
         parameters: {
             query?: never;
             header?: never;
@@ -1262,7 +1279,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/analytics/me/overview": {
+    "/v1/analytics/me/overview": {
         parameters: {
             query?: never;
             header?: never;
@@ -1279,7 +1296,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/weather/me/current": {
+    "/v1/weather/me/current": {
         parameters: {
             query?: never;
             header?: never;
@@ -1296,7 +1313,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/weather/me/forecast": {
+    "/v1/weather/me/forecast": {
         parameters: {
             query?: never;
             header?: never;
@@ -1313,7 +1330,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/weather/me/location": {
+    "/v1/weather/me/location": {
         parameters: {
             query?: never;
             header?: never;
@@ -1330,7 +1347,7 @@ export interface paths {
         patch: operations["WeatherController_updateMyLocation"];
         trace?: never;
     };
-    "/weather/current": {
+    "/v1/weather/current": {
         parameters: {
             query?: never;
             header?: never;
@@ -1347,7 +1364,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/weather/forecast": {
+    "/v1/weather/forecast": {
         parameters: {
             query?: never;
             header?: never;
@@ -1364,7 +1381,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/weather/reverse-geocode": {
+    "/v1/weather/reverse-geocode": {
         parameters: {
             query?: never;
             header?: never;
@@ -1381,7 +1398,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/providers": {
+    "/v1/notifications/providers": {
         parameters: {
             query?: never;
             header?: never;
@@ -1398,7 +1415,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me": {
+    "/v1/notifications/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1415,7 +1432,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me/unread-count": {
+    "/v1/notifications/me/unread-count": {
         parameters: {
             query?: never;
             header?: never;
@@ -1432,7 +1449,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me/devices": {
+    "/v1/notifications/me/devices": {
         parameters: {
             query?: never;
             header?: never;
@@ -1450,7 +1467,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me/devices/{id}": {
+    "/v1/notifications/me/devices/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1467,7 +1484,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me/test": {
+    "/v1/notifications/me/test": {
         parameters: {
             query?: never;
             header?: never;
@@ -1484,7 +1501,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/notifications/me/{id}/read": {
+    "/v1/notifications/me/{id}/read": {
         parameters: {
             query?: never;
             header?: never;
@@ -1501,7 +1518,7 @@ export interface paths {
         patch: operations["NotificationsController_markRead"];
         trace?: never;
     };
-    "/notifications/me/read-all": {
+    "/v1/notifications/me/read-all": {
         parameters: {
             query?: never;
             header?: never;
@@ -1518,7 +1535,7 @@ export interface paths {
         patch: operations["NotificationsController_markAllRead"];
         trace?: never;
     };
-    "/notifications/user/{userId}": {
+    "/v1/notifications/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1535,7 +1552,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reminders/me": {
+    "/v1/reminders/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1553,7 +1570,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reminders/me/stats": {
+    "/v1/reminders/me/stats": {
         parameters: {
             query?: never;
             header?: never;
@@ -1570,7 +1587,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reminders": {
+    "/v1/reminders": {
         parameters: {
             query?: never;
             header?: never;
@@ -1587,7 +1604,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reminders/user/{userId}": {
+    "/v1/reminders/user/{userId}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1604,7 +1621,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/reminders/{id}": {
+    "/v1/reminders/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1623,7 +1640,7 @@ export interface paths {
         patch: operations["RemindersController_update"];
         trace?: never;
     };
-    "/jobs/status": {
+    "/v1/jobs/status": {
         parameters: {
             query?: never;
             header?: never;
@@ -1640,7 +1657,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/jobs/weekly-mood-stats/run": {
+    "/v1/jobs/weekly-mood-stats/run": {
         parameters: {
             query?: never;
             header?: never;
@@ -1657,7 +1674,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/jobs/weekly-mood-stats/enqueue": {
+    "/v1/jobs/weekly-mood-stats/enqueue": {
         parameters: {
             query?: never;
             header?: never;
@@ -1674,7 +1691,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/providers": {
+    "/v1/billing/providers": {
         parameters: {
             query?: never;
             header?: never;
@@ -1691,7 +1708,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/plans": {
+    "/v1/billing/plans": {
         parameters: {
             query?: never;
             header?: never;
@@ -1708,7 +1725,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/me": {
+    "/v1/billing/me": {
         parameters: {
             query?: never;
             header?: never;
@@ -1725,7 +1742,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/me/checkout-session": {
+    "/v1/billing/me/checkout-session": {
         parameters: {
             query?: never;
             header?: never;
@@ -1742,7 +1759,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/analytics/overview": {
+    "/v1/billing/me/payments/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm a pending payment and activate the subscription */
+        post: operations["BillingController_confirmPayment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/admin/analytics/overview": {
         parameters: {
             query?: never;
             header?: never;
@@ -1759,7 +1793,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/admin/search": {
+    "/v1/admin/search": {
         parameters: {
             query?: never;
             header?: never;
@@ -1776,7 +1810,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/app-themes": {
+    "/v1/admin-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List admin audit logs */
+        get: operations["AdminLogsController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/app-themes": {
         parameters: {
             query?: never;
             header?: never;
@@ -1794,7 +1845,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/app-themes/default": {
+    "/v1/app-themes/default": {
         parameters: {
             query?: never;
             header?: never;
@@ -1811,7 +1862,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/app-themes/{id}": {
+    "/v1/app-themes/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1829,7 +1880,7 @@ export interface paths {
         patch: operations["AppThemesController_update"];
         trace?: never;
     };
-    "/onboarding-slides": {
+    "/v1/onboarding-slides": {
         parameters: {
             query?: never;
             header?: never;
@@ -1847,7 +1898,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/onboarding-slides/{id}": {
+    "/v1/onboarding-slides/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1865,7 +1916,7 @@ export interface paths {
         patch: operations["OnboardingSlidesController_update"];
         trace?: never;
     };
-    "/companion-assets": {
+    "/v1/companion-assets": {
         parameters: {
             query?: never;
             header?: never;
@@ -1883,7 +1934,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/companion-assets/default": {
+    "/v1/companion-assets/default": {
         parameters: {
             query?: never;
             header?: never;
@@ -1900,7 +1951,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/companion-assets/{id}": {
+    "/v1/companion-assets/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1918,7 +1969,7 @@ export interface paths {
         patch: operations["CompanionAssetsController_update"];
         trace?: never;
     };
-    "/companion-messages": {
+    "/v1/companion-messages": {
         parameters: {
             query?: never;
             header?: never;
@@ -1936,7 +1987,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/companion-messages/random": {
+    "/v1/companion-messages/random": {
         parameters: {
             query?: never;
             header?: never;
@@ -1953,7 +2004,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/companion-messages/{id}": {
+    "/v1/companion-messages/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1971,7 +2022,7 @@ export interface paths {
         patch: operations["CompanionMessagesController_update"];
         trace?: never;
     };
-    "/ambient-sounds": {
+    "/v1/ambient-sounds": {
         parameters: {
             query?: never;
             header?: never;
@@ -1989,7 +2040,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/ambient-sounds/category/{category}": {
+    "/v1/ambient-sounds/category/{category}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2006,7 +2057,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/ambient-sounds/{id}": {
+    "/v1/ambient-sounds/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2024,7 +2075,7 @@ export interface paths {
         patch: operations["AmbientSoundsController_update"];
         trace?: never;
     };
-    "/breathing-exercises": {
+    "/v1/breathing-exercises": {
         parameters: {
             query?: never;
             header?: never;
@@ -2042,7 +2093,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/breathing-exercises/{id}": {
+    "/v1/breathing-exercises/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2060,7 +2111,7 @@ export interface paths {
         patch: operations["BreathingExercisesController_update"];
         trace?: never;
     };
-    "/cozy-quotes": {
+    "/v1/cozy-quotes": {
         parameters: {
             query?: never;
             header?: never;
@@ -2078,7 +2129,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cozy-quotes/random": {
+    "/v1/cozy-quotes/random": {
         parameters: {
             query?: never;
             header?: never;
@@ -2095,7 +2146,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cozy-quotes/mood/{mood}": {
+    "/v1/cozy-quotes/mood/{mood}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2112,7 +2163,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/cozy-quotes/{id}": {
+    "/v1/cozy-quotes/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -2152,6 +2203,7 @@ export interface components {
         RemoveStorageObjectDto: {
             paths: string[];
         };
+        Object: Record<string, never>;
         CreateUserDto: {
             /** Format: email */
             email: string;
@@ -2226,7 +2278,6 @@ export interface components {
             pushNotificationsEnabled?: boolean;
             emailNotificationsEnabled?: boolean;
         };
-        Object: Record<string, never>;
         RecalculateWeeklyMoodStatsDto: {
             /** Format: date-time */
             from?: string;
@@ -2361,6 +2412,14 @@ export interface components {
             /** @enum {string} */
             provider?: "STRIPE" | "APP_STORE" | "GOOGLE_PLAY" | "MANUAL";
             description?: string;
+        };
+        ConfirmPaymentDto: {
+            /**
+             * @description Plan the pending payment was created for. The backend re-resolves the
+             *     plan from SubscriptionTier/fallback catalog and verifies the paid amount
+             *     matches before activating the subscription.
+             */
+            planName: string;
         };
         CreateAppThemeDto: {
             name: string;
@@ -2519,7 +2578,7 @@ export interface components {
              * @example VALIDATION_FAILED
              * @enum {string}
              */
-            code: "VALIDATION_FAILED" | "ROUTE_NOT_FOUND" | "RATE_LIMIT_EXCEEDED" | "INTERNAL_SERVER_ERROR" | "CONFIG_MISSING_REQUIRED_ENV" | "STORAGE_NOT_CONFIGURED" | "STORAGE_INVALID_PATH" | "STORAGE_OPERATION_FAILED" | "DATABASE_UNIQUE_CONSTRAINT" | "DATABASE_FOREIGN_KEY_CONSTRAINT" | "DATABASE_RECORD_NOT_FOUND" | "AUTH_INVALID_CREDENTIALS" | "AUTH_INACTIVE_USER" | "AUTH_REFRESH_TOKEN_INVALID" | "AUTH_TOKEN_INVALID" | "AUTH_TOKEN_EXPIRED" | "AUTH_TOKEN_CONSUMED" | "AUTH_UNAUTHORIZED" | "AUTH_FORBIDDEN" | "USER_NOT_FOUND" | "USER_EMAIL_ALREADY_EXISTS" | "USER_PROFILE_NOT_FOUND" | "USER_PREFERENCE_NOT_FOUND" | "SESSION_NOT_FOUND" | "NOTIFICATION_NOT_FOUND" | "PUSH_DEVICE_NOT_FOUND" | "REMINDER_NOT_FOUND" | "MOOD_CHECKIN_NOT_FOUND" | "JOURNAL_NOT_FOUND" | "USER_COMPANION_NOT_FOUND" | "RELAX_SESSION_NOT_FOUND" | "CATALOG_APP_THEME_NOT_FOUND" | "CATALOG_DEFAULT_APP_THEME_NOT_FOUND" | "CATALOG_ONBOARDING_SLIDE_NOT_FOUND" | "CATALOG_COMPANION_ASSET_NOT_FOUND" | "CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND" | "CATALOG_COMPANION_MESSAGE_NOT_FOUND" | "CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND" | "CATALOG_AMBIENT_SOUND_NOT_FOUND" | "CATALOG_BREATHING_EXERCISE_NOT_FOUND" | "CATALOG_COZY_QUOTE_NOT_FOUND" | "CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND";
+            code: "VALIDATION_FAILED" | "ROUTE_NOT_FOUND" | "RATE_LIMIT_EXCEEDED" | "INTERNAL_SERVER_ERROR" | "CONFIG_MISSING_REQUIRED_ENV" | "STORAGE_NOT_CONFIGURED" | "STORAGE_INVALID_PATH" | "STORAGE_OPERATION_FAILED" | "DATABASE_UNIQUE_CONSTRAINT" | "DATABASE_FOREIGN_KEY_CONSTRAINT" | "DATABASE_RECORD_NOT_FOUND" | "AUTH_INVALID_CREDENTIALS" | "AUTH_INACTIVE_USER" | "AUTH_REFRESH_TOKEN_INVALID" | "AUTH_TOKEN_INVALID" | "AUTH_TOKEN_EXPIRED" | "AUTH_TOKEN_CONSUMED" | "AUTH_UNAUTHORIZED" | "AUTH_FORBIDDEN" | "USER_NOT_FOUND" | "USER_EMAIL_ALREADY_EXISTS" | "USER_PROFILE_NOT_FOUND" | "USER_PREFERENCE_NOT_FOUND" | "SESSION_NOT_FOUND" | "NOTIFICATION_NOT_FOUND" | "PUSH_DEVICE_NOT_FOUND" | "REMINDER_NOT_FOUND" | "MOOD_CHECKIN_NOT_FOUND" | "JOURNAL_NOT_FOUND" | "USER_COMPANION_NOT_FOUND" | "RELAX_SESSION_NOT_FOUND" | "PAYMENT_NOT_FOUND" | "PAYMENT_NOT_PENDING" | "PAYMENT_PLAN_MISMATCH" | "CATALOG_APP_THEME_NOT_FOUND" | "CATALOG_DEFAULT_APP_THEME_NOT_FOUND" | "CATALOG_ONBOARDING_SLIDE_NOT_FOUND" | "CATALOG_COMPANION_ASSET_NOT_FOUND" | "CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND" | "CATALOG_COMPANION_MESSAGE_NOT_FOUND" | "CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND" | "CATALOG_AMBIENT_SOUND_NOT_FOUND" | "CATALOG_BREATHING_EXERCISE_NOT_FOUND" | "CATALOG_COZY_QUOTE_NOT_FOUND" | "CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND";
             /** @example Validation failed */
             message: string;
             /** @description Optional validation messages, Prisma metadata, or provider details. */
@@ -2571,7 +2630,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2598,7 +2657,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2607,7 +2666,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2675,7 +2734,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2702,7 +2761,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2711,7 +2770,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2751,14 +2810,20 @@ export interface operations {
     };
     AppController_getHealth: {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Set true to include database/storage readiness without changing the /ready contract.
+                 * @example true
+                 */
+                deep?: string;
+            };
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody?: never;
         responses: {
-            /** @description Returns process liveness only. Use GET /ready for deep checks. */
+            /** @description Returns process liveness. With deep=true it returns the same readiness payload as GET /ready. */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2774,7 +2839,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2801,7 +2866,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2810,7 +2875,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2882,7 +2947,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -2909,7 +2974,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -2918,7 +2983,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2978,7 +3043,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3005,7 +3070,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3014,7 +3079,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3090,7 +3155,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3117,7 +3182,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3126,7 +3191,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3197,7 +3262,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3224,7 +3289,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3233,7 +3298,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3291,19 +3356,30 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "configured": true,
+                     *       "id": "clx_storage_file_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "filename": "avatar.png",
+                     *       "mimetype": "image/png",
+                     *       "size": 245760,
                      *       "provider": "supabase",
                      *       "bucket": "public-assets",
-                     *       "missingKeys": [],
-                     *       "invalidKeys": [],
-                     *       "urlValid": true,
-                     *       "bucketFound": true
+                     *       "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "isPublic": true,
+                     *       "expiresAt": null,
+                     *       "metadata": {
+                     *         "domain": "profile",
+                     *         "state": "avatar"
+                     *       },
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3330,7 +3406,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3339,7 +3415,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3394,30 +3470,30 @@ export interface operations {
                 content: {
                     /**
                      * @example {
+                     *       "id": "clx_storage_file_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "filename": "avatar.png",
+                     *       "mimetype": "image/png",
+                     *       "size": 245760,
                      *       "provider": "supabase",
                      *       "bucket": "public-assets",
-                     *       "publicBucket": true,
-                     *       "defaultSignedUrlExpiresIn": 3600,
-                     *       "pathConventions": {
-                     *         "companions": "companions/{asset-key}/{state}.png",
-                     *         "onboarding": "onboarding/{slide-key}.png",
-                     *         "sounds": "sounds/{category}/{sound-key}.mp3",
-                     *         "breathing": "breathing/{exercise-key}.png",
-                     *         "quotes": "quotes/{mood-key}.png",
-                     *         "userUploads": "user-uploads/{user-id}/{filename}"
+                     *       "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "isPublic": true,
+                     *       "expiresAt": null,
+                     *       "metadata": {
+                     *         "domain": "profile",
+                     *         "state": "avatar"
                      *       },
-                     *       "accessRules": {
-                     *         "catalogAssets": "public-url readable by users; writes and arbitrary path reads are admin-only",
-                     *         "userUploads": "signed/public read URLs are scoped to user-uploads/{authenticatedUserId}/",
-                     *         "adminDeletes": "admin-only"
-                     *       },
-                     *       "configured": true
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3444,7 +3520,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3453,7 +3529,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3527,7 +3603,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3554,7 +3630,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3563,7 +3639,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3637,7 +3713,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3664,7 +3740,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3673,7 +3749,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3742,7 +3818,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3769,7 +3845,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3778,7 +3854,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3847,7 +3923,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3874,7 +3950,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3883,7 +3959,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -3949,7 +4025,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3976,7 +4052,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3985,7 +4061,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4051,7 +4127,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4078,7 +4154,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4087,7 +4163,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4141,33 +4217,31 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "clx_storage_file_01",
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "filename": "avatar.png",
-                     *         "mimetype": "image/png",
-                     *         "size": 245760,
-                     *         "provider": "supabase",
-                     *         "bucket": "public-assets",
-                     *         "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "isPublic": true,
-                     *         "expiresAt": null,
-                     *         "metadata": {
-                     *           "domain": "profile",
-                     *           "state": "avatar"
-                     *         },
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "clx_storage_file_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "filename": "avatar.png",
+                     *       "mimetype": "image/png",
+                     *       "size": 245760,
+                     *       "provider": "supabase",
+                     *       "bucket": "public-assets",
+                     *       "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "isPublic": true,
+                     *       "expiresAt": null,
+                     *       "metadata": {
+                     *         "domain": "profile",
+                     *         "state": "avatar"
+                     *       },
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4194,7 +4268,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4203,7 +4277,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4275,33 +4349,31 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "clx_storage_file_01",
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "filename": "avatar.png",
-                     *         "mimetype": "image/png",
-                     *         "size": 245760,
-                     *         "provider": "supabase",
-                     *         "bucket": "public-assets",
-                     *         "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "isPublic": true,
-                     *         "expiresAt": null,
-                     *         "metadata": {
-                     *           "domain": "profile",
-                     *           "state": "avatar"
-                     *         },
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "clx_storage_file_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "filename": "avatar.png",
+                     *       "mimetype": "image/png",
+                     *       "size": 245760,
+                     *       "provider": "supabase",
+                     *       "bucket": "public-assets",
+                     *       "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "isPublic": true,
+                     *       "expiresAt": null,
+                     *       "metadata": {
+                     *         "domain": "profile",
+                     *         "state": "avatar"
+                     *       },
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4328,7 +4400,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4337,7 +4409,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4391,33 +4463,31 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "clx_storage_file_01",
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "filename": "avatar.png",
-                     *         "mimetype": "image/png",
-                     *         "size": 245760,
-                     *         "provider": "supabase",
-                     *         "bucket": "public-assets",
-                     *         "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
-                     *         "isPublic": true,
-                     *         "expiresAt": null,
-                     *         "metadata": {
-                     *           "domain": "profile",
-                     *           "state": "avatar"
-                     *         },
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "clx_storage_file_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "filename": "avatar.png",
+                     *       "mimetype": "image/png",
+                     *       "size": 245760,
+                     *       "provider": "supabase",
+                     *       "bucket": "public-assets",
+                     *       "path": "user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "url": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "publicUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/user-uploads/clx_user_01hv7q6y8e9r0t1y2u3i4o5p/avatars/avatar.png",
+                     *       "isPublic": true,
+                     *       "expiresAt": null,
+                     *       "metadata": {
+                     *         "domain": "profile",
+                     *         "state": "avatar"
+                     *       },
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4444,7 +4514,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4453,7 +4523,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4534,7 +4604,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4561,7 +4631,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4570,7 +4640,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4647,7 +4717,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4674,7 +4744,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4683,7 +4753,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4724,6 +4794,10 @@ export interface operations {
     UsersController_findAll: {
         parameters: {
             query?: {
+                search?: string;
+                role?: components["schemas"]["Object"];
+                status?: components["schemas"]["Object"];
+                emailVerified?: boolean;
                 includeDeleted?: boolean;
                 /** @example 0 */
                 skip?: number;
@@ -4744,62 +4818,54 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "items": [
-                     *         {
-                     *           "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *           "email": "thiai.chill@example.com",
-                     *           "name": "Thì Ai",
-                     *           "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
-                     *           "role": "USER",
-                     *           "authProvider": "LOCAL",
-                     *           "emailVerified": true,
-                     *           "isActive": true,
-                     *           "lastLoginAt": "2026-05-16T15:30:00.000Z",
-                     *           "createdAt": "2026-05-10T08:00:00.000Z",
-                     *           "updatedAt": "2026-05-16T15:30:00.000Z",
-                     *           "profile": {
-                     *             "id": "clx_profile_01",
-                     *             "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *             "displayName": "Thì Ai",
-                     *             "bio": "Đang tập sống chậm lại một chút.",
-                     *             "birthday": "2000-05-20T00:00:00.000Z",
-                     *             "zodiacSign": "TAURUS",
-                     *             "chineseZodiac": "DRAGON",
-                     *             "createdAt": "2026-05-10T08:00:00.000Z",
-                     *             "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *           },
-                     *           "preferences": {
-                     *             "id": "clx_pref_01",
-                     *             "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *             "language": "vi",
-                     *             "timezone": "Asia/Ho_Chi_Minh",
-                     *             "latitude": 10.7769,
-                     *             "longitude": 106.7009,
-                     *             "locationName": "Ho Chi Minh City",
-                     *             "weatherEnabled": true,
-                     *             "themeMode": "SYSTEM",
-                     *             "themeId": "theme_pixel_purple",
-                     *             "enableCompanionBubble": true,
-                     *             "bubbleIntervalSeconds": 900,
-                     *             "enableSound": true,
-                     *             "enableHaptics": true,
-                     *             "pushNotificationsEnabled": true,
-                     *             "emailNotificationsEnabled": false,
-                     *             "createdAt": "2026-05-10T08:00:00.000Z",
-                     *             "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *           }
-                     *         }
-                     *       ],
-                     *       "total": 1,
-                     *       "skip": 0,
-                     *       "limit": 20,
-                     *       "hasMore": false
+                     *       "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "email": "thiai.chill@example.com",
+                     *       "name": "Thì Ai",
+                     *       "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *       "role": "USER",
+                     *       "authProvider": "LOCAL",
+                     *       "emailVerified": true,
+                     *       "isActive": true,
+                     *       "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *       "createdAt": "2026-05-10T08:00:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *       "profile": {
+                     *         "id": "clx_profile_01",
+                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "displayName": "Thì Ai",
+                     *         "bio": "Đang tập sống chậm lại một chút.",
+                     *         "birthday": "2000-05-20T00:00:00.000Z",
+                     *         "zodiacSign": "TAURUS",
+                     *         "chineseZodiac": "DRAGON",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *       },
+                     *       "preferences": {
+                     *         "id": "clx_pref_01",
+                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "language": "vi",
+                     *         "timezone": "Asia/Ho_Chi_Minh",
+                     *         "latitude": 10.7769,
+                     *         "longitude": 106.7009,
+                     *         "locationName": "Ho Chi Minh City",
+                     *         "weatherEnabled": true,
+                     *         "themeMode": "SYSTEM",
+                     *         "themeId": "theme_pixel_purple",
+                     *         "enableCompanionBubble": true,
+                     *         "bubbleIntervalSeconds": 900,
+                     *         "enableSound": true,
+                     *         "enableHaptics": true,
+                     *         "pushNotificationsEnabled": true,
+                     *         "emailNotificationsEnabled": false,
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4826,7 +4892,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4835,7 +4901,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -4953,7 +5019,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4980,7 +5046,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -4989,7 +5055,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5094,7 +5160,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5121,7 +5187,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5130,7 +5196,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5235,7 +5301,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5262,7 +5328,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5271,7 +5337,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5387,7 +5453,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5414,7 +5480,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5423,7 +5489,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5541,7 +5607,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5568,7 +5634,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5577,7 +5643,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5694,7 +5760,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5721,7 +5787,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5730,7 +5796,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5846,7 +5912,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5873,7 +5939,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5882,7 +5948,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -5946,13 +6012,59 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
+                     *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5979,7 +6091,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -5988,7 +6100,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6052,21 +6164,59 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true,
-                     *       "delivery": {
-                     *         "channel": "email",
-                     *         "purpose": "PASSWORD_RESET",
-                     *         "provider": "none",
-                     *         "configured": false,
-                     *         "queued": false,
-                     *         "devToken": "dev-reset-token-from-request"
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
                      *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6093,7 +6243,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6102,7 +6252,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6167,8 +6317,9 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true,
-                     *       "revokedSessions": true,
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
                      *       "user": {
                      *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
                      *         "email": "thiai.chill@example.com",
@@ -6218,7 +6369,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6245,7 +6396,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6254,7 +6405,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6318,7 +6469,9 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true,
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
                      *       "user": {
                      *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
                      *         "email": "thiai.chill@example.com",
@@ -6368,7 +6521,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6395,7 +6548,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6404,7 +6557,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6459,54 +6612,59 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *       "email": "thiai.chill@example.com",
-                     *       "name": "Thì Ai",
-                     *       "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
-                     *       "role": "USER",
-                     *       "authProvider": "LOCAL",
-                     *       "emailVerified": true,
-                     *       "isActive": true,
-                     *       "lastLoginAt": "2026-05-16T15:30:00.000Z",
-                     *       "createdAt": "2026-05-10T08:00:00.000Z",
-                     *       "updatedAt": "2026-05-16T15:30:00.000Z",
-                     *       "profile": {
-                     *         "id": "clx_profile_01",
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "displayName": "Thì Ai",
-                     *         "bio": "Đang tập sống chậm lại một chút.",
-                     *         "birthday": "2000-05-20T00:00:00.000Z",
-                     *         "zodiacSign": "TAURUS",
-                     *         "chineseZodiac": "DRAGON",
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
                      *         "createdAt": "2026-05-10T08:00:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       },
-                     *       "preferences": {
-                     *         "id": "clx_pref_01",
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "language": "vi",
-                     *         "timezone": "Asia/Ho_Chi_Minh",
-                     *         "latitude": 10.7769,
-                     *         "longitude": 106.7009,
-                     *         "locationName": "Ho Chi Minh City",
-                     *         "weatherEnabled": true,
-                     *         "themeMode": "SYSTEM",
-                     *         "themeId": "theme_pixel_purple",
-                     *         "enableCompanionBubble": true,
-                     *         "bubbleIntervalSeconds": 900,
-                     *         "enableSound": true,
-                     *         "enableHaptics": true,
-                     *         "pushNotificationsEnabled": true,
-                     *         "emailNotificationsEnabled": false,
-                     *         "createdAt": "2026-05-10T08:00:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
                      *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6533,7 +6691,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6542,7 +6700,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6607,16 +6765,59 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true,
-                     *       "mode": "SOFT",
-                     *       "revokedSessions": true,
-                     *       "anonymized": true
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
+                     *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6643,7 +6844,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6652,7 +6853,150 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too many requests in a short period. Possible codes: RATE_LIMIT_EXCEEDED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Server, configuration, or database failure. Possible codes: INTERNAL_SERVER_ERROR, CONFIG_MISSING_REQUIRED_ENV, STORAGE_NOT_CONFIGURED. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description External provider or storage operation failed. Possible codes: STORAGE_OPERATION_FAILED. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AuthController_exportMine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description GDPR-style JSON export for the authenticated user. Secret hashes and provider tokens are excluded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
+                     *       }
+                     *     }
+                     */
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bearer token is missing, invalid, or expired. Possible codes: AUTH_UNAUTHORIZED, AUTH_TOKEN_INVALID, AUTH_TOKEN_EXPIRED, AUTH_TOKEN_CONSUMED, AUTH_INVALID_CREDENTIALS, AUTH_REFRESH_TOKEN_INVALID, AUTH_INACTIVE_USER. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Authenticated user does not have permission. Possible codes: AUTH_FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6707,23 +7051,59 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "success": true,
-                     *       "alreadyVerified": false,
-                     *       "expiresAt": "2026-05-17T15:30:00.000Z",
-                     *       "delivery": {
-                     *         "channel": "email",
-                     *         "purpose": "EMAIL_VERIFICATION",
-                     *         "provider": "none",
-                     *         "configured": false,
-                     *         "queued": false,
-                     *         "devToken": "dev-email-verification-token-from-request"
+                     *       "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai",
+                     *         "avatar": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/avatars/thiai.png",
+                     *         "role": "USER",
+                     *         "authProvider": "LOCAL",
+                     *         "emailVerified": true,
+                     *         "isActive": true,
+                     *         "lastLoginAt": "2026-05-16T15:30:00.000Z",
+                     *         "createdAt": "2026-05-10T08:00:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *         "profile": {
+                     *           "id": "clx_profile_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "displayName": "Thì Ai",
+                     *           "bio": "Đang tập sống chậm lại một chút.",
+                     *           "birthday": "2000-05-20T00:00:00.000Z",
+                     *           "zodiacSign": "TAURUS",
+                     *           "chineseZodiac": "DRAGON",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         },
+                     *         "preferences": {
+                     *           "id": "clx_pref_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "language": "vi",
+                     *           "timezone": "Asia/Ho_Chi_Minh",
+                     *           "latitude": 10.7769,
+                     *           "longitude": 106.7009,
+                     *           "locationName": "Ho Chi Minh City",
+                     *           "weatherEnabled": true,
+                     *           "themeMode": "SYSTEM",
+                     *           "themeId": "theme_pixel_purple",
+                     *           "enableCompanionBubble": true,
+                     *           "bubbleIntervalSeconds": 900,
+                     *           "enableSound": true,
+                     *           "enableHaptics": true,
+                     *           "pushNotificationsEnabled": true,
+                     *           "emailNotificationsEnabled": false,
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *         }
                      *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6750,7 +7130,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6759,7 +7139,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6831,7 +7211,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6858,7 +7238,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6867,7 +7247,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -6950,7 +7330,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6977,7 +7357,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -6986,7 +7366,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7055,7 +7435,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7082,7 +7462,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7091,7 +7471,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7171,7 +7551,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7198,7 +7578,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7207,7 +7587,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7288,7 +7668,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7315,7 +7695,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7324,7 +7704,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7427,7 +7807,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7454,7 +7834,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7463,7 +7843,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7541,7 +7921,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7568,7 +7948,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7577,7 +7957,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7677,7 +8057,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7704,7 +8084,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7713,7 +8093,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7788,7 +8168,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7815,7 +8195,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7824,7 +8204,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7902,7 +8282,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -7929,7 +8309,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -7938,7 +8318,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -7996,13 +8376,25 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "count": 3
+                     *       "id": "clx_session_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "refreshToken": "2b5ad8d4-5c3f-4a3e-9f8a-8f1dbdb5d2c1",
+                     *       "userAgent": "RelaxApp/1.0 iOS",
+                     *       "ipAddress": "203.0.113.10",
+                     *       "expiresAt": "2026-06-15T15:30:00.000Z",
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *       "user": {
+                     *         "id": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "email": "thiai.chill@example.com",
+                     *         "name": "Thì Ai"
+                     *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8029,7 +8421,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8038,7 +8430,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8113,7 +8505,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8140,7 +8532,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8149,7 +8541,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8225,7 +8617,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8252,7 +8644,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8261,7 +8653,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8341,7 +8733,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8368,7 +8760,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8377,7 +8769,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8443,34 +8835,26 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "items": [
-                     *         {
-                     *           "id": "clx_mood_01",
-                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *           "mood": "STRESSED",
-                     *           "intensity": 4,
-                     *           "rawScore": 78,
-                     *           "finalScore": 61,
-                     *           "scoredAt": "2026-05-16T15:30:00.000Z",
-                     *           "note": "Stress quá mới tìm đến tui hở?",
-                     *           "tags": [
-                     *             "deadline",
-                     *             "work"
-                     *           ],
-                     *           "createdAt": "2026-05-16T15:30:00.000Z",
-                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *         }
+                     *       "id": "clx_mood_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "mood": "STRESSED",
+                     *       "intensity": 4,
+                     *       "rawScore": 78,
+                     *       "finalScore": 61,
+                     *       "scoredAt": "2026-05-16T15:30:00.000Z",
+                     *       "note": "Stress quá mới tìm đến tui hở?",
+                     *       "tags": [
+                     *         "deadline",
+                     *         "work"
                      *       ],
-                     *       "total": 1,
-                     *       "skip": 0,
-                     *       "limit": 20,
-                     *       "hasMore": false
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8497,7 +8881,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8506,7 +8890,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8572,34 +8956,26 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "items": [
-                     *         {
-                     *           "id": "clx_mood_01",
-                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *           "mood": "STRESSED",
-                     *           "intensity": 4,
-                     *           "rawScore": 78,
-                     *           "finalScore": 61,
-                     *           "scoredAt": "2026-05-16T15:30:00.000Z",
-                     *           "note": "Stress quá mới tìm đến tui hở?",
-                     *           "tags": [
-                     *             "deadline",
-                     *             "work"
-                     *           ],
-                     *           "createdAt": "2026-05-16T15:30:00.000Z",
-                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *         }
+                     *       "id": "clx_mood_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "mood": "STRESSED",
+                     *       "intensity": 4,
+                     *       "rawScore": 78,
+                     *       "finalScore": 61,
+                     *       "scoredAt": "2026-05-16T15:30:00.000Z",
+                     *       "note": "Stress quá mới tìm đến tui hở?",
+                     *       "tags": [
+                     *         "deadline",
+                     *         "work"
                      *       ],
-                     *       "total": 1,
-                     *       "skip": 0,
-                     *       "limit": 20,
-                     *       "hasMore": false
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8626,7 +9002,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8635,7 +9011,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8724,7 +9100,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8751,7 +9127,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8760,7 +9136,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8834,7 +9210,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8861,7 +9237,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8870,7 +9246,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -8955,7 +9331,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -8982,7 +9358,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -8991,7 +9367,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9072,7 +9448,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9099,7 +9475,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9108,7 +9484,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9195,7 +9571,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9222,7 +9598,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9231,7 +9607,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9347,7 +9723,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9374,7 +9750,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9383,7 +9759,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9543,7 +9919,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9570,7 +9946,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9579,7 +9955,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9647,7 +10023,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9674,7 +10050,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9683,7 +10059,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9779,7 +10155,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9806,7 +10182,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9815,7 +10191,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -9903,7 +10279,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -9930,7 +10306,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -9939,7 +10315,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10023,7 +10399,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10050,7 +10426,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10059,7 +10435,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10149,7 +10525,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10176,7 +10552,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10185,7 +10561,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10304,7 +10680,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10331,7 +10707,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10340,7 +10716,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10417,7 +10793,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10444,7 +10820,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10453,7 +10829,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10530,7 +10906,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10557,7 +10933,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10566,7 +10942,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10658,7 +11034,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10685,7 +11061,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10694,7 +11070,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10748,21 +11124,30 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "type": "MUSIC",
-                     *         "title": "Nhạc",
-                     *         "description": "Những giai điệu nhẹ nhàng giúp tâm trí thư giãn.",
-                     *         "iconKey": "music-cassette",
-                     *         "defaultDurationSeconds": 900,
-                     *         "enabled": true
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "clx_relax_session_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "activityType": "MUSIC",
+                     *       "status": "FINISHED",
+                     *       "resourceId": "ambient_lofi_chill",
+                     *       "title": "Lo-fi Chill - Pixel Beats",
+                     *       "startedAt": "2026-05-16T15:05:00.000Z",
+                     *       "endedAt": "2026-05-16T15:30:00.000Z",
+                     *       "duration": 1500,
+                     *       "moodBefore": "STRESSED",
+                     *       "moodAfter": "CALM",
+                     *       "reliefLevel": 4,
+                     *       "stressReliefPercent": 19,
+                     *       "note": "Nghe nhạc xong thấy nhẹ đầu hơn.",
+                     *       "nextActionAccepted": "PODCAST",
+                     *       "createdAt": "2026-05-16T15:05:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10789,7 +11174,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10798,7 +11183,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -10887,7 +11272,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -10914,7 +11299,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -10923,7 +11308,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11015,7 +11400,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11042,7 +11427,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11051,7 +11436,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11153,7 +11538,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11180,7 +11565,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11189,7 +11574,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11304,7 +11689,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11331,7 +11716,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11340,7 +11725,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11429,7 +11814,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11456,7 +11841,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11465,7 +11850,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11557,7 +11942,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11584,7 +11969,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11593,7 +11978,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11689,7 +12074,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11716,7 +12101,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11725,7 +12110,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11840,7 +12225,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11867,7 +12252,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -11876,7 +12261,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -11917,6 +12302,7 @@ export interface operations {
     JournalsController_findMine: {
         parameters: {
             query?: {
+                q?: string;
                 /** @example STRESSED */
                 mood?: components["schemas"]["Object"];
                 /** @example self-care */
@@ -11946,33 +12332,25 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "items": [
-                     *         {
-                     *           "id": "clx_journal_01",
-                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *           "title": "Một chút nhẹ lòng",
-                     *           "content": "Hôm nay mình đã nghỉ lại vài phút và thấy dễ thở hơn.",
-                     *           "mood": "CALM",
-                     *           "tags": [
-                     *             "self-care",
-                     *             "evening"
-                     *           ],
-                     *           "isPrivate": true,
-                     *           "isFavorite": false,
-                     *           "createdAt": "2026-05-16T15:30:00.000Z",
-                     *           "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *         }
+                     *       "id": "clx_journal_01",
+                     *       "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *       "title": "Một chút nhẹ lòng",
+                     *       "content": "Hôm nay mình đã nghỉ lại vài phút và thấy dễ thở hơn.",
+                     *       "mood": "CALM",
+                     *       "tags": [
+                     *         "self-care",
+                     *         "evening"
                      *       ],
-                     *       "total": 1,
-                     *       "skip": 0,
-                     *       "limit": 20,
-                     *       "hasMore": false
+                     *       "isPrivate": true,
+                     *       "isFavorite": false,
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -11999,7 +12377,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12008,7 +12386,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12098,7 +12476,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12125,7 +12503,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12134,7 +12512,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12175,6 +12553,7 @@ export interface operations {
     JournalsController_getMineStats: {
         parameters: {
             query?: {
+                q?: string;
                 /** @example STRESSED */
                 mood?: components["schemas"]["Object"];
                 /** @example self-care */
@@ -12227,7 +12606,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12254,7 +12633,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12263,7 +12642,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12304,6 +12683,7 @@ export interface operations {
     JournalsController_findByUserId: {
         parameters: {
             query?: {
+                q?: string;
                 /** @example STRESSED */
                 mood?: components["schemas"]["Object"];
                 /** @example self-care */
@@ -12362,7 +12742,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12389,7 +12769,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12398,7 +12778,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12474,7 +12854,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12501,7 +12881,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12510,7 +12890,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12586,7 +12966,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12613,7 +12993,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12622,7 +13002,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12714,7 +13094,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12741,7 +13121,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12750,7 +13130,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12846,7 +13226,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -12873,7 +13253,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -12882,7 +13262,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -12995,7 +13375,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13022,7 +13402,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13031,7 +13411,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13187,7 +13567,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13214,7 +13594,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13223,7 +13603,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13341,7 +13721,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13368,7 +13748,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13377,7 +13757,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13499,7 +13879,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13526,7 +13906,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13535,7 +13915,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13647,7 +14027,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13674,7 +14054,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13683,7 +14063,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -13738,25 +14118,181 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "moodScore": {
-                     *         "scale": "0-100",
-                     *         "meaning": "Điểm càng cao càng căng thẳng; điểm càng thấp càng thư giãn.",
-                     *         "rawScore": "Điểm thô khi người dùng chọn mood/mức độ trước activity.",
-                     *         "finalScore": "Điểm sau khi hoàn thành activity/check-in relief.",
-                     *         "effectiveScore": "finalScore ?? rawScore ?? scoreFromMood(mood)"
+                     *       "period": "week",
+                     *       "timezone": "Asia/Ho_Chi_Minh",
+                     *       "timezoneOffsetMinutes": 420,
+                     *       "mood": {
+                     *         "period": "week",
+                     *         "timezone": "Asia/Ho_Chi_Minh",
+                     *         "timezoneOffsetMinutes": 420,
+                     *         "timeline": [
+                     *           {
+                     *             "label": "T2",
+                     *             "date": "2026-05-11",
+                     *             "avgScore": 62,
+                     *             "dominantMood": "TIRED"
+                     *           },
+                     *           {
+                     *             "label": "T3",
+                     *             "date": "2026-05-12",
+                     *             "avgScore": 58,
+                     *             "dominantMood": "STRESSED"
+                     *           },
+                     *           {
+                     *             "label": "T4",
+                     *             "date": "2026-05-13",
+                     *             "avgScore": 49,
+                     *             "dominantMood": "CALM"
+                     *           }
+                     *         ],
+                     *         "weeklyStats": [
+                     *           {
+                     *             "id": "clx_weekly_mood_01",
+                     *             "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *             "weekStart": "2026-05-11T00:00:00.000Z",
+                     *             "avgScore": 58.4,
+                     *             "stressReducePct": 18,
+                     *             "streakDays": 12,
+                     *             "dominantMood": "CALM",
+                     *             "createdAt": "2026-05-16T15:30:00.000Z"
+                     *           }
+                     *         ],
+                     *         "streak": {
+                     *           "current": 12,
+                     *           "longest": 21
+                     *         },
+                     *         "delta": {
+                     *           "stressReduction": 18,
+                     *           "scoreChange": -9
+                     *         }
                      *       },
-                     *       "weeklyMoodStat": {
-                     *         "weekStartsOn": "MONDAY",
-                     *         "timezoneSource": "query.timezone > userPreference.timezone > Asia/Ho_Chi_Minh",
-                     *         "avgScore": "Trung bình effectiveScore trong tuần theo timezone user.",
-                     *         "stressReducePct": "previousWeekAvgScore - currentWeekAvgScore. Số dương nghĩa là stress giảm."
+                     *       "journals": {
+                     *         "total": 12,
+                     *         "favorites": 3,
+                     *         "privateEntries": 10,
+                     *         "moodCounts": {
+                     *           "CALM": 5,
+                     *           "STRESSED": 4,
+                     *           "HAPPY": 3
+                     *         },
+                     *         "topTags": [
+                     *           {
+                     *             "tag": "self-care",
+                     *             "count": 6
+                     *           },
+                     *           {
+                     *             "tag": "work",
+                     *             "count": 4
+                     *           }
+                     *         ]
+                     *       },
+                     *       "relax": {
+                     *         "period": "week",
+                     *         "totalSessions": 9,
+                     *         "totalDurationSeconds": 31320,
+                     *         "totalDurationLabel": "8h 42m",
+                     *         "favoriteActivityType": "MUSIC",
+                     *         "activityBreakdown": [
+                     *           {
+                     *             "activityType": "MUSIC",
+                     *             "totalDurationSeconds": 12000,
+                     *             "label": "3h 20m"
+                     *           },
+                     *           {
+                     *             "activityType": "PODCAST",
+                     *             "totalDurationSeconds": 7800,
+                     *             "label": "2h 10m"
+                     *           }
+                     *         ],
+                     *         "recentSessions": [
+                     *           {
+                     *             "id": "clx_relax_session_01",
+                     *             "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *             "activityType": "MUSIC",
+                     *             "status": "FINISHED",
+                     *             "resourceId": "ambient_lofi_chill",
+                     *             "title": "Lo-fi Chill - Pixel Beats",
+                     *             "startedAt": "2026-05-16T15:05:00.000Z",
+                     *             "endedAt": "2026-05-16T15:30:00.000Z",
+                     *             "duration": 1500,
+                     *             "moodBefore": "STRESSED",
+                     *             "moodAfter": "CALM",
+                     *             "reliefLevel": 4,
+                     *             "stressReliefPercent": 19,
+                     *             "note": "Nghe nhạc xong thấy nhẹ đầu hơn.",
+                     *             "nextActionAccepted": "PODCAST",
+                     *             "createdAt": "2026-05-16T15:05:00.000Z",
+                     *             "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *           }
+                     *         ]
+                     *       },
+                     *       "companion": {
+                     *         "companion": {
+                     *           "id": "clx_user_companion_01",
+                     *           "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *           "assetId": "asset_pixel_cat_default",
+                     *           "name": "Mon Leo",
+                     *           "type": "CAT",
+                     *           "personalizationMode": "DEFAULT",
+                     *           "mood": "CHILL",
+                     *           "action": "IDLE",
+                     *           "level": 3,
+                     *           "affection": 72,
+                     *           "energy": 88,
+                     *           "lastSeenAt": "2026-05-16T15:30:00.000Z",
+                     *           "lastFedAt": "2026-05-16T12:00:00.000Z",
+                     *           "lastMoodAt": "2026-05-16T15:30:00.000Z",
+                     *           "createdAt": "2026-05-10T08:00:00.000Z",
+                     *           "updatedAt": "2026-05-16T15:30:00.000Z",
+                     *           "asset": {
+                     *             "id": "asset_pixel_cat_default",
+                     *             "name": "Pixel Cat Default",
+                     *             "type": "CAT",
+                     *             "description": "Pet pixel mặc định cho màn hình home.",
+                     *             "previewImageUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/preview.png",
+                     *             "spriteSheetUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sprite.png",
+                     *             "idleAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/idle.gif",
+                     *             "sleepAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sleep.gif",
+                     *             "walkAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/walk.gif",
+                     *             "primaryColor": "#7C5CFF",
+                     *             "secondaryColor": "#BCA8FF",
+                     *             "accentColor": "#FFB4A8",
+                     *             "zodiacSign": null,
+                     *             "chineseZodiac": null,
+                     *             "isDefault": true,
+                     *             "isActive": true,
+                     *             "createdAt": "2026-05-16T15:30:00.000Z",
+                     *             "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *           }
+                     *         },
+                     *         "totalInteractions": 24,
+                     *         "recentInteractions": [
+                     *           {
+                     *             "id": "clx_companion_interaction_01",
+                     *             "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *             "companionId": "clx_user_companion_01",
+                     *             "type": "PET",
+                     *             "metadata": {
+                     *               "source": "home",
+                     *               "mood": "STRESSED"
+                     *             },
+                     *             "createdAt": "2026-05-16T15:30:00.000Z"
+                     *           }
+                     *         ]
+                     *       },
+                     *       "summaryCards": {
+                     *         "currentStreak": 12,
+                     *         "totalRelaxTime": "8h 42m",
+                     *         "totalJournals": 12,
+                     *         "companionAffection": 72,
+                     *         "stressReduction": 18
                      *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -13783,7 +14319,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -13792,7 +14328,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14028,7 +14564,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14055,7 +14591,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14064,7 +14600,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14165,7 +14701,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14192,7 +14728,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14201,7 +14737,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14328,7 +14864,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14355,7 +14891,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14364,7 +14900,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14506,7 +15042,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14533,7 +15069,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14542,7 +15078,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14643,7 +15179,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14670,7 +15206,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14679,7 +15215,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14806,7 +15342,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14833,7 +15369,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14842,7 +15378,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -14919,7 +15455,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -14946,7 +15482,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -14955,7 +15491,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15053,7 +15589,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15080,7 +15616,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15089,7 +15625,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15172,7 +15708,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15199,7 +15735,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15208,7 +15744,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15269,7 +15805,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15296,7 +15832,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15305,7 +15841,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15380,7 +15916,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15407,7 +15943,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15416,7 +15952,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15505,7 +16041,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15532,7 +16068,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15541,7 +16077,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15606,7 +16142,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15633,7 +16169,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15642,7 +16178,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15729,7 +16265,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15756,7 +16292,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15765,7 +16301,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15836,7 +16372,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15863,7 +16399,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15872,7 +16408,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -15934,7 +16470,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -15961,7 +16497,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -15970,7 +16506,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16060,7 +16596,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16087,7 +16623,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16096,7 +16632,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16185,7 +16721,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16212,7 +16748,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16221,7 +16757,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16305,7 +16841,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16332,7 +16868,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16341,7 +16877,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16418,7 +16954,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16445,7 +16981,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16454,7 +16990,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16543,7 +17079,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16570,7 +17106,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16579,7 +17115,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16671,7 +17207,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16698,7 +17234,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16707,7 +17243,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16788,7 +17324,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16815,7 +17351,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16824,7 +17360,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -16889,7 +17425,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -16916,7 +17452,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -16925,7 +17461,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17008,7 +17544,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17035,7 +17571,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17044,7 +17580,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17116,7 +17652,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17143,7 +17679,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17152,7 +17688,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17251,7 +17787,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17278,7 +17814,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17287,7 +17823,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17364,7 +17900,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17391,7 +17927,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17400,7 +17936,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17483,7 +18019,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17510,7 +18046,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17519,7 +18055,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17591,7 +18127,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17618,7 +18154,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17627,7 +18163,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17682,44 +18218,36 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "subscription": {
-                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
-                     *         "status": "ACTIVE",
-                     *         "planName": "FREE",
-                     *         "price": 0,
-                     *         "currency": "VND"
+                     *       "configured": false,
+                     *       "provider": "STRIPE",
+                     *       "plan": {
+                     *         "name": "CHILL_PLUS",
+                     *         "title": "Chill Plus",
+                     *         "price": 49000,
+                     *         "currency": "VND",
+                     *         "source": "subscription_tier"
                      *       },
-                     *       "providerStatus": {
-                     *         "configured": false,
-                     *         "providers": {
-                     *           "STRIPE": {
-                     *             "configured": false,
-                     *             "missingKeys": [
-                     *               "STRIPE_SECRET_KEY"
-                     *             ]
-                     *           },
-                     *           "APP_STORE": {
-                     *             "configured": false,
-                     *             "missingKeys": [
-                     *               "APPLE_SHARED_SECRET",
-                     *               "APP_STORE_CONNECT_API_KEY"
-                     *             ],
-                     *             "note": "App Store chỉ cần một trong các cấu hình receipt validation."
-                     *           },
-                     *           "GOOGLE_PLAY": {
-                     *             "configured": false,
-                     *             "missingKeys": [
-                     *               "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
-                     *             ]
-                     *           }
-                     *         }
+                     *       "payment": {
+                     *         "id": "clx_payment_01",
+                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "amount": 49000,
+                     *         "currency": "VND",
+                     *         "status": "PENDING",
+                     *         "provider": "STRIPE",
+                     *         "description": "Upgrade to Chill Plus monthly",
+                     *         "createdAt": "2026-05-16T15:30:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *       },
+                     *       "checkout": {
+                     *         "status": "PROVIDER_NOT_CONFIGURED",
+                     *         "note": "Backend đã tạo payment pending. Cần cấu hình Stripe/App Store/Google Play để lấy checkout URL thật."
                      *       }
                      *     }
                      */
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17746,7 +18274,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17755,7 +18283,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17850,7 +18378,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17877,7 +18405,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17886,7 +18414,134 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too many requests in a short period. Possible codes: RATE_LIMIT_EXCEEDED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Server, configuration, or database failure. Possible codes: INTERNAL_SERVER_ERROR, CONFIG_MISSING_REQUIRED_ENV, STORAGE_NOT_CONFIGURED. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description External provider or storage operation failed. Possible codes: STORAGE_OPERATION_FAILED. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    BillingController_confirmPayment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example clx_record_01hv7q6y8e9r0t1y2u3i4o5p */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmPaymentDto"];
+            };
+        };
+        responses: {
+            /** @description Settled payment plus the newly activated subscription. Used by the manual/dev flow and by provider webhooks once wired. */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    /**
+                     * @example {
+                     *       "configured": false,
+                     *       "provider": "STRIPE",
+                     *       "plan": {
+                     *         "name": "CHILL_PLUS",
+                     *         "title": "Chill Plus",
+                     *         "price": 49000,
+                     *         "currency": "VND",
+                     *         "source": "subscription_tier"
+                     *       },
+                     *       "payment": {
+                     *         "id": "clx_payment_01",
+                     *         "userId": "clx_user_01hv7q6y8e9r0t1y2u3i4o5p",
+                     *         "amount": 49000,
+                     *         "currency": "VND",
+                     *         "status": "PENDING",
+                     *         "provider": "STRIPE",
+                     *         "description": "Upgrade to Chill Plus monthly",
+                     *         "createdAt": "2026-05-16T15:30:00.000Z",
+                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *       },
+                     *       "checkout": {
+                     *         "status": "PROVIDER_NOT_CONFIGURED",
+                     *         "note": "Backend đã tạo payment pending. Cần cấu hình Stripe/App Store/Google Play để lấy checkout URL thật."
+                     *       }
+                     *     }
+                     */
+                    "application/json": Record<string, never>;
+                };
+            };
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bearer token is missing, invalid, or expired. Possible codes: AUTH_UNAUTHORIZED, AUTH_TOKEN_INVALID, AUTH_TOKEN_EXPIRED, AUTH_TOKEN_CONSUMED, AUTH_INVALID_CREDENTIALS, AUTH_REFRESH_TOKEN_INVALID, AUTH_INACTIVE_USER. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Authenticated user does not have permission. Possible codes: AUTH_FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -17951,7 +18606,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -17978,7 +18633,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -17987,7 +18642,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18027,8 +18682,8 @@ export interface operations {
     };
     AdminDashboardController_search: {
         parameters: {
-            query: {
-                q: string;
+            query?: {
+                q?: string;
                 entityType?: string;
                 /** @example 0 */
                 skip?: number;
@@ -18041,14 +18696,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description SearchIndex results for dashboard global search. Requires at least 2 query characters. */
+            /** @description SearchIndex results for dashboard global search. Blank query returns latest indexes; non-empty query requires at least 2 characters. */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18075,7 +18730,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18084,7 +18739,110 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Too many requests in a short period. Possible codes: RATE_LIMIT_EXCEEDED. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Server, configuration, or database failure. Possible codes: INTERNAL_SERVER_ERROR, CONFIG_MISSING_REQUIRED_ENV, STORAGE_NOT_CONFIGURED. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description External provider or storage operation failed. Possible codes: STORAGE_OPERATION_FAILED. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    AdminLogsController_findAll: {
+        parameters: {
+            query?: {
+                adminId?: string;
+                action?: string;
+                targetType?: string;
+                targetId?: string;
+                /** @example 2026-05-11T00:00:00.000Z */
+                from?: string;
+                /** @example 2026-05-16T23:59:59.999Z */
+                to?: string;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated admin write-action audit trail with sanitized request details. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Bearer token is missing, invalid, or expired. Possible codes: AUTH_UNAUTHORIZED, AUTH_TOKEN_INVALID, AUTH_TOKEN_EXPIRED, AUTH_TOKEN_CONSUMED, AUTH_INVALID_CREDENTIALS, AUTH_REFRESH_TOKEN_INVALID, AUTH_INACTIVE_USER. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Authenticated user does not have permission. Possible codes: AUTH_FORBIDDEN. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18124,7 +18882,14 @@ export interface operations {
     };
     AppThemesController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -18138,29 +18903,27 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "theme_pixel_purple",
-                     *         "name": "Pixel Purple Light",
-                     *         "mode": "LIGHT",
-                     *         "backgroundColor": "#F8F6FF",
-                     *         "surfaceColor": "#FFFFFF",
-                     *         "primaryColor": "#6D5DFB",
-                     *         "secondaryColor": "#BCA8FF",
-                     *         "accentColor": "#FFB4A8",
-                     *         "textColor": "#261D55",
-                     *         "mutedTextColor": "#7E76A6",
-                     *         "isDefault": true,
-                     *         "isActive": true,
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "theme_pixel_purple",
+                     *       "name": "Pixel Purple Light",
+                     *       "mode": "LIGHT",
+                     *       "backgroundColor": "#F8F6FF",
+                     *       "surfaceColor": "#FFFFFF",
+                     *       "primaryColor": "#6D5DFB",
+                     *       "secondaryColor": "#BCA8FF",
+                     *       "accentColor": "#FFB4A8",
+                     *       "textColor": "#261D55",
+                     *       "mutedTextColor": "#7E76A6",
+                     *       "isDefault": true,
+                     *       "isActive": true,
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18187,7 +18950,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18196,7 +18959,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18289,7 +19052,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18316,7 +19079,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18325,7 +19088,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18399,7 +19162,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18426,7 +19189,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18435,7 +19198,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18512,7 +19275,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18539,7 +19302,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18548,7 +19311,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18636,7 +19399,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18663,7 +19426,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18672,7 +19435,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18712,7 +19475,14 @@ export interface operations {
     };
     OnboardingSlidesController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -18744,7 +19514,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18771,7 +19541,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18780,7 +19550,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18865,7 +19635,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -18892,7 +19662,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -18901,7 +19671,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -18974,7 +19744,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19001,7 +19771,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19010,7 +19780,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19094,7 +19864,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19121,7 +19891,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19130,7 +19900,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19170,7 +19940,14 @@ export interface operations {
     };
     CompanionAssetsController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -19184,33 +19961,31 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "asset_pixel_cat_default",
-                     *         "name": "Pixel Cat Default",
-                     *         "type": "CAT",
-                     *         "description": "Pet pixel mặc định cho màn hình home.",
-                     *         "previewImageUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/preview.png",
-                     *         "spriteSheetUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sprite.png",
-                     *         "idleAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/idle.gif",
-                     *         "sleepAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sleep.gif",
-                     *         "walkAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/walk.gif",
-                     *         "primaryColor": "#7C5CFF",
-                     *         "secondaryColor": "#BCA8FF",
-                     *         "accentColor": "#FFB4A8",
-                     *         "zodiacSign": null,
-                     *         "chineseZodiac": null,
-                     *         "isDefault": true,
-                     *         "isActive": true,
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "asset_pixel_cat_default",
+                     *       "name": "Pixel Cat Default",
+                     *       "type": "CAT",
+                     *       "description": "Pet pixel mặc định cho màn hình home.",
+                     *       "previewImageUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/preview.png",
+                     *       "spriteSheetUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sprite.png",
+                     *       "idleAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/idle.gif",
+                     *       "sleepAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/sleep.gif",
+                     *       "walkAnimationUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/companions/pixel-cat/walk.gif",
+                     *       "primaryColor": "#7C5CFF",
+                     *       "secondaryColor": "#BCA8FF",
+                     *       "accentColor": "#FFB4A8",
+                     *       "zodiacSign": null,
+                     *       "chineseZodiac": null,
+                     *       "isDefault": true,
+                     *       "isActive": true,
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19237,7 +20012,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19246,7 +20021,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19345,7 +20120,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19372,7 +20147,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19381,7 +20156,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19459,7 +20234,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19486,7 +20261,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19495,7 +20270,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19576,7 +20351,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19603,7 +20378,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19612,7 +20387,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19704,7 +20479,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19731,7 +20506,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19740,7 +20515,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19780,7 +20555,14 @@ export interface operations {
     };
     CompanionMessagesController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -19794,26 +20576,24 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "message_after_checkin_01",
-                     *         "content": "Stress quá mới tìm đến tui hở? Bạn kể tui nghe đi nè!",
-                     *         "triggerType": "AFTER_CHECKIN",
-                     *         "mood": "STRESSED",
-                     *         "companionMood": "CURIOUS",
-                     *         "minHour": 6,
-                     *         "maxHour": 23,
-                     *         "weight": 10,
-                     *         "isActive": true,
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "message_after_checkin_01",
+                     *       "content": "Stress quá mới tìm đến tui hở? Bạn kể tui nghe đi nè!",
+                     *       "triggerType": "AFTER_CHECKIN",
+                     *       "mood": "STRESSED",
+                     *       "companionMood": "CURIOUS",
+                     *       "minHour": 6,
+                     *       "maxHour": 23,
+                     *       "weight": 10,
+                     *       "isActive": true,
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19840,7 +20620,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19849,7 +20629,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -19936,7 +20716,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -19963,7 +20743,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -19972,7 +20752,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20043,7 +20823,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20070,7 +20850,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20079,7 +20859,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20153,7 +20933,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20180,7 +20960,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20189,7 +20969,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20275,7 +21055,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20302,7 +21082,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20311,7 +21091,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20351,7 +21131,14 @@ export interface operations {
     };
     AmbientSoundsController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -20383,7 +21170,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20410,7 +21197,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20419,7 +21206,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20504,7 +21291,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20531,7 +21318,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20540,7 +21327,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20615,7 +21402,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20642,7 +21429,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20651,7 +21438,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20724,7 +21511,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20751,7 +21538,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20760,7 +21547,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20844,7 +21631,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20871,7 +21658,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20880,7 +21667,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -20920,7 +21707,14 @@ export interface operations {
     };
     BreathingExercisesController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -20954,7 +21748,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -20981,7 +21775,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -20990,7 +21784,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21079,7 +21873,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21106,7 +21900,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21115,7 +21909,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21190,7 +21984,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21217,7 +22011,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21226,7 +22020,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21313,7 +22107,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21340,7 +22134,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21349,7 +22143,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21389,7 +22183,14 @@ export interface operations {
     };
     CozyQuotesController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string;
+                isActive?: boolean;
+                /** @example 0 */
+                skip?: number;
+                /** @example 20 */
+                limit?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -21403,23 +22204,21 @@ export interface operations {
                 };
                 content: {
                     /**
-                     * @example [
-                     *       {
-                     *         "id": "quote_calm_01",
-                     *         "content": "Không cần phải ổn hết mọi ngày, chỉ cần tốt hơn một chút so với chính mình hôm qua.",
-                     *         "author": "Thì Ai Chill",
-                     *         "mood": "CALM",
-                     *         "imageUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/quotes/calm.png",
-                     *         "isActive": true,
-                     *         "createdAt": "2026-05-16T15:30:00.000Z",
-                     *         "updatedAt": "2026-05-16T15:30:00.000Z"
-                     *       }
-                     *     ]
+                     * @example {
+                     *       "id": "quote_calm_01",
+                     *       "content": "Không cần phải ổn hết mọi ngày, chỉ cần tốt hơn một chút so với chính mình hôm qua.",
+                     *       "author": "Thì Ai Chill",
+                     *       "mood": "CALM",
+                     *       "imageUrl": "https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/quotes/calm.png",
+                     *       "isActive": true,
+                     *       "createdAt": "2026-05-16T15:30:00.000Z",
+                     *       "updatedAt": "2026-05-16T15:30:00.000Z"
+                     *     }
                      */
-                    "application/json": unknown[];
+                    "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21446,7 +22245,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21455,7 +22254,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21536,7 +22335,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21563,7 +22362,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21572,7 +22371,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21640,7 +22439,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21667,7 +22466,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21676,7 +22475,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21749,7 +22548,7 @@ export interface operations {
                     "application/json": unknown[];
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21776,7 +22575,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21785,7 +22584,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21856,7 +22655,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -21883,7 +22682,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -21892,7 +22691,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -21973,7 +22772,7 @@ export interface operations {
                     "application/json": Record<string, never>;
                 };
             };
-            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH. */
+            /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -22000,7 +22799,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
+            /** @description Route or requested resource was not found. Possible codes: ROUTE_NOT_FOUND, USER_NOT_FOUND, USER_PROFILE_NOT_FOUND, USER_PREFERENCE_NOT_FOUND, SESSION_NOT_FOUND, NOTIFICATION_NOT_FOUND, PUSH_DEVICE_NOT_FOUND, REMINDER_NOT_FOUND, MOOD_CHECKIN_NOT_FOUND, JOURNAL_NOT_FOUND, USER_COMPANION_NOT_FOUND, RELAX_SESSION_NOT_FOUND, CATALOG_APP_THEME_NOT_FOUND, CATALOG_DEFAULT_APP_THEME_NOT_FOUND, CATALOG_ONBOARDING_SLIDE_NOT_FOUND, CATALOG_COMPANION_ASSET_NOT_FOUND, CATALOG_DEFAULT_COMPANION_ASSET_NOT_FOUND, CATALOG_COMPANION_MESSAGE_NOT_FOUND, CATALOG_ACTIVE_COMPANION_MESSAGE_NOT_FOUND, CATALOG_AMBIENT_SOUND_NOT_FOUND, CATALOG_BREATHING_EXERCISE_NOT_FOUND, CATALOG_COZY_QUOTE_NOT_FOUND, CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND, PAYMENT_NOT_FOUND, DATABASE_RECORD_NOT_FOUND. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -22009,7 +22808,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
+            /** @description Conflict with existing or related data. Possible codes: USER_EMAIL_ALREADY_EXISTS, PAYMENT_NOT_PENDING, DATABASE_UNIQUE_CONSTRAINT, DATABASE_FOREIGN_KEY_CONSTRAINT. */
             409: {
                 headers: {
                     [name: string]: unknown;

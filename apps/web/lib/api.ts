@@ -1,4 +1,8 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6823';
+// All HTTP API routes are served under /v1. The Socket.IO namespace
+// (`${API_URL}/realtime`) and infra routes are NOT versioned, so the prefix is
+// applied here at the HTTP layer only.
+export const API_VERSION_PREFIX = '/v1';
 const ACCESS_TOKEN_KEY = 'relax_access_token';
 const REFRESH_TOKEN_KEY = 'relax_refresh_token';
 const SESSION_ID_KEY = 'relax_session_id';
@@ -75,11 +79,14 @@ async function sendApiRequest<T>(
     headers.set('Authorization', `Bearer ${token}`);
   }
 
-  const response = await fetch(`${API_URL}${withQuery(path, options.query)}`, {
-    ...init,
-    headers,
-    cache: 'no-store',
-  });
+  const response = await fetch(
+    `${API_URL}${API_VERSION_PREFIX}${withQuery(path, options.query)}`,
+    {
+      ...init,
+      headers,
+      cache: 'no-store',
+    },
+  );
   const payload = await parseJsonResponse(response);
 
   if (!response.ok) {
