@@ -8,6 +8,7 @@ import {
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
+import { RealtimeService } from '../realtime/realtime.service';
 import { UsersService } from '../users/users.service';
 import { CreateCompanionInteractionDto } from './dto/create-companion-interaction.dto';
 import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-personalization.dto';
@@ -18,7 +19,19 @@ export class UserCompanionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly realtime: RealtimeService,
   ) {}
+
+  private emitCompanionUpdate(
+    userId: string,
+    companion: { id: string; mood?: unknown; action?: unknown },
+  ) {
+    this.realtime.emitToUser(userId, 'companion.updated', {
+      id: companion.id,
+      mood: companion.mood,
+      action: companion.action,
+    });
+  }
 
   async getMine(userId: string) {
     await this.usersService.findOne(userId);
@@ -49,30 +62,31 @@ export class UserCompanionsService {
       lastMoodAt: dto.mood ? new Date() : undefined,
     };
 
-    if (existing) {
-      return this.prisma.userCompanion.update({
-        where: { userId },
-        data,
-        include: { asset: true },
-      });
-    }
+    const companion = existing
+      ? await this.prisma.userCompanion.update({
+          where: { userId },
+          data,
+          include: { asset: true },
+        })
+      : await this.prisma.userCompanion.create({
+          data: {
+            userId,
+            assetId: asset?.id ?? dto.assetId,
+            name: dto.name ?? 'Mon Leo',
+            type: dto.type ?? asset?.type,
+            personalizationMode,
+            mood: dto.mood ?? CompanionMood.CHILL,
+            action: dto.action ?? CompanionAction.IDLE,
+            level: dto.level ?? 1,
+            affection: dto.affection ?? 0,
+            energy: dto.energy ?? 100,
+            lastSeenAt: new Date(),
+          },
+          include: { asset: true },
+        });
 
-    return this.prisma.userCompanion.create({
-      data: {
-        userId,
-        assetId: asset?.id ?? dto.assetId,
-        name: dto.name ?? 'Mon Leo',
-        type: dto.type ?? asset?.type,
-        personalizationMode,
-        mood: dto.mood ?? CompanionMood.CHILL,
-        action: dto.action ?? CompanionAction.IDLE,
-        level: dto.level ?? 1,
-        affection: dto.affection ?? 0,
-        energy: dto.energy ?? 100,
-        lastSeenAt: new Date(),
-      },
-      include: { asset: true },
-    });
+    this.emitCompanionUpdate(userId, companion);
+    return companion;
   }
 
   async interact(userId: string, dto: CreateCompanionInteractionDto) {
@@ -101,6 +115,7 @@ export class UserCompanionsService {
       }),
     ]);
 
+    this.emitCompanionUpdate(userId, updated);
     return { interaction, companion: updated };
   }
 
@@ -229,6 +244,7 @@ export class UserCompanionsService {
       include: { asset: true },
     });
 
+    this.emitCompanionUpdate(userId, updated);
     return {
       companion: updated,
       transition: {

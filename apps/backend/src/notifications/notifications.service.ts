@@ -5,6 +5,7 @@ import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
+import { RealtimeService } from '../realtime/realtime.service';
 import { UsersService } from '../users/users.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { NotificationQueryDto } from './dto/notification-query.dto';
@@ -16,6 +17,7 @@ export class NotificationsService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   getProviderStatus() {
@@ -191,6 +193,13 @@ export class NotificationsService {
         message: dto.message,
         type,
       },
+    });
+
+    this.realtime.emitToUser(userId, 'notification.created', {
+      id: notification.id,
+      title: notification.title,
+      type: notification.type,
+      createdAt: notification.createdAt,
     });
 
     return {
