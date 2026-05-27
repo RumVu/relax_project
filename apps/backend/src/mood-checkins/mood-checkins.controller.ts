@@ -26,6 +26,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateMoodCheckinDto } from './dto/create-mood-checkin.dto';
 import { MoodAnalyticsQueryDto } from './dto/mood-analytics-query.dto';
 import { MoodCheckinQueryDto } from './dto/mood-checkin-query.dto';
+import {
+  MoodCheckinPageDto,
+  MoodCheckinResponseDto,
+} from './dto/mood-checkin-response.dto';
 import { RecalculateWeeklyMoodStatsDto } from './dto/recalculate-weekly-mood-stats.dto';
 import { UpdateMoodCheckinDto } from './dto/update-mood-checkin.dto';
 import { MoodCheckinsService } from './mood-checkins.service';
@@ -44,7 +48,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'List all mood check-ins (admin)' })
-  @ApiOkResponse({ description: 'Mood check-in list.' })
+  @ApiOkResponse({ type: MoodCheckinPageDto, description: 'Mood check-in list.' })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -54,7 +58,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'List current user mood check-ins' })
-  @ApiOkResponse({ description: 'Current user mood check-in list.' })
+  @ApiOkResponse({ type: MoodCheckinPageDto, description: 'Current user mood check-in list.' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   findMine(@CurrentUser() user: AuthUser, @Query() query: MoodCheckinQueryDto) {
@@ -62,7 +66,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Get current user latest mood check-in' })
-  @ApiOkResponse({ description: 'Latest current user mood check-in.' })
+  @ApiOkResponse({ type: MoodCheckinResponseDto, description: 'Latest current user mood check-in.' })
   @UseGuards(JwtAuthGuard)
   @Get('me/latest')
   findMineLatest(@CurrentUser() user: AuthUser) {
@@ -144,7 +148,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Create current user mood check-in' })
-  @ApiCreatedResponse({ description: 'Created mood check-in.' })
+  @ApiCreatedResponse({ type: MoodCheckinResponseDto, description: 'Created mood check-in.' })
   @UseGuards(JwtAuthGuard)
   @Post('me')
   createMine(@CurrentUser() user: AuthUser, @Body() dto: CreateMoodCheckinDto) {
@@ -152,7 +156,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'List mood check-ins by user id (admin)' })
-  @ApiOkResponse({ description: 'User mood check-in list.' })
+  @ApiOkResponse({ type: MoodCheckinPageDto, description: 'User mood check-in list.' })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -223,7 +227,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Get one mood check-in by id' })
-  @ApiOkResponse({ description: 'Mood check-in payload.' })
+  @ApiOkResponse({ type: MoodCheckinResponseDto, description: 'Mood check-in payload.' })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
@@ -231,7 +235,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Update one mood check-in by id' })
-  @ApiOkResponse({ description: 'Updated mood check-in payload.' })
+  @ApiOkResponse({ type: MoodCheckinResponseDto, description: 'Updated mood check-in payload.' })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
@@ -243,7 +247,7 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Delete one mood check-in by id' })
-  @ApiOkResponse({ description: 'Deleted mood check-in payload.' })
+  @ApiOkResponse({ type: MoodCheckinResponseDto, description: 'Deleted mood check-in payload.' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {

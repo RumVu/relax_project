@@ -20,6 +20,10 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { FinishRelaxSessionDto } from './dto/finish-relax-session.dto';
 import { RelaxActivityQueryDto } from './dto/relax-activity-query.dto';
 import { StartRelaxSessionDto } from './dto/start-relax-session.dto';
+import {
+  RelaxSessionPageDto,
+  RelaxSessionResponseDto,
+} from './dto/relax-session-response.dto';
 import { RelaxActivitiesService } from './relax-activities.service';
 
 @ApiTags('Relax Activities')
@@ -40,7 +44,7 @@ export class RelaxActivitiesController {
   }
 
   @ApiOperation({ summary: 'Start current user relax activity session' })
-  @ApiCreatedResponse({ description: 'Started relax session.' })
+  @ApiCreatedResponse({ type: RelaxSessionResponseDto, description: 'Started relax session.' })
   @UseGuards(JwtAuthGuard)
   @Post('sessions/start')
   startSession(
@@ -65,7 +69,7 @@ export class RelaxActivitiesController {
   }
 
   @ApiOperation({ summary: 'List current user finished relax sessions' })
-  @ApiOkResponse({ description: 'Finished relax session list.' })
+  @ApiOkResponse({ type: RelaxSessionPageDto, description: 'Finished relax session list.' })
   @UseGuards(JwtAuthGuard)
   @Get('me/sessions')
   listSessions(
