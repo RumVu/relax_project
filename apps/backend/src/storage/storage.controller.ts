@@ -26,6 +26,7 @@ import { CreateSignedUrlQueryDto } from './dto/create-signed-url-query.dto';
 import { GetPublicUrlQueryDto } from './dto/get-public-url-query.dto';
 import { RegisterStorageFileDto } from './dto/register-storage-file.dto';
 import { RemoveStorageObjectDto } from './dto/remove-storage-object.dto';
+import { StorageFileResponseDto } from './dto/storage-file-response.dto';
 import { StorageHealthQueryDto } from './dto/storage-health-query.dto';
 import { StorageService } from './storage.service';
 
@@ -141,7 +142,11 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'List registered storage file metadata' })
-  @ApiOkResponse({ description: 'Storage file metadata list.' })
+  @ApiOkResponse({
+    type: StorageFileResponseDto,
+    isArray: true,
+    description: 'Storage file metadata list.',
+  })
   @AdminOnly()
   @Get('files')
   findFiles() {
@@ -149,7 +154,11 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'List current user storage file metadata' })
-  @ApiOkResponse({ description: 'Current user storage file metadata list.' })
+  @ApiOkResponse({
+    type: StorageFileResponseDto,
+    isArray: true,
+    description: 'Current user storage file metadata list.',
+  })
   @ApiBearerAuth('access-token')
   @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
   @UseGuards(JwtAuthGuard)
@@ -159,7 +168,7 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'Register storage file metadata' })
-  @ApiCreatedResponse({ description: 'Created storage file metadata.' })
+  @ApiCreatedResponse({ type: StorageFileResponseDto, description: 'Created storage file metadata.' })
   @ApiBearerAuth('access-token')
   @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
   @UseGuards(JwtAuthGuard)
@@ -172,7 +181,7 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'Delete storage file metadata by id' })
-  @ApiOkResponse({ description: 'Deleted storage file metadata.' })
+  @ApiOkResponse({ type: StorageFileResponseDto, description: 'Deleted storage file metadata.' })
   @AdminOnly()
   @Delete('files/:id')
   removeFileMetadata(@Param('id') id: string) {

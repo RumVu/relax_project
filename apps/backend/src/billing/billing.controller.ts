@@ -11,6 +11,7 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
+import { ConfirmPaymentResponseDto } from './dto/billing-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
 @ApiTags('Billing')
@@ -60,6 +61,7 @@ export class BillingController {
     summary: 'Confirm a pending payment and activate the subscription',
   })
   @ApiCreatedResponse({
+    type: ConfirmPaymentResponseDto,
     description:
       'Settled payment plus the newly activated subscription. Used by the manual/dev flow and by provider webhooks once wired.',
   })

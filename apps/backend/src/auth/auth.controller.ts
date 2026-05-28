@@ -29,6 +29,8 @@ import { DeleteAccountDto } from './dto/delete-account.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { AuthActionResultDto, AuthResponseDto } from './dto/auth-response.dto';
+import { UserResponseDto } from '../users/dto/user-response.dto';
 
 @ApiTags('Auth')
 @Throttle({
@@ -39,7 +41,7 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a local user and create a session' })
-  @ApiCreatedResponse({ description: 'User, access token, and refresh token.' })
+  @ApiCreatedResponse({ type: AuthResponseDto, description: 'User, access token, and refresh token.' })
   @Throttle({
     default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
   })
@@ -53,7 +55,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiCreatedResponse({ description: 'User, access token, and refresh token.' })
+  @ApiCreatedResponse({ type: AuthResponseDto, description: 'User, access token, and refresh token.' })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials or inactive user.',
   })
@@ -71,6 +73,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Rotate a refresh token' })
   @ApiCreatedResponse({
+    type: AuthResponseDto,
     description: 'Fresh access token, refresh token, and user.',
   })
   @ApiUnauthorizedResponse({
@@ -86,7 +89,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Logout by revoking one refresh token' })
-  @ApiCreatedResponse({ description: 'Logout success payload.' })
+  @ApiCreatedResponse({ type: AuthActionResultDto, description: 'Logout success payload.' })
   @Post('logout')
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
@@ -94,6 +97,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Request a password reset email' })
   @ApiCreatedResponse({
+    type: AuthActionResultDto,
     description:
       'Password reset request accepted. In development, devToken is returned if no email provider is configured.',
   })
@@ -107,6 +111,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Reset password with an account token' })
   @ApiCreatedResponse({
+    type: AuthActionResultDto,
     description: 'Password has been reset and active sessions were revoked.',
   })
   @Post('password-reset/confirm')
@@ -115,7 +120,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify email with an account token' })
-  @ApiCreatedResponse({ description: 'Email verification result.' })
+  @ApiCreatedResponse({ type: AuthActionResultDto, description: 'Email verification result.' })
   @Post('email/verify')
   verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto);
@@ -123,7 +128,7 @@ export class AuthController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get the current authenticated user' })
-  @ApiOkResponse({ description: 'Current safe user payload.' })
+  @ApiOkResponse({ type: UserResponseDto, description: 'Current safe user payload.' })
   @ApiUnauthorizedResponse({
     description: 'Bearer token is missing or invalid.',
   })
@@ -148,6 +153,7 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Request current user email verification token' })
   @ApiCreatedResponse({
+    type: AuthActionResultDto,
     description:
       'Email verification request accepted. In development, devToken is returned if no email provider is configured.',
   })
@@ -160,6 +166,7 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Delete or deactivate the current account' })
   @ApiOkResponse({
+    type: AuthActionResultDto,
     description:
       'Account deletion result. SOFT anonymizes and deactivates; HARD removes related data via cascade.',
   })

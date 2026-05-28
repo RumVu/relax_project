@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateJournalDto } from './dto/create-journal.dto';
 import { JournalQueryDto } from './dto/journal-query.dto';
+import { JournalPageDto, JournalResponseDto } from './dto/journal-response.dto';
 import { UpdateJournalDto } from './dto/update-journal.dto';
 import { JournalsService } from './journals.service';
 
@@ -35,7 +36,7 @@ export class JournalsController {
   constructor(private readonly journalsService: JournalsService) {}
 
   @ApiOperation({ summary: 'List current user journals' })
-  @ApiOkResponse({ description: 'Current user journal list.' })
+  @ApiOkResponse({ type: JournalPageDto, description: 'Current user journal list.' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   findMine(@CurrentUser() user: AuthUser, @Query() query: JournalQueryDto) {
@@ -51,7 +52,7 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'Create current user journal' })
-  @ApiCreatedResponse({ description: 'Created journal.' })
+  @ApiCreatedResponse({ type: JournalResponseDto, description: 'Created journal.' })
   @UseGuards(JwtAuthGuard)
   @Post('me')
   createMine(@CurrentUser() user: AuthUser, @Body() dto: CreateJournalDto) {
@@ -59,7 +60,7 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'List journals by user id (admin)' })
-  @ApiOkResponse({ description: 'User journal list.' })
+  @ApiOkResponse({ type: JournalPageDto, description: 'User journal list.' })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -72,7 +73,7 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'Get one journal by id' })
-  @ApiOkResponse({ description: 'Journal payload.' })
+  @ApiOkResponse({ type: JournalResponseDto, description: 'Journal payload.' })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
@@ -80,7 +81,7 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'Update one journal by id' })
-  @ApiOkResponse({ description: 'Updated journal.' })
+  @ApiOkResponse({ type: JournalResponseDto, description: 'Updated journal.' })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(
@@ -92,7 +93,7 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'Delete one journal by id' })
-  @ApiOkResponse({ description: 'Deleted journal.' })
+  @ApiOkResponse({ type: JournalResponseDto, description: 'Deleted journal.' })
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: AuthUser) {
