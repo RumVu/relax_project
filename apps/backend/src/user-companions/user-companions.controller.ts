@@ -12,6 +12,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateCompanionInteractionDto } from './dto/create-companion-interaction.dto';
 import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-personalization.dto';
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
+import { UserCompanionResponseDto } from './dto/user-companion-response.dto';
 import { UserCompanionsService } from './user-companions.service';
 
 @ApiTags('User Companions')
@@ -21,7 +22,7 @@ export class UserCompanionsController {
   constructor(private readonly userCompanionsService: UserCompanionsService) {}
 
   @ApiOperation({ summary: 'Get current user companion' })
-  @ApiOkResponse({ description: 'Current user companion.' })
+  @ApiOkResponse({ type: UserCompanionResponseDto, description: 'Current user companion.' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMine(@CurrentUser() user: AuthUser) {
@@ -29,7 +30,7 @@ export class UserCompanionsController {
   }
 
   @ApiOperation({ summary: 'Upsert current user companion' })
-  @ApiOkResponse({ description: 'Updated current user companion.' })
+  @ApiOkResponse({ type: UserCompanionResponseDto, description: 'Updated current user companion.' })
   @UseGuards(JwtAuthGuard)
   @Patch('me')
   upsertMine(

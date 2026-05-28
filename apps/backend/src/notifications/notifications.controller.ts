@@ -21,6 +21,12 @@ import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateNotificationDto } from './dto/create-notification.dto';
+import {
+  NotificationPageDto,
+  NotificationResponseDto,
+  PushDeviceResponseDto,
+  UnreadCountResponseDto,
+} from './dto/notification-response.dto';
 import { NotificationQueryDto } from './dto/notification-query.dto';
 import { RegisterPushDeviceDto } from './dto/register-push-device.dto';
 import { NotificationsService } from './notifications.service';
@@ -40,7 +46,7 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'List current user notifications' })
-  @ApiOkResponse({ description: 'Current user notification list.' })
+  @ApiOkResponse({ type: NotificationPageDto, description: 'Current user notification list.' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   listMine(
@@ -51,7 +57,7 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Get unread notification count' })
-  @ApiOkResponse({ description: 'Unread notification count.' })
+  @ApiOkResponse({ type: UnreadCountResponseDto, description: 'Unread notification count.' })
   @UseGuards(JwtAuthGuard)
   @Get('me/unread-count')
   getUnreadCount(@CurrentUser() user: AuthUser) {
@@ -59,7 +65,7 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Register or update current user push device' })
-  @ApiCreatedResponse({ description: 'Registered push device.' })
+  @ApiCreatedResponse({ type: PushDeviceResponseDto, description: 'Registered push device.' })
   @UseGuards(JwtAuthGuard)
   @Post('me/devices')
   registerDevice(
@@ -70,7 +76,11 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'List current user push devices' })
-  @ApiOkResponse({ description: 'Registered push devices.' })
+  @ApiOkResponse({
+    type: PushDeviceResponseDto,
+    isArray: true,
+    description: 'Registered push devices.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/devices')
   listDevices(@CurrentUser() user: AuthUser) {
@@ -100,7 +110,7 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Mark one notification as read' })
-  @ApiOkResponse({ description: 'Updated notification.' })
+  @ApiOkResponse({ type: NotificationResponseDto, description: 'Updated notification.' })
   @UseGuards(JwtAuthGuard)
   @Patch('me/:id/read')
   markRead(@CurrentUser() user: AuthUser, @Param('id') id: string) {
