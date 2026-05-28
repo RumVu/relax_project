@@ -204,9 +204,9 @@ export function MetricCard({
       <div className={cn('flex h-11 w-11 items-center justify-center rounded-lg', toneClass)}>
         <Icon className="h-5 w-5" />
       </div>
-      <p className="mt-5 text-sm font-semibold text-slate">{label}</p>
-      <p className="mt-2 text-3xl font-extrabold text-ink">{value}</p>
-      {note ? <p className="mt-1 break-words text-sm font-medium text-plum">{note}</p> : null}
+      <p className="mt-5 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">{label}</p>
+      <p className="mt-2 text-3xl font-extrabold text-[var(--app-text,theme(colors.ink))]">{value}</p>
+      {note ? <p className="mt-1 break-words text-sm font-medium text-[var(--app-muted,theme(colors.plum))]">{note}</p> : null}
     </Card>
   );
 }
@@ -223,11 +223,11 @@ export function SectionTitle({
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-plum">
+        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--app-muted,theme(colors.plum))]">
           Khu vực
         </p>
-        <h3 className="mt-2 text-xl font-extrabold text-ink">{title}</h3>
-        {copy ? <p className="mt-1 text-sm text-slate">{copy}</p> : null}
+        <h3 className="mt-2 text-xl font-extrabold text-[var(--app-text,theme(colors.ink))]">{title}</h3>
+        {copy ? <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">{copy}</p> : null}
       </div>
       {action}
     </div>
@@ -282,7 +282,7 @@ export function DataTable({
           <tr>
             {columns.map((column, columnIndex) => (
               <th
-                className="border-b border-lilac/70 px-3 py-3 font-bold text-slate"
+                className="border-b border-[var(--field-border,theme(colors.lilac/70))] px-3 py-3 font-bold text-[var(--app-muted,theme(colors.slate))]"
                 key={`${column}-${columnIndex}`}
               >
                 {column}
@@ -295,7 +295,7 @@ export function DataTable({
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) => (
                 <td
-                  className="border-b border-lilac/45 px-3 py-3 font-medium text-ink"
+                  className="border-b border-[var(--field-border,theme(colors.lilac/45))] px-3 py-3 font-medium text-[var(--app-text,theme(colors.ink))]"
                   key={`${rowIndex}-${cellIndex}`}
                 >
                   {cell}

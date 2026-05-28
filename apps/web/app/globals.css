@@ -72,3 +72,77 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+/* -------------------------------------------------------------------------
+ * Dark-mode overrides
+ *
+ * The codebase historically hardcodes Tailwind utility classes like
+ * `text-ink` (#171334 — almost black) and `bg-white` everywhere, which is
+ * fine on the light theme but turns into dark-on-dark / dark-on-white blobs
+ * the moment a user picks the DARK theme.  These overrides remap every
+ * hardcoded utility so the whole app — login page, mood block, sidebar,
+ * settings, admin tables — picks up theme-aware colours without touching
+ * every component file.
+ * ------------------------------------------------------------------------- */
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Text colour overrides */
+html[data-theme='dark'] .text-ink,
+html[data-theme='dark'] .text-night {
+  color: var(--app-text);
+}
+html[data-theme='dark'] .text-slate,
+html[data-theme='dark'] .text-plum {
+  color: var(--app-muted);
+}
+html[data-theme='dark'] .text-violet {
+  color: var(--brand-primary);
+}
+
+/* Surface / panel / card overrides — anything that was a flat white
+   surface in light mode becomes the dark panel colour. */
+html[data-theme='dark'] .bg-white,
+html[data-theme='dark'] .bg-mist,
+html[data-theme='dark'] .bg-cloud {
+  background-color: var(--panel-strong);
+}
+html[data-theme='dark'] .bg-white\/75,
+html[data-theme='dark'] .bg-white\/80,
+html[data-theme='dark'] .bg-white\/85,
+html[data-theme='dark'] .bg-white\/90,
+html[data-theme='dark'] .bg-white\/95 {
+  background-color: var(--panel-bg);
+}
+
+/* Border colour overrides */
+html[data-theme='dark'] .border-lilac,
+html[data-theme='dark'] .border-lilac\/45,
+html[data-theme='dark'] .border-lilac\/60,
+html[data-theme='dark'] .border-lilac\/70,
+html[data-theme='dark'] .border-cloud,
+html[data-theme='dark'] .border-mist {
+  border-color: var(--field-border);
+}
+
+/* Toggle / button states that pair a colored bg with `text-ink` need the
+   text to stay readable.  When the bg is `bg-violet` (already the brand
+   primary) we want white text so the contrast is preserved. */
+html[data-theme='dark'] .bg-violet {
+  color: #ffffff;
+}
+
+/* Inputs/selects already use var(--app-text) for foreground via the rule
+   above, but the placeholder colour needs an explicit override on dark
+   themes so it doesn't disappear into the field background. */
+html[data-theme='dark'] input::placeholder,
+html[data-theme='dark'] textarea::placeholder {
+  color: color-mix(in srgb, var(--app-muted) 70%, transparent);
+}
+
+/* Disabled buttons, secondary buttons that use bg-cloud + text-ink keep
+   ink ↔ muted swap — already covered by the .text-ink rule, but make sure
+   any `bg-cloud` block is dark-friendly too (handled above). */
+
