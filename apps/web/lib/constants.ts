@@ -6,6 +6,7 @@ export const primaryNav: NavItem[] = [
   { label: 'Breaks', href: '/dashboard/breaks' },
   { label: 'Journal', href: '/dashboard/journal' },
   { label: 'Analytics', href: '/dashboard/analytics' },
+  { label: 'Weather', href: '/dashboard/weather' },
   { label: 'Settings', href: '/dashboard/settings' },
 ];
 

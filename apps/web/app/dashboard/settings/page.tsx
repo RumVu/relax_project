@@ -9,6 +9,7 @@ import {
   type LucideIcon,
   MapPin,
   Moon,
+  Navigation,
   Repeat,
   Save,
   Smartphone,
@@ -33,6 +34,11 @@ import {
 import { apiFetch, extractList } from '@/lib/api';
 import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
+import {
+  chineseZodiacLabel,
+  computeZodiac,
+  zodiacLabel,
+} from '@/lib/zodiac';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 
@@ -420,20 +426,37 @@ export default function SettingsPage() {
                 }))
               }
             />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <DerivedCard
-                icon={WandSparkles}
-                label="Zodiac"
-                note="Tự tính theo ngày sinh"
-                value={settings.profile.zodiacSign}
-              />
-              <DerivedCard
-                icon={WandSparkles}
-                label="Chinese zodiac"
-                note="Cập nhật cùng lúc với birthday"
-                value={settings.profile.chineseZodiac}
-              />
-            </div>
+            {(() => {
+              // Compute zodiac client-side from the in-progress birthday
+              // draft so the cards update the moment the user picks a new
+              // date, without waiting for a PATCH round-trip. Falls back
+              // to the server-rendered values when the draft is empty.
+              const previewed = computeZodiac(birthday);
+              const liveZodiac =
+                zodiacLabel(previewed.zodiacSign) !== '—'
+                  ? zodiacLabel(previewed.zodiacSign)
+                  : settings.profile.zodiacSign;
+              const liveChinese =
+                chineseZodiacLabel(previewed.chineseZodiac) !== '—'
+                  ? chineseZodiacLabel(previewed.chineseZodiac)
+                  : settings.profile.chineseZodiac;
+              return (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DerivedCard
+                    icon={WandSparkles}
+                    label="Zodiac"
+                    note="Tự đổi ngay khi chọn ngày sinh"
+                    value={liveZodiac}
+                  />
+                  <DerivedCard
+                    icon={WandSparkles}
+                    label="Chinese zodiac"
+                    note="Theo năm sinh — cập nhật tức thì"
+                    value={liveChinese}
+                  />
+                </div>
+              );
+            })()}
           </div>
           <Button
             className="mt-5"
@@ -718,6 +741,55 @@ export default function SettingsPage() {
             >
               <Save className="h-4 w-4" />
               {saveState === 'saving' ? 'Đang lưu' : 'Lưu preferences'}
+            </Button>
+            <Button
+              onClick={() => {
+                if (typeof navigator === 'undefined' || !navigator.geolocation) {
+                  pushToast({
+                    tone: 'error',
+                    title: 'Trình duyệt không hỗ trợ định vị',
+                  });
+                  return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                  async (pos) => {
+                    try {
+                      await apiFetch('/weather/me/location', {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                          latitude: pos.coords.latitude,
+                          longitude: pos.coords.longitude,
+                          weatherEnabled: true,
+                        }),
+                      });
+                      setRefreshKey((current) => current + 1);
+                      triggerRefresh();
+                      pushToast({
+                        tone: 'success',
+                        title: 'Đã cập nhật vị trí',
+                        message:
+                          'Backend sẽ lấy thời tiết theo vị trí hiện tại của anh.',
+                      });
+                    } catch {
+                      pushToast({
+                        tone: 'error',
+                        title: 'Không lưu được vị trí',
+                      });
+                    }
+                  },
+                  (err) =>
+                    pushToast({
+                      tone: 'error',
+                      title: 'Không lấy được vị trí',
+                      message: err.message,
+                    }),
+                  { enableHighAccuracy: true, timeout: 10_000 },
+                );
+              }}
+              variant="secondary"
+            >
+              <Navigation className="h-4 w-4" />
+              Dùng vị trí hiện tại
             </Button>
             <Button
               onClick={async () => {

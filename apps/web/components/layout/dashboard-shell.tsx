@@ -8,6 +8,7 @@ import {
   BarChart3,
   Bell,
   BookOpenText,
+  CloudSun,
   FileClock,
   Home,
   Leaf,
@@ -36,6 +37,7 @@ const iconMap = {
   Breaks: Wind,
   Journal: BookOpenText,
   Analytics: BarChart3,
+  Weather: CloudSun,
   Settings,
   'Admin Home': Shield,
   Users,
@@ -138,7 +140,11 @@ export function DashboardShell({
   return (
     <main
       className={cn(
-        'min-h-screen overflow-x-hidden px-3 py-4 text-ink transition sm:px-5 lg:px-6',
+        // NOTE: overflow-x-hidden intentionally NOT set here — it would
+        // create a new scroll containing block and break `lg:sticky` on
+        // the sidebar. Horizontal overflow is handled on <body> in
+        // globals.css instead.
+        'min-h-screen px-3 py-4 text-ink transition sm:px-5 lg:px-6',
         focusMode && 'bg-[radial-gradient(circle_at_top,rgba(64,201,162,0.12),transparent_32%)]',
       )}
     >
