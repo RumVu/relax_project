@@ -1,6 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Allow Next.js dev server (HMR + RSC chunks) to be reached through any
+  // *.trycloudflare.com quick tunnel. Without this, dev mode returns 403 on
+  // internal `_next/*` assets when the Host header is not `localhost`.
+  // Production is unaffected — this setting only applies to `next dev`.
+  allowedDevOrigins: ['*.trycloudflare.com'],
   async headers() {
     return [
       {
