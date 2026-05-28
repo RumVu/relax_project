@@ -2189,6 +2189,23 @@ export interface components {
             path: string;
             upsert?: boolean;
         };
+        StorageFileResponseDto: {
+            id: string;
+            userId: string | null;
+            filename: string;
+            mimetype: string;
+            size: number;
+            provider: string;
+            path: string | null;
+            url: string;
+            publicUrl: string | null;
+            bucket: string | null;
+            isPublic: boolean;
+            /** Format: date-time */
+            expiresAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
         RegisterStorageFileDto: {
             filename: string;
             mimetype: string;
@@ -2204,6 +2221,85 @@ export interface components {
             paths: string[];
         };
         Object: Record<string, never>;
+        UserProfileResponseDto: {
+            id: string;
+            userId: string;
+            displayName: string | null;
+            bio: string | null;
+            /** Format: date-time */
+            birthday: string | null;
+            zodiacSign: string | null;
+            chineseZodiac: string | null;
+            totalMoodCheckins: number;
+            totalJournalPosts: number;
+            currentStreak: number;
+            longestStreak: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UserPreferenceResponseDto: {
+            id: string;
+            userId: string;
+            language: string;
+            timezone: string;
+            latitude: number | null;
+            longitude: number | null;
+            locationName: string | null;
+            weatherEnabled: boolean;
+            themeMode: Record<string, never>;
+            themeId: string | null;
+            enableCompanionBubble: boolean;
+            bubbleIntervalSeconds: number;
+            enableSound: boolean;
+            enableHaptics: boolean;
+            pushNotificationsEnabled: boolean;
+            emailNotificationsEnabled: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        TierNameDto: {
+            name: string;
+        };
+        UserSubscriptionSummaryDto: {
+            id: string;
+            planName: string;
+            status: string;
+            /** Format: date-time */
+            endDate: string | null;
+            tier?: components["schemas"]["TierNameDto"] | null;
+        };
+        UserResponseDto: {
+            id: string;
+            email: string;
+            name: string | null;
+            avatar: string | null;
+            role: Record<string, never>;
+            authProvider: Record<string, never>;
+            emailVerified: boolean;
+            isActive: boolean;
+            /** Format: date-time */
+            lastLoginAt: string | null;
+            /** Format: date-time */
+            deletedAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            profile?: components["schemas"]["UserProfileResponseDto"] | null;
+            preferences?: components["schemas"]["UserPreferenceResponseDto"] | null;
+            subscriptions?: components["schemas"]["UserSubscriptionSummaryDto"][];
+        };
+        UserPageDto: {
+            items: components["schemas"]["UserResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         CreateUserDto: {
             /** Format: email */
             email: string;
@@ -2232,6 +2328,14 @@ export interface components {
             password: string;
             name?: string;
         };
+        AuthResponseDto: {
+            accessToken: string;
+            refreshToken: string;
+            /** Format: date-time */
+            expiresAt: string;
+            sessionId?: string;
+            user: components["schemas"]["UserResponseDto"];
+        };
         LoginDto: {
             /** Format: email */
             email: string;
@@ -2239,6 +2343,16 @@ export interface components {
         };
         RefreshTokenDto: {
             refreshToken: string;
+        };
+        AuthActionResultDto: {
+            success?: boolean;
+            mode?: string;
+            revokedSessions?: boolean;
+            anonymized?: boolean;
+            devToken?: string;
+            /** Format: date-time */
+            expiresAt?: string;
+            user?: components["schemas"]["UserResponseDto"];
         };
         RequestPasswordResetDto: {
             /** Format: email */
@@ -2278,6 +2392,39 @@ export interface components {
             pushNotificationsEnabled?: boolean;
             emailNotificationsEnabled?: boolean;
         };
+        SessionResponseDto: {
+            id: string;
+            userId: string;
+            userAgent: string | null;
+            ipAddress: string | null;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MoodCheckinResponseDto: {
+            id: string;
+            userId: string;
+            mood: Record<string, never>;
+            intensity: number | null;
+            rawScore: number | null;
+            finalScore: number | null;
+            /** Format: date-time */
+            scoredAt: string | null;
+            note: string | null;
+            tags: string[];
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        MoodCheckinPageDto: {
+            items: components["schemas"]["MoodCheckinResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         RecalculateWeeklyMoodStatsDto: {
             /** Format: date-time */
             from?: string;
@@ -2303,11 +2450,62 @@ export interface components {
             title?: string;
             moodBefore?: Record<string, never>;
         };
+        RelaxSessionResponseDto: {
+            id: string;
+            userId: string;
+            activityType: Record<string, never>;
+            status: Record<string, never>;
+            resourceId: string | null;
+            title: string;
+            /** Format: date-time */
+            startedAt: string;
+            /** Format: date-time */
+            endedAt: string | null;
+            duration: number | null;
+            moodBefore: Record<string, never> | null;
+            moodAfter: Record<string, never> | null;
+            reliefLevel: number | null;
+            stressReliefPercent: number | null;
+            note: string | null;
+            nextActionAccepted: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         FinishRelaxSessionDto: {
             moodAfter?: Record<string, never>;
             reliefLevel?: number;
             note?: string;
             nextActionAccepted?: string;
+        };
+        RelaxSessionPageDto: {
+            items: components["schemas"]["RelaxSessionResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
+        JournalResponseDto: {
+            id: string;
+            userId: string;
+            title: string | null;
+            content: string;
+            mood: Record<string, never> | null;
+            tags: string[];
+            isPrivate: boolean;
+            isFavorite: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        JournalPageDto: {
+            items: components["schemas"]["JournalResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         CreateJournalDto: {
             title?: string;
@@ -2324,6 +2522,52 @@ export interface components {
             tags?: string[];
             isPrivate?: boolean;
             isFavorite?: boolean;
+        };
+        CompanionAssetResponseDto: {
+            id: string;
+            name: string;
+            type: Record<string, never>;
+            description: string | null;
+            previewImageUrl: string | null;
+            spriteSheetUrl: string | null;
+            idleAnimationUrl: string | null;
+            sleepAnimationUrl: string | null;
+            walkAnimationUrl: string | null;
+            primaryColor: string | null;
+            secondaryColor: string | null;
+            accentColor: string | null;
+            zodiacSign: string | null;
+            chineseZodiac: string | null;
+            isDefault: boolean;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        UserCompanionResponseDto: {
+            id: string;
+            userId: string;
+            assetId: string | null;
+            name: string;
+            type: Record<string, never>;
+            personalizationMode: Record<string, never>;
+            mood: Record<string, never>;
+            action: Record<string, never>;
+            level: number;
+            affection: number;
+            energy: number;
+            /** Format: date-time */
+            lastSeenAt: string | null;
+            /** Format: date-time */
+            lastFedAt: string | null;
+            /** Format: date-time */
+            lastMoodAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+            asset?: components["schemas"]["CompanionAssetResponseDto"] | null;
         };
         UpsertUserCompanionDto: {
             assetId?: string;
@@ -2355,6 +2599,30 @@ export interface components {
             reverseGeocode?: boolean;
             localityLanguage?: string;
         };
+        NotificationResponseDto: {
+            id: string;
+            userId: string;
+            title: string;
+            message: string;
+            type: Record<string, never>;
+            relatedEntity: string | null;
+            relatedId: string | null;
+            isRead: boolean;
+            /** Format: date-time */
+            readAt: string | null;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        NotificationPageDto: {
+            items: components["schemas"]["NotificationResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
+        UnreadCountResponseDto: {
+            count: number;
+        };
         RegisterPushDeviceDto: {
             token: string;
             platform: Record<string, never>;
@@ -2365,10 +2633,50 @@ export interface components {
             timezone?: string;
             enabled?: boolean;
         };
+        PushDeviceResponseDto: {
+            id: string;
+            userId: string;
+            token: string;
+            platform: Record<string, never>;
+            provider: Record<string, never>;
+            deviceId: string | null;
+            deviceName: string | null;
+            appVersion: string | null;
+            timezone: string | null;
+            enabled: boolean;
+            /** Format: date-time */
+            lastSeenAt: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         CreateNotificationDto: {
             title: string;
             message: string;
             type?: Record<string, never>;
+        };
+        ReminderResponseDto: {
+            id: string;
+            userId: string;
+            title: string;
+            message: string | null;
+            type: Record<string, never>;
+            /** Format: date-time */
+            scheduledAt: string;
+            repeatRule: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ReminderPageDto: {
+            items: components["schemas"]["ReminderResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         CreateReminderDto: {
             title: string;
@@ -2421,6 +2729,75 @@ export interface components {
              */
             planName: string;
         };
+        PaymentResponseDto: {
+            id: string;
+            userId: string;
+            amount: number;
+            currency: string;
+            status: Record<string, never>;
+            provider: string | null;
+            method: string | null;
+            description: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        SubscriptionResponseDto: {
+            id: string;
+            userId: string;
+            tierId: string | null;
+            status: Record<string, never>;
+            planName: string;
+            price: number;
+            currency: string;
+            /** Format: date-time */
+            startDate: string;
+            /** Format: date-time */
+            endDate: string | null;
+            externalSubscriptionId: string | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ConfirmPaymentPlanDto: {
+            name: string;
+            title: string;
+            price: number;
+            currency: string;
+            source: string;
+        };
+        ConfirmPaymentResponseDto: {
+            payment: components["schemas"]["PaymentResponseDto"];
+            subscription: components["schemas"]["SubscriptionResponseDto"];
+            plan: components["schemas"]["ConfirmPaymentPlanDto"];
+        };
+        AppThemeResponseDto: {
+            id: string;
+            name: string;
+            mode: Record<string, never>;
+            backgroundColor: string;
+            surfaceColor: string;
+            primaryColor: string;
+            secondaryColor: string | null;
+            accentColor: string | null;
+            textColor: string;
+            mutedTextColor: string | null;
+            isDefault: boolean;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AppThemePageDto: {
+            items: components["schemas"]["AppThemeResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         CreateAppThemeDto: {
             name: string;
             mode: Record<string, never>;
@@ -2447,6 +2824,27 @@ export interface components {
             isDefault?: boolean;
             isActive?: boolean;
         };
+        OnboardingSlideResponseDto: {
+            id: string;
+            title: string;
+            subtitle: string | null;
+            description: string | null;
+            imageUrl: string | null;
+            animationUrl: string | null;
+            displayOrder: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        OnboardingSlidePageDto: {
+            items: components["schemas"]["OnboardingSlideResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         CreateOnboardingSlideDto: {
             title: string;
             subtitle?: string;
@@ -2464,6 +2862,13 @@ export interface components {
             animationUrl?: string;
             displayOrder?: number;
             isActive?: boolean;
+        };
+        CompanionAssetPageDto: {
+            items: components["schemas"]["CompanionAssetResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         CreateCompanionAssetDto: {
             name: string;
@@ -2495,6 +2900,28 @@ export interface components {
             isDefault?: boolean;
             isActive?: boolean;
         };
+        CompanionMessageResponseDto: {
+            id: string;
+            content: string;
+            triggerType: Record<string, never>;
+            mood: Record<string, never> | null;
+            companionMood: Record<string, never> | null;
+            minHour: number | null;
+            maxHour: number | null;
+            weight: number;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CompanionMessagePageDto: {
+            items: components["schemas"]["CompanionMessageResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         CreateCompanionMessageDto: {
             content: string;
             triggerType?: Record<string, never>;
@@ -2515,6 +2942,27 @@ export interface components {
             weight?: number;
             isActive?: boolean;
         };
+        AmbientSoundResponseDto: {
+            id: string;
+            title: string;
+            description: string | null;
+            category: string;
+            soundUrl: string;
+            imageUrl: string | null;
+            duration: number | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        AmbientSoundPageDto: {
+            items: components["schemas"]["AmbientSoundResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
+        };
         CreateAmbientSoundDto: {
             title: string;
             description?: string;
@@ -2532,6 +2980,29 @@ export interface components {
             imageUrl?: string;
             duration?: number;
             isActive?: boolean;
+        };
+        BreathingExerciseResponseDto: {
+            id: string;
+            title: string;
+            description: string | null;
+            inhaleSeconds: number;
+            holdSeconds: number;
+            exhaleSeconds: number;
+            cycles: number;
+            duration: number | null;
+            imageUrl: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        BreathingExercisePageDto: {
+            items: components["schemas"]["BreathingExerciseResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         CreateBreathingExerciseDto: {
             title: string;
@@ -2554,6 +3025,25 @@ export interface components {
             duration?: number;
             imageUrl?: string;
             isActive?: boolean;
+        };
+        CozyQuoteResponseDto: {
+            id: string;
+            content: string;
+            author: string | null;
+            mood: Record<string, never> | null;
+            imageUrl: string | null;
+            isActive: boolean;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CozyQuotePageDto: {
+            items: components["schemas"]["CozyQuoteResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         CreateCozyQuoteDto: {
             content: string;
@@ -4238,7 +4728,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StorageFileResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -4370,7 +4860,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StorageFileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -4484,7 +4974,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StorageFileResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -4601,7 +5091,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["StorageFileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -4862,7 +5352,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5016,7 +5506,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5157,7 +5647,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5298,7 +5788,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5450,7 +5940,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5604,7 +6094,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5757,7 +6247,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -5909,7 +6399,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6061,7 +6551,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6213,7 +6703,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6366,7 +6856,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6518,7 +7008,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6661,7 +7151,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -6814,7 +7304,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7100,7 +7590,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AuthActionResultDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7208,7 +7698,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7327,7 +7817,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7432,7 +7922,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7548,7 +8038,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserProfileResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7665,7 +8155,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserPreferenceResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7804,7 +8294,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserPreferenceResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -7918,7 +8408,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserPreferenceResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8054,7 +8544,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserPreferenceResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8165,7 +8655,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["SessionResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8279,7 +8769,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["SessionResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8502,7 +8992,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["SessionResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8614,7 +9104,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["SessionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8851,7 +9341,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -8972,7 +9462,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -9097,7 +9587,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -9207,7 +9697,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -10152,7 +10642,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -10790,7 +11280,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -10903,7 +11393,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -11031,7 +11521,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["MoodCheckinResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -11269,7 +11759,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RelaxSessionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -11535,7 +12025,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RelaxSessionPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -11811,7 +12301,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["RelaxSessionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12071,7 +12561,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["RelaxSessionPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12347,7 +12837,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12473,7 +12963,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12739,7 +13229,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12851,7 +13341,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -12963,7 +13453,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -13091,7 +13581,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["JournalResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -13223,7 +13713,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserCompanionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -13372,7 +13862,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UserCompanionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15705,7 +16195,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["NotificationPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15802,7 +16292,7 @@ export interface operations {
                      *       "count": 3
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["UnreadCountResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15913,7 +16403,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["PushDeviceResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -16038,7 +16528,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["PushDeviceResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -16369,7 +16859,7 @@ export interface operations {
                      *       "createdAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["NotificationResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -16718,7 +17208,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -16838,7 +17328,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -17076,7 +17566,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -17204,7 +17694,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -17321,7 +17811,7 @@ export interface operations {
                      *       "hasMore": false
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -17541,7 +18031,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ReminderResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18502,7 +18992,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ConfirmPaymentResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18920,7 +19410,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AppThemePageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19049,7 +19539,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AppThemeResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19159,7 +19649,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AppThemeResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19272,7 +19762,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AppThemeResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19396,7 +19886,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AppThemeResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19511,7 +20001,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["OnboardingSlidePageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19632,7 +20122,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["OnboardingSlideResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19741,7 +20231,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["OnboardingSlideResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19861,7 +20351,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["OnboardingSlideResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19982,7 +20472,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionAssetPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20117,7 +20607,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionAssetResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20231,7 +20721,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionAssetResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20348,7 +20838,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionAssetResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20476,7 +20966,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionAssetResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20590,7 +21080,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionMessagePageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20713,7 +21203,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionMessageResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20820,7 +21310,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionMessageResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -20930,7 +21420,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionMessageResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21052,7 +21542,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CompanionMessageResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21167,7 +21657,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["AmbientSoundPageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21288,7 +21778,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AmbientSoundResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21399,7 +21889,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["AmbientSoundResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21508,7 +21998,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AmbientSoundResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21628,7 +22118,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["AmbientSoundResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21745,7 +22235,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["BreathingExercisePageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21870,7 +22360,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["BreathingExerciseResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -21981,7 +22471,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["BreathingExerciseResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22104,7 +22594,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["BreathingExerciseResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22215,7 +22705,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CozyQuotePageDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22332,7 +22822,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CozyQuoteResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22436,7 +22926,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CozyQuoteResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22545,7 +23035,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["CozyQuoteResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22652,7 +23142,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CozyQuoteResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -22769,7 +23259,7 @@ export interface operations {
                      *       "updatedAt": "2026-05-16T15:30:00.000Z"
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CozyQuoteResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
