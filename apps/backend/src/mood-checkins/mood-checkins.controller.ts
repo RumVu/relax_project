@@ -30,6 +30,7 @@ import {
   MoodCheckinPageDto,
   MoodCheckinResponseDto,
 } from './dto/mood-checkin-response.dto';
+import { WeeklyMoodStatResponseDto } from './dto/weekly-mood-stat-response.dto';
 import { RecalculateWeeklyMoodStatsDto } from './dto/recalculate-weekly-mood-stats.dto';
 import { UpdateMoodCheckinDto } from './dto/update-mood-checkin.dto';
 import { MoodCheckinsService } from './mood-checkins.service';
@@ -85,7 +86,11 @@ export class MoodCheckinsController {
   }
 
   @ApiOperation({ summary: 'Get current user materialized weekly mood stats' })
-  @ApiOkResponse({ description: 'Current user weekly mood stat rows.' })
+  @ApiOkResponse({
+    type: WeeklyMoodStatResponseDto,
+    isArray: true,
+    description: 'Current user weekly mood stat rows.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/weekly-stats')
   getMineWeeklyStats(
@@ -184,7 +189,11 @@ export class MoodCheckinsController {
   @ApiOperation({
     summary: 'Get materialized weekly mood stats by user id (admin)',
   })
-  @ApiOkResponse({ description: 'User weekly mood stat rows.' })
+  @ApiOkResponse({
+    type: WeeklyMoodStatResponseDto,
+    isArray: true,
+    description: 'User weekly mood stat rows.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
