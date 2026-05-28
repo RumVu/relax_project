@@ -83,6 +83,20 @@ web-build: ## Build Next.js
 web-test-e2e: ## Run Playwright smoke (auto-starts the web server)
 	npm --workspace apps/web run test:e2e
 
+# ---- Cloudflare tunnel -----------------------------------------------------
+
+.PHONY: tunnel
+tunnel: ## Backend + web Cloudflare quick tunnels (services must be running)
+	scripts/tunnel.sh
+
+.PHONY: tunnel-backend
+tunnel-backend: ## Backend-only Cloudflare tunnel
+	scripts/tunnel.sh --backend
+
+.PHONY: tunnel-web
+tunnel-web: ## Web-only Cloudflare tunnel
+	scripts/tunnel.sh --web
+
 # ---- Quality ---------------------------------------------------------------
 
 .PHONY: lint

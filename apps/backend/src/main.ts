@@ -18,6 +18,7 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { networkInterfaces } from 'node:os';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
+import { isAllowedOrigin } from './common/cors';
 import { HttpExceptionFilter } from './common/errors/http-exception.filter';
 import { ErrorCode } from './common/errors/error-code';
 import { applyExampleDocumentation } from './docs/swagger.examples';
@@ -345,25 +346,6 @@ function timingSafeStringEqual(left: string, right: string) {
   const leftDigest = createHash('sha256').update(left).digest();
   const rightDigest = createHash('sha256').update(right).digest();
   return timingSafeEqual(leftDigest, rightDigest);
-}
-
-function isAllowedOrigin(
-  origin: string,
-  allowedOrigins: string[],
-  isProduction: boolean,
-) {
-  if (allowedOrigins.includes(origin)) {
-    return true;
-  }
-
-  if (
-    !isProduction &&
-    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)
-  ) {
-    return true;
-  }
-
-  return !isProduction && allowedOrigins.includes('*');
 }
 
 async function bootstrap() {
