@@ -20,9 +20,7 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(query: UserQueryDto = {}) {
-    const where: Prisma.UserWhereInput = query.includeDeleted
-      ? {}
-      : { deletedAt: null };
+    const where = this.buildWhere(query);
     const [items, total] = await Promise.all([
       this.prisma.user.findMany({
         where,
@@ -116,6 +114,39 @@ export class UsersService {
       where: { id },
       select: userSelect,
     });
+  }
+
+  private buildWhere(query: UserQueryDto) {
+    const where: Prisma.UserWhereInput = query.includeDeleted
+      ? {}
+      : { deletedAt: null };
+    const search = query.search?.trim();
+
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        {
+          profile: {
+            is: { displayName: { contains: search, mode: 'insensitive' } },
+          },
+        },
+      ];
+    }
+
+    if (query.role) {
+      where.role = query.role;
+    }
+
+    if (query.status) {
+      where.isActive = query.status === 'ACTIVE';
+    }
+
+    if (typeof query.emailVerified === 'boolean') {
+      where.emailVerified = query.emailVerified;
+    }
+
+    return where;
   }
 
   private handleKnownUserError(error: unknown): never {

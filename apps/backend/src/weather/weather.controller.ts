@@ -15,6 +15,10 @@ import {
   UpdateWeatherLocationDto,
   WeatherForecastQueryDto,
 } from './dto/current-weather-query.dto';
+import {
+  WeatherCurrentResponseDto,
+  WeatherForecastResponseDto,
+} from './dto/weather-response.dto';
 import { WeatherService } from './weather.service';
 
 @ApiTags('Weather')
@@ -30,6 +34,7 @@ export class WeatherController {
     summary: 'Get current weather for the current user location',
   })
   @ApiOkResponse({
+    type: WeatherCurrentResponseDto,
     description:
       'Weather payload for the home greeting. Query coordinates override saved preferences.',
   })
@@ -47,6 +52,7 @@ export class WeatherController {
     summary: 'Get weather forecast for the current user location',
   })
   @ApiOkResponse({
+    type: WeatherForecastResponseDto,
     description:
       'Forecast payload for the saved current user location. Query coordinates override saved preferences.',
   })
@@ -78,6 +84,7 @@ export class WeatherController {
 
   @ApiOperation({ summary: 'Get current weather by coordinates' })
   @ApiOkResponse({
+    type: WeatherCurrentResponseDto,
     description: 'Weather payload for an explicit latitude and longitude.',
   })
   @ApiBearerAuth('access-token')
@@ -89,6 +96,7 @@ export class WeatherController {
 
   @ApiOperation({ summary: 'Get weather forecast by coordinates' })
   @ApiOkResponse({
+    type: WeatherForecastResponseDto,
     description: 'Forecast payload for an explicit latitude and longitude.',
   })
   @ApiBearerAuth('access-token')

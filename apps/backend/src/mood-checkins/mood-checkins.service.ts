@@ -11,6 +11,7 @@ import {
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
 import { buildPage } from '../common/pagination/page';
+import { RealtimeService } from '../realtime/realtime.service';
 import {
   addLocalDays,
   createTimezoneContext,
@@ -61,6 +62,7 @@ export class MoodCheckinsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   async findAll(query: MoodCheckinQueryDto) {
@@ -162,6 +164,11 @@ export class MoodCheckinsService {
 
     await this.syncProfileStats(userId);
     await this.syncWeeklyStatsAroundDate(userId, this.getCheckinDate(checkin));
+    this.realtime.emitToUser(userId, 'mood.updated', {
+      id: checkin.id,
+      mood: checkin.mood,
+      createdAt: checkin.createdAt,
+    });
     return checkin;
   }
 

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, ThemeMode } from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAppThemeDto } from './dto/create-app-theme.dto';
 import { UpdateAppThemeDto } from './dto/update-app-theme.dto';
@@ -10,10 +12,19 @@ import { UpdateAppThemeDto } from './dto/update-app-theme.dto';
 export class AppThemesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.appTheme.findMany({
-      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.appTheme.findMany({
+        where,
+        orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.appTheme.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async findDefault() {
@@ -96,6 +107,33 @@ export class AppThemesService {
         'App theme not found',
       );
     }
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.AppThemeWhereInput = {};
+    const q = query.q?.trim();
+    const themeMode = q ? this.asThemeMode(q) : undefined;
+
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: 'insensitive' } },
+        { primaryColor: { contains: q, mode: 'insensitive' } },
+        { backgroundColor: { contains: q, mode: 'insensitive' } },
+        ...(themeMode ? [{ mode: themeMode }] : []),
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
+  }
+
+  private asThemeMode(value: string) {
+    return Object.values(ThemeMode).find(
+      (mode) => mode.toLowerCase() === value.toLowerCase(),
+    );
   }
 
   private async ensureDefault(

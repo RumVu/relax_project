@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,7 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AmbientSoundsService } from './ambient-sounds.service';
+import {
+  AmbientSoundPageDto,
+  AmbientSoundResponseDto,
+} from './dto/ambient-sound-response.dto';
 import { CreateAmbientSoundDto } from './dto/create-ambient-sound.dto';
 import { UpdateAmbientSoundDto } from './dto/update-ambient-sound.dto';
 
@@ -24,21 +30,31 @@ export class AmbientSoundsController {
   constructor(private readonly ambientSoundsService: AmbientSoundsService) {}
 
   @ApiOperation({ summary: 'List ambient sounds' })
-  @ApiOkResponse({ description: 'Ambient sound catalog list.' })
+  @ApiOkResponse({
+    type: AmbientSoundPageDto,
+    description: 'Ambient sound catalog list.',
+  })
   @Get()
-  findAll() {
-    return this.ambientSoundsService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.ambientSoundsService.findAll(query);
   }
 
   @ApiOperation({ summary: 'List ambient sounds by category' })
-  @ApiOkResponse({ description: 'Ambient sounds in the requested category.' })
+  @ApiOkResponse({
+    type: AmbientSoundResponseDto,
+    isArray: true,
+    description: 'Ambient sounds in the requested category.',
+  })
   @Get('category/:category')
   findByCategory(@Param('category') category: string) {
     return this.ambientSoundsService.findByCategory(category);
   }
 
   @ApiOperation({ summary: 'Create an ambient sound' })
-  @ApiCreatedResponse({ description: 'Created ambient sound.' })
+  @ApiCreatedResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Created ambient sound.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateAmbientSoundDto) {
@@ -46,7 +62,10 @@ export class AmbientSoundsController {
   }
 
   @ApiOperation({ summary: 'Update an ambient sound' })
-  @ApiOkResponse({ description: 'Updated ambient sound.' })
+  @ApiOkResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Updated ambient sound.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateAmbientSoundDto) {
@@ -54,7 +73,10 @@ export class AmbientSoundsController {
   }
 
   @ApiOperation({ summary: 'Delete an ambient sound' })
-  @ApiOkResponse({ description: 'Deleted ambient sound.' })
+  @ApiOkResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Deleted ambient sound.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

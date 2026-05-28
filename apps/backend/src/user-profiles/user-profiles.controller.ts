@@ -13,6 +13,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { UpsertUserProfileDto } from './dto/upsert-user-profile.dto';
+import { UserProfileResponseDto } from './dto/user-profile-response.dto';
 import { UserProfilesService } from './user-profiles.service';
 
 @ApiTags('User Profiles')
@@ -22,7 +23,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get a user profile by user id (admin)' })
-  @ApiOkResponse({ description: 'User profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'User profile payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -33,7 +37,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert a user profile by user id (admin)' })
-  @ApiOkResponse({ description: 'Upserted user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Upserted user profile payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -44,7 +51,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get the current user profile' })
-  @ApiOkResponse({ description: 'Current user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Current user profile payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/profile')
   findMine(@CurrentUser() user: AuthUser) {
@@ -53,7 +63,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert the current user profile' })
-  @ApiOkResponse({ description: 'Upserted current user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Upserted current user profile payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/profile')
   upsertMine(@CurrentUser() user: AuthUser, @Body() dto: UpsertUserProfileDto) {

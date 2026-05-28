@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import {
   INestApplication,
   Logger as NestLogger,
+  RequestMethod,
   ValidationPipe,
 } from '@nestjs/common';
 import type {
@@ -40,7 +41,11 @@ const STANDARD_ERROR_RESPONSES: Record<
 > = {
   '400': {
     description: 'Bad request or validation failed.',
-    codes: [ErrorCode.VALIDATION_FAILED, ErrorCode.STORAGE_INVALID_PATH],
+    codes: [
+      ErrorCode.VALIDATION_FAILED,
+      ErrorCode.STORAGE_INVALID_PATH,
+      ErrorCode.PAYMENT_PLAN_MISMATCH,
+    ],
   },
   '401': {
     description: 'Bearer token is missing, invalid, or expired.',
@@ -84,6 +89,7 @@ const STANDARD_ERROR_RESPONSES: Record<
       ErrorCode.CATALOG_BREATHING_EXERCISE_NOT_FOUND,
       ErrorCode.CATALOG_COZY_QUOTE_NOT_FOUND,
       ErrorCode.CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND,
+      ErrorCode.PAYMENT_NOT_FOUND,
       ErrorCode.DATABASE_RECORD_NOT_FOUND,
     ],
   },
@@ -91,6 +97,7 @@ const STANDARD_ERROR_RESPONSES: Record<
     description: 'Conflict with existing or related data.',
     codes: [
       ErrorCode.USER_EMAIL_ALREADY_EXISTS,
+      ErrorCode.PAYMENT_NOT_PENDING,
       ErrorCode.DATABASE_UNIQUE_CONSTRAINT,
       ErrorCode.DATABASE_FOREIGN_KEY_CONSTRAINT,
     ],
@@ -364,6 +371,16 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   configureTrustProxy(app, configService);
   configureHttpSecurity(app, configService);
+  // Version all API routes under /v1 so the contract can evolve without
+  // breaking shipped mobile clients. Infra/index routes stay unversioned.
+  app.setGlobalPrefix('v1', {
+    exclude: [
+      { path: '/', method: RequestMethod.GET },
+      { path: 'api', method: RequestMethod.GET },
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'ready', method: RequestMethod.GET },
+    ],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

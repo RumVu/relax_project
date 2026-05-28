@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { buildPage } from '../common/pagination/page';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOnboardingSlideDto } from './dto/create-onboarding-slide.dto';
 import { UpdateOnboardingSlideDto } from './dto/update-onboarding-slide.dto';
@@ -9,10 +12,19 @@ import { UpdateOnboardingSlideDto } from './dto/update-onboarding-slide.dto';
 export class OnboardingSlidesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  findAll() {
-    return this.prisma.onboardingSlide.findMany({
-      orderBy: [{ displayOrder: 'asc' }, { createdAt: 'asc' }],
-    });
+  async findAll(query: CatalogQueryDto = {}) {
+    const where = this.buildWhere(query);
+    const [items, total] = await Promise.all([
+      this.prisma.onboardingSlide.findMany({
+        where,
+        orderBy: [{ displayOrder: 'asc' }, { createdAt: 'asc' }],
+        skip: query.skip,
+        take: query.limit,
+      }),
+      this.prisma.onboardingSlide.count({ where }),
+    ]);
+
+    return buildPage(items, total, query);
   }
 
   async create(dto: CreateOnboardingSlideDto) {
@@ -106,5 +118,24 @@ export class OnboardingSlidesService {
         'Onboarding slide not found',
       );
     }
+  }
+
+  private buildWhere(query: CatalogQueryDto) {
+    const where: Prisma.OnboardingSlideWhereInput = {};
+    const q = query.q?.trim();
+
+    if (q) {
+      where.OR = [
+        { title: { contains: q, mode: 'insensitive' } },
+        { subtitle: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    return where;
   }
 }

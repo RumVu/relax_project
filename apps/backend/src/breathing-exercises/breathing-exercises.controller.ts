@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,7 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { BreathingExercisesService } from './breathing-exercises.service';
+import {
+  BreathingExercisePageDto,
+  BreathingExerciseResponseDto,
+} from './dto/breathing-exercise-response.dto';
 import { CreateBreathingExerciseDto } from './dto/create-breathing-exercise.dto';
 import { UpdateBreathingExerciseDto } from './dto/update-breathing-exercise.dto';
 
@@ -26,14 +32,20 @@ export class BreathingExercisesController {
   ) {}
 
   @ApiOperation({ summary: 'List breathing exercises' })
-  @ApiOkResponse({ description: 'Breathing exercise catalog list.' })
+  @ApiOkResponse({
+    type: BreathingExercisePageDto,
+    description: 'Breathing exercise catalog list.',
+  })
   @Get()
-  findAll() {
-    return this.breathingExercisesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.breathingExercisesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Create a breathing exercise' })
-  @ApiCreatedResponse({ description: 'Created breathing exercise.' })
+  @ApiCreatedResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Created breathing exercise.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateBreathingExerciseDto) {
@@ -41,7 +53,10 @@ export class BreathingExercisesController {
   }
 
   @ApiOperation({ summary: 'Update a breathing exercise' })
-  @ApiOkResponse({ description: 'Updated breathing exercise.' })
+  @ApiOkResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Updated breathing exercise.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateBreathingExerciseDto) {
@@ -49,7 +64,10 @@ export class BreathingExercisesController {
   }
 
   @ApiOperation({ summary: 'Delete a breathing exercise' })
-  @ApiOkResponse({ description: 'Deleted breathing exercise.' })
+  @ApiOkResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Deleted breathing exercise.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

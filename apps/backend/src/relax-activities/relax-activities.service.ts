@@ -21,6 +21,7 @@ import {
 import type { TimezoneContext } from '../common/timezone';
 import { MoodCheckinsService } from '../mood-checkins/mood-checkins.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { RealtimeService } from '../realtime/realtime.service';
 import { UsersService } from '../users/users.service';
 import { FinishRelaxSessionDto } from './dto/finish-relax-session.dto';
 import {
@@ -46,6 +47,7 @@ export class RelaxActivitiesService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly moodCheckinsService: MoodCheckinsService,
+    private readonly realtime: RealtimeService,
   ) {}
 
   async getActivities() {
@@ -133,6 +135,13 @@ export class RelaxActivitiesService {
         note: dto.note,
         nextActionAccepted: dto.nextActionAccepted,
       },
+    });
+
+    this.realtime.emitToUser(userId, 'relax-session.updated', {
+      id: session.id,
+      activityType,
+      status: session.status,
+      durationSeconds,
     });
 
     if (dto.moodAfter) {

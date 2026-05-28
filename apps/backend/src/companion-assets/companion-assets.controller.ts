@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -14,7 +15,12 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CompanionAssetsService } from './companion-assets.service';
+import {
+  CompanionAssetPageDto,
+  CompanionAssetResponseDto,
+} from './dto/companion-asset-response.dto';
 import { CreateCompanionAssetDto } from './dto/create-companion-asset.dto';
 import { UpdateCompanionAssetDto } from './dto/update-companion-asset.dto';
 
@@ -26,21 +32,30 @@ export class CompanionAssetsController {
   ) {}
 
   @ApiOperation({ summary: 'List companion assets' })
-  @ApiOkResponse({ description: 'Companion asset catalog list.' })
+  @ApiOkResponse({
+    type: CompanionAssetPageDto,
+    description: 'Companion asset catalog list.',
+  })
   @Get()
-  findAll() {
-    return this.companionAssetsService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.companionAssetsService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get the default companion asset' })
-  @ApiOkResponse({ description: 'Default active companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Default active companion asset.',
+  })
   @Get('default')
   findDefault() {
     return this.companionAssetsService.findDefault();
   }
 
   @ApiOperation({ summary: 'Create a companion asset' })
-  @ApiCreatedResponse({ description: 'Created companion asset.' })
+  @ApiCreatedResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Created companion asset.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateCompanionAssetDto) {
@@ -48,7 +63,10 @@ export class CompanionAssetsController {
   }
 
   @ApiOperation({ summary: 'Update a companion asset' })
-  @ApiOkResponse({ description: 'Updated companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Updated companion asset.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCompanionAssetDto) {
@@ -56,7 +74,10 @@ export class CompanionAssetsController {
   }
 
   @ApiOperation({ summary: 'Delete a companion asset' })
-  @ApiOkResponse({ description: 'Deleted companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Deleted companion asset.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

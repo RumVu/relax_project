@@ -7,6 +7,7 @@ import {
   ParseEnumPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -16,8 +17,13 @@ import {
 } from '@nestjs/swagger';
 import { MoodType } from '@prisma/client';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
+import { CatalogQueryDto } from '../common/dto/catalog-query.dto';
 import { CozyQuotesService } from './cozy-quotes.service';
 import { CreateCozyQuoteDto } from './dto/create-cozy-quote.dto';
+import {
+  CozyQuotePageDto,
+  CozyQuoteResponseDto,
+} from './dto/cozy-quote-response.dto';
 import { UpdateCozyQuoteDto } from './dto/update-cozy-quote.dto';
 
 @ApiTags('Cozy Quotes')
@@ -26,28 +32,41 @@ export class CozyQuotesController {
   constructor(private readonly cozyQuotesService: CozyQuotesService) {}
 
   @ApiOperation({ summary: 'List cozy quotes' })
-  @ApiOkResponse({ description: 'Cozy quote catalog list.' })
+  @ApiOkResponse({
+    type: CozyQuotePageDto,
+    description: 'Cozy quote catalog list.',
+  })
   @Get()
-  findAll() {
-    return this.cozyQuotesService.findAll();
+  findAll(@Query() query: CatalogQueryDto) {
+    return this.cozyQuotesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get a random active cozy quote' })
-  @ApiOkResponse({ description: 'Random cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Random cozy quote.',
+  })
   @Get('random')
   findRandom() {
     return this.cozyQuotesService.findRandom();
   }
 
   @ApiOperation({ summary: 'List cozy quotes by mood' })
-  @ApiOkResponse({ description: 'Cozy quotes matching the mood.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    isArray: true,
+    description: 'Cozy quotes matching the mood.',
+  })
   @Get('mood/:mood')
   findByMood(@Param('mood', new ParseEnumPipe(MoodType)) mood: MoodType) {
     return this.cozyQuotesService.findByMood(mood);
   }
 
   @ApiOperation({ summary: 'Create a cozy quote' })
-  @ApiCreatedResponse({ description: 'Created cozy quote.' })
+  @ApiCreatedResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Created cozy quote.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateCozyQuoteDto) {
@@ -55,7 +74,10 @@ export class CozyQuotesController {
   }
 
   @ApiOperation({ summary: 'Update a cozy quote' })
-  @ApiOkResponse({ description: 'Updated cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Updated cozy quote.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCozyQuoteDto) {
@@ -63,7 +85,10 @@ export class CozyQuotesController {
   }
 
   @ApiOperation({ summary: 'Delete a cozy quote' })
-  @ApiOkResponse({ description: 'Deleted cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Deleted cozy quote.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

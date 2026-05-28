@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  push:
+    branches: [main, backend_dev, front-moblie-dev]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Backend: unit + e2e (needs Postgres + Redis)
+  # ---------------------------------------------------------------------------
+  backend:
+    name: Backend (unit + e2e)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 123456
+          POSTGRES_DB: digital_cigarette_break
+        ports: ["5555:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d digital_cigarette_break"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public
+      REDIS_URL: redis://localhost:6379
+      REDIS_ENABLED: "true"
+      JWT_SECRET: ci-test-secret-not-for-production-use-only
+      JWT_EXPIRES_IN: 15m
+      JWT_ISSUER: digital-cigarette-break-api
+      JWT_AUDIENCE: digital-cigarette-break-app
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_test
+      SUPABASE_SECRET_KEY: sb_secret_test
+      SUPABASE_BUCKET: public-assets
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Apply Prisma migrations
+        working-directory: apps/backend
+        run: npm run prisma:migrate:deploy
+
+      - name: Backend unit tests
+        working-directory: apps/backend
+        run: npm test -- --ci
+
+      - name: Backend e2e tests
+        working-directory: apps/backend
+        run: npm run test:e2e -- --ci
+
+  # ---------------------------------------------------------------------------
+  # Web: build + Playwright smoke
+  # ---------------------------------------------------------------------------
+  web:
+    name: Web (build + playwright)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install root deps
+        run: npm ci
+
+      - name: Build web
+        working-directory: apps/web
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:6823
+        run: npm run build
+
+      - name: Install Playwright browsers
+        working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright smoke
+        working-directory: apps/web
+        run: npm run test:e2e
+
+      - name: Upload Playwright results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            apps/web/test-results/
+            apps/web/playwright-report/
+          retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Lint (non-blocking — projects may still be tightening rules)
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm --workspace apps/backend run lint
+      - run: npm --workspace apps/web run lint
