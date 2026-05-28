@@ -5,7 +5,36 @@ Backend Swagger UI is available at:
 - Local UI: `http://localhost:6823/docs`
 - OpenAPI JSON: `http://localhost:6823/docs-json`
 
-The Swagger UI supports Bearer auth. Register or login through `/auth/register` or `/auth/login`, copy the returned `accessToken`, click **Authorize**, and paste it as the bearer token.
+The Swagger UI supports Bearer auth. Register or login through `/v1/auth/register` or `/v1/auth/login`, copy the returned `accessToken`, click **Authorize**, and paste it as the bearer token.
+
+## Current contract (read this first)
+
+- **All API routes are served under `/v1`** (e.g. `GET /v1/auth/me`). Infra
+  routes (`/`, `/api`, `/health`, `/ready`) stay unversioned. The OpenAPI
+  document at `/docs-json` already publishes the prefixed paths.
+- **List endpoints** return a paginated page:
+  `{ items, total, skip, limit, hasMore }`. Single-item endpoints
+  (`/random`, `/default`, `:id`, ...) still return the bare entity. The seven
+  catalog list endpoints, `/v1/users`, `/v1/journals/me`, `/v1/mood-checkins/me`,
+  `/v1/reminders/me`, and `/v1/notifications/me` all follow this shape.
+- **Search and filter** query params are first-class:
+  - Catalogs accept `?q=`, `?isActive=`, plus `?skip=` and `?limit=`.
+  - `/v1/users` accepts `?search=`, `?role=`, `?status=`, `?emailVerified=`.
+  - Journals accept `?q=`.
+- **Realtime** is mounted at the unversioned Socket.IO namespace `/realtime`
+  with JWT via `auth.token`. Backend services emit `mood.updated`,
+  `journal.created`, `relax-session.updated`, `notification.created`,
+  `companion.updated` to the user room on writes.
+- **Billing activation**: `POST /v1/billing/me/payments/:id/confirm
+  { planName }` flips a pending payment to COMPLETED and provisions an ACTIVE
+  subscription. A future Stripe/App Store/Google Play webhook will run the
+  same logic; today this is the manual/dev settlement step.
+- For the full client/mobile integration contract (auth/refresh flow, error
+  envelope, realtime payloads, push, capability discovery, env requirements)
+  see `docs/11-mobile-integration.md`.
+
+> The endpoint tables below list paths without the `/v1` prefix for brevity.
+> Prefix every path except `/`, `/api`, `/health`, `/ready` with `/v1`.
 
 ## Health
 
@@ -361,7 +390,10 @@ Swagger injects the common error response schema into every endpoint with these 
 | `404` | `CATALOG_COZY_QUOTE_NOT_FOUND` | Cozy quote id does not exist. |
 | `404` | `CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND` | No active cozy quote is available for random selection. |
 | `404` | `DATABASE_RECORD_NOT_FOUND` | Prisma update/delete could not find the target row. |
+| `400` | `PAYMENT_PLAN_MISMATCH` | Payment amount does not match the plan price during confirmation. |
+| `404` | `PAYMENT_NOT_FOUND` | Payment id does not exist for the requesting user. |
 | `409` | `USER_EMAIL_ALREADY_EXISTS` | Email is already registered. |
+| `409` | `PAYMENT_NOT_PENDING` | Payment is already settled (only pending payments can be confirmed). |
 | `409` | `DATABASE_UNIQUE_CONSTRAINT` | Database unique constraint failed. |
 | `409` | `DATABASE_FOREIGN_KEY_CONSTRAINT` | Database foreign key constraint failed. |
 | `500` | `INTERNAL_SERVER_ERROR` | Unexpected backend/database/provider failure. |
