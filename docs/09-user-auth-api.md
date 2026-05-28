@@ -1,6 +1,25 @@
 # User, Auth, Profile, Preference, and Session APIs
 
-Base path: backend API root.
+Base path: backend API root. **All routes are served under `/v1`** (e.g.
+`POST /v1/auth/login`); infra routes `/`, `/api`, `/health`, `/ready` stay
+unversioned. The tables below omit the `/v1` prefix for brevity.
+
+## Current contract (read this first)
+
+- **Auth response shape** (`/v1/auth/register`, `/login`, `/refresh`):
+  `{ accessToken, refreshToken, expiresAt, sessionId, user }`. The `user`
+  payload mirrors the safe `User` shape and includes nested `profile`,
+  `preferences`, and a `subscriptions` summary on `/v1/auth/me`.
+- **Refresh-on-401 rule**: retry via `POST /v1/auth/refresh` when the error
+  `code` is `AUTH_TOKEN_EXPIRED`, `AUTH_TOKEN_INVALID`, `AUTH_UNAUTHORIZED`,
+  or `AUTH_REFRESH_TOKEN_INVALID`. Refresh tokens are rotated; persist the
+  new pair every time.
+- **`/v1/users`** (admin) is paginated and filterable: `?search=`, `?role=`,
+  `?status=ACTIVE|INACTIVE`, `?emailVerified=`, `?skip=`, `?limit=`. The
+  response is `{ items, total, skip, limit, hasMore }`.
+- For the full client/mobile contract (realtime events, push, error envelope,
+  pagination, capability discovery, env requirements) see
+  `docs/11-mobile-integration.md`.
 
 ## Auth
 
