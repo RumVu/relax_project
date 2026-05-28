@@ -15,6 +15,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger as PinoLogger } from 'nestjs-pino';
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { networkInterfaces } from 'node:os';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/errors/http-exception.filter';
@@ -550,9 +551,21 @@ async function bootstrap() {
   const port = configService.get<number>('app.port') ?? 6823;
   await app.listen(port);
   const logger = new NestLogger('Bootstrap');
-  logger.log(`Server is running on http://localhost:${port}`);
+  const lanAddresses = Object.values(networkInterfaces())
+    .flatMap((ifs) => ifs ?? [])
+    .filter((info) => info.family === 'IPv4' && !info.internal)
+    .map((info) => info.address);
+  logger.log(`Server is running on:`);
+  logger.log(`  - Local:    http://localhost:${port}`);
+  for (const address of lanAddresses) {
+    logger.log(`  - Network:  http://${address}:${port}`);
+  }
   if (swaggerEnabled) {
-    logger.log(`Swagger docs available at http://localhost:${port}/docs`);
+    logger.log(`Swagger docs:`);
+    logger.log(`  - Local:    http://localhost:${port}/docs`);
+    for (const address of lanAddresses) {
+      logger.log(`  - Network:  http://${address}:${port}/docs`);
+    }
   }
 }
 
