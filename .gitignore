@@ -34,5 +34,10 @@ pnpm-debug.log*
 .turbo/
 .claude/
 
+# Playwright artifacts
+**/playwright-report/
+**/test-results/
+**/.playwright/
+
 # Local database backups are rescue artifacts only.
 apps/backend/prisma/backups/*.sql

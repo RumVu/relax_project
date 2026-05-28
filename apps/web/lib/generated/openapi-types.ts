@@ -2425,6 +2425,20 @@ export interface components {
             limit: number;
             hasMore: boolean;
         };
+        WeeklyMoodStatResponseDto: {
+            id: string;
+            userId: string;
+            /** Format: date-time */
+            weekStart: string;
+            avgScore: number;
+            stressReducePct: number;
+            streakDays: number;
+            dominantMood: Record<string, never> | null;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
         RecalculateWeeklyMoodStatsDto: {
             /** Format: date-time */
             from?: string;
@@ -2590,6 +2604,50 @@ export interface components {
             type: string;
             metadata?: Record<string, never>;
         };
+        WeatherGreetingDto: {
+            title: string;
+            subtitle: string;
+            iconKey: string;
+        };
+        WeatherLocationDto: {
+            latitude: number;
+            longitude: number;
+            name: string | null;
+            timezone: string;
+        };
+        WeatherCurrentDataDto: {
+            temperature: number | null;
+            temperatureUnit: string;
+            weatherCode: number | null;
+            isDay: boolean;
+            observedAt: string | null;
+        };
+        WeatherCurrentResponseDto: {
+            configured: boolean;
+            reason?: string;
+            greeting?: components["schemas"]["WeatherGreetingDto"];
+            provider?: string;
+            location?: components["schemas"]["WeatherLocationDto"];
+            reverseGeocode?: Record<string, never> | null;
+            current?: components["schemas"]["WeatherCurrentDataDto"];
+        };
+        WeatherForecastDayDto: {
+            date: string;
+            temperatureMax: number | null;
+            temperatureMin: number | null;
+            precipitationProbability: number | null;
+            weatherCode: number | null;
+        };
+        WeatherForecastResponseDto: {
+            configured: boolean;
+            reason?: string;
+            greeting?: components["schemas"]["WeatherGreetingDto"];
+            provider?: string;
+            location?: components["schemas"]["WeatherLocationDto"];
+            reverseGeocode?: Record<string, never> | null;
+            current?: components["schemas"]["WeatherCurrentDataDto"];
+            forecast: components["schemas"]["WeatherForecastDayDto"][];
+        };
         UpdateWeatherLocationDto: {
             latitude?: number;
             longitude?: number;
@@ -2598,6 +2656,10 @@ export interface components {
             weatherEnabled?: boolean;
             reverseGeocode?: boolean;
             localityLanguage?: string;
+        };
+        ProviderStatusResponseDto: {
+            configured: boolean;
+            providers: Record<string, never>;
         };
         NotificationResponseDto: {
             id: string;
@@ -2705,6 +2767,27 @@ export interface components {
             timezone?: string;
             limit?: number;
         };
+        BillingPlanLimitDto: {
+            name: string;
+            value: number;
+            unit: string | null;
+        };
+        BillingPlanResponseDto: {
+            id?: string;
+            name: string;
+            title: string;
+            description?: string | null;
+            price: number;
+            currency: string;
+            billingCycle?: Record<string, never>;
+            features: string[];
+            limits?: components["schemas"]["BillingPlanLimitDto"][];
+        };
+        BillingMeResponseDto: {
+            /** @description Either the latest real Subscription row or a synthetic FREE placeholder. */
+            subscription: Record<string, never>;
+            providerStatus: components["schemas"]["ProviderStatusResponseDto"];
+        };
         CreateCheckoutSessionDto: {
             planName: string;
             /**
@@ -2720,6 +2803,26 @@ export interface components {
             /** @enum {string} */
             provider?: "STRIPE" | "APP_STORE" | "GOOGLE_PLAY" | "MANUAL";
             description?: string;
+        };
+        CheckoutResolvedPlanDto: {
+            name: string;
+            title: string;
+            price: number;
+            currency: string;
+            source: string;
+        };
+        CheckoutSessionStatusDto: {
+            status: string;
+            note: string;
+        };
+        CheckoutSessionResponseDto: {
+            configured: boolean;
+            provider: string;
+            /** @description Raw SubscriptionTier row when the plan came from the DB, else null. */
+            tier: Record<string, never>;
+            plan: components["schemas"]["CheckoutResolvedPlanDto"];
+            payment: Record<string, never>;
+            checkout: components["schemas"]["CheckoutSessionStatusDto"];
         };
         ConfirmPaymentDto: {
             /**
@@ -2772,6 +2875,30 @@ export interface components {
             payment: components["schemas"]["PaymentResponseDto"];
             subscription: components["schemas"]["SubscriptionResponseDto"];
             plan: components["schemas"]["ConfirmPaymentPlanDto"];
+        };
+        AdminLogActorDto: {
+            id: string;
+            email: string;
+            name: string | null;
+            role: Record<string, never>;
+        };
+        AdminLogResponseDto: {
+            id: string;
+            adminId: string;
+            action: string;
+            targetId: string | null;
+            targetType: string | null;
+            details: string;
+            /** Format: date-time */
+            createdAt: string;
+            admin?: components["schemas"]["AdminLogActorDto"];
+        };
+        AdminLogPageDto: {
+            items: components["schemas"]["AdminLogResponseDto"][];
+            total: number;
+            skip: number;
+            limit: number;
+            hasMore: boolean;
         };
         AppThemeResponseDto: {
             id: string;
@@ -9935,7 +10062,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["WeeklyMoodStatResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -10886,7 +11013,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["WeeklyMoodStatResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15188,7 +15315,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["WeatherCurrentResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15351,7 +15478,7 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["WeatherForecastResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15666,7 +15793,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["WeatherCurrentResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -15829,7 +15956,7 @@ export interface operations {
                      *       ]
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["WeatherForecastResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -16076,7 +16203,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ProviderStatusResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18506,7 +18633,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["ProviderStatusResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18614,7 +18741,7 @@ export interface operations {
                      *       }
                      *     ]
                      */
-                    "application/json": unknown[];
+                    "application/json": components["schemas"]["BillingPlanResponseDto"][];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18734,7 +18861,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["BillingMeResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -18865,7 +18992,7 @@ export interface operations {
                      *       }
                      *     }
                      */
-                    "application/json": Record<string, never>;
+                    "application/json": components["schemas"]["CheckoutSessionResponseDto"];
                 };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
@@ -19294,7 +19421,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["AdminLogPageDto"];
+                };
             };
             /** @description Bad request or validation failed. Possible codes: VALIDATION_FAILED, STORAGE_INVALID_PATH, PAYMENT_PLAN_MISMATCH. */
             400: {
