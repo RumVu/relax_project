@@ -20,6 +20,7 @@ import type { AuthUser } from '../auth/auth.types';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ProviderStatusResponseDto } from '../billing/dto/billing-extras.dto';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import {
   NotificationPageDto,
@@ -38,7 +39,7 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @ApiOperation({ summary: 'Get push/email provider configuration status' })
-  @ApiOkResponse({ description: 'Notification provider readiness.' })
+  @ApiOkResponse({ type: ProviderStatusResponseDto, description: 'Notification provider readiness.' })
   @UseGuards(JwtAuthGuard)
   @Get('providers')
   getProviderStatus() {

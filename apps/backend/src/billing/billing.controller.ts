@@ -10,6 +10,12 @@ import type { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
+import {
+  BillingMeResponseDto,
+  BillingPlanResponseDto,
+  CheckoutSessionResponseDto,
+  ProviderStatusResponseDto,
+} from './dto/billing-extras.dto';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { ConfirmPaymentResponseDto } from './dto/billing-response.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
@@ -21,7 +27,7 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @ApiOperation({ summary: 'Get billing/payment provider status' })
-  @ApiOkResponse({ description: 'Configured payment providers.' })
+  @ApiOkResponse({ type: ProviderStatusResponseDto, description: 'Configured payment providers.' })
   @UseGuards(JwtAuthGuard)
   @Get('providers')
   getProviderStatus() {
@@ -29,14 +35,18 @@ export class BillingController {
   }
 
   @ApiOperation({ summary: 'List available subscription plans' })
-  @ApiOkResponse({ description: 'Plan catalog.' })
+  @ApiOkResponse({
+    type: BillingPlanResponseDto,
+    isArray: true,
+    description: 'Plan catalog.',
+  })
   @Get('plans')
   getPlans() {
     return this.billingService.getPlans();
   }
 
   @ApiOperation({ summary: 'Get current user billing state' })
-  @ApiOkResponse({ description: 'Current subscription and provider status.' })
+  @ApiOkResponse({ type: BillingMeResponseDto, description: 'Current subscription and provider status.' })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMine(@CurrentUser() user: AuthUser) {
@@ -45,6 +55,7 @@ export class BillingController {
 
   @ApiOperation({ summary: 'Create a checkout session intent' })
   @ApiCreatedResponse({
+    type: CheckoutSessionResponseDto,
     description:
       'Pending payment plus provider readiness. Checkout URL appears after real provider wiring.',
   })
