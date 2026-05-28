@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { minutes, Throttle } from '@nestjs/throttler';
 import type { Request } from 'express';
+import { getClientIp } from '../common/client-ip';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -54,7 +55,7 @@ export class AuthController {
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
   ) {
-    return this.authService.register(dto, userAgent, request.ip);
+    return this.authService.register(dto, userAgent, getClientIp(request));
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
@@ -74,7 +75,7 @@ export class AuthController {
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
   ) {
-    return this.authService.login(dto, userAgent, request.ip);
+    return this.authService.login(dto, userAgent, getClientIp(request));
   }
 
   @ApiOperation({ summary: 'Rotate a refresh token' })
@@ -91,7 +92,7 @@ export class AuthController {
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
   ) {
-    return this.authService.refresh(dto, userAgent, request.ip);
+    return this.authService.refresh(dto, userAgent, getClientIp(request));
   }
 
   @ApiOperation({ summary: 'Logout by revoking one refresh token' })
