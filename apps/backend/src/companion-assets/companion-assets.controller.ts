@@ -32,21 +32,30 @@ export class CompanionAssetsController {
   ) {}
 
   @ApiOperation({ summary: 'List companion assets' })
-  @ApiOkResponse({ type: CompanionAssetPageDto, description: 'Companion asset catalog list.' })
+  @ApiOkResponse({
+    type: CompanionAssetPageDto,
+    description: 'Companion asset catalog list.',
+  })
   @Get()
   findAll(@Query() query: CatalogQueryDto) {
     return this.companionAssetsService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get the default companion asset' })
-  @ApiOkResponse({ type: CompanionAssetResponseDto, description: 'Default active companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Default active companion asset.',
+  })
   @Get('default')
   findDefault() {
     return this.companionAssetsService.findDefault();
   }
 
   @ApiOperation({ summary: 'Create a companion asset' })
-  @ApiCreatedResponse({ type: CompanionAssetResponseDto, description: 'Created companion asset.' })
+  @ApiCreatedResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Created companion asset.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateCompanionAssetDto) {
@@ -54,7 +63,10 @@ export class CompanionAssetsController {
   }
 
   @ApiOperation({ summary: 'Update a companion asset' })
-  @ApiOkResponse({ type: CompanionAssetResponseDto, description: 'Updated companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Updated companion asset.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCompanionAssetDto) {
@@ -62,7 +74,10 @@ export class CompanionAssetsController {
   }
 
   @ApiOperation({ summary: 'Delete a companion asset' })
-  @ApiOkResponse({ type: CompanionAssetResponseDto, description: 'Deleted companion asset.' })
+  @ApiOkResponse({
+    type: CompanionAssetResponseDto,
+    description: 'Deleted companion asset.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

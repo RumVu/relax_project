@@ -36,7 +36,10 @@ export class RemindersController {
   constructor(private readonly remindersService: RemindersService) {}
 
   @ApiOperation({ summary: 'List current user reminders' })
-  @ApiOkResponse({ type: ReminderPageDto, description: 'Paginated reminder list for current user.' })
+  @ApiOkResponse({
+    type: ReminderPageDto,
+    description: 'Paginated reminder list for current user.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   listMine(@CurrentUser() user: AuthUser, @Query() query: ReminderQueryDto) {
@@ -52,7 +55,10 @@ export class RemindersController {
   }
 
   @ApiOperation({ summary: 'Create current user reminder' })
-  @ApiCreatedResponse({ type: ReminderResponseDto, description: 'Created reminder.' })
+  @ApiCreatedResponse({
+    type: ReminderResponseDto,
+    description: 'Created reminder.',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('me')
   createMine(@CurrentUser() user: AuthUser, @Body() dto: CreateReminderDto) {
@@ -60,7 +66,10 @@ export class RemindersController {
   }
 
   @ApiOperation({ summary: 'List all reminders (admin)' })
-  @ApiOkResponse({ type: ReminderPageDto, description: 'Paginated reminder list across users.' })
+  @ApiOkResponse({
+    type: ReminderPageDto,
+    description: 'Paginated reminder list across users.',
+  })
   @AdminOnly()
   @Get()
   listAll(@Query() query: ReminderQueryDto) {
@@ -68,7 +77,10 @@ export class RemindersController {
   }
 
   @ApiOperation({ summary: 'List reminders by user id (admin)' })
-  @ApiOkResponse({ type: ReminderPageDto, description: 'Paginated reminder list for a user.' })
+  @ApiOkResponse({
+    type: ReminderPageDto,
+    description: 'Paginated reminder list for a user.',
+  })
   @AdminOnly()
   @Get('user/:userId')
   listByUserId(
@@ -79,7 +91,10 @@ export class RemindersController {
   }
 
   @ApiOperation({ summary: 'Get one reminder by id' })
-  @ApiOkResponse({ type: ReminderResponseDto, description: 'Reminder payload.' })
+  @ApiOkResponse({
+    type: ReminderResponseDto,
+    description: 'Reminder payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string, @CurrentUser() user: AuthUser) {
@@ -87,7 +102,10 @@ export class RemindersController {
   }
 
   @ApiOperation({ summary: 'Update one reminder by id' })
-  @ApiOkResponse({ type: ReminderResponseDto, description: 'Updated reminder.' })
+  @ApiOkResponse({
+    type: ReminderResponseDto,
+    description: 'Updated reminder.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(

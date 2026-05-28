@@ -39,7 +39,10 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @ApiOperation({ summary: 'Get push/email provider configuration status' })
-  @ApiOkResponse({ type: ProviderStatusResponseDto, description: 'Notification provider readiness.' })
+  @ApiOkResponse({
+    type: ProviderStatusResponseDto,
+    description: 'Notification provider readiness.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('providers')
   getProviderStatus() {
@@ -47,7 +50,10 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'List current user notifications' })
-  @ApiOkResponse({ type: NotificationPageDto, description: 'Current user notification list.' })
+  @ApiOkResponse({
+    type: NotificationPageDto,
+    description: 'Current user notification list.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   listMine(
@@ -58,7 +64,10 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Get unread notification count' })
-  @ApiOkResponse({ type: UnreadCountResponseDto, description: 'Unread notification count.' })
+  @ApiOkResponse({
+    type: UnreadCountResponseDto,
+    description: 'Unread notification count.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/unread-count')
   getUnreadCount(@CurrentUser() user: AuthUser) {
@@ -66,7 +75,10 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Register or update current user push device' })
-  @ApiCreatedResponse({ type: PushDeviceResponseDto, description: 'Registered push device.' })
+  @ApiCreatedResponse({
+    type: PushDeviceResponseDto,
+    description: 'Registered push device.',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('me/devices')
   registerDevice(
@@ -111,7 +123,10 @@ export class NotificationsController {
   }
 
   @ApiOperation({ summary: 'Mark one notification as read' })
-  @ApiOkResponse({ type: NotificationResponseDto, description: 'Updated notification.' })
+  @ApiOkResponse({
+    type: NotificationResponseDto,
+    description: 'Updated notification.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/:id/read')
   markRead(@CurrentUser() user: AuthUser, @Param('id') id: string) {

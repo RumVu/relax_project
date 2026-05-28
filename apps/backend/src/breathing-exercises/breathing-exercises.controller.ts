@@ -32,14 +32,20 @@ export class BreathingExercisesController {
   ) {}
 
   @ApiOperation({ summary: 'List breathing exercises' })
-  @ApiOkResponse({ type: BreathingExercisePageDto, description: 'Breathing exercise catalog list.' })
+  @ApiOkResponse({
+    type: BreathingExercisePageDto,
+    description: 'Breathing exercise catalog list.',
+  })
   @Get()
   findAll(@Query() query: CatalogQueryDto) {
     return this.breathingExercisesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Create a breathing exercise' })
-  @ApiCreatedResponse({ type: BreathingExerciseResponseDto, description: 'Created breathing exercise.' })
+  @ApiCreatedResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Created breathing exercise.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateBreathingExerciseDto) {
@@ -47,7 +53,10 @@ export class BreathingExercisesController {
   }
 
   @ApiOperation({ summary: 'Update a breathing exercise' })
-  @ApiOkResponse({ type: BreathingExerciseResponseDto, description: 'Updated breathing exercise.' })
+  @ApiOkResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Updated breathing exercise.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateBreathingExerciseDto) {
@@ -55,7 +64,10 @@ export class BreathingExercisesController {
   }
 
   @ApiOperation({ summary: 'Delete a breathing exercise' })
-  @ApiOkResponse({ type: BreathingExerciseResponseDto, description: 'Deleted breathing exercise.' })
+  @ApiOkResponse({
+    type: BreathingExerciseResponseDto,
+    description: 'Deleted breathing exercise.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

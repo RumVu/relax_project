@@ -41,7 +41,10 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register a local user and create a session' })
-  @ApiCreatedResponse({ type: AuthResponseDto, description: 'User, access token, and refresh token.' })
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'User, access token, and refresh token.',
+  })
   @Throttle({
     default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
   })
@@ -55,7 +58,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
-  @ApiCreatedResponse({ type: AuthResponseDto, description: 'User, access token, and refresh token.' })
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'User, access token, and refresh token.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials or inactive user.',
   })
@@ -89,7 +95,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Logout by revoking one refresh token' })
-  @ApiCreatedResponse({ type: AuthActionResultDto, description: 'Logout success payload.' })
+  @ApiCreatedResponse({
+    type: AuthActionResultDto,
+    description: 'Logout success payload.',
+  })
   @Post('logout')
   logout(@Body() dto: RefreshTokenDto) {
     return this.authService.logout(dto.refreshToken);
@@ -120,7 +129,10 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify email with an account token' })
-  @ApiCreatedResponse({ type: AuthActionResultDto, description: 'Email verification result.' })
+  @ApiCreatedResponse({
+    type: AuthActionResultDto,
+    description: 'Email verification result.',
+  })
   @Post('email/verify')
   verifyEmail(@Body() dto: VerifyEmailDto) {
     return this.authService.verifyEmail(dto);
@@ -128,7 +140,10 @@ export class AuthController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get the current authenticated user' })
-  @ApiOkResponse({ type: UserResponseDto, description: 'Current safe user payload.' })
+  @ApiOkResponse({
+    type: UserResponseDto,
+    description: 'Current safe user payload.',
+  })
   @ApiUnauthorizedResponse({
     description: 'Bearer token is missing or invalid.',
   })

@@ -22,7 +22,10 @@ export class UserCompanionsController {
   constructor(private readonly userCompanionsService: UserCompanionsService) {}
 
   @ApiOperation({ summary: 'Get current user companion' })
-  @ApiOkResponse({ type: UserCompanionResponseDto, description: 'Current user companion.' })
+  @ApiOkResponse({
+    type: UserCompanionResponseDto,
+    description: 'Current user companion.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMine(@CurrentUser() user: AuthUser) {
@@ -30,7 +33,10 @@ export class UserCompanionsController {
   }
 
   @ApiOperation({ summary: 'Upsert current user companion' })
-  @ApiOkResponse({ type: UserCompanionResponseDto, description: 'Updated current user companion.' })
+  @ApiOkResponse({
+    type: UserCompanionResponseDto,
+    description: 'Updated current user companion.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me')
   upsertMine(

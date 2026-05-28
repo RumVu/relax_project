@@ -25,7 +25,10 @@ export class UserPreferencesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get user preferences by user id (admin)' })
-  @ApiOkResponse({ type: UserPreferenceResponseDto, description: 'User preferences payload.' })
+  @ApiOkResponse({
+    type: UserPreferenceResponseDto,
+    description: 'User preferences payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -36,7 +39,10 @@ export class UserPreferencesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert user preferences by user id (admin)' })
-  @ApiOkResponse({ type: UserPreferenceResponseDto, description: 'Upserted user preferences payload.' })
+  @ApiOkResponse({
+    type: UserPreferenceResponseDto,
+    description: 'Upserted user preferences payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -50,7 +56,10 @@ export class UserPreferencesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get the current user preferences' })
-  @ApiOkResponse({ type: UserPreferenceResponseDto, description: 'Current user preferences payload.' })
+  @ApiOkResponse({
+    type: UserPreferenceResponseDto,
+    description: 'Current user preferences payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/preferences')
   findMine(@CurrentUser() user: AuthUser) {
@@ -59,7 +68,10 @@ export class UserPreferencesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert the current user preferences' })
-  @ApiOkResponse({ type: UserPreferenceResponseDto, description: 'Upserted current user preferences payload.' })
+  @ApiOkResponse({
+    type: UserPreferenceResponseDto,
+    description: 'Upserted current user preferences payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/preferences')
   upsertMine(

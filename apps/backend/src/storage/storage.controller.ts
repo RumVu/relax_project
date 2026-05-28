@@ -168,7 +168,10 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'Register storage file metadata' })
-  @ApiCreatedResponse({ type: StorageFileResponseDto, description: 'Created storage file metadata.' })
+  @ApiCreatedResponse({
+    type: StorageFileResponseDto,
+    description: 'Created storage file metadata.',
+  })
   @ApiBearerAuth('access-token')
   @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
   @UseGuards(JwtAuthGuard)
@@ -181,7 +184,10 @@ export class StorageController {
   }
 
   @ApiOperation({ summary: 'Delete storage file metadata by id' })
-  @ApiOkResponse({ type: StorageFileResponseDto, description: 'Deleted storage file metadata.' })
+  @ApiOkResponse({
+    type: StorageFileResponseDto,
+    description: 'Deleted storage file metadata.',
+  })
   @AdminOnly()
   @Delete('files/:id')
   removeFileMetadata(@Param('id') id: string) {

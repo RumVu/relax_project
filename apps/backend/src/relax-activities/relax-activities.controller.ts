@@ -44,7 +44,10 @@ export class RelaxActivitiesController {
   }
 
   @ApiOperation({ summary: 'Start current user relax activity session' })
-  @ApiCreatedResponse({ type: RelaxSessionResponseDto, description: 'Started relax session.' })
+  @ApiCreatedResponse({
+    type: RelaxSessionResponseDto,
+    description: 'Started relax session.',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('sessions/start')
   startSession(
@@ -69,7 +72,10 @@ export class RelaxActivitiesController {
   }
 
   @ApiOperation({ summary: 'List current user finished relax sessions' })
-  @ApiOkResponse({ type: RelaxSessionPageDto, description: 'Finished relax session list.' })
+  @ApiOkResponse({
+    type: RelaxSessionPageDto,
+    description: 'Finished relax session list.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/sessions')
   listSessions(

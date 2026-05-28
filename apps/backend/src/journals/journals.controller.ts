@@ -36,7 +36,10 @@ export class JournalsController {
   constructor(private readonly journalsService: JournalsService) {}
 
   @ApiOperation({ summary: 'List current user journals' })
-  @ApiOkResponse({ type: JournalPageDto, description: 'Current user journal list.' })
+  @ApiOkResponse({
+    type: JournalPageDto,
+    description: 'Current user journal list.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   findMine(@CurrentUser() user: AuthUser, @Query() query: JournalQueryDto) {
@@ -52,7 +55,10 @@ export class JournalsController {
   }
 
   @ApiOperation({ summary: 'Create current user journal' })
-  @ApiCreatedResponse({ type: JournalResponseDto, description: 'Created journal.' })
+  @ApiCreatedResponse({
+    type: JournalResponseDto,
+    description: 'Created journal.',
+  })
   @UseGuards(JwtAuthGuard)
   @Post('me')
   createMine(@CurrentUser() user: AuthUser, @Body() dto: CreateJournalDto) {

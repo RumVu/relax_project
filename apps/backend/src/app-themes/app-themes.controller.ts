@@ -37,14 +37,20 @@ export class AppThemesController {
   }
 
   @ApiOperation({ summary: 'Get the default app theme' })
-  @ApiOkResponse({ type: AppThemeResponseDto, description: 'Default active theme.' })
+  @ApiOkResponse({
+    type: AppThemeResponseDto,
+    description: 'Default active theme.',
+  })
   @Get('default')
   findDefault() {
     return this.appThemesService.findDefault();
   }
 
   @ApiOperation({ summary: 'Create an app theme' })
-  @ApiCreatedResponse({ type: AppThemeResponseDto, description: 'Created app theme.' })
+  @ApiCreatedResponse({
+    type: AppThemeResponseDto,
+    description: 'Created app theme.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateAppThemeDto) {
@@ -52,7 +58,10 @@ export class AppThemesController {
   }
 
   @ApiOperation({ summary: 'Update an app theme' })
-  @ApiOkResponse({ type: AppThemeResponseDto, description: 'Updated app theme.' })
+  @ApiOkResponse({
+    type: AppThemeResponseDto,
+    description: 'Updated app theme.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateAppThemeDto) {
@@ -60,7 +69,10 @@ export class AppThemesController {
   }
 
   @ApiOperation({ summary: 'Delete an app theme' })
-  @ApiOkResponse({ type: AppThemeResponseDto, description: 'Deleted app theme.' })
+  @ApiOkResponse({
+    type: AppThemeResponseDto,
+    description: 'Deleted app theme.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

@@ -32,14 +32,20 @@ export class CozyQuotesController {
   constructor(private readonly cozyQuotesService: CozyQuotesService) {}
 
   @ApiOperation({ summary: 'List cozy quotes' })
-  @ApiOkResponse({ type: CozyQuotePageDto, description: 'Cozy quote catalog list.' })
+  @ApiOkResponse({
+    type: CozyQuotePageDto,
+    description: 'Cozy quote catalog list.',
+  })
   @Get()
   findAll(@Query() query: CatalogQueryDto) {
     return this.cozyQuotesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Get a random active cozy quote' })
-  @ApiOkResponse({ type: CozyQuoteResponseDto, description: 'Random cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Random cozy quote.',
+  })
   @Get('random')
   findRandom() {
     return this.cozyQuotesService.findRandom();
@@ -57,7 +63,10 @@ export class CozyQuotesController {
   }
 
   @ApiOperation({ summary: 'Create a cozy quote' })
-  @ApiCreatedResponse({ type: CozyQuoteResponseDto, description: 'Created cozy quote.' })
+  @ApiCreatedResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Created cozy quote.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateCozyQuoteDto) {
@@ -65,7 +74,10 @@ export class CozyQuotesController {
   }
 
   @ApiOperation({ summary: 'Update a cozy quote' })
-  @ApiOkResponse({ type: CozyQuoteResponseDto, description: 'Updated cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Updated cozy quote.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCozyQuoteDto) {
@@ -73,7 +85,10 @@ export class CozyQuotesController {
   }
 
   @ApiOperation({ summary: 'Delete a cozy quote' })
-  @ApiOkResponse({ type: CozyQuoteResponseDto, description: 'Deleted cozy quote.' })
+  @ApiOkResponse({
+    type: CozyQuoteResponseDto,
+    description: 'Deleted cozy quote.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {
