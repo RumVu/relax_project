@@ -32,14 +32,20 @@ export class OnboardingSlidesController {
   ) {}
 
   @ApiOperation({ summary: 'List onboarding slides' })
-  @ApiOkResponse({ type: OnboardingSlidePageDto, description: 'Active onboarding slide list.' })
+  @ApiOkResponse({
+    type: OnboardingSlidePageDto,
+    description: 'Active onboarding slide list.',
+  })
   @Get()
   findAll(@Query() query: CatalogQueryDto) {
     return this.onboardingSlidesService.findAll(query);
   }
 
   @ApiOperation({ summary: 'Create an onboarding slide' })
-  @ApiCreatedResponse({ type: OnboardingSlideResponseDto, description: 'Created onboarding slide.' })
+  @ApiCreatedResponse({
+    type: OnboardingSlideResponseDto,
+    description: 'Created onboarding slide.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateOnboardingSlideDto) {
@@ -47,7 +53,10 @@ export class OnboardingSlidesController {
   }
 
   @ApiOperation({ summary: 'Update an onboarding slide' })
-  @ApiOkResponse({ type: OnboardingSlideResponseDto, description: 'Updated onboarding slide.' })
+  @ApiOkResponse({
+    type: OnboardingSlideResponseDto,
+    description: 'Updated onboarding slide.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateOnboardingSlideDto) {
@@ -55,7 +64,10 @@ export class OnboardingSlidesController {
   }
 
   @ApiOperation({ summary: 'Delete an onboarding slide' })
-  @ApiOkResponse({ type: OnboardingSlideResponseDto, description: 'Deleted onboarding slide.' })
+  @ApiOkResponse({
+    type: OnboardingSlideResponseDto,
+    description: 'Deleted onboarding slide.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

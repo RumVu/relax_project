@@ -62,7 +62,10 @@ export class SessionsController {
   }
 
   @ApiOperation({ summary: 'Revoke one session (admin)' })
-  @ApiOkResponse({ type: SessionResponseDto, description: 'Deleted session payload.' })
+  @ApiOkResponse({
+    type: SessionResponseDto,
+    description: 'Deleted session payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)

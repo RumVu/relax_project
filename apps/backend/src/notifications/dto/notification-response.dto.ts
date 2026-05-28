@@ -1,8 +1,4 @@
-import {
-  NotificationType,
-  PushPlatform,
-  PushProvider,
-} from '@prisma/client';
+import { NotificationType, PushPlatform, PushProvider } from '@prisma/client';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 export class NotificationResponseDto {

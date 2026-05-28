@@ -36,7 +36,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({ summary: 'List all users (admin)' })
-  @ApiOkResponse({ type: UserPageDto, description: 'Users with profile and preferences.' })
+  @ApiOkResponse({
+    type: UserPageDto,
+    description: 'Users with profile and preferences.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @Get()
   findAll(@Query() query: UserQueryDto) {
@@ -51,21 +54,30 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Create a user (admin)' })
-  @ApiCreatedResponse({ type: UserResponseDto, description: 'Created safe user payload.' })
+  @ApiCreatedResponse({
+    type: UserResponseDto,
+    description: 'Created safe user payload.',
+  })
   @Post()
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
   @ApiOperation({ summary: 'Update a user (admin)' })
-  @ApiOkResponse({ type: UserResponseDto, description: 'Updated safe user payload.' })
+  @ApiOkResponse({
+    type: UserResponseDto,
+    description: 'Updated safe user payload.',
+  })
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
   }
 
   @ApiOperation({ summary: 'Delete a user (admin)' })
-  @ApiOkResponse({ type: UserResponseDto, description: 'Deleted safe user payload.' })
+  @ApiOkResponse({
+    type: UserResponseDto,
+    description: 'Deleted safe user payload.',
+  })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(id);

@@ -1,6 +1,10 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BillingCycle, PaymentStatus, SubscriptionStatus } from '@prisma/client';
+import {
+  BillingCycle,
+  PaymentStatus,
+  SubscriptionStatus,
+} from '@prisma/client';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';

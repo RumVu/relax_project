@@ -30,7 +30,10 @@ export class AmbientSoundsController {
   constructor(private readonly ambientSoundsService: AmbientSoundsService) {}
 
   @ApiOperation({ summary: 'List ambient sounds' })
-  @ApiOkResponse({ type: AmbientSoundPageDto, description: 'Ambient sound catalog list.' })
+  @ApiOkResponse({
+    type: AmbientSoundPageDto,
+    description: 'Ambient sound catalog list.',
+  })
   @Get()
   findAll(@Query() query: CatalogQueryDto) {
     return this.ambientSoundsService.findAll(query);
@@ -48,7 +51,10 @@ export class AmbientSoundsController {
   }
 
   @ApiOperation({ summary: 'Create an ambient sound' })
-  @ApiCreatedResponse({ type: AmbientSoundResponseDto, description: 'Created ambient sound.' })
+  @ApiCreatedResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Created ambient sound.',
+  })
   @AdminOnly()
   @Post()
   create(@Body() dto: CreateAmbientSoundDto) {
@@ -56,7 +62,10 @@ export class AmbientSoundsController {
   }
 
   @ApiOperation({ summary: 'Update an ambient sound' })
-  @ApiOkResponse({ type: AmbientSoundResponseDto, description: 'Updated ambient sound.' })
+  @ApiOkResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Updated ambient sound.',
+  })
   @AdminOnly()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateAmbientSoundDto) {
@@ -64,7 +73,10 @@ export class AmbientSoundsController {
   }
 
   @ApiOperation({ summary: 'Delete an ambient sound' })
-  @ApiOkResponse({ type: AmbientSoundResponseDto, description: 'Deleted ambient sound.' })
+  @ApiOkResponse({
+    type: AmbientSoundResponseDto,
+    description: 'Deleted ambient sound.',
+  })
   @AdminOnly()
   @Delete(':id')
   remove(@Param('id') id: string) {

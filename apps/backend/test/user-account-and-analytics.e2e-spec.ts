@@ -203,7 +203,9 @@ describe('User account + analytics APIs (e2e)', () => {
   // ---------------------------------------------------------------------------
   describe('analytics', () => {
     it('rejects anonymous /analytics/contracts', async () => {
-      await request(app.getHttpServer()).get('/analytics/contracts').expect(401);
+      await request(app.getHttpServer())
+        .get('/analytics/contracts')
+        .expect(401);
     });
 
     it('serves the chart/card contracts to an authenticated user', async () => {

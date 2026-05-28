@@ -23,7 +23,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get a user profile by user id (admin)' })
-  @ApiOkResponse({ type: UserProfileResponseDto, description: 'User profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'User profile payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -34,7 +37,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert a user profile by user id (admin)' })
-  @ApiOkResponse({ type: UserProfileResponseDto, description: 'Upserted user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Upserted user profile payload.',
+  })
   @ApiForbiddenResponse({ description: 'Requires ADMIN role.' })
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -45,7 +51,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Get the current user profile' })
-  @ApiOkResponse({ type: UserProfileResponseDto, description: 'Current user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Current user profile payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/profile')
   findMine(@CurrentUser() user: AuthUser) {
@@ -54,7 +63,10 @@ export class UserProfilesController {
 
   @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Upsert the current user profile' })
-  @ApiOkResponse({ type: UserProfileResponseDto, description: 'Upserted current user profile payload.' })
+  @ApiOkResponse({
+    type: UserProfileResponseDto,
+    description: 'Upserted current user profile payload.',
+  })
   @UseGuards(JwtAuthGuard)
   @Patch('me/profile')
   upsertMine(@CurrentUser() user: AuthUser, @Body() dto: UpsertUserProfileDto) {

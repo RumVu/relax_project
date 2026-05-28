@@ -27,7 +27,10 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @ApiOperation({ summary: 'Get billing/payment provider status' })
-  @ApiOkResponse({ type: ProviderStatusResponseDto, description: 'Configured payment providers.' })
+  @ApiOkResponse({
+    type: ProviderStatusResponseDto,
+    description: 'Configured payment providers.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('providers')
   getProviderStatus() {
@@ -46,7 +49,10 @@ export class BillingController {
   }
 
   @ApiOperation({ summary: 'Get current user billing state' })
-  @ApiOkResponse({ type: BillingMeResponseDto, description: 'Current subscription and provider status.' })
+  @ApiOkResponse({
+    type: BillingMeResponseDto,
+    description: 'Current subscription and provider status.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMine(@CurrentUser() user: AuthUser) {
