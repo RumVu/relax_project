@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
     "openapi:types": "mkdir -p lib/generated && npx --yes openapi-typescript ${NEXT_PUBLIC_API_URL:-http://localhost:6823}/docs-json -o lib/generated/openapi-types.ts"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/node": "^25.7.0",
     "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
