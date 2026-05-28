@@ -143,7 +143,7 @@ export function DashboardShell({
       )}
     >
       <div className="mx-auto grid w-full max-w-[1440px] min-w-0 gap-4 lg:grid-cols-[248px_minmax(0,1fr)]">
-        <aside className="min-w-0 overflow-hidden rounded-lg border border-white/10 bg-night p-4 text-mist shadow-panel lg:sticky lg:top-6 lg:h-[calc(100vh-48px)]">
+        <aside className="min-w-0 rounded-lg border border-white/10 bg-night p-4 text-mist shadow-panel lg:sticky lg:top-6 lg:h-[calc(100vh-48px)] lg:overflow-y-auto">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-violet text-white">
               <Leaf className="h-5 w-5" />

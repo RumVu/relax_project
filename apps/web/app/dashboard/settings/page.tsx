@@ -31,6 +31,7 @@ import {
   type DashboardThemePalette,
 } from '@/components/providers/theme-provider';
 import { apiFetch, extractList } from '@/lib/api';
+import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
@@ -485,7 +486,8 @@ export default function SettingsPage() {
                 select
                 value={themeMode}
                 options={['SYSTEM', 'LIGHT', 'DARK']}
-                onChange={(value) =>
+                onChange={(value) => {
+                  const nextMode = value as ThemeMode;
                   setDraftPreferences((current) => ({
                     weatherEnabled:
                       current?.weatherEnabled ??
@@ -500,9 +502,21 @@ export default function SettingsPage() {
                     locationName:
                       current?.locationName ??
                       settings.preferences.locationName,
-                    themeMode: value as ThemeMode,
-                  }))
-                }
+                    themeMode: nextMode,
+                  }));
+                  // Hot-apply immediately so the user sees the new mode
+                  // without having to press "Lưu preferences" first.
+                  const activePalette =
+                    themeCatalog.find((t) => t.id === activeThemeId) ?? null;
+                  dispatchDashboardTheme(nextMode, activePalette);
+                  // Best-effort persist in the background.
+                  void apiFetch('/user-preferences/me/preferences', {
+                    method: 'PATCH',
+                    body: JSON.stringify({ themeMode: nextMode }),
+                  }).catch(() => {
+                    /* surfaced via the Save button if it fails */
+                  });
+                }}
               />
               <Field
                 label="Timezone"
@@ -1052,6 +1066,17 @@ export default function SettingsPage() {
                 : themeState === theme.id
                   ? 'Đang áp dụng'
                   : 'Áp dụng';
+              // Auto-fix unreadable palettes (e.g. dark ink on a dark
+              // surface). If the admin's textColor has enough contrast we
+              // keep it; otherwise we fall back to white/near-black.
+              const readableText = getReadableTextColor(
+                theme.surfaceColor,
+                theme.textColor,
+              );
+              const readableMuted = getReadableTextColor(
+                theme.surfaceColor,
+                theme.mutedTextColor || theme.textColor,
+              );
 
               return (
                 <button
@@ -1112,7 +1137,7 @@ export default function SettingsPage() {
                     boxShadow: isActiveTheme
                       ? `0 0 0 1px ${theme.primaryColor}`
                       : 'none',
-                    color: theme.textColor,
+                    color: readableText,
                   }}
                   type="button"
                 >
@@ -1120,22 +1145,25 @@ export default function SettingsPage() {
                     <div>
                       <p
                         className="text-lg font-extrabold"
-                        style={{ color: theme.textColor }}
+                        style={{ color: readableText }}
                       >
                         {theme.name}
                       </p>
                       <p
                         className="mt-1 text-sm"
-                        style={{
-                          color: theme.mutedTextColor || theme.textColor,
-                        }}
+                        style={{ color: readableMuted }}
                       >
                         {theme.mode} {theme.isDefault ? '• mặc định hệ thống' : ''}
                       </p>
                     </div>
                     <div
                       className="text-xs font-bold"
-                      style={{ color: theme.primaryColor }}
+                      style={{
+                        color: getReadableTextColor(
+                          theme.surfaceColor,
+                          theme.primaryColor,
+                        ),
+                      }}
                     >
                       {statusLabel}
                     </div>
