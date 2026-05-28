@@ -468,8 +468,12 @@ export default function SettingsPage() {
                   method: 'PATCH',
                   body: JSON.stringify({
                     displayName,
+                    // Always send UTC midnight for the picked date so we
+                    // don't shift back a day in negative timezones.
+                    // (`new Date('YYYY-MM-DDT00:00:00')` is interpreted
+                    // as LOCAL time → +07 lost a day in UTC.)
                     birthday: birthday
-                      ? new Date(`${birthday}T00:00:00`).toISOString()
+                      ? new Date(`${birthday}T00:00:00.000Z`).toISOString()
                       : null,
                   }),
                 });
@@ -1991,7 +1995,13 @@ function normalizeBirthdayValue(value: string) {
     return '';
   }
 
-  return parsed.toISOString().slice(0, 10);
+  // Read UTC parts so an ISO like "2003-10-02T00:00:00Z" stays "2003-10-02"
+  // when the browser is in UTC+7 (otherwise toLocaleDateString shifts
+  // back/forward by a day depending on the timezone offset).
+  const year = parsed.getUTCFullYear();
+  const month = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function nextLocalReminderTime() {
