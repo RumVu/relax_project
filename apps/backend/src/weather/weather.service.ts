@@ -18,12 +18,20 @@ const REVERSE_GEOCODE_CACHE_TTL_SECONDS = 24 * 60 * 60;
 interface OpenMeteoCurrentPayload {
   current?: {
     temperature_2m?: number;
+    apparent_temperature?: number;
+    relative_humidity_2m?: number;
     weather_code?: number;
     is_day?: number;
+    precipitation?: number;
+    wind_speed_10m?: number;
+    wind_direction_10m?: number;
     time?: string;
   };
   current_units?: {
     temperature_2m?: string;
+    relative_humidity_2m?: string;
+    wind_speed_10m?: string;
+    precipitation?: string;
   };
   timezone?: string;
 }
@@ -242,6 +250,14 @@ export class WeatherService {
       current: {
         temperature: current?.temperature_2m ?? null,
         temperatureUnit: payload.current_units?.temperature_2m ?? '°C',
+        apparentTemperature: current?.apparent_temperature ?? null,
+        humidity: current?.relative_humidity_2m ?? null,
+        humidityUnit: payload.current_units?.relative_humidity_2m ?? '%',
+        windSpeed: current?.wind_speed_10m ?? null,
+        windSpeedUnit: payload.current_units?.wind_speed_10m ?? 'km/h',
+        windDirection: current?.wind_direction_10m ?? null,
+        precipitation: current?.precipitation ?? null,
+        precipitationUnit: payload.current_units?.precipitation ?? 'mm',
         weatherCode: current?.weather_code ?? null,
         isDay: current?.is_day !== 0,
         observedAt: current?.time ?? null,
@@ -276,7 +292,12 @@ export class WeatherService {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     url.searchParams.set('latitude', String(latitude));
     url.searchParams.set('longitude', String(longitude));
-    url.searchParams.set('current', 'temperature_2m,weather_code,is_day');
+    // Pull the extra Open-Meteo fields the dashboard needs to render
+    // its weather panels (humidity, wind, apparent temp, precipitation).
+    url.searchParams.set(
+      'current',
+      'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,precipitation,wind_speed_10m,wind_direction_10m',
+    );
     url.searchParams.set('timezone', timezone);
 
     const controller = new AbortController();
@@ -353,6 +374,14 @@ export class WeatherService {
       current: {
         temperature: current?.temperature_2m ?? null,
         temperatureUnit: payload.current_units?.temperature_2m ?? '°C',
+        apparentTemperature: current?.apparent_temperature ?? null,
+        humidity: current?.relative_humidity_2m ?? null,
+        humidityUnit: payload.current_units?.relative_humidity_2m ?? '%',
+        windSpeed: current?.wind_speed_10m ?? null,
+        windSpeedUnit: payload.current_units?.wind_speed_10m ?? 'km/h',
+        windDirection: current?.wind_direction_10m ?? null,
+        precipitation: current?.precipitation ?? null,
+        precipitationUnit: payload.current_units?.precipitation ?? 'mm',
         weatherCode: current?.weather_code ?? null,
         isDay: current?.is_day !== 0,
         observedAt: current?.time ?? null,
@@ -397,7 +426,12 @@ export class WeatherService {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
     url.searchParams.set('latitude', String(latitude));
     url.searchParams.set('longitude', String(longitude));
-    url.searchParams.set('current', 'temperature_2m,weather_code,is_day');
+    // Pull the extra Open-Meteo fields the dashboard needs to render
+    // its weather panels (humidity, wind, apparent temp, precipitation).
+    url.searchParams.set(
+      'current',
+      'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,precipitation,wind_speed_10m,wind_direction_10m',
+    );
     url.searchParams.set(
       'daily',
       'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
