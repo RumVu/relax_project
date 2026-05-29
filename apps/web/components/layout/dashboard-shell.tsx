@@ -80,14 +80,52 @@ export function DashboardShell({
 
   // Realtime events arrive on /realtime; refetch dashboard + chrome data,
   // throttled so a burst of events does not trigger a refetch storm.
-  const handleRealtimeEvent = useCallback(() => {
-    const now = Date.now();
-    if (now - lastRealtimeRefreshRef.current < 1500) {
-      return;
+  // For `notification.created` we also pop a toast + a browser-level
+  // Notification (if the user granted permission) + a short "bóc bóc"
+  // beep so a brand-new device login is impossible to miss.
+  const handleRealtimeEvent = useCallback(
+    (eventName: string, payload?: unknown) => {
+      const now = Date.now();
+      if (now - lastRealtimeRefreshRef.current > 1500) {
+        lastRealtimeRefreshRef.current = now;
+        triggerRefresh();
+      }
+
+      if (eventName === 'notification.created') {
+        const p = (payload ?? {}) as {
+          title?: string;
+          message?: string;
+          type?: string;
+        };
+        const title = p.title || 'Thông báo mới';
+        const message = p.message || '';
+
+        pushToast({
+          tone: title.toLowerCase().includes('thiết bị') ? 'info' : 'success',
+          title,
+          message,
+        });
+
+        playNotifyChime();
+        showBrowserNotification(title, message);
+      }
+    },
+    [pushToast, triggerRefresh],
+  );
+
+  // Ask for browser-level Notification permission once per session so
+  // realtime events can pop a native OS toast even if the dashboard tab
+  // is in the background.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+      const t = window.setTimeout(() => {
+        void Notification.requestPermission().catch(() => undefined);
+      }, 2000);
+      return () => window.clearTimeout(t);
     }
-    lastRealtimeRefreshRef.current = now;
-    triggerRefresh();
-  }, [triggerRefresh]);
+  }, []);
 
   const loadChromeData = useCallback(async () => {
     try {
@@ -387,4 +425,70 @@ function formatReminderTime(value: string) {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+/**
+ * Play a short two-note "bóc bóc" chime using the WebAudio API — no
+ * static audio asset required, no permission needed beyond the usual
+ * autoplay rule (which is satisfied because the chime only fires in
+ * response to a realtime event after the user has interacted with the
+ * page).
+ */
+function playNotifyChime() {
+  if (typeof window === 'undefined') return;
+  const Ctx =
+    window.AudioContext ||
+    (window as unknown as { webkitAudioContext?: typeof AudioContext })
+      .webkitAudioContext;
+  if (!Ctx) return;
+
+  try {
+    const ctx = new Ctx();
+    const now = ctx.currentTime;
+    const tones: Array<[number, number]> = [
+      [880, now],         // first beep at A5
+      [660, now + 0.18],  // second beep at E5 — "bóc bóc"
+    ];
+
+    for (const [freq, start] of tones) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, start);
+      gain.gain.linearRampToValueAtTime(0.18, start + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.16);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.18);
+    }
+    // Auto-close the context shortly after the second tone finishes so
+    // we don't leak an open AudioContext on every notification.
+    window.setTimeout(() => ctx.close().catch(() => undefined), 500);
+  } catch {
+    // WebAudio refused (rare) — silently ignore. The in-app toast still
+    // fires regardless.
+  }
+}
+
+/**
+ * Pop a native OS-level notification if the user previously granted
+ * permission. Falls back to silent no-op otherwise — the in-app toast
+ * still surfaces the same content.
+ */
+function showBrowserNotification(title: string, body: string) {
+  if (typeof window === 'undefined') return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  try {
+    const n = new Notification(title, {
+      body,
+      icon: '/favicon.ico',
+      tag: 'digital-break-notification',
+    });
+    // Auto-dismiss after 8s so notifications don't pile up.
+    window.setTimeout(() => n.close(), 8000);
+  } catch {
+    // Notification constructor can throw in service-worker-only contexts.
+  }
 }
