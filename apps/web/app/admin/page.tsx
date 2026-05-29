@@ -26,7 +26,12 @@ import {
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { apiFetch } from '@/lib/api';
+import {
+  API_URL,
+  API_VERSION_PREFIX,
+  apiFetch,
+  getStoredAccessToken,
+} from '@/lib/api';
 import { useAdminDashboardData } from '@/lib/live-dashboard';
 
 const metricIcons = [Activity, Users, Users, CreditCard, Activity, Bell];
@@ -173,12 +178,97 @@ type InfraHealth = {
   endpoint: string;
 };
 
+/**
+ * Different health probes return wildly different payload shapes:
+ * /health             → { status, timestamp, uptimeSeconds }
+ * /redis/health       → { status, mode, enabled }
+ * /queues/health      → { status, enabled, queueCount }
+ * /realtime/health    → { status, adapter: { provider, namespace, mode, … } }
+ *
+ * Distill any of them down to a short single-line string for the card so
+ * we never accidentally try to render an object (which is what produced
+ * the "Objects are not valid as a React child {provider, namespace, mode,
+ * redisConfigured, redisConnected}" crash).
+ */
+/**
+ * Hits an endpoint WITHOUT the /v1 global prefix that apiFetch hard-codes.
+ * Used for the small set of infra routes (/, /health, /ready) the backend
+ * explicitly excludes from versioning.
+ */
+async function fetchUnversioned(
+  path: string,
+): Promise<Record<string, unknown>> {
+  const token = getStoredAccessToken();
+  const headers: Record<string, string> = { Accept: 'application/json' };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  // Strip the /v1 prefix that API_VERSION_PREFIX adds — we just want
+  // `${API_URL}${path}`.
+  void API_VERSION_PREFIX;
+  const response = await fetch(`${API_URL}${path}`, {
+    headers,
+    cache: 'no-store',
+  });
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const text = await response.text();
+  try {
+    return text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  } catch {
+    return { raw: text };
+  }
+}
+
+function summariseHealthPayload(payload: Record<string, unknown>): string {
+  const parts: string[] = [];
+
+  // adapter: prefer "<provider> on <namespace>" if it's an object.
+  const adapter = payload.adapter;
+  if (typeof adapter === 'string' && adapter) {
+    parts.push(adapter);
+  } else if (adapter && typeof adapter === 'object') {
+    const a = adapter as Record<string, unknown>;
+    const provider = typeof a.provider === 'string' ? a.provider : null;
+    const namespace = typeof a.namespace === 'string' ? a.namespace : null;
+    const mode = typeof a.mode === 'string' ? a.mode : null;
+    const tag = [provider, namespace ? `ns=${namespace}` : null, mode]
+      .filter(Boolean)
+      .join(' · ');
+    if (tag) parts.push(tag);
+  }
+
+  if (typeof payload.mode === 'string' && payload.mode) {
+    parts.push(`mode ${payload.mode}`);
+  }
+  if (typeof payload.enabled === 'boolean') {
+    parts.push(payload.enabled ? 'enabled' : 'disabled');
+  }
+  if (typeof payload.queueCount === 'number') {
+    parts.push(`${payload.queueCount} queue`);
+  }
+  if (typeof payload.uptimeSeconds === 'number') {
+    parts.push(`uptime ${Math.round(payload.uptimeSeconds)}s`);
+  }
+  if (typeof payload.redisConnected === 'boolean') {
+    parts.push(`redis ${payload.redisConnected ? '✓' : '✗'}`);
+  }
+
+  return parts.join(' • ') || 'OK';
+}
+
 function InfraHealthCard() {
   const [items, setItems] = useState<InfraHealth[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const probes: Array<{ service: string; endpoint: string }> = [
-    { service: 'API server', endpoint: '/health' },
+  // /health is NOT versioned (excluded from the /v1 global prefix in
+  // backend main.ts); the others ARE. `versioned: false` makes the probe
+  // hit /health directly instead of /v1/health which 404s.
+  const probes: Array<{
+    service: string;
+    endpoint: string;
+    versioned?: boolean;
+  }> = [
+    { service: 'API server', endpoint: '/health', versioned: false },
     { service: 'Redis cache', endpoint: '/redis/health' },
     { service: 'BullMQ queues', endpoint: '/queues/health' },
     { service: 'Realtime (Socket.IO)', endpoint: '/realtime/health' },
@@ -187,29 +277,29 @@ function InfraHealthCard() {
   async function refresh() {
     setLoading(true);
     const next: InfraHealth[] = await Promise.all(
-      probes.map(async ({ service, endpoint }) => {
+      probes.map(async ({ service, endpoint, versioned = true }) => {
         const start = performance.now();
         try {
-          const payload = (await apiFetch<Record<string, unknown>>(endpoint)) as {
-            status?: string;
-            uptimeSeconds?: number;
-            adapter?: string;
-            mode?: string;
-          };
+          const payload = versioned
+            ? await apiFetch<Record<string, unknown>>(endpoint)
+            : await fetchUnversioned(endpoint);
           const ms = Math.round(performance.now() - start);
+          // Some probes don't have a "status" field but are healthy
+          // (e.g. /v1/redis/health returns {configured, enabled, ...}).
+          // Treat ok-status OR configured+enabled OR a non-error
+          // response as UP.
+          const status =
+            payload.status === 'ok' ||
+            payload.status === 'ready' ||
+            (payload.configured === true && payload.enabled !== false)
+              ? 'up'
+              : 'down';
           return {
             service,
             endpoint,
-            status: (payload.status === 'ok' || payload.status === 'ready')
-              ? 'up'
-              : 'down',
+            status,
             latencyMs: ms,
-            detail:
-              payload.adapter ||
-              payload.mode ||
-              (typeof payload.uptimeSeconds === 'number'
-                ? `uptime ${Math.round(payload.uptimeSeconds)}s`
-                : undefined),
+            detail: summariseHealthPayload(payload),
           };
         } catch (error) {
           return {
