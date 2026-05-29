@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CloudRain,
   CloudSun,
@@ -18,7 +18,6 @@ import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -309,57 +308,27 @@ export default function WeatherPage() {
           copy="Nhiệt độ cao/thấp và xác suất mưa từng ngày."
           action={<CloudSun className="h-5 w-5 text-violet" />}
         />
-        <div className="mt-5 h-[260px]">
-          {mounted && chartData.length > 0 ? (
-            <ResponsiveContainer height="100%" width="100%">
-              <LineChart data={chartData} margin={{ left: -18, right: 8, top: 16 }}>
-                <CartesianGrid stroke="var(--field-border)" strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="day"
-                  stroke="var(--app-muted)"
-                  tickLine={false}
-                />
-                <YAxis
-                  domain={['auto', 'auto']}
-                  stroke="var(--app-muted)"
-                  tickLine={false}
-                  width={32}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--panel-strong)',
-                    border: '1px solid var(--field-border)',
-                    color: 'var(--app-text)',
-                  }}
-                />
-                <Line
-                  dataKey="high"
-                  dot={{ r: 3 }}
-                  name="Cao"
-                  stroke="#ef767a"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-                <Line
-                  dataKey="low"
-                  dot={{ r: 3 }}
-                  name="Thấp"
-                  stroke="#7357f6"
-                  strokeWidth={2}
-                  type="monotone"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex h-full items-center justify-center text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-              {loading ? 'Đang tải dự báo…' : 'Chưa có dữ liệu — cấp vị trí trước.'}
-            </div>
+        <ChartBox emptyHint={loading ? 'Đang tải dự báo…' : 'Chưa có dữ liệu — cấp vị trí trước.'} hasData={chartData.length > 0} height={260} mounted={mounted}>
+          {(width) => (
+            <LineChart data={chartData} height={260} margin={{ left: -18, right: 8, top: 16 }} width={width}>
+              <CartesianGrid stroke="var(--field-border)" strokeDasharray="3 3" />
+              <XAxis dataKey="day" stroke="var(--app-muted)" tickLine={false} />
+              <YAxis domain={['auto', 'auto']} stroke="var(--app-muted)" tickLine={false} width={32} />
+              <Tooltip
+                contentStyle={{
+                  background: 'var(--panel-strong)',
+                  border: '1px solid var(--field-border)',
+                  color: 'var(--app-text)',
+                }}
+              />
+              <Line dataKey="high" dot={{ r: 3 }} name="Cao" stroke="#ef767a" strokeWidth={2} type="monotone" />
+              <Line dataKey="low" dot={{ r: 3 }} name="Thấp" stroke="#7357f6" strokeWidth={2} type="monotone" />
+            </LineChart>
           )}
-        </div>
-        <div className="mt-4 h-[160px]">
-          {mounted && chartData.length > 0 ? (
-            <ResponsiveContainer height="100%" width="100%">
-              <AreaChart data={chartData} margin={{ left: -18, right: 8, top: 8 }}>
+        </ChartBox>
+        <ChartBox className="mt-4" emptyHint="" hasData={chartData.length > 0} height={160} mounted={mounted}>
+          {(width) => (
+            <AreaChart data={chartData} height={160} margin={{ left: -18, right: 8, top: 8 }} width={width}>
                 <defs>
                   <linearGradient id="rainFill" x1="0" x2="0" y1="0" y2="1">
                     <stop offset="0%" stopColor="#7357f6" stopOpacity={0.45} />
@@ -395,9 +364,8 @@ export default function WeatherPage() {
                   type="monotone"
                 />
               </AreaChart>
-            </ResponsiveContainer>
-          ) : null}
-        </div>
+          )}
+        </ChartBox>
       </Card>
 
       <Card>
@@ -533,4 +501,56 @@ function formatDay(date: string | undefined): string {
   } catch {
     return date;
   }
+}
+
+/**
+ * Wraps a recharts chart in a width-measuring container. recharts'
+ * ResponsiveContainer kept rendering as a 0×0 div under Next 16 canary,
+ * so we measure the parent width ourselves with ResizeObserver and pass
+ * it down. Same approach the analytics page uses (ChartFrame in
+ * dashboard-ui), reproduced here without the prop coupling.
+ */
+function ChartBox({
+  children,
+  className,
+  emptyHint,
+  hasData,
+  height,
+  mounted,
+}: {
+  children: (width: number) => React.ReactElement;
+  className?: string;
+  emptyHint: string;
+  hasData: boolean;
+  height: number;
+  mounted: boolean;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+
+  useEffect(() => {
+    if (!mounted || !ref.current) return;
+    const observer = new ResizeObserver((entries) => {
+      const next = Math.floor(entries[0]?.contentRect.width ?? 0);
+      if (next > 0) setWidth(next);
+    });
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [mounted]);
+
+  return (
+    <div
+      className={className ?? 'mt-5'}
+      ref={ref}
+      style={{ height, width: '100%' }}
+    >
+      {mounted && hasData && width > 0 ? (
+        children(width)
+      ) : (
+        <div className="flex h-full items-center justify-center text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+          {emptyHint}
+        </div>
+      )}
+    </div>
+  );
 }

@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import {
   Bell,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Globe2,
   Laptop,
@@ -182,6 +184,8 @@ export default function SettingsPage() {
   const [themeCatalog, setThemeCatalog] = useState<ThemeCard[]>([]);
   const [themeState, setThemeState] = useState<string | null>(null);
   const [activeThemeId, setActiveThemeId] = useState<string | null>(null);
+  const [sessionsPage, setSessionsPage] = useState(0);
+  const [sessionsPageSize, setSessionsPageSize] = useState(10);
   const weatherEnabled =
     draftPreferences?.weatherEnabled ?? settings.preferences.weatherEnabled;
   const pushEnabled = draftPreferences?.pushEnabled ?? settings.preferences.pushEnabled;
@@ -1303,30 +1307,42 @@ export default function SettingsPage() {
                 'Hết hạn',
                 'Trạng thái',
               ]}
-              rows={settings.sessions.map((session) => [
-                <div
-                  className="max-w-[220px]"
-                  key={`${session.id}-device`}
-                  title={session.device}
-                >
-                  <p className="font-bold">{describeDevice(session.device)}</p>
-                </div>,
-                <span
-                  className="text-sm font-semibold"
-                  key={`${session.id}-browser`}
-                >
-                  {describeBrowser(session.device)}
-                </span>,
-                <code
-                  className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
-                  key={`${session.id}-ip`}
-                >
-                  {session.ipAddress || '—'}
-                </code>,
-                session.createdAt,
-                session.expiresAt,
-                session.current ? 'Phiên hiện tại' : 'Đã lưu',
-              ])}
+              rows={settings.sessions
+                .slice(
+                  sessionsPage * sessionsPageSize,
+                  (sessionsPage + 1) * sessionsPageSize,
+                )
+                .map((session) => [
+                  <div
+                    className="max-w-[220px]"
+                    key={`${session.id}-device`}
+                    title={session.device}
+                  >
+                    <p className="font-bold">{describeDevice(session.device)}</p>
+                  </div>,
+                  <span
+                    className="text-sm font-semibold"
+                    key={`${session.id}-browser`}
+                  >
+                    {describeBrowser(session.device)}
+                  </span>,
+                  <code
+                    className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
+                    key={`${session.id}-ip`}
+                  >
+                    {session.ipAddress || '—'}
+                  </code>,
+                  session.createdAt,
+                  session.expiresAt,
+                  session.current ? 'Phiên hiện tại' : 'Đã lưu',
+                ])}
+            />
+            <SessionsPagination
+              page={sessionsPage}
+              pageSize={sessionsPageSize}
+              setPage={setSessionsPage}
+              setPageSize={setSessionsPageSize}
+              total={settings.sessions.length}
             />
           </div>
           <p className="mt-4 text-sm text-[var(--app-muted,theme(colors.slate))]">
@@ -1734,6 +1750,77 @@ export default function SettingsPage() {
         />
       ) : null}
     </>
+  );
+}
+
+function SessionsPagination({
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  total,
+}: {
+  page: number;
+  pageSize: number;
+  setPage: (next: number) => void;
+  setPageSize: (next: number) => void;
+  total: number;
+}) {
+  const pageSizes = [10, 20, 50];
+  const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  const showingFrom = total === 0 ? 0 : page * pageSize + 1;
+  const showingTo = Math.min((page + 1) * pageSize, total);
+  if (total <= pageSizes[0]! && page === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+        <span>Hiển thị</span>
+        <select
+          aria-label="Số phiên / trang"
+          className="h-9 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-2 text-sm font-bold text-[var(--app-text)]"
+          onChange={(event) => {
+            setPageSize(Number(event.target.value));
+            setPage(0);
+          }}
+          value={pageSize}
+        >
+          {pageSizes.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <span>phiên / trang</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
+        <span className="text-[var(--app-muted,theme(colors.slate))]">
+          {showingFrom}–{showingTo} / {total}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            aria-label="Trang trước"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page <= 0}
+            onClick={() => setPage(Math.max(0, page - 1))}
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="px-2 text-xs font-bold">
+            {page + 1} / {Math.max(1, lastPage + 1)}
+          </span>
+          <button
+            aria-label="Trang sau"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page >= lastPage}
+            onClick={() => setPage(Math.min(lastPage, page + 1))}
+            type="button"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
