@@ -75,6 +75,13 @@ jobs:
         working-directory: apps/backend
         run: npm run prisma:migrate:deploy
 
+      - name: Seed catalog data
+        # catalog.e2e expects /app-themes/default and /companion-assets/default
+        # to return 200, which requires at least one row with isDefault=true.
+        # Seeding is idempotent (upserts) so it's safe to run before tests.
+        working-directory: apps/backend
+        run: node ./prisma/seed.cjs
+
       - name: Backend unit tests
         working-directory: apps/backend
         run: npm test -- --ci
