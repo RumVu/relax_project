@@ -209,12 +209,16 @@ html[data-theme='dark'] .bg-mist,
 html[data-theme='dark'] .bg-cloud {
   background-color: var(--panel-strong);
 }
+html[data-theme='dark'] .bg-white\/60,
+html[data-theme='dark'] .bg-white\/65,
+html[data-theme='dark'] .bg-white\/70,
 html[data-theme='dark'] .bg-white\/75,
 html[data-theme='dark'] .bg-white\/80,
 html[data-theme='dark'] .bg-white\/85,
 html[data-theme='dark'] .bg-white\/90,
 html[data-theme='dark'] .bg-white\/95 {
   background-color: var(--panel-bg);
+  color: var(--app-text);
 }
 
 /* Border colour overrides */
