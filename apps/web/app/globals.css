@@ -246,3 +246,72 @@ html[data-theme='dark'] textarea::placeholder {
    ink ↔ muted swap — already covered by the .text-ink rule, but make sure
    any `bg-cloud` block is dark-friendly too (handled above). */
 
+/* -------------------------------------------------------------------------
+ * Responsive layer — desktop layout intact, phones/tablets get tap-friendly
+ * targets, single-column grids, and the recharts containers no longer blow
+ * past the viewport in landscape.
+ * ------------------------------------------------------------------------- */
+
+/* Touch devices: kill the hover lift (jitters under a finger tap because
+ * the device fires hover + click in quick succession). */
+@media (hover: none) {
+  button:not(:disabled):hover {
+    transform: none;
+  }
+}
+
+/* Phone (< 640px) tweaks. */
+@media (max-width: 639px) {
+  main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Every interactive control reaches the 44×44 tap target Apple/Material
+   * recommend, except for explicit small/icon buttons. */
+  button:not(.h-8):not(.h-9):not(.h-7):not([aria-label='Đóng menu']):not([aria-label='Đóng checkout']) {
+    min-height: 44px;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* prevents iOS Safari auto-zoom on focus */
+  }
+
+  /* Cards lose a little padding so the content doesn't feel cramped. */
+  .rounded-lg.shadow-panel,
+  .rounded-xl.shadow-panel {
+    padding: 1rem;
+  }
+
+  /* Stack any sm:2/3/4-col grid into a single column on phones. */
+  .grid.sm\:grid-cols-2,
+  .grid.sm\:grid-cols-3,
+  .grid.sm\:grid-cols-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Hero title shrinks on phones so it doesn't overflow. */
+  h2.text-3xl,
+  h2.text-4xl {
+    font-size: 1.5rem;
+    line-height: 1.85rem;
+  }
+}
+
+/* Tablet (640–1023px): hint that data tables may scroll right. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .overflow-x-auto {
+    mask-image: linear-gradient(to right, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, black 92%, transparent);
+  }
+}
+
+/* Charts (recharts) never overflow the parent. */
+.recharts-responsive-container,
+.recharts-wrapper {
+  max-width: 100%;
+}
+
