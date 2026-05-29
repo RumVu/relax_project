@@ -13,6 +13,7 @@ import {
   Prisma,
 } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 import { createHash, randomBytes } from 'node:crypto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
@@ -22,6 +23,7 @@ import { userSelect } from '../users/user.select';
 import { UsersService } from '../users/users.service';
 import { JwtPayload } from './auth.types';
 import { DeleteAccountDto, DeleteAccountMode } from './dto/delete-account.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -107,6 +109,129 @@ export class AuthService {
     await this.prisma.session.delete({ where: { id: session.id } });
 
     return this.createAuthResponse(session.user, userAgent, ipAddress);
+  }
+
+  /**
+   * Exchanges a Google Identity Services ID token for an app session.
+   *
+   * Flow:
+   *   1. Verify the JWT signature against Google's public JWKs and check
+   *      that `aud` matches our GOOGLE_CLIENT_ID (prevents replay from
+   *      other apps' tokens).
+   *   2. Pull email + name + picture out of the verified payload.
+   *   3. Find an existing user by email:
+   *      - if they registered with LOCAL, upgrade `authProvider` so they
+   *        can use both flows;
+   *      - if not found, create one with `authProvider: GOOGLE` and
+   *        `emailVerified: true` (Google already verified the address).
+   *   4. Return the same auth response shape as /auth/login.
+   */
+  async googleLogin(
+    dto: GoogleLoginDto,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    const clientId = this.configService.get<string>('app.googleClientId');
+    if (!clientId) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message:
+          'Google sign-in is not configured (missing GOOGLE_CLIENT_ID on backend).',
+      });
+    }
+
+    let payload: {
+      email?: string;
+      email_verified?: boolean;
+      name?: string;
+      picture?: string;
+      sub?: string;
+    };
+
+    try {
+      const client = new OAuth2Client(clientId);
+      const ticket = await client.verifyIdToken({
+        idToken: dto.idToken,
+        audience: clientId,
+      });
+      payload = ticket.getPayload() ?? {};
+    } catch {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message: 'Google ID token is invalid or expired.',
+      });
+    }
+
+    const email = payload.email?.toLowerCase();
+    if (!email) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message: 'Google token does not include an email address.',
+      });
+    }
+
+    // Find-or-create the user. Google has already verified the email,
+    // so we can set emailVerified = true on first create.
+    const existing = await this.usersService.findByEmailWithPassword(email);
+    let userId: string;
+    let userActive: boolean;
+    let userRole: JwtPayload['role'];
+
+    if (!existing) {
+      const created = await this.prisma.user.create({
+        data: {
+          email,
+          name: payload.name ?? null,
+          avatar: payload.picture ?? null,
+          authProvider: AuthProvider.GOOGLE,
+          emailVerified: payload.email_verified === true,
+          profile: {
+            create: { displayName: payload.name ?? email.split('@')[0] },
+          },
+          preferences: { create: {} },
+        },
+        select: { id: true, isActive: true, role: true },
+      });
+      userId = created.id;
+      userActive = created.isActive;
+      userRole = created.role;
+    } else {
+      if (existing.authProvider === AuthProvider.LOCAL) {
+        // Upgrade legacy LOCAL accounts so the next Google login skips
+        // straight through. Keep the password hash so they can still
+        // use email + password if they want.
+        await this.prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            authProvider: AuthProvider.GOOGLE,
+            emailVerified: true,
+            avatar: existing.avatar ?? payload.picture ?? null,
+            name: existing.name ?? payload.name ?? null,
+          },
+        });
+      }
+      userId = existing.id;
+      userActive = existing.isActive;
+      userRole = existing.role;
+    }
+
+    if (!userActive) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INACTIVE_USER,
+        message: 'User account is inactive',
+      });
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lastLoginAt: new Date() },
+    });
+
+    return this.createAuthResponse(
+      { id: userId, email, role: userRole },
+      userAgent,
+      ipAddress,
+    );
   }
 
   async logout(refreshToken: string) {
