@@ -1424,7 +1424,11 @@ export default function SettingsPage() {
             action={<Repeat className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_220px_auto]">
+            {/* Stack on mobile, 2-col on tablet, full single row only on
+             *  ≥xl where there's actually room for label + input + button.
+             *  Old md:grid-cols-[1fr_180px_220px_auto] squeezed the title
+             *  field to 0px on intermediate widths. */}
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_220px_auto]">
               <Field
                 label="Tiêu đề"
                 value={reminderDraft.title}
@@ -1455,8 +1459,9 @@ export default function SettingsPage() {
                   }))
                 }
               />
-              <div className="self-end">
+              <div className="sm:col-span-2 xl:col-span-1 xl:self-end">
                 <Button
+                  className="w-full xl:w-auto"
                   disabled={reminderState === 'saving'}
                   onClick={async () => {
                     setReminderState('saving');
