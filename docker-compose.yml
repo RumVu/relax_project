@@ -57,6 +57,7 @@ services:
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_BUCKET: ${SUPABASE_BUCKET:-public-assets}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3233}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
@@ -75,12 +76,14 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6823}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
     container_name: digital-cigarette-web
     restart: unless-stopped
     depends_on:
       - backend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6823}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-}
       NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "${WEB_PORT:-3233}:3233"
