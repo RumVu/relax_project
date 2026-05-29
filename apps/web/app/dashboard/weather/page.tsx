@@ -97,6 +97,7 @@ export default function WeatherPage() {
   // the chart on this flag the same way every other dashboard page does.
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -119,6 +120,7 @@ export default function WeatherPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void reload();
   }, [reload]);
 
@@ -174,6 +176,7 @@ export default function WeatherPage() {
   const locationMissing =
     current?.configured === false || current?.reason === 'LOCATION_MISSING';
   const [secure, setSecure] = useState(true);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setSecure(isSecureContext()), []);
 
   return (

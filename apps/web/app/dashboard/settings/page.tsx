@@ -1339,7 +1339,7 @@ export default function SettingsPage() {
             Bảng này đóng vai trò lịch sử đăng nhập. Cột{' '}
             <strong>Thiết bị</strong> chỉ hiển thị OS + dòng máy (Pixel 9,
             iPhone…) vì <em>browser không cho phép app đọc tên máy thật</em>{' '}
-            (privacy). Muốn đặt tên thiết bị riêng (vd "MacBook ở công ty"),
+            (privacy). Muốn đặt tên thiết bị riêng (vd &ldquo;MacBook ở công ty&rdquo;),
             hãy đăng ký nó dưới mục <strong>Thiết bị push</strong> bên cạnh —
             chỗ đó cho phép gắn label tuỳ ý.
           </p>

@@ -52,10 +52,13 @@ jobs:
       JWT_EXPIRES_IN: 15m
       JWT_ISSUER: digital-cigarette-break-api
       JWT_AUDIENCE: digital-cigarette-break-app
-      SUPABASE_URL: https://example.supabase.co
-      SUPABASE_PUBLISHABLE_KEY: sb_publishable_test
-      SUPABASE_SECRET_KEY: sb_secret_test
-      SUPABASE_BUCKET: public-assets
+      # Storage e2e expects STORAGE_NOT_CONFIGURED when Supabase isn't
+      # wired up. Empty strings keep the storage service in "not
+      # configured" mode so catalog.e2e-spec passes in CI.
+      SUPABASE_URL: ''
+      SUPABASE_PUBLISHABLE_KEY: ''
+      SUPABASE_SECRET_KEY: ''
+      SUPABASE_BUCKET: ''
 
     steps:
       - uses: actions/checkout@v4
@@ -71,6 +74,13 @@ jobs:
       - name: Apply Prisma migrations
         working-directory: apps/backend
         run: npm run prisma:migrate:deploy
+
+      - name: Seed catalog data
+        # catalog.e2e expects /app-themes/default and /companion-assets/default
+        # to return 200, which requires at least one row with isDefault=true.
+        # Seeding is idempotent (upserts) so it's safe to run before tests.
+        working-directory: apps/backend
+        run: node ./prisma/seed.cjs
 
       - name: Backend unit tests
         working-directory: apps/backend
