@@ -26,6 +26,7 @@ import {
   MetricCard,
   SectionTitle,
 } from '@/components/dashboard/dashboard-ui';
+import { PermissionsPanel } from '@/components/dashboard/permissions-panel';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -37,6 +38,7 @@ import {
 import { apiFetch, extractList } from '@/lib/api';
 import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
+import { requestGeolocation } from '@/lib/permissions';
 import { describeBrowser, describeDevice } from '@/lib/user-agent';
 import {
   chineseZodiacLabel,
@@ -770,48 +772,33 @@ export default function SettingsPage() {
               {saveState === 'saving' ? 'Đang lưu' : 'Lưu preferences'}
             </Button>
             <Button
-              onClick={() => {
-                if (typeof navigator === 'undefined' || !navigator.geolocation) {
+              onClick={async () => {
+                try {
+                  const pos = await requestGeolocation();
+                  await apiFetch('/weather/me/location', {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                      latitude: pos.coords.latitude,
+                      longitude: pos.coords.longitude,
+                      weatherEnabled: true,
+                    }),
+                  });
+                  setRefreshKey((current) => current + 1);
+                  triggerRefresh();
+                  pushToast({
+                    tone: 'success',
+                    title: 'Đã cập nhật vị trí',
+                    message:
+                      'Backend sẽ lấy thời tiết theo vị trí hiện tại của anh.',
+                  });
+                } catch (error) {
                   pushToast({
                     tone: 'error',
-                    title: 'Trình duyệt không hỗ trợ định vị',
+                    title: 'Không lấy được vị trí',
+                    message:
+                      error instanceof Error ? error.message : 'Unknown',
                   });
-                  return;
                 }
-                navigator.geolocation.getCurrentPosition(
-                  async (pos) => {
-                    try {
-                      await apiFetch('/weather/me/location', {
-                        method: 'PATCH',
-                        body: JSON.stringify({
-                          latitude: pos.coords.latitude,
-                          longitude: pos.coords.longitude,
-                          weatherEnabled: true,
-                        }),
-                      });
-                      setRefreshKey((current) => current + 1);
-                      triggerRefresh();
-                      pushToast({
-                        tone: 'success',
-                        title: 'Đã cập nhật vị trí',
-                        message:
-                          'Backend sẽ lấy thời tiết theo vị trí hiện tại của anh.',
-                      });
-                    } catch {
-                      pushToast({
-                        tone: 'error',
-                        title: 'Không lưu được vị trí',
-                      });
-                    }
-                  },
-                  (err) =>
-                    pushToast({
-                      tone: 'error',
-                      title: 'Không lấy được vị trí',
-                      message: err.message,
-                    }),
-                  { enableHighAccuracy: true, timeout: 10_000 },
-                );
               }}
               variant="secondary"
             >
@@ -1290,6 +1277,8 @@ export default function SettingsPage() {
           </div>
         </Card>
       </div>
+
+      <PermissionsPanel />
 
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>

@@ -46,7 +46,9 @@ jobs:
       DATABASE_URL: postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public
       REDIS_URL: redis://localhost:6379
       REDIS_ENABLED: "true"
-      JWT_SECRET: ci-test-secret-not-for-production-use-only
+      # Random hex string accepted by env.validation (anything with the
+      # word "test" / "placeholder" / "change-me" trips isWeakJwtSecret).
+      JWT_SECRET: a8f3c2e9b4d7610549efaa8b03c6d219734af5e2c1b6890a7d4f9e2c5b8a1d36
       JWT_EXPIRES_IN: 15m
       JWT_ISSUER: digital-cigarette-break-api
       JWT_AUDIENCE: digital-cigarette-break-app
