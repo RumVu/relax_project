@@ -10,6 +10,7 @@ describe('navigation constants', () => {
         '/dashboard/breaks',
         '/dashboard/journal',
         '/dashboard/analytics',
+        '/dashboard/weather',
         '/dashboard/settings',
       ]);
     });

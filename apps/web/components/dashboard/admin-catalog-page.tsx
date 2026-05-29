@@ -1,7 +1,16 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Edit3, Plus, RefreshCcw, Search, ToggleRight, Trash2 } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Edit3,
+  Plus,
+  RefreshCcw,
+  Search,
+  ToggleRight,
+  Trash2,
+} from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { DataTable, MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';
@@ -258,12 +267,21 @@ export function AdminCatalogPage({
   const config = catalogConfig[kind];
   const pushToast = useUiStore((state) => state.pushToast);
   const [items, setItems] = useState<CatalogItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0); // zero-based
+  const [pageSize, setPageSize] = useState(20);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'ACTIVE' | 'DRAFT'>('ALL');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>(() => createDraft(config.fields));
+
+  // Reset to first page whenever the search / filter / page-size changes
+  // so the user doesn't end up on an empty page.
+  useEffect(() => {
+    setPage(0);
+  }, [query, statusFilter, pageSize]);
 
   async function loadItems(showSpinner = true) {
     if (showSpinner) {
@@ -272,9 +290,10 @@ export function AdminCatalogPage({
 
     try {
       const payload = await apiFetch<unknown>(endpoint, undefined, {
-        query: catalogQuery(query, statusFilter),
+        query: catalogQuery(query, statusFilter, page, pageSize),
       });
       setItems(extractList<CatalogItem>(payload));
+      setTotal(extractTotal(payload, pageSize));
     } catch {
       pushToast({
         tone: 'error',
@@ -292,10 +311,11 @@ export function AdminCatalogPage({
     async function bootstrap() {
       try {
         const payload = await apiFetch<unknown>(endpoint, undefined, {
-          query: catalogQuery(query, statusFilter),
+          query: catalogQuery(query, statusFilter, page, pageSize),
         });
         if (!cancelled) {
           setItems(extractList<CatalogItem>(payload));
+          setTotal(extractTotal(payload, pageSize));
         }
       } catch {
         if (!cancelled) {
@@ -317,7 +337,7 @@ export function AdminCatalogPage({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, pushToast, query, statusFilter, title]);
+  }, [endpoint, pushToast, query, statusFilter, title, page, pageSize]);
 
   const rows = useMemo(
     () => items.map(config.buildRow),
@@ -492,13 +512,22 @@ export function AdminCatalogPage({
               ])}
             />
             {loading ? (
-              <p className="mt-4 text-sm font-semibold text-slate">Đang tải dữ liệu catalog...</p>
+              <p className="mt-4 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+                Đang tải dữ liệu catalog...
+              </p>
             ) : null}
             {!loading && rows.length === 0 ? (
-              <p className="mt-4 rounded-lg border border-dashed border-lilac bg-white/70 p-4 text-sm font-semibold text-slate">
+              <p className="mt-4 rounded-lg border border-dashed border-[var(--field-border,theme(colors.lilac))] bg-[var(--panel-bg)] p-4 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
                 Chưa có nội dung nào khớp bộ lọc hiện tại.
               </p>
             ) : null}
+            <PaginationBar
+              page={page}
+              pageSize={pageSize}
+              setPage={setPage}
+              setPageSize={setPageSize}
+              total={total}
+            />
           </div>
         </Card>
 
@@ -536,12 +565,35 @@ export function AdminCatalogPage({
   );
 }
 
-function catalogQuery(query: string, statusFilter: 'ALL' | 'ACTIVE' | 'DRAFT') {
+function catalogQuery(
+  query: string,
+  statusFilter: 'ALL' | 'ACTIVE' | 'DRAFT',
+  page: number,
+  pageSize: number,
+) {
   return {
     q: query.trim() || undefined,
     isActive: statusFilter === 'ALL' ? undefined : statusFilter === 'ACTIVE',
-    limit: 100,
+    limit: pageSize,
+    skip: page * pageSize,
   };
+}
+
+function extractTotal(payload: unknown, fallback: number): number {
+  if (payload && typeof payload === 'object') {
+    const total = (payload as { total?: unknown }).total;
+    if (typeof total === 'number' && Number.isFinite(total)) {
+      return total;
+    }
+    const items = (payload as { items?: unknown[] }).items;
+    if (Array.isArray(items)) {
+      return items.length;
+    }
+  }
+  if (Array.isArray(payload)) {
+    return payload.length;
+  }
+  return fallback;
 }
 
 function CatalogField({
@@ -701,4 +753,84 @@ function truncate(value: string, length: number) {
   }
 
   return `${value.slice(0, length - 1)}...`;
+}
+
+/**
+ * Footer for the catalog table: lets the admin pick how many rows show
+ * up per page (10 / 20 / 50) and step through pages. Hides itself when
+ * the entire list fits in one page anyway.
+ */
+function PaginationBar({
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  total,
+}: {
+  page: number;
+  pageSize: number;
+  setPage: (next: number) => void;
+  setPageSize: (next: number) => void;
+  total: number;
+}) {
+  const pageSizes = [10, 20, 50];
+  const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  const showingFrom = total === 0 ? 0 : page * pageSize + 1;
+  const showingTo = Math.min((page + 1) * pageSize, total);
+
+  // Don't render at all when there's nothing to page through.
+  if (total <= pageSizes[0]! && page === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+        <span>Hiển thị</span>
+        <select
+          aria-label="Số kết quả mỗi trang"
+          className="h-9 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-2 text-sm font-bold text-[var(--app-text)]"
+          onChange={(event) => setPageSize(Number(event.target.value))}
+          value={pageSize}
+        >
+          {pageSizes.map((size) => (
+            <option key={size} value={size}>
+              {size}
+            </option>
+          ))}
+        </select>
+        <span>kết quả / trang</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
+        <span className="text-[var(--app-muted,theme(colors.slate))]">
+          {total === 0
+            ? '0 / 0'
+            : `${showingFrom}–${showingTo} / ${total}`}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            aria-label="Trang trước"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page <= 0}
+            onClick={() => setPage(Math.max(0, page - 1))}
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="px-2 text-xs font-bold">
+            {page + 1} / {Math.max(1, lastPage + 1)}
+          </span>
+          <button
+            aria-label="Trang sau"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page >= lastPage}
+            onClick={() => setPage(Math.min(lastPage, page + 1))}
+            type="button"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

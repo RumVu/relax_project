@@ -3,7 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "node ./scripts/free-dev-port.cjs && next dev --port ${WEB_PORT:-3233}",
+    "dev:fresh": "npm run dev",
+    "port:free": "node ./scripts/free-dev-port.cjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

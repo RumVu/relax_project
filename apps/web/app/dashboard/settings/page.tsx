@@ -3,15 +3,19 @@
 import { useEffect, useState } from 'react';
 import {
   Bell,
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   Globe2,
   Laptop,
   type LucideIcon,
   MapPin,
   Moon,
+  Navigation,
   Repeat,
   Save,
   Smartphone,
+  Trash2,
   UserRound,
   WandSparkles,
   X,
@@ -33,6 +37,12 @@ import {
 import { apiFetch, extractList } from '@/lib/api';
 import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
+import { describeBrowser, describeDevice } from '@/lib/user-agent';
+import {
+  chineseZodiacLabel,
+  computeZodiac,
+  zodiacLabel,
+} from '@/lib/zodiac';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 
@@ -175,6 +185,8 @@ export default function SettingsPage() {
   const [themeCatalog, setThemeCatalog] = useState<ThemeCard[]>([]);
   const [themeState, setThemeState] = useState<string | null>(null);
   const [activeThemeId, setActiveThemeId] = useState<string | null>(null);
+  const [sessionsPage, setSessionsPage] = useState(0);
+  const [sessionsPageSize, setSessionsPageSize] = useState(10);
   const weatherEnabled =
     draftPreferences?.weatherEnabled ?? settings.preferences.weatherEnabled;
   const pushEnabled = draftPreferences?.pushEnabled ?? settings.preferences.pushEnabled;
@@ -420,20 +432,37 @@ export default function SettingsPage() {
                 }))
               }
             />
-            <div className="grid gap-3 sm:grid-cols-2">
-              <DerivedCard
-                icon={WandSparkles}
-                label="Zodiac"
-                note="Tự tính theo ngày sinh"
-                value={settings.profile.zodiacSign}
-              />
-              <DerivedCard
-                icon={WandSparkles}
-                label="Chinese zodiac"
-                note="Cập nhật cùng lúc với birthday"
-                value={settings.profile.chineseZodiac}
-              />
-            </div>
+            {(() => {
+              // Compute zodiac client-side from the in-progress birthday
+              // draft so the cards update the moment the user picks a new
+              // date, without waiting for a PATCH round-trip. Falls back
+              // to the server-rendered values when the draft is empty.
+              const previewed = computeZodiac(birthday);
+              const liveZodiac =
+                zodiacLabel(previewed.zodiacSign) !== '—'
+                  ? zodiacLabel(previewed.zodiacSign)
+                  : settings.profile.zodiacSign;
+              const liveChinese =
+                chineseZodiacLabel(previewed.chineseZodiac) !== '—'
+                  ? chineseZodiacLabel(previewed.chineseZodiac)
+                  : settings.profile.chineseZodiac;
+              return (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <DerivedCard
+                    icon={WandSparkles}
+                    label="Zodiac"
+                    note="Tự đổi ngay khi chọn ngày sinh"
+                    value={liveZodiac}
+                  />
+                  <DerivedCard
+                    icon={WandSparkles}
+                    label="Chinese zodiac"
+                    note="Theo năm sinh — cập nhật tức thì"
+                    value={liveChinese}
+                  />
+                </div>
+              );
+            })()}
           </div>
           <Button
             className="mt-5"
@@ -445,8 +474,12 @@ export default function SettingsPage() {
                   method: 'PATCH',
                   body: JSON.stringify({
                     displayName,
+                    // Always send UTC midnight for the picked date so we
+                    // don't shift back a day in negative timezones.
+                    // (`new Date('YYYY-MM-DDT00:00:00')` is interpreted
+                    // as LOCAL time → +07 lost a day in UTC.)
                     birthday: birthday
-                      ? new Date(`${birthday}T00:00:00`).toISOString()
+                      ? new Date(`${birthday}T00:00:00.000Z`).toISOString()
                       : null,
                   }),
                 });
@@ -667,16 +700,33 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {settings.preferences.reminderTimes.map((time) => (
-              <div
-                className="rounded-lg border border-lilac/70 bg-white/75 p-4 text-center"
-                key={time}
-              >
-                <p className="text-lg font-extrabold text-ink">{time}</p>
-                <p className="text-xs font-semibold text-slate">reminder</p>
-              </div>
-            ))}
+          <div className="mt-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--app-muted,theme(colors.slate))]">
+              Quick add nhắc trong ngày
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {settings.preferences.reminderTimes.map((time) => (
+                <span
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--field-border)] bg-[var(--panel-bg)] px-3 py-1.5 text-sm font-bold"
+                  key={time}
+                >
+                  <Repeat className="h-3.5 w-3.5 text-violet" />
+                  {time}
+                </span>
+              ))}
+              {settings.preferences.reminderTimes.length === 0 ? (
+                <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+                  Chưa có nhắc nào — pick thời điểm phía dưới để thêm nhanh.
+                </span>
+              ) : null}
+            </div>
+            <QuickAddReminder
+              defaultTitle="Nhắc thở nhẹ"
+              onCreated={() => {
+                setRefreshKey((current) => current + 1);
+                triggerRefresh();
+              }}
+            />
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -718,6 +768,55 @@ export default function SettingsPage() {
             >
               <Save className="h-4 w-4" />
               {saveState === 'saving' ? 'Đang lưu' : 'Lưu preferences'}
+            </Button>
+            <Button
+              onClick={() => {
+                if (typeof navigator === 'undefined' || !navigator.geolocation) {
+                  pushToast({
+                    tone: 'error',
+                    title: 'Trình duyệt không hỗ trợ định vị',
+                  });
+                  return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                  async (pos) => {
+                    try {
+                      await apiFetch('/weather/me/location', {
+                        method: 'PATCH',
+                        body: JSON.stringify({
+                          latitude: pos.coords.latitude,
+                          longitude: pos.coords.longitude,
+                          weatherEnabled: true,
+                        }),
+                      });
+                      setRefreshKey((current) => current + 1);
+                      triggerRefresh();
+                      pushToast({
+                        tone: 'success',
+                        title: 'Đã cập nhật vị trí',
+                        message:
+                          'Backend sẽ lấy thời tiết theo vị trí hiện tại của anh.',
+                      });
+                    } catch {
+                      pushToast({
+                        tone: 'error',
+                        title: 'Không lưu được vị trí',
+                      });
+                    }
+                  },
+                  (err) =>
+                    pushToast({
+                      tone: 'error',
+                      title: 'Không lấy được vị trí',
+                      message: err.message,
+                    }),
+                  { enableHighAccuracy: true, timeout: 10_000 },
+                );
+              }}
+              variant="secondary"
+            >
+              <Navigation className="h-4 w-4" />
+              Dùng vị trí hiện tại
             </Button>
             <Button
               onClick={async () => {
@@ -1201,19 +1300,59 @@ export default function SettingsPage() {
           />
           <div className="mt-5">
             <DataTable
-              columns={['Device', 'IP', 'Đăng nhập', 'Hết hạn', 'Trạng thái']}
-              rows={settings.sessions.map((session) => [
-                session.device,
-                session.ipAddress,
-                session.createdAt,
-                session.expiresAt,
-                session.current ? 'Phiên hiện tại' : 'Đã lưu',
-              ])}
+              columns={[
+                'Thiết bị',
+                'Trình duyệt',
+                'IP',
+                'Đăng nhập',
+                'Hết hạn',
+                'Trạng thái',
+              ]}
+              rows={settings.sessions
+                .slice(
+                  sessionsPage * sessionsPageSize,
+                  (sessionsPage + 1) * sessionsPageSize,
+                )
+                .map((session) => [
+                  <div
+                    className="max-w-[220px]"
+                    key={`${session.id}-device`}
+                    title={session.device}
+                  >
+                    <p className="font-bold">{describeDevice(session.device)}</p>
+                  </div>,
+                  <span
+                    className="text-sm font-semibold"
+                    key={`${session.id}-browser`}
+                  >
+                    {describeBrowser(session.device)}
+                  </span>,
+                  <code
+                    className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
+                    key={`${session.id}-ip`}
+                  >
+                    {session.ipAddress || '—'}
+                  </code>,
+                  session.createdAt,
+                  session.expiresAt,
+                  session.current ? 'Phiên hiện tại' : 'Đã lưu',
+                ])}
+            />
+            <SessionsPagination
+              page={sessionsPage}
+              pageSize={sessionsPageSize}
+              setPage={setSessionsPage}
+              setPageSize={setSessionsPageSize}
+              total={settings.sessions.length}
             />
           </div>
-          <p className="mt-4 text-sm text-slate">
-            Quyền revoke session hiện được khoá ở phía backend cho admin, nên bảng này
-            đang đóng vai trò lịch sử đăng nhập thay vì nút xoá phiên tại chỗ.
+          <p className="mt-4 text-sm text-[var(--app-muted,theme(colors.slate))]">
+            Bảng này đóng vai trò lịch sử đăng nhập. Cột{' '}
+            <strong>Thiết bị</strong> chỉ hiển thị OS + dòng máy (Pixel 9,
+            iPhone…) vì <em>browser không cho phép app đọc tên máy thật</em>{' '}
+            (privacy). Muốn đặt tên thiết bị riêng (vd "MacBook ở công ty"),
+            hãy đăng ký nó dưới mục <strong>Thiết bị push</strong> bên cạnh —
+            chỗ đó cho phép gắn label tuỳ ý.
           </p>
         </Card>
 
@@ -1306,7 +1445,11 @@ export default function SettingsPage() {
             action={<Repeat className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 grid gap-4">
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_220px_auto]">
+            {/* Stack on mobile, 2-col on tablet, full single row only on
+             *  ≥xl where there's actually room for label + input + button.
+             *  Old md:grid-cols-[1fr_180px_220px_auto] squeezed the title
+             *  field to 0px on intermediate widths. */}
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_220px_auto]">
               <Field
                 label="Tiêu đề"
                 value={reminderDraft.title}
@@ -1337,8 +1480,9 @@ export default function SettingsPage() {
                   }))
                 }
               />
-              <div className="self-end">
+              <div className="sm:col-span-2">
                 <Button
+                  className="w-full sm:w-auto"
                   disabled={reminderState === 'saving'}
                   onClick={async () => {
                     setReminderState('saving');
@@ -1355,16 +1499,18 @@ export default function SettingsPage() {
                       });
                       setRefreshKey((current) => current + 1);
                       triggerRefresh();
-                      setReminderDraft({
-                        title: 'Nhắc thở nhẹ',
-                        message: 'Đến lúc nghỉ một chút rồi hít thở nào.',
-                        type: 'BREATHING',
+                      // KEEP the title + type + message so the user can
+                      // quickly create another similar reminder. Only
+                      // bump the scheduled time forward by an hour so
+                      // they don't accidentally re-create the same slot.
+                      setReminderDraft((current) => ({
+                        ...current,
                         scheduledAt: nextLocalReminderTime(),
-                      });
+                      }));
                       pushToast({
                         tone: 'success',
                         title: 'Đã tạo reminder',
-                        message: 'Lịch nhắc mới đã lưu vào backend.',
+                        message: `"${reminderDraft.title}" — lưu OK. Title giữ nguyên cho lần tạo tiếp.`,
                       });
                     } catch {
                       pushToast({
@@ -1382,10 +1528,54 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+                {settings.reminders.length} nhắc đang lưu
+              </p>
+              {settings.reminders.length > 0 ? (
+                <Button
+                  className="h-9 px-3 text-xs"
+                  disabled={reminderState === 'saving'}
+                  onClick={async () => {
+                    const ok = window.confirm(
+                      `Xoá tất cả ${settings.reminders.length} nhắc? Hành động này không hoàn tác được.`,
+                    );
+                    if (!ok) return;
+                    setReminderState('saving');
+                    try {
+                      await Promise.all(
+                        settings.reminders.map((reminder) =>
+                          apiFetch(`/reminders/${reminder.id}`, {
+                            method: 'DELETE',
+                          }).catch(() => undefined),
+                        ),
+                      );
+                      setRefreshKey((current) => current + 1);
+                      triggerRefresh();
+                      pushToast({
+                        tone: 'success',
+                        title: `Đã xoá ${settings.reminders.length} nhắc`,
+                      });
+                    } finally {
+                      setReminderState('idle');
+                    }
+                  }}
+                  variant="secondary"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Xoá tất cả
+                </Button>
+              ) : null}
+            </div>
             <DataTable
-              columns={['Type', 'Title', 'Schedule', 'Active', 'Actions']}
+              columns={['Loại', 'Tiêu đề', 'Lịch', 'Trạng thái', 'Hành động']}
               rows={settings.reminders.map((reminder) => [
-                reminder.type,
+                <span
+                  className="inline-flex rounded-full bg-violet/15 px-2 py-0.5 text-xs font-bold text-violet"
+                  key={`${reminder.id}-type`}
+                >
+                  {reminder.type}
+                </span>,
                 reminder.title,
                 reminder.schedule,
                 reminder.active ? 'On' : 'Off',
@@ -1607,6 +1797,144 @@ export default function SettingsPage() {
         />
       ) : null}
     </>
+  );
+}
+
+function SessionsPagination({
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  total,
+}: {
+  page: number;
+  pageSize: number;
+  setPage: (next: number) => void;
+  setPageSize: (next: number) => void;
+  total: number;
+}) {
+  const pageSizes = [10, 20, 50];
+  const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  const showingFrom = total === 0 ? 0 : page * pageSize + 1;
+  const showingTo = Math.min((page + 1) * pageSize, total);
+  if (total <= pageSizes[0]! && page === 0) return null;
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+        <span>Hiển thị</span>
+        <select
+          aria-label="Số phiên / trang"
+          className="h-9 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-2 text-sm font-bold text-[var(--app-text)]"
+          onChange={(event) => {
+            setPageSize(Number(event.target.value));
+            setPage(0);
+          }}
+          value={pageSize}
+        >
+          {pageSizes.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+        <span>phiên / trang</span>
+      </div>
+      <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
+        <span className="text-[var(--app-muted,theme(colors.slate))]">
+          {showingFrom}–{showingTo} / {total}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            aria-label="Trang trước"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page <= 0}
+            onClick={() => setPage(Math.max(0, page - 1))}
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="px-2 text-xs font-bold">
+            {page + 1} / {Math.max(1, lastPage + 1)}
+          </span>
+          <button
+            aria-label="Trang sau"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page >= lastPage}
+            onClick={() => setPage(Math.min(lastPage, page + 1))}
+            type="button"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function QuickAddReminder({
+  defaultTitle,
+  onCreated,
+}: {
+  defaultTitle: string;
+  onCreated: () => void;
+}) {
+  const pushToast = useUiStore((state) => state.pushToast);
+  const [time, setTime] = useState(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1, 0, 0, 0);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  });
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-end gap-3">
+      <label className="flex-1 min-w-[120px]">
+        <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+          Giờ nhắc
+        </span>
+        <input
+          className="mt-2 h-11 w-full rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-sm font-semibold text-[var(--app-text,theme(colors.ink))] outline-none"
+          onChange={(event) => setTime(event.target.value)}
+          type="time"
+          value={time}
+        />
+      </label>
+      <Button
+        disabled={busy || !time}
+        onClick={async () => {
+          if (!time) return;
+          setBusy(true);
+          try {
+            const [hh, mm] = time.split(':').map(Number);
+            const scheduled = new Date();
+            scheduled.setHours(hh ?? 9, mm ?? 0, 0, 0);
+            if (scheduled.getTime() < Date.now()) {
+              scheduled.setDate(scheduled.getDate() + 1);
+            }
+            await apiFetch('/reminders/me', {
+              method: 'POST',
+              body: JSON.stringify({
+                title: defaultTitle,
+                message: 'Nhắc nhẹ trong ngày từ Quick add.',
+                type: 'BREATHING',
+                scheduledAt: scheduled.toISOString(),
+                isActive: true,
+              }),
+            });
+            onCreated();
+            pushToast({ tone: 'success', title: `Đã thêm nhắc ${time}` });
+          } catch {
+            pushToast({ tone: 'error', title: 'Không thêm được nhắc' });
+          } finally {
+            setBusy(false);
+          }
+        }}
+        variant="secondary"
+      >
+        <Save className="h-4 w-4" />
+        {busy ? 'Đang thêm' : 'Thêm nhanh'}
+      </Button>
+    </div>
   );
 }
 
@@ -1914,12 +2242,31 @@ function normalizeBirthdayValue(value: string) {
     return '';
   }
 
+  // Already YYYY-MM-DD — accept as-is so the date input keeps it.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  // vi-VN locale string "DD/MM/YYYY" — what live-dashboard.formatDate
+  // happens to spit out. Parse the parts directly so we don't fall into
+  // `new Date("10/3/2003")` which JS interprets as MM/DD/YYYY (US) and
+  // would swap day↔month.
+  const localeMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (localeMatch) {
+    const [, day, month, year] = localeMatch;
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  // ISO with time (e.g. "2003-03-10T00:00:00Z"). Use UTC parts so a VN
+  // +07 browser doesn't roll back/forward a day.
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
     return '';
   }
-
-  return parsed.toISOString().slice(0, 10);
+  const year = parsed.getUTCFullYear();
+  const month = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(parsed.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 function nextLocalReminderTime() {

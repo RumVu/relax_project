@@ -58,7 +58,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       {isRegister ? (
         <input
           autoComplete="name"
-          className="w-full rounded-2xl border bg-white/70 px-4 py-3"
+          className="w-full rounded-2xl border border-[var(--field-border)] bg-[var(--field-bg)] px-4 py-3 text-[var(--app-text)] placeholder:text-[var(--app-muted)] focus:border-[var(--brand-primary)]"
           onChange={(event) => setName(event.target.value)}
           placeholder="Full name"
           required

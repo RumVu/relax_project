@@ -45,6 +45,9 @@ html[data-theme='dark'] {
 
 body {
   min-height: 100vh;
+  /* Prevent horizontal scroll from wide content (used to live on <main>
+   * but that broke `lg:sticky` on the dashboard sidebar). */
+  overflow-x: hidden;
   background:
     linear-gradient(120deg, rgba(220, 214, 255, 0.38), transparent 34%),
     linear-gradient(240deg, rgba(64, 201, 162, 0.18), transparent 32%),
@@ -66,11 +69,108 @@ textarea {
   background: var(--field-bg);
   border-color: var(--field-border);
   color: var(--app-text);
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-primary) 24%, transparent);
 }
 
 a {
   color: inherit;
   text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------
+ * Polish layer — softens edges, adds gentle hover/scroll behaviour app-wide
+ * without touching individual components.
+ * ------------------------------------------------------------------------- */
+
+/* Smooth scrolling everywhere (anchor jumps, router scroll-to-top) */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Discreet scrollbar in dark + light */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--brand-primary) 38%, transparent)
+    transparent;
+}
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--brand-primary) 32%, transparent);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--brand-primary) 60%, transparent);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Card / button hover lift — subtle, performance-friendly transforms only */
+[class*='rounded-'] {
+  transition-property: transform, box-shadow, background-color, border-color;
+  transition-duration: 0.18s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+button:not(:disabled):active {
+  transform: translateY(0);
+}
+
+/* Cards (anything using --panel-bg as background) get a soft glow on hover
+ * — applied via a CSS attribute selector so we don't need to touch the
+ * <Card> component. */
+[style*='--panel-bg'],
+[style*='var(--panel-bg)'] {
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+/* Focus ring for keyboard navigation, branded */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+button:focus-visible,
+a:focus-visible {
+  outline-offset: 3px;
+}
+
+/* Selection colour follows brand */
+::selection {
+  background: color-mix(in srgb, var(--brand-primary) 35%, transparent);
+  color: var(--app-text);
+}
+
+/* Slightly softer panel border on dark theme — looks less harsh against
+ * the deep navy background. */
+html[data-theme='dark'] {
+  --panel-border: rgba(238, 241, 255, 0.08);
+  --field-border: rgba(180, 166, 255, 0.22);
+}
+
+/* Subtle backdrop tint behind any modal/overlay using bg-ink/55 */
+.bg-ink\/55 {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 /* -------------------------------------------------------------------------
@@ -109,12 +209,16 @@ html[data-theme='dark'] .bg-mist,
 html[data-theme='dark'] .bg-cloud {
   background-color: var(--panel-strong);
 }
+html[data-theme='dark'] .bg-white\/60,
+html[data-theme='dark'] .bg-white\/65,
+html[data-theme='dark'] .bg-white\/70,
 html[data-theme='dark'] .bg-white\/75,
 html[data-theme='dark'] .bg-white\/80,
 html[data-theme='dark'] .bg-white\/85,
 html[data-theme='dark'] .bg-white\/90,
 html[data-theme='dark'] .bg-white\/95 {
   background-color: var(--panel-bg);
+  color: var(--app-text);
 }
 
 /* Border colour overrides */
@@ -145,4 +249,73 @@ html[data-theme='dark'] textarea::placeholder {
 /* Disabled buttons, secondary buttons that use bg-cloud + text-ink keep
    ink ↔ muted swap — already covered by the .text-ink rule, but make sure
    any `bg-cloud` block is dark-friendly too (handled above). */
+
+/* -------------------------------------------------------------------------
+ * Responsive layer — desktop layout intact, phones/tablets get tap-friendly
+ * targets, single-column grids, and the recharts containers no longer blow
+ * past the viewport in landscape.
+ * ------------------------------------------------------------------------- */
+
+/* Touch devices: kill the hover lift (jitters under a finger tap because
+ * the device fires hover + click in quick succession). */
+@media (hover: none) {
+  button:not(:disabled):hover {
+    transform: none;
+  }
+}
+
+/* Phone (< 640px) tweaks. */
+@media (max-width: 639px) {
+  main {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  /* Every interactive control reaches the 44×44 tap target Apple/Material
+   * recommend, except for explicit small/icon buttons. */
+  button:not(.h-8):not(.h-9):not(.h-7):not([aria-label='Đóng menu']):not([aria-label='Đóng checkout']) {
+    min-height: 44px;
+  }
+
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    min-height: 44px;
+    font-size: 16px; /* prevents iOS Safari auto-zoom on focus */
+  }
+
+  /* Cards lose a little padding so the content doesn't feel cramped. */
+  .rounded-lg.shadow-panel,
+  .rounded-xl.shadow-panel {
+    padding: 1rem;
+  }
+
+  /* Stack any sm:2/3/4-col grid into a single column on phones. */
+  .grid.sm\:grid-cols-2,
+  .grid.sm\:grid-cols-3,
+  .grid.sm\:grid-cols-4 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Hero title shrinks on phones so it doesn't overflow. */
+  h2.text-3xl,
+  h2.text-4xl {
+    font-size: 1.5rem;
+    line-height: 1.85rem;
+  }
+}
+
+/* Tablet (640–1023px): hint that data tables may scroll right. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .overflow-x-auto {
+    mask-image: linear-gradient(to right, black 92%, transparent);
+    -webkit-mask-image: linear-gradient(to right, black 92%, transparent);
+  }
+}
+
+/* Charts (recharts) never overflow the parent. */
+.recharts-responsive-container,
+.recharts-wrapper {
+  max-width: 100%;
+}
 
