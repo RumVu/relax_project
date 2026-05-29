@@ -895,7 +895,16 @@ function mapReminderTable(items: Array<Record<string, unknown>> | undefined) {
     return undefined;
   }
 
-  return items.map((item) => ({
+  // Newest first — most recently created reminder is what the user just
+  // pressed "Tạo reminder" on, so it should land at the TOP of the table
+  // instead of being appended somewhere off-screen at the bottom.
+  const sorted = [...items].sort((a, b) => {
+    const aTs = Date.parse(asString(a.createdAt) ?? '') || 0;
+    const bTs = Date.parse(asString(b.createdAt) ?? '') || 0;
+    return bTs - aTs;
+  });
+
+  return sorted.map((item) => ({
     id: asString(item.id) ?? crypto.randomUUID(),
     type: asString(item.type) ?? 'CUSTOM',
     title: asString(item.title) ?? 'Reminder',

@@ -199,13 +199,31 @@ export function MetricCard({
     lilac: 'bg-lilac/70 text-plum',
   }[tone];
 
+  // Long values like "PREMIUM_ANNUAL" used to overflow the card. Auto
+  // shrink to a smaller size when the value is long, and always allow
+  // word-break + ellipsis so it never escapes the card.
+  const valueString = String(value);
+  const valueClass =
+    valueString.length > 14
+      ? 'text-lg sm:text-xl'
+      : valueString.length > 10
+        ? 'text-2xl'
+        : 'text-3xl';
   return (
-    <Card className="min-h-[156px]">
+    <Card className="min-h-[156px] overflow-hidden">
       <div className={cn('flex h-11 w-11 items-center justify-center rounded-lg', toneClass)}>
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-5 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">{label}</p>
-      <p className="mt-2 text-3xl font-extrabold text-[var(--app-text,theme(colors.ink))]">{value}</p>
+      <p
+        className={cn(
+          'mt-2 font-extrabold break-words leading-tight text-[var(--app-text,theme(colors.ink))]',
+          valueClass,
+        )}
+        title={valueString}
+      >
+        {valueString}
+      </p>
       {note ? <p className="mt-1 break-words text-sm font-medium text-[var(--app-muted,theme(colors.plum))]">{note}</p> : null}
     </Card>
   );
