@@ -9,4 +9,8 @@ export default registerAs('app', () => ({
   swaggerPublic: process.env.SWAGGER_PUBLIC,
   swaggerBasicUser: process.env.SWAGGER_BASIC_USER,
   swaggerBasicPassword: process.env.SWAGGER_BASIC_PASSWORD,
+  // Google Identity Services client ID (web). Same value must be set
+  // in NEXT_PUBLIC_GOOGLE_CLIENT_ID on the web so the ID token
+  // audience matches. Leaving this empty disables /auth/google.
+  googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
 }));
