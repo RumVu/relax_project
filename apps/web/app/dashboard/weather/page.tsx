@@ -44,12 +44,17 @@ type WeatherCurrent = {
   };
   current?: {
     temperature?: number;
+    temperatureUnit?: string;
     apparentTemperature?: number;
     humidity?: number;
+    humidityUnit?: string;
     windSpeed?: number;
+    windSpeedUnit?: string;
+    windDirection?: number;
+    precipitation?: number;
+    precipitationUnit?: string;
     weatherCode?: number;
     isDay?: boolean;
-    precipitation?: number;
   };
   location?: {
     name?: string;
@@ -86,6 +91,14 @@ export default function WeatherPage() {
   const [forecast, setForecast] = useState<WeatherForecast | null>(null);
   const [loading, setLoading] = useState(true);
   const [locating, setLocating] = useState(false);
+  // recharts ResponsiveContainer needs a client-side mount to size
+  // itself; otherwise SSR markup hydrates to a 0×0 wrapper and the
+  // chart never appears in light mode (just empty white space). Gate
+  // the chart on this flag the same way every other dashboard page does.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -297,7 +310,7 @@ export default function WeatherPage() {
           action={<CloudSun className="h-5 w-5 text-violet" />}
         />
         <div className="mt-5 h-[260px]">
-          {chartData.length > 0 ? (
+          {mounted && chartData.length > 0 ? (
             <ResponsiveContainer height="100%" width="100%">
               <LineChart data={chartData} margin={{ left: -18, right: 8, top: 16 }}>
                 <CartesianGrid stroke="var(--field-border)" strokeDasharray="3 3" />
@@ -344,7 +357,7 @@ export default function WeatherPage() {
           )}
         </div>
         <div className="mt-4 h-[160px]">
-          {chartData.length > 0 ? (
+          {mounted && chartData.length > 0 ? (
             <ResponsiveContainer height="100%" width="100%">
               <AreaChart data={chartData} margin={{ left: -18, right: 8, top: 8 }}>
                 <defs>

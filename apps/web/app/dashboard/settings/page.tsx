@@ -1329,9 +1329,13 @@ export default function SettingsPage() {
               ])}
             />
           </div>
-          <p className="mt-4 text-sm text-slate">
-            Quyền revoke session hiện được khoá ở phía backend cho admin, nên bảng này
-            đang đóng vai trò lịch sử đăng nhập thay vì nút xoá phiên tại chỗ.
+          <p className="mt-4 text-sm text-[var(--app-muted,theme(colors.slate))]">
+            Bảng này đóng vai trò lịch sử đăng nhập. Cột{' '}
+            <strong>Thiết bị</strong> chỉ hiển thị OS + dòng máy (Pixel 9,
+            iPhone…) vì <em>browser không cho phép app đọc tên máy thật</em>{' '}
+            (privacy). Muốn đặt tên thiết bị riêng (vd "MacBook ở công ty"),
+            hãy đăng ký nó dưới mục <strong>Thiết bị push</strong> bên cạnh —
+            chỗ đó cho phép gắn label tuỳ ý.
           </p>
         </Card>
 
@@ -1459,9 +1463,9 @@ export default function SettingsPage() {
                   }))
                 }
               />
-              <div className="sm:col-span-2 xl:col-span-1 xl:self-end">
+              <div className="sm:col-span-2">
                 <Button
-                  className="w-full xl:w-auto"
+                  className="w-full sm:w-auto"
                   disabled={reminderState === 'saving'}
                   onClick={async () => {
                     setReminderState('saving');

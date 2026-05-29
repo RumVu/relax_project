@@ -42,11 +42,19 @@ describe('parseUserAgent', () => {
     expect(p.browser).toBe('Chrome 146');
   });
 
-  it('parses Android Chrome', () => {
+  it('parses Android Chrome and pulls the model name', () => {
     const p = parseUserAgent(ANDROID_CHROME);
-    expect(p.device).toBe('Android Phone');
+    // Should pick up "Pixel 9" from the UA model slot.
+    expect(p.device).toBe('Pixel 9');
     expect(p.os).toBe('Android 14');
     expect(p.browser).toBe('Chrome 148');
+  });
+
+  it('falls back to "Android Phone" when Chrome hides the model (K)', () => {
+    const p = parseUserAgent(
+      'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Mobile Safari/537.36',
+    );
+    expect(p.device).toBe('Android Phone');
   });
 
   it('parses iPhone Safari', () => {

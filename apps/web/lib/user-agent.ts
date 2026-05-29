@@ -39,7 +39,19 @@ export function parseUserAgent(ua: string | null | undefined): ParsedUserAgent {
   } else if (/android/.test(lower)) {
     const v = raw.match(/android ([\d.]+)/i)?.[1];
     os = v ? `Android ${v}` : 'Android';
-    device = /mobile/.test(lower) ? 'Android Phone' : 'Android Tablet';
+    // Pull the model name out of the Android UA: it looks like
+    //   "(Linux; Android 14; Pixel 9 Build/MRA58N)"
+    // We want "Pixel 9" — anything between the version and " Build/" or
+    // the closing paren. Skip the placeholder "K" Chrome puts in
+    // privacy-mode UAs.
+    const model = raw
+      .match(/android [\d.]+;\s*([^;)]+?)(?:\s+build\/[^;)]*)?\s*[;)]/i)?.[1]
+      ?.trim();
+    if (model && !/^k$/i.test(model)) {
+      device = model;
+    } else {
+      device = /mobile/.test(lower) ? 'Android Phone' : 'Android Tablet';
+    }
   } else if (/mac os x|macintosh/.test(lower)) {
     const v = raw
       .match(/mac os x ([\d_]+)/i)?.[1]
