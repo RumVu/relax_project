@@ -27,6 +27,33 @@ up: ## Start full stack (infra + backend + web) via compose profiles
 down: ## Stop all compose services
 	docker compose --profile full down
 
+.PHONY: share
+share: ## Build + start full stack bound to your LAN IP so anyone on wifi can hit IP:3233
+	@set -e; \
+	IP="$${SHARE_IP:-$$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $$1}')}"; \
+	if [ -z "$$IP" ]; then \
+	  echo "✗ Không tìm thấy LAN IP — set SHARE_IP=192.168.x.x make share"; \
+	  exit 1; \
+	fi; \
+	echo "→ Dùng LAN IP: $$IP"; \
+	export JWT_SECRET="$${JWT_SECRET:-$$(openssl rand -hex 24)}"; \
+	export NEXT_PUBLIC_API_URL="http://$$IP:6823"; \
+	export CORS_ORIGINS="http://localhost:3233,http://$$IP:3233,http://localhost:3000"; \
+	docker compose --profile full up -d --build; \
+	echo ""; \
+	echo "════════════════════════════════════════════════════════════"; \
+	echo "  🌍 Web dashboard:  http://$$IP:3233"; \
+	echo "  🔌 Backend API:    http://$$IP:6823"; \
+	echo "  📘 Swagger docs:   http://$$IP:6823/docs"; \
+	echo ""; \
+	echo "  Gửi link http://$$IP:3233 cho người dùng cùng wifi."; \
+	echo "  Stop: make down"; \
+	echo "════════════════════════════════════════════════════════════"
+
+.PHONY: share-ip
+share-ip: ## In LAN IP máy đang dùng (cho biết để gửi cho khách)
+	@ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $$1}'
+
 .PHONY: logs
 logs: ## Tail logs for all running compose services
 	docker compose logs -f --tail=200
