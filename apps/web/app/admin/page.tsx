@@ -136,16 +136,38 @@ export default function AdminPage() {
         <div className="mt-5">
           <DataTable
             columns={['Khu vực', 'Endpoint', 'Live', 'Draft', 'Hành động']}
-            rows={(data.content.length > 0 ? data.content : catalogLinks).map((item) => {
-              const href =
-                catalogLinks.find((link) => link.area === item.area)?.href ?? '/admin';
+            rows={catalogLinks.map((link) => {
+              // ALWAYS render the full 7-area catalog; pull live/draft
+              // figures from data.content by area name. Avoids the
+              // partial-data render (Quotes filled, rest dashes) that
+              // happened when data.content arrived out-of-order.
+              const stats = data.content.find(
+                (item) => item.area === link.area,
+              );
+              const live = stats?.live ?? 0;
+              const drafts = stats?.drafts ?? 0;
+              const endpoint = stats?.endpoint ?? '—';
 
               return [
-                item.area,
-                'endpoint' in item ? item.endpoint : '-',
-                'live' in item ? item.live : 0,
-                'drafts' in item ? item.drafts : 0,
-                <Link href={href} key={href}>
+                <span className="font-bold" key={`${link.area}-area`}>
+                  {link.area}
+                </span>,
+                <code
+                  className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
+                  key={`${link.area}-endpoint`}
+                >
+                  {endpoint}
+                </code>,
+                <span
+                  className={`font-extrabold ${live > 0 ? 'text-mint' : 'text-[var(--app-muted)]'}`}
+                  key={`${link.area}-live`}
+                >
+                  {live}
+                </span>,
+                <span className="font-bold" key={`${link.area}-drafts`}>
+                  {drafts}
+                </span>,
+                <Link href={link.href} key={link.href}>
                   <Button className="h-8 px-3 text-xs" variant="secondary">
                     Mở quản lý
                   </Button>
@@ -153,6 +175,12 @@ export default function AdminPage() {
               ];
             })}
           />
+          {data.content.length === 0 ? (
+            <p className="mt-3 text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+              Đang tải số liệu live/draft từ /admin/analytics/overview… nếu sau 5s vẫn 0
+              hết, kiểm tra token admin hoặc backend.
+            </p>
+          ) : null}
         </div>
       </Card>
     </DashboardShell>

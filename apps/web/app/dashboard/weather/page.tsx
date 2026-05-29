@@ -422,48 +422,137 @@ function buildAdvice(
   const humidity = current.current?.humidity ?? 0;
   const wind = current.current?.windSpeed ?? 0;
   const rainChance = today?.precipitationProbability ?? 0;
+  const code = current.current?.weatherCode;
+  const todayHigh = today?.temperatureMax;
+  const todayLow = today?.temperatureMin;
+  const now = new Date();
+  const hour = now.getHours();
+  const day = now.getDay(); // 0=Sun ... 6=Sat
+  const isWeekend = day === 0 || day === 6;
+  const month = now.getMonth() + 1;
 
+  // ---- Temperature buckets ------------------------------------------------
   if (temp != null) {
-    if (temp >= 33) {
-      tips.push('Trời đang nóng (≥ 33°). Uống nhiều nước, tránh ra nắng từ 11–15h.');
+    if (temp >= 36) {
+      tips.push('🥵 Nắng gắt cực — tránh ra ngoài hoàn toàn từ 11–15h. Bật điều hoà 26–27°.');
+      tips.push('Mang chai nước theo — uống ≥ 2.5L nay nếu hoạt động bình thường.');
+    } else if (temp >= 33) {
+      tips.push('☀️ Nắng nóng (≥ 33°) — chống nắng, kính râm, mũ rộng vành.');
+      tips.push('Bữa trưa nên ăn nhẹ, nhiều rau và trái cây mọng nước.');
     } else if (temp >= 28) {
-      tips.push('Nắng ấm — mặc đồ thoáng, bôi kem chống nắng nếu ra ngoài.');
-    } else if (temp >= 22) {
-      tips.push('Nhiệt độ dễ chịu, hợp đi bộ nhẹ hoặc chạy bộ ngắn.');
+      tips.push('🌤 Nắng ấm — mặc đồ thoáng, bôi kem chống nắng SPF 30+ nếu ra ngoài.');
+    } else if (temp >= 24) {
+      tips.push('😎 Nhiệt độ dễ chịu — hợp đi bộ, chạy bộ ngắn hoặc đạp xe.');
+    } else if (temp >= 20) {
+      tips.push('🍃 Mát mẻ — hợp ngồi cà phê ngoài trời, đọc sách dưới tán cây.');
     } else if (temp >= 16) {
-      tips.push('Hơi mát — mang theo áo khoác mỏng nếu ra ngoài lâu.');
+      tips.push('🧥 Hơi mát — mang áo khoác mỏng nếu ra ngoài tối.');
+    } else if (temp >= 10) {
+      tips.push('🧣 Lạnh — mặc nhiều lớp, uống trà / cà phê nóng.');
     } else {
-      tips.push('Trời lạnh — mặc thêm lớp giữ ấm và uống đồ ấm.');
+      tips.push('🥶 Rất lạnh — giữ ấm cổ + tay chân, hạn chế ra ngoài lúc gió mạnh.');
     }
   }
 
-  if (apparent != null && Math.abs((apparent ?? 0) - (temp ?? 0)) >= 3) {
-    tips.push(`Cảm giác ngoài trời ${Math.round(apparent)}° (chênh với nhiệt độ thực).`);
+  // ---- Apparent vs actual -------------------------------------------------
+  if (apparent != null && temp != null && Math.abs(apparent - temp) >= 3) {
+    const direction = apparent > temp ? 'nóng hơn' : 'mát hơn';
+    tips.push(
+      `🌡 Cảm giác ngoài trời ${Math.round(apparent)}° — ${direction} so với nhiệt độ thực ${Math.round(temp)}°.`,
+    );
   }
 
-  if (rainChance >= 60) {
-    tips.push(`Xác suất mưa ${Math.round(rainChance)}% — mang ô / áo mưa.`);
-  } else if (rainChance >= 30) {
-    tips.push('Có khả năng mưa rải rác trong ngày, để ô gần cửa cho an tâm.');
+  // ---- Day temp swing -----------------------------------------------------
+  if (todayHigh != null && todayLow != null && todayHigh - todayLow >= 10) {
+    tips.push(
+      `🔁 Hôm nay chênh nhiệt lớn (${Math.round(todayLow)}° → ${Math.round(todayHigh)}°) — chuẩn bị 1 áo khoác cầm tay.`,
+    );
   }
 
-  if (humidity >= 85) {
-    tips.push('Độ ẩm cao — phòng ngủ bật quạt/máy hút ẩm nếu có.');
-  } else if (humidity <= 35) {
-    tips.push('Không khí khô — uống thêm nước và dùng dưỡng ẩm.');
+  // ---- Rain ---------------------------------------------------------------
+  if (rainChance >= 80) {
+    tips.push(`☔ Khả năng mưa rất cao (${Math.round(rainChance)}%) — mang ô + áo mưa.`);
+    tips.push('Tránh đi xe máy đường ngập / khu hay đọng nước.');
+  } else if (rainChance >= 60) {
+    tips.push(`🌧 Có thể mưa lớn (${Math.round(rainChance)}%) — mang ô / áo mưa.`);
+  } else if (rainChance >= 40) {
+    tips.push('☂ Mưa rào rải rác — bỏ ô gấp trong cặp cho yên tâm.');
+  } else if (rainChance >= 20) {
+    tips.push('🌥 Ít khả năng mưa, nhưng vẫn nên check lại trước khi ra ngoài.');
   }
 
-  if (wind >= 35) {
-    tips.push(`Gió mạnh (${Math.round(wind)} km/h) — cẩn thận khi đi xe máy.`);
+  // ---- Humidity -----------------------------------------------------------
+  if (humidity >= 90) {
+    tips.push('💧 Độ ẩm rất cao (≥ 90%) — phòng ngủ bật quạt/máy hút ẩm để dễ ngủ.');
+  } else if (humidity >= 80) {
+    tips.push('Độ ẩm cao — dễ bí, tránh mặc đồ bó sát.');
+  } else if (humidity <= 30) {
+    tips.push('🏜 Không khí khô — uống thêm nước, bôi kem dưỡng ẩm môi & tay.');
+  } else if (humidity <= 45) {
+    tips.push('Hơi khô — đặt 1 cốc nước cạnh bàn làm việc cho dễ nhớ uống.');
   }
 
+  // ---- Wind ---------------------------------------------------------------
+  if (wind >= 50) {
+    tips.push(`🌬 Gió rất mạnh (${Math.round(wind)} km/h) — hạn chế đi xe máy, cẩn thận biển hiệu.`);
+  } else if (wind >= 30) {
+    tips.push(`💨 Gió mạnh (${Math.round(wind)} km/h) — đội mũ bảo hiểm có dây cài chắc.`);
+  } else if (wind >= 15) {
+    tips.push('🍃 Có gió nhẹ — dễ chịu nếu ngồi sân thượng / hiên nhà.');
+  }
+
+  // ---- Storm / specific weather codes -------------------------------------
+  if (code != null && code >= 95) {
+    tips.push('⛈ Có dông — rút phích sạc, tránh đứng dưới cây / cột điện.');
+  }
+  if (code != null && code >= 45 && code <= 48) {
+    tips.push('🌫 Sương mù — bật đèn xe sớm, giữ khoảng cách an toàn.');
+  }
+  if (code != null && code >= 80 && code <= 82) {
+    tips.push('🌧 Mưa rào dồn dập — chuẩn bị đồ chống thấm cho cặp/điện thoại.');
+  }
+
+  // ---- Time of day --------------------------------------------------------
+  if (hour >= 5 && hour < 9) {
+    tips.push('🌅 Sáng sớm — thử thở sâu 1 phút trước khi mở điện thoại.');
+  } else if (hour >= 11 && hour < 14) {
+    tips.push('🍽 Giờ trưa — ăn từ tốn, nghỉ mắt 5 phút khỏi màn hình.');
+  } else if (hour >= 14 && hour < 17) {
+    tips.push('☕ Giữa chiều — đứng dậy đi vài bước, uống ngụm nước thay đường.');
+  } else if (hour >= 17 && hour < 20) {
+    tips.push('🌇 Cuối ngày — dành 10 phút thư giãn trước khi vào việc gia đình.');
+  } else if (hour >= 20 && hour < 23) {
+    tips.push('🌙 Tối muộn — giảm sáng màn hình, tránh cà phê sau 19h.');
+  } else if (hour >= 23 || hour < 5) {
+    tips.push('🌌 Khuya rồi — nghỉ ngơi đi nha, ngủ đủ giấc quan trọng hơn deadline.');
+  }
+
+  // ---- Weekend / weekday --------------------------------------------------
+  if (isWeekend) {
+    tips.push('🛋 Cuối tuần — thử dành 30 phút không màn hình, đọc sách / pha trà / nghe nhạc.');
+  } else {
+    tips.push('💼 Ngày làm việc — đặt 1 reminder 90 phút/lần để đứng dậy duỗi người.');
+  }
+
+  // ---- Seasonal hints (VN miền Nam) ---------------------------------------
+  if (month >= 5 && month <= 10) {
+    tips.push('🌦 Mùa mưa — kiểm tra dự báo trước khi đi xa, nạp pin điện thoại đầy.');
+  } else if (month >= 11 || month <= 2) {
+    tips.push('🌬 Mùa khô — uống đủ nước, dưỡng môi, giữ ấm vào sáng sớm.');
+  } else {
+    tips.push('🌸 Giao mùa — dễ cảm vặt, ăn nhiều rau xanh & ngủ đủ.');
+  }
+
+  // ---- Day/night ----------------------------------------------------------
   if (!isDay) {
-    tips.push('Đã muộn — nếu đi ngoài nhớ mặc đồ sáng màu cho dễ thấy.');
+    tips.push('🔦 Đã tối — nếu đi ngoài nhớ mặc đồ sáng màu / có phản quang.');
+  } else if (temp != null && temp >= 28) {
+    tips.push('🕶 Đeo kính râm chống UV nếu ra ngoài lâu.');
   }
 
-  if (tips.length === 0) {
-    tips.push('Thời tiết ổn định — tận hưởng một ngày yên ả nha.');
-  }
+  // ---- Always-on mindfulness ---------------------------------------------
+  tips.push('🧘 Đừng quên: 4 nhịp hít vào - 7 giữ - 8 thở ra giúp giảm stress trong 1 phút.');
+
   return tips;
 }
 
