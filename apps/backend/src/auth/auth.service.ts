@@ -6,11 +6,17 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { AccountTokenType, AuthProvider, Prisma } from '@prisma/client';
+import {
+  AccountTokenType,
+  AuthProvider,
+  NotificationType,
+  Prisma,
+} from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomBytes } from 'node:crypto';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
+import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { userSelect } from '../users/user.select';
 import { UsersService } from '../users/users.service';
@@ -33,6 +39,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async register(dto: RegisterDto, userAgent?: string, ipAddress?: string) {
@@ -377,6 +384,11 @@ export class AuthService {
     const refreshToken = randomBytes(32).toString('base64url');
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 
+    // Detect "new device" BEFORE we insert the new session — otherwise
+    // every login would trivially match itself. A device is "new" when
+    // we've never seen this exact userAgent for this user.
+    const isNewDevice = await this.isFirstTimeDeviceForUser(user.id, userAgent);
+
     const session = await this.prisma.session.create({
       data: {
         userId: user.id,
@@ -386,6 +398,15 @@ export class AuthService {
         expiresAt,
       },
     });
+
+    if (isNewDevice) {
+      // Fire-and-forget: notifying the user must never block the login
+      // flow. Errors are swallowed (worst case the user just doesn't see
+      // a notification — sessions row still recorded for audit).
+      void this.notifyNewDeviceLogin(user.id, userAgent, ipAddress).catch(
+        () => undefined,
+      );
+    }
 
     const payload: JwtPayload = {
       sub: user.id,
@@ -405,6 +426,45 @@ export class AuthService {
       sessionId: session.id,
       user: safeUser,
     };
+  }
+
+  /**
+   * Returns true when this user has never had a session with this exact
+   * userAgent. Missing/blank UA is treated as a known device (we don't
+   * want to spam users when their browser refuses to send one).
+   */
+  private async isFirstTimeDeviceForUser(
+    userId: string,
+    userAgent?: string,
+  ): Promise<boolean> {
+    if (!userAgent) {
+      return false;
+    }
+    const existing = await this.prisma.session.findFirst({
+      where: { userId, userAgent },
+      select: { id: true },
+    });
+    return existing === null;
+  }
+
+  /**
+   * Creates an in-app notification ("Đã tìm thấy thiết bị đăng nhập
+   * mới") with a short device summary so the user knows where the
+   * login came from. Surfaces in the dashboard notification bell via
+   * the existing realtime push from NotificationsService.
+   */
+  private async notifyNewDeviceLogin(
+    userId: string,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    const deviceLabel = summariseUserAgent(userAgent);
+    const ipLabel = ipAddress ? ` từ IP ${ipAddress}` : '';
+    await this.notifications.createForUser(userId, {
+      title: 'Đã tìm thấy thiết bị đăng nhập mới',
+      message: `Phát hiện đăng nhập từ ${deviceLabel}${ipLabel}. Nếu không phải anh, hãy đổi mật khẩu ngay.`,
+      type: NotificationType.IN_APP,
+    });
   }
 
   private throwInvalidCredentials(): never {
@@ -524,3 +584,38 @@ type JwtPayloadUser = {
   email: string;
   role: JwtPayload['role'];
 };
+
+/**
+ * Short human-readable label for a User-Agent. Mirrors the web's UA
+ * parser in spirit but stays tiny so it doesn't pull in a dependency.
+ * Used in the "new device login" notification body.
+ */
+function summariseUserAgent(ua?: string): string {
+  if (!ua) return 'thiết bị không xác định';
+  const lower = ua.toLowerCase();
+
+  // OS
+  let os = 'máy lạ';
+  if (/iphone/.test(lower)) os = 'iPhone';
+  else if (/ipad/.test(lower)) os = 'iPad';
+  else if (/android/.test(lower))
+    os = /mobile/.test(lower) ? 'Android' : 'Android Tablet';
+  else if (/mac os x|macintosh/.test(lower)) os = 'Mac';
+  else if (/windows/.test(lower)) os = 'Windows';
+  else if (/linux/.test(lower)) os = 'Linux';
+  else if (/curl/.test(lower)) os = 'curl';
+
+  // Browser
+  let browser = '';
+  if (/edg\//.test(lower)) browser = 'Edge';
+  else if (/coc_coc|coccoc/.test(lower)) browser = 'Cốc Cốc';
+  else if (/brave/.test(lower)) browser = 'Brave';
+  else if (/opr\/|opera/.test(lower)) browser = 'Opera';
+  else if (/firefox|fxios/.test(lower)) browser = 'Firefox';
+  else if (/samsungbrowser/.test(lower)) browser = 'Samsung Internet';
+  else if (/crios|chrome/.test(lower)) browser = 'Chrome';
+  else if (/safari/.test(lower)) browser = 'Safari';
+  else if (/curl/.test(lower)) browser = 'curl';
+
+  return browser ? `${browser} trên ${os}` : os;
+}
