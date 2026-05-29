@@ -30,6 +30,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
+import { isSecureContext, requestGeolocation } from '@/lib/permissions';
 import { useUiStore } from '@/stores/use-ui-store';
 
 type WeatherCurrent = {
@@ -122,47 +123,36 @@ export default function WeatherPage() {
   }, [reload]);
 
   const useMyLocation = useCallback(async () => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+    setLocating(true);
+    try {
+      const pos = await requestGeolocation();
+      await apiFetch('/weather/me/location', {
+        method: 'PATCH',
+        body: JSON.stringify({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          weatherEnabled: true,
+        }),
+      });
+      pushToast({
+        tone: 'success',
+        title: 'Đã cập nhật vị trí',
+        message: 'Đang lấy thời tiết theo vị trí hiện tại của anh.',
+      });
+      await reload();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Không lấy được vị trí.';
       pushToast({
         tone: 'error',
-        title: 'Trình duyệt không hỗ trợ định vị',
+        title: 'Không lấy được vị trí',
+        message,
       });
-      return;
+    } finally {
+      setLocating(false);
     }
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        try {
-          await apiFetch('/weather/me/location', {
-            method: 'PATCH',
-            body: JSON.stringify({
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
-              weatherEnabled: true,
-            }),
-          });
-          pushToast({
-            tone: 'success',
-            title: 'Đã cập nhật vị trí',
-            message: 'Đang lấy thời tiết theo vị trí hiện tại của anh.',
-          });
-          await reload();
-        } catch {
-          pushToast({ tone: 'error', title: 'Không lưu được vị trí' });
-        } finally {
-          setLocating(false);
-        }
-      },
-      (err) => {
-        setLocating(false);
-        pushToast({
-          tone: 'error',
-          title: 'Không lấy được vị trí',
-          message: err.message,
-        });
-      },
-      { enableHighAccuracy: true, timeout: 10_000 },
-    );
   }, [pushToast, reload]);
 
   const advice = useMemo(
@@ -183,9 +173,34 @@ export default function WeatherPage() {
 
   const locationMissing =
     current?.configured === false || current?.reason === 'LOCATION_MISSING';
+  const [secure, setSecure] = useState(true);
+  useEffect(() => setSecure(isSecureContext()), []);
 
   return (
     <DashboardShell eyebrow="Atmosphere" title="Thời tiết">
+      {!secure ? (
+        <Card className="border-coral/40 bg-coral/10">
+          <p className="text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
+            ⚠️ App đang chạy ở chế độ không an toàn (HTTP qua LAN IP)
+          </p>
+          <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">
+            Trình duyệt CHẶN gọi định vị / notification trên origin{' '}
+            <code className="rounded bg-[var(--field-bg)] px-1 py-0.5 text-xs">
+              {typeof window !== 'undefined' ? window.location.origin : 'http://…'}
+            </code>{' '}
+            — không hiện popup, không báo lỗi. Để dùng được:
+          </p>
+          <ul className="mt-2 list-disc pl-6 text-sm text-[var(--app-muted,theme(colors.slate))]">
+            <li>
+              Mở app qua <code>http://localhost:3233</code> (cùng máy chạy
+              Docker) — localhost được coi là secure context.
+            </li>
+            <li>
+              Hoặc setup HTTPS (Caddy/nginx + Let&apos;s Encrypt / mkcert).
+            </li>
+          </ul>
+        </Card>
+      ) : null}
       {locationMissing ? (
         <Card className="border-coral/40 bg-coral/10">
           <div className="flex flex-wrap items-start justify-between gap-3">

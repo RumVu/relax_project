@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { adminNav, primaryNav } from '@/lib/constants';
 import { apiFetch, getStoredRole } from '@/lib/api';
+import { requestNotificationPermission } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { RealtimeStatusBadge } from '@/components/dashboard/dashboard-ui';
@@ -138,16 +139,13 @@ export function DashboardShell({
 
   // Ask for browser-level Notification permission once per session so
   // realtime events can pop a native OS toast even if the dashboard tab
-  // is in the background.
+  // is in the background. Uses the centralised helper so insecure
+  // contexts (http://LAN-IP) silently no-op instead of looking broken.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!('Notification' in window)) return;
-    if (Notification.permission === 'default') {
-      const t = window.setTimeout(() => {
-        void Notification.requestPermission().catch(() => undefined);
-      }, 2000);
-      return () => window.clearTimeout(t);
-    }
+    const t = window.setTimeout(() => {
+      void requestNotificationPermission().catch(() => undefined);
+    }, 2000);
+    return () => window.clearTimeout(t);
   }, []);
 
   const loadChromeData = useCallback(async () => {
