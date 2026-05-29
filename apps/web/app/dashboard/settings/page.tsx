@@ -15,6 +15,7 @@ import {
   Repeat,
   Save,
   Smartphone,
+  Trash2,
   UserRound,
   WandSparkles,
   X,
@@ -1498,16 +1499,18 @@ export default function SettingsPage() {
                       });
                       setRefreshKey((current) => current + 1);
                       triggerRefresh();
-                      setReminderDraft({
-                        title: 'Nhắc thở nhẹ',
-                        message: 'Đến lúc nghỉ một chút rồi hít thở nào.',
-                        type: 'BREATHING',
+                      // KEEP the title + type + message so the user can
+                      // quickly create another similar reminder. Only
+                      // bump the scheduled time forward by an hour so
+                      // they don't accidentally re-create the same slot.
+                      setReminderDraft((current) => ({
+                        ...current,
                         scheduledAt: nextLocalReminderTime(),
-                      });
+                      }));
                       pushToast({
                         tone: 'success',
                         title: 'Đã tạo reminder',
-                        message: 'Lịch nhắc mới đã lưu vào backend.',
+                        message: `"${reminderDraft.title}" — lưu OK. Title giữ nguyên cho lần tạo tiếp.`,
                       });
                     } catch {
                       pushToast({
@@ -1525,10 +1528,54 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <p className="text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+                {settings.reminders.length} nhắc đang lưu
+              </p>
+              {settings.reminders.length > 0 ? (
+                <Button
+                  className="h-9 px-3 text-xs"
+                  disabled={reminderState === 'saving'}
+                  onClick={async () => {
+                    const ok = window.confirm(
+                      `Xoá tất cả ${settings.reminders.length} nhắc? Hành động này không hoàn tác được.`,
+                    );
+                    if (!ok) return;
+                    setReminderState('saving');
+                    try {
+                      await Promise.all(
+                        settings.reminders.map((reminder) =>
+                          apiFetch(`/reminders/${reminder.id}`, {
+                            method: 'DELETE',
+                          }).catch(() => undefined),
+                        ),
+                      );
+                      setRefreshKey((current) => current + 1);
+                      triggerRefresh();
+                      pushToast({
+                        tone: 'success',
+                        title: `Đã xoá ${settings.reminders.length} nhắc`,
+                      });
+                    } finally {
+                      setReminderState('idle');
+                    }
+                  }}
+                  variant="secondary"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Xoá tất cả
+                </Button>
+              ) : null}
+            </div>
             <DataTable
-              columns={['Type', 'Title', 'Schedule', 'Active', 'Actions']}
+              columns={['Loại', 'Tiêu đề', 'Lịch', 'Trạng thái', 'Hành động']}
               rows={settings.reminders.map((reminder) => [
-                reminder.type,
+                <span
+                  className="inline-flex rounded-full bg-violet/15 px-2 py-0.5 text-xs font-bold text-violet"
+                  key={`${reminder.id}-type`}
+                >
+                  {reminder.type}
+                </span>,
                 reminder.title,
                 reminder.schedule,
                 reminder.active ? 'On' : 'Off',
