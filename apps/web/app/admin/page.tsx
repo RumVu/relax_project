@@ -348,6 +348,7 @@ function InfraHealthCard() {
   }
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void refresh();
     const t = window.setInterval(refresh, 15000); // refresh mỗi 15s
     return () => window.clearInterval(t);

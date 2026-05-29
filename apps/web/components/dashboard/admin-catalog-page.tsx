@@ -280,6 +280,7 @@ export function AdminCatalogPage({
   // Reset to first page whenever the search / filter / page-size changes
   // so the user doesn't end up on an empty page.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(0);
   }, [query, statusFilter, pageSize]);
 

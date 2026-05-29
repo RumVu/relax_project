@@ -77,6 +77,7 @@ export function DashboardShell({
   // Close the drawer whenever the user navigates so they don't have to
   // tap "close" manually after picking a destination.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileNavOpen(false);
   }, [pathname]);
   // Lock body scroll while drawer is open so the page underneath stays
