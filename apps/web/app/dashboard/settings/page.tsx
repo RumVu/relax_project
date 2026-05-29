@@ -34,6 +34,7 @@ import {
 import { apiFetch, extractList } from '@/lib/api';
 import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
+import { describeBrowser, describeDevice } from '@/lib/user-agent';
 import {
   chineseZodiacLabel,
   computeZodiac,
@@ -694,16 +695,33 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {settings.preferences.reminderTimes.map((time) => (
-              <div
-                className="rounded-lg border border-lilac/70 bg-white/75 p-4 text-center"
-                key={time}
-              >
-                <p className="text-lg font-extrabold text-ink">{time}</p>
-                <p className="text-xs font-semibold text-slate">reminder</p>
-              </div>
-            ))}
+          <div className="mt-5">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--app-muted,theme(colors.slate))]">
+              Quick add nhắc trong ngày
+            </p>
+            <div className="flex flex-wrap items-center gap-2">
+              {settings.preferences.reminderTimes.map((time) => (
+                <span
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--field-border)] bg-[var(--panel-bg)] px-3 py-1.5 text-sm font-bold"
+                  key={time}
+                >
+                  <Repeat className="h-3.5 w-3.5 text-violet" />
+                  {time}
+                </span>
+              ))}
+              {settings.preferences.reminderTimes.length === 0 ? (
+                <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+                  Chưa có nhắc nào — pick thời điểm phía dưới để thêm nhanh.
+                </span>
+              ) : null}
+            </div>
+            <QuickAddReminder
+              defaultTitle="Nhắc thở nhẹ"
+              onCreated={() => {
+                setRefreshKey((current) => current + 1);
+                triggerRefresh();
+              }}
+            />
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -1277,10 +1295,34 @@ export default function SettingsPage() {
           />
           <div className="mt-5">
             <DataTable
-              columns={['Device', 'IP', 'Đăng nhập', 'Hết hạn', 'Trạng thái']}
+              columns={[
+                'Thiết bị',
+                'Trình duyệt',
+                'IP',
+                'Đăng nhập',
+                'Hết hạn',
+                'Trạng thái',
+              ]}
               rows={settings.sessions.map((session) => [
-                session.device,
-                session.ipAddress,
+                <div
+                  className="max-w-[220px]"
+                  key={`${session.id}-device`}
+                  title={session.device}
+                >
+                  <p className="font-bold">{describeDevice(session.device)}</p>
+                </div>,
+                <span
+                  className="text-sm font-semibold"
+                  key={`${session.id}-browser`}
+                >
+                  {describeBrowser(session.device)}
+                </span>,
+                <code
+                  className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
+                  key={`${session.id}-ip`}
+                >
+                  {session.ipAddress || '—'}
+                </code>,
                 session.createdAt,
                 session.expiresAt,
                 session.current ? 'Phiên hiện tại' : 'Đã lưu',
@@ -1686,6 +1728,73 @@ export default function SettingsPage() {
   );
 }
 
+function QuickAddReminder({
+  defaultTitle,
+  onCreated,
+}: {
+  defaultTitle: string;
+  onCreated: () => void;
+}) {
+  const pushToast = useUiStore((state) => state.pushToast);
+  const [time, setTime] = useState(() => {
+    const d = new Date();
+    d.setHours(d.getHours() + 1, 0, 0, 0);
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  });
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-end gap-3">
+      <label className="flex-1 min-w-[120px]">
+        <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+          Giờ nhắc
+        </span>
+        <input
+          className="mt-2 h-11 w-full rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-sm font-semibold text-[var(--app-text,theme(colors.ink))] outline-none"
+          onChange={(event) => setTime(event.target.value)}
+          type="time"
+          value={time}
+        />
+      </label>
+      <Button
+        disabled={busy || !time}
+        onClick={async () => {
+          if (!time) return;
+          setBusy(true);
+          try {
+            const [hh, mm] = time.split(':').map(Number);
+            const scheduled = new Date();
+            scheduled.setHours(hh ?? 9, mm ?? 0, 0, 0);
+            if (scheduled.getTime() < Date.now()) {
+              scheduled.setDate(scheduled.getDate() + 1);
+            }
+            await apiFetch('/reminders/me', {
+              method: 'POST',
+              body: JSON.stringify({
+                title: defaultTitle,
+                message: 'Nhắc nhẹ trong ngày từ Quick add.',
+                type: 'BREATHING',
+                scheduledAt: scheduled.toISOString(),
+                isActive: true,
+              }),
+            });
+            onCreated();
+            pushToast({ tone: 'success', title: `Đã thêm nhắc ${time}` });
+          } catch {
+            pushToast({ tone: 'error', title: 'Không thêm được nhắc' });
+          } finally {
+            setBusy(false);
+          }
+        }}
+        variant="secondary"
+      >
+        <Save className="h-4 w-4" />
+        {busy ? 'Đang thêm' : 'Thêm nhanh'}
+      </Button>
+    </div>
+  );
+}
+
 function CheckoutModal({
   billingState,
   currentPlanName,
@@ -1990,14 +2099,27 @@ function normalizeBirthdayValue(value: string) {
     return '';
   }
 
+  // Already YYYY-MM-DD — accept as-is so the date input keeps it.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  // vi-VN locale string "DD/MM/YYYY" — what live-dashboard.formatDate
+  // happens to spit out. Parse the parts directly so we don't fall into
+  // `new Date("10/3/2003")` which JS interprets as MM/DD/YYYY (US) and
+  // would swap day↔month.
+  const localeMatch = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (localeMatch) {
+    const [, day, month, year] = localeMatch;
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+
+  // ISO with time (e.g. "2003-03-10T00:00:00Z"). Use UTC parts so a VN
+  // +07 browser doesn't roll back/forward a day.
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) {
     return '';
   }
-
-  // Read UTC parts so an ISO like "2003-10-02T00:00:00Z" stays "2003-10-02"
-  // when the browser is in UTC+7 (otherwise toLocaleDateString shifts
-  // back/forward by a day depending on the timezone offset).
   const year = parsed.getUTCFullYear();
   const month = String(parsed.getUTCMonth() + 1).padStart(2, '0');
   const day = String(parsed.getUTCDate()).padStart(2, '0');
