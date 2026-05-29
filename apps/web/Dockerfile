@@ -12,6 +12,11 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=http://localhost:6823
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
+# Optional Google sign-in client ID — baked at build time. Leave empty
+# to hide the "Sign in with Google" button.
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID=
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=$NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 

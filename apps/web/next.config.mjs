@@ -57,8 +57,15 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
+            // connect-src: 'self' + every http(s)/ws(s) target so the
+            // dashboard can call the backend at whatever host it lives
+            // on (LAN IP, localhost, public URL). The previous policy
+            // hard-coded `http://localhost:6823` only, which silently
+            // blocked fetches to `http://192.168.1.x:6823` in the LAN
+            // share flow — the catch block then surfaced as a
+            // misleading "email or password incorrect" toast.
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' http://localhost:6823 ws://localhost:6823 https: wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' http: https: ws: wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
           },
           {
             key: 'Permissions-Policy',

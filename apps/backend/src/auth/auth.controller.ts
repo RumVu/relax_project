@@ -27,6 +27,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
@@ -76,6 +77,27 @@ export class AuthController {
     @Req() request: Request,
   ) {
     return this.authService.login(dto, userAgent, getClientIp(request));
+  }
+
+  @ApiOperation({ summary: 'Exchange a Google ID token for an app session' })
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'User, access token and refresh token (Google account).',
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      'Google ID token missing/invalid, or GOOGLE_CLIENT_ID not configured on backend.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 10, blockDuration: minutes(5) },
+  })
+  @Post('google')
+  google(
+    @Body() dto: GoogleLoginDto,
+    @Headers('user-agent') userAgent: string | undefined,
+    @Req() request: Request,
+  ) {
+    return this.authService.googleLogin(dto, userAgent, getClientIp(request));
   }
 
   @ApiOperation({ summary: 'Rotate a refresh token' })
