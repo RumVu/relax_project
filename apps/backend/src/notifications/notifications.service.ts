@@ -198,6 +198,7 @@ export class NotificationsService {
     this.realtime.emitToUser(userId, 'notification.created', {
       id: notification.id,
       title: notification.title,
+      message: notification.message,
       type: notification.type,
       createdAt: notification.createdAt,
     });
