@@ -31,6 +31,7 @@ import { requestNotificationPermission } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { RealtimeStatusBadge } from '@/components/dashboard/dashboard-ui';
+import { AccountMenu } from '@/components/dashboard/account-menu';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 
@@ -225,14 +226,17 @@ export function DashboardShell({
             </p>
           </div>
         </div>
-        <button
-          aria-label="Mở menu"
-          className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] text-[var(--app-text)] transition hover:bg-violet/10"
-          onClick={() => setMobileNavOpen(true)}
-          type="button"
-        >
-          <Menu className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <AccountMenu />
+          <button
+            aria-label="Mở menu"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] text-[var(--app-text)] transition hover:bg-violet/10"
+            onClick={() => setMobileNavOpen(true)}
+            type="button"
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer backdrop */}
@@ -355,7 +359,7 @@ export function DashboardShell({
               <div className="flex flex-wrap items-center gap-2">
                 <RealtimeStatusBadge onEvent={handleRealtimeEvent} />
                 <button
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
+                  className="relative inline-flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink transition hover:border-violet"
                   onClick={() => {
                     setAlertOpen((current) => !current);
                     if (!alertOpen) {
@@ -365,7 +369,13 @@ export function DashboardShell({
                   type="button"
                 >
                   <Bell className="h-4 w-4 text-coral" />
-                  {unreadCount} thông báo
+                  <span className="hidden sm:inline">{unreadCount} thông báo</span>
+                  <span className="sm:hidden">{unreadCount}</span>
+                  {unreadCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-coral px-1 text-[10px] font-bold text-white sm:hidden">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  ) : null}
                 </button>
                 <Button
                   onClick={() => {
@@ -382,6 +392,11 @@ export function DashboardShell({
                   <RefreshCcw className="h-4 w-4" />
                   Refresh
                 </Button>
+                {/* Account menu — hidden on mobile (it lives in the mobile
+                 *  topbar already) so the desktop hero row doesn't double-up. */}
+                <div className="hidden lg:block">
+                  <AccountMenu />
+                </div>
               </div>
             </div>
           </div>
