@@ -54,6 +54,47 @@ share: ## Build + start full stack bound to your LAN IP so anyone on wifi can hi
 share-ip: ## In LAN IP máy đang dùng (cho biết để gửi cho khách)
 	@ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $$1}'
 
+# Vercel frontend (production) + backend ở docker + Cloudflare tunnel.
+# Dùng khi a muốn người ngoài internet vô frontend Vercel mà vẫn gọi
+# được backend chạy trên máy a. Không tốn $, URL frontend cố định.
+.PHONY: share-vercel
+share-vercel: ## Backend docker + tunnel public; frontend = Vercel
+	scripts/share-vercel.sh
+
+.PHONY: doctor
+doctor: ## Kiểm tra prerequisites (docker, cloudflared, ports)
+	@echo "→ Docker:"; \
+	if command -v docker >/dev/null 2>&1; then \
+	  echo "  ✓ $$(docker --version)"; \
+	  if docker info >/dev/null 2>&1; then echo "  ✓ daemon up"; \
+	  else echo "  ✗ daemon DOWN — open -a Docker, đợi 30s"; fi; \
+	else echo "  ✗ chưa cài"; fi; \
+	echo "→ cloudflared:"; \
+	if command -v cloudflared >/dev/null 2>&1; then \
+	  echo "  ✓ $$(cloudflared --version 2>&1 | head -1)"; \
+	else echo "  ✗ chưa cài (brew install cloudflared)"; fi; \
+	echo "→ Port 6823 (backend):"; \
+	if curl -sf http://localhost:6823/health >/dev/null 2>&1; then \
+	  echo "  ✓ backend đã chạy + healthy"; \
+	elif lsof -nP -iTCP:6823 -sTCP:LISTEN >/dev/null 2>&1; then \
+	  echo "  ⚠ port chiếm bởi process KHÁC — chạy 'lsof -i :6823' để xem"; \
+	else echo "  ✓ trống (share-vercel sẽ boot backend)"; fi; \
+	echo "→ JWT_SECRET:"; \
+	if [ -n "$$JWT_SECRET" ]; then echo "  ✓ set ($${#JWT_SECRET} chars)"; \
+	else echo "  ℹ chưa set — share-vercel sẽ tự tạo"; fi
+
+.PHONY: tunnel-url
+tunnel-url: ## In URL tunnel hiện tại (từ .tunnel-url) — copy vào Vercel
+	@if [ -f .tunnel-url ]; then \
+	  echo "$$(cat .tunnel-url)"; \
+	else \
+	  echo "✗ Chưa có tunnel — chạy 'make share-vercel' trước"; exit 1; \
+	fi
+
+.PHONY: backend-stop
+backend-stop: ## Stop backend docker stack (giữ data)
+	docker compose --profile api down
+
 .PHONY: logs
 logs: ## Tail logs for all running compose services
 	docker compose logs -f --tail=200
