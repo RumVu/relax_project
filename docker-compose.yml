@@ -57,6 +57,10 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-digital-cigarette-break-api}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-digital-cigarette-break-app}
+      # Supabase Storage — chứa avatar, ảnh project, sound assets.
+      # Backend dùng SECRET_KEY (sb_secret_*) để issue signed-upload-url,
+      # frontend dùng PUBLISHABLE_KEY (sb_publishable_*) để read.
+      # Để rỗng → StorageService no-op (upload sẽ fail rõ ràng).
       SUPABASE_URL: ${SUPABASE_URL:-}
       SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
