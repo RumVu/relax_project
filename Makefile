@@ -95,6 +95,39 @@ tunnel-url: ## In URL tunnel hiện tại (từ .tunnel-url) — copy vào Verce
 backend-stop: ## Stop backend docker stack (giữ data)
 	docker compose --profile api down
 
+# ---- Tailscale Funnel (URL cố định, auto-restart) --------------------------
+# Sau setup 1 lần (xem docs/14-tailscale-funnel.md): URL không đổi giữa
+# các restart. Phù hợp để Vercel env trỏ tới 1 lần xài mãi.
+
+.PHONY: funnel
+funnel: ## Backend + Tailscale Funnel (cần TS_AUTHKEY env)
+	@if [ -z "$$TS_AUTHKEY" ]; then \
+	  echo "✗ Cần TS_AUTHKEY trong env."; \
+	  echo "  Setup ở https://login.tailscale.com/admin/settings/keys"; \
+	  echo "  Đầy đủ hướng dẫn: docs/14-tailscale-funnel.md"; \
+	  exit 1; \
+	fi
+	export JWT_SECRET="$${JWT_SECRET:-$$(openssl rand -hex 32)}"; \
+	docker compose --profile api --profile funnel up -d --build
+
+.PHONY: funnel-url
+funnel-url: ## In URL công khai Tailscale Funnel hiện tại
+	@if ! docker ps --format '{{.Names}}' | grep -q digital-cigarette-tailscale; then \
+	  echo "✗ Tailscale container chưa chạy — make funnel trước"; exit 1; \
+	fi
+	@docker exec digital-cigarette-tailscale tailscale status --json 2>/dev/null \
+	  | python3 -c "import json,sys; d=json.load(sys.stdin); print('https://' + d['Self']['DNSName'].rstrip('.'))"
+
+.PHONY: funnel-status
+funnel-status: ## Tailscale status + funnel routes
+	@docker exec digital-cigarette-tailscale tailscale status
+	@echo "---"
+	@docker exec digital-cigarette-tailscale tailscale funnel status
+
+.PHONY: funnel-down
+funnel-down: ## Stop chỉ Tailscale container (backend vẫn chạy)
+	docker compose --profile funnel stop tailscale
+
 .PHONY: logs
 logs: ## Tail logs for all running compose services
 	docker compose logs -f --tail=200
