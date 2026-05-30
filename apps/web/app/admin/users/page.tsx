@@ -21,6 +21,7 @@ import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useAdminDashboardData } from '@/lib/live-dashboard';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type AdminUserRow = {
   id: string;
@@ -35,6 +36,7 @@ type AdminUserRow = {
 };
 
 export default function AdminUsersPage() {
+  const { t } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [refreshKey, setRefreshKey] = useState(0);
   const [query, setQuery] = useState('');
@@ -61,7 +63,7 @@ export default function AdminUsersPage() {
   );
 
   return (
-    <DashboardShell admin eyebrow="Moderation" title="Users">
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.users.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard icon={Users} label="Tổng user" value={users.length} />
         <MetricCard

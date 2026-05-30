@@ -31,6 +31,7 @@ import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const iconMap = {
   sun: Sun,
@@ -43,6 +44,7 @@ const iconMap = {
 
 export default function MoodPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const moodFilters = useDashboardFilters('/mood-checkins/me', 'mood');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
@@ -79,7 +81,7 @@ export default function MoodPage() {
             }}
             variant="secondary"
           >
-            Sửa
+            {t('mood.history.edit')}
           </Button>
           <Button
             className="h-8 px-3 text-xs"
@@ -89,28 +91,28 @@ export default function MoodPage() {
                 triggerRefresh();
                 pushToast({
                   tone: 'success',
-                  title: 'Đã xoá mood check-in',
+                  title: t('mood.toast.deleted'),
                 });
               } catch {
                 pushToast({
                   tone: 'error',
-                  title: 'Không xoá được check-in',
+                  title: t('mood.toast.deleteFailed'),
                 });
               }
             }}
           >
             <Trash2 className="h-3.5 w-3.5" />
-            Xoá
+            {t('mood.history.delete')}
           </Button>
         </div>,
       ]),
-    [data.moodHistory, pushToast, triggerRefresh],
+    [data.moodHistory, pushToast, triggerRefresh, t],
   );
 
   return (
-    <DashboardShell eyebrow="Mood intelligence" title="Theo dõi cảm xúc">
+    <DashboardShell eyebrow={t('mood.page.eyebrow')} title={t('mood.page.title')}>
       <ActionModal
-        description="Check-in mới đã được lưu. Anh có thể qua Analytics để xem ảnh hưởng lên biểu đồ, hoặc ở lại ghi thêm một mood khác."
+        description={t('mood.modal.description')}
         onClose={() => setModalOpen(false)}
         onPrimary={() => {
           setModalOpen(false);
@@ -118,37 +120,37 @@ export default function MoodPage() {
         }}
         onSecondary={() => setModalOpen(false)}
         open={modalOpen}
-        primaryLabel="Xem analytics"
-        secondaryLabel="Ở lại màn này"
-        title="Đã lưu check-in"
+        primaryLabel={t('mood.modal.viewAnalytics')}
+        secondaryLabel={t('mood.modal.stay')}
+        title={t('mood.modal.title')}
       />
-      <DashboardFilterBar {...moodFilters} title="Bộ lọc lịch sử mood" />
+      <DashboardFilterBar {...moodFilters} title={t('mood.filterTitle')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={Sparkles}
-          label="Mood hiện tại"
+          label={t('mood.metric.current')}
           note={data.overview.mood.prompt}
           value={data.overview.mood.currentMood}
         />
         <MetricCard
           icon={Zap}
-          label="Average intensity"
-          note="0-100"
+          label={t('mood.metric.averageIntensity')}
+          note={t('mood.metric.averageIntensity.note')}
           tone="coral"
           value={data.overview.mood.summary.averageIntensity}
         />
         <MetricCard
           icon={Sun}
-          label="Top mood"
-          note="trong tuần"
+          label={t('mood.metric.topMood')}
+          note={t('mood.metric.topMood.note')}
           tone="sun"
           value={data.overview.mood.summary.topMood}
         />
         <MetricCard
           icon={Moon}
-          label="Longest streak"
-          note="ngày"
+          label={t('mood.metric.longestStreak')}
+          note={t('mood.metric.longestStreak.note')}
           tone="lilac"
           value={data.overview.mood.summary.longestStreak}
         />
@@ -157,8 +159,8 @@ export default function MoodPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <Card>
           <SectionTitle
-            title={editingId ? 'Chỉnh sửa check-in' : 'Check-in mới'}
-            copy="Chọn cảm xúc gần nhất của anh rồi ghi vài dòng để hệ thống hiểu nhịp tâm trạng tốt hơn."
+            title={editingId ? t('mood.checkin.editHeading') : t('mood.checkin.heading')}
+            copy={t('mood.checkin.copy')}
             action={<Plus className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -181,29 +183,33 @@ export default function MoodPage() {
                   <Icon className="h-5 w-5" />
                   <span className="font-bold">{mood.label}</span>
                   <span className={cn('text-xs', active ? 'text-white/70' : 'text-slate')}>
-                    rawScore {mood.value}/100
+                    {t('mood.history.rawScore', { value: mood.value })}
                   </span>
                 </button>
               );
             })}
           </div>
           <label className="mt-5 block">
-            <span className="text-sm font-semibold text-ink">Ghi chú</span>
+            <span className="text-sm font-semibold text-ink">{t('mood.form.note')}</span>
             <textarea
               className="mt-2 min-h-[120px] w-full rounded-lg border border-lilac bg-white/85 p-3 text-sm outline-none focus:border-violet"
               maxLength={120}
               onChange={(event) => setNote(event.target.value)}
-              placeholder="Viết vài dòng cho bé nghe nè..."
+              placeholder={t('mood.checkin.notePlaceholder')}
               value={note}
             />
           </label>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm font-semibold text-slate">
-              Selected: {selected?.label} • {note.length}/120
+              {t('mood.history.selected', {
+                label: selected?.label ?? '',
+                used: note.length,
+                max: 120,
+              })}
             </p>
             {editingId ? (
               <label className="flex items-center gap-2 text-sm font-semibold text-slate">
-                Cường độ
+                {t('mood.checkin.intensity')}
                 <input
                   className="h-10 w-20 rounded-lg border border-lilac bg-white/85 px-3 text-sm text-ink outline-none focus:border-violet"
                   max={5}
@@ -240,21 +246,25 @@ export default function MoodPage() {
                   setModalOpen(true);
                   pushToast({
                     tone: 'success',
-                    title: editingId ? 'Đã cập nhật mood check-in' : 'Đã lưu mood check-in',
-                    message: 'Biểu đồ và lịch sử đang được làm mới.',
+                    title: editingId ? t('mood.toast.updatedTitle') : t('mood.toast.savedTitle'),
+                    message: t('mood.toast.savedMessage'),
                   });
                 } catch {
                   setSaveState('error');
                   pushToast({
                     tone: 'error',
-                    title: 'Không lưu được check-in',
-                    message: 'Kiểm tra đăng nhập hoặc backend.',
+                    title: t('mood.toast.saveFailed'),
+                    message: t('mood.toast.saveFailedMessage'),
                   });
                 }
               }}
             >
               <Save className="h-4 w-4" />
-              {saveState === 'saving' ? 'Đang lưu' : editingId ? 'Cập nhật' : 'Lưu check-in'}
+              {saveState === 'saving'
+                ? t('mood.checkin.saving')
+                : editingId
+                  ? t('mood.checkin.update')
+                  : t('mood.checkin.save')}
             </Button>
           </div>
           {editingId ? (
@@ -268,7 +278,7 @@ export default function MoodPage() {
               }}
               variant="secondary"
             >
-              Huỷ sửa
+              {t('mood.checkin.cancelEdit')}
             </Button>
           ) : null}
           {saveState === 'saved' || saveState === 'error' ? (
@@ -278,17 +288,15 @@ export default function MoodPage() {
                 saveState === 'saved' ? 'text-mint' : 'text-coral',
               )}
             >
-              {saveState === 'saved'
-                ? 'Đã lưu qua API và refetch dashboard.'
-                : 'Lưu check-in thất bại. Dữ liệu không được ghi và UI không dùng số liệu giả.'}
+              {saveState === 'saved' ? t('mood.checkin.saved') : t('mood.checkin.failed')}
             </p>
           ) : null}
         </Card>
 
         <Card>
           <SectionTitle
-            title="Gợi ý theo mood"
-            copy="Ba gợi ý nhẹ nhàng được ưu tiên theo cảm xúc hiện tại và thói quen thư giãn gần đây."
+            title={t('mood.suggestions.heading')}
+            copy={t('mood.suggestions.copy')}
           />
           <div className="mt-5 space-y-3">
             {data.overview.mood.recommendations.map((item, index) => (
@@ -316,12 +324,18 @@ export default function MoodPage() {
 
       <Card>
         <SectionTitle
-          title="Lịch sử check-in"
-          copy="Danh sách này lấy từ các lần check-in thật gần nhất để anh nhìn lại trạng thái và ghi chú của mình."
+          title={t('mood.historyTable.heading')}
+          copy={t('mood.historyTable.copy')}
         />
         <div className="mt-5">
           <DataTable
-            columns={['Thời điểm', 'Mood', 'Cường độ', 'Ghi chú', 'Hành động']}
+            columns={[
+              t('mood.historyTable.time'),
+              t('mood.historyTable.mood'),
+              t('mood.historyTable.intensity'),
+              t('mood.historyTable.note'),
+              t('mood.historyTable.action'),
+            ]}
             rows={historyRows}
           />
         </div>

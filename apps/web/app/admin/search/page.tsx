@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type SearchIndexItem = {
   id: string;
@@ -39,6 +40,7 @@ const entityOptions = [
 const quickQueries = ['stress', 'calm', 'linh thú', 'podcast', 'thở', 'onboarding'];
 
 export default function AdminSearchPage() {
+  const { t } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [query, setQuery] = useState('');
   const [entityType, setEntityType] = useState('');
@@ -116,7 +118,7 @@ export default function AdminSearchPage() {
   }
 
   return (
-    <DashboardShell admin eyebrow="Search index" title="Admin search">
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.search.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard icon={Search} label="Kết quả" value={total} />
         <MetricCard icon={Database} label="Index source" tone="mint" value="SearchIndex" />

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type AdminLog = {
   id: string;
@@ -28,6 +29,7 @@ type PageResponse<T> = {
 };
 
 export default function AdminLogsPage() {
+  const { t } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [logs, setLogs] = useState<AdminLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -69,7 +71,7 @@ export default function AdminLogsPage() {
   }, [loadLogs]);
 
   return (
-    <DashboardShell admin eyebrow="Audit trail" title="Admin logs">
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.logs.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <MetricCard icon={FileClock} label="Tổng log khớp filter" value={total} />
         <MetricCard

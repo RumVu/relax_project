@@ -47,6 +47,7 @@ import {
 } from '@/lib/zodiac';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type ThemeMode = 'SYSTEM' | 'LIGHT' | 'DARK';
 
@@ -148,6 +149,7 @@ type ThemeCard = {
 };
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -374,7 +376,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      <DashboardShell eyebrow="Personal controls" title="Setup">
+      <DashboardShell eyebrow={t('settings.eyebrow')} title={t('settings.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={UserRound}

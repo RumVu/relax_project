@@ -1,12 +1,16 @@
+'use client';
+
 import { AdminCatalogPage } from '@/components/dashboard/admin-catalog-page';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 export default function AdminCompanionAssetsPage() {
+  const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Nạp và chỉnh linh thú: preview, sprite sheet, animation, bảng màu, mặc định và publish."
+      copy="Tải lên và chỉnh sửa người bạn đồng hành — ảnh xem trước, sprite sheet, hoạt hình, bảng màu, mặc định và trạng thái xuất bản."
       endpoint="/companion-assets"
       kind="companion-assets"
-      title="Companion Assets"
+      title={t('admin.companionAssets.title')}
     />
   );
 }

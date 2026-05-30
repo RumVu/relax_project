@@ -1,9 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import { Home, SearchX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 export default function NotFound() {
+  const { t } = useTranslation();
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
       <Card className="max-w-xl">
@@ -14,15 +18,15 @@ export default function NotFound() {
           404
         </p>
         <h1 className="mt-3 text-3xl font-extrabold text-[var(--app-text)]">
-          Route này đi lạc mất rồi.
+          {t('page.notFound.title')}
         </h1>
         <p className="mt-3 text-sm font-semibold text-[var(--app-muted)]">
-          Đường dẫn không tồn tại hoặc đã được chuyển sang khu vực khác.
+          {t('page.notFound.description')}
         </p>
         <Link href="/dashboard">
           <Button className="mt-6">
             <Home className="h-4 w-4" />
-            Về dashboard
+            {t('page.error.home')}
           </Button>
         </Link>
       </Card>

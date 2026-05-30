@@ -29,9 +29,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const overviewFilters = useDashboardFilters('/analytics/me/overview', 'overview');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const data = useUserDashboardData({
@@ -43,45 +45,47 @@ export default function DashboardPage() {
   });
   const summary = data.overview.summaryCards;
   const displayName = data.settings.profile.displayName;
-  const title = displayName ? `Dashboard thư giãn của ${displayName}` : 'Dashboard thư giãn';
+  const title = displayName
+    ? t('dashboard.titleWithName', { name: displayName })
+    : t('dashboard.title');
 
   return (
-    <DashboardShell eyebrow="Trang tổng quan" title={title}>
-      <DashboardFilterBar {...overviewFilters} title="Bộ lọc tổng quan" />
+    <DashboardShell eyebrow={t('dashboard.eyebrow')} title={title}>
+      <DashboardFilterBar {...overviewFilters} title={t('dashboard.filters.title')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <MetricCard
           icon={Trophy}
-          label="Streak hiện tại"
-          note="ngày liên tiếp"
+          label={t('dashboard.metric.currentStreak')}
+          note={t('dashboard.metric.currentStreak.note')}
           tone="sun"
           value={summary.currentStreak}
         />
         <MetricCard
           icon={Clock3}
-          label="Tổng thời gian thư giãn"
-          note="duration"
+          label={t('dashboard.metric.totalRelax')}
+          note={t('dashboard.metric.totalRelax.note')}
           tone="lilac"
           value={summary.totalRelaxTime}
         />
         <MetricCard
           icon={BookOpenText}
-          label="Tổng nhật ký"
-          note="entry count"
+          label={t('dashboard.metric.totalJournals')}
+          note={t('dashboard.metric.totalJournals.note')}
           tone="mint"
           value={summary.totalJournals}
         />
         <MetricCard
           icon={Sparkles}
-          label="Độ thân thiết pet"
-          note="0-100"
+          label={t('dashboard.metric.companionAffection')}
+          note={t('dashboard.metric.companionAffection.note')}
           tone="violet"
           value={`${summary.companionAffection}%`}
         />
         <MetricCard
           icon={HeartPulse}
-          label="Giảm stress"
-          note="so với tuần trước"
+          label={t('dashboard.metric.stressReduction')}
+          note={t('dashboard.metric.stressReduction.note')}
           tone="coral"
           value={`${summary.stressReduction}%`}
         />
@@ -92,23 +96,27 @@ export default function DashboardPage() {
           <div className="grid min-h-[420px] gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="flex flex-col justify-between gap-8">
               <div>
-                <Badge className="bg-white/10 text-lilac">Mood now</Badge>
+                <Badge className="bg-white/10 text-lilac">
+                  {t('dashboard.moodNow.badge')}
+                </Badge>
                 <p className="mt-6 max-w-xl text-3xl font-extrabold leading-tight md:text-4xl">
                   {data.overview.mood.prompt}
                 </p>
                 <p className="mt-4 text-sm font-semibold text-mist/70">
-                  Current mood: {data.overview.mood.currentMood} • Average
-                  intensity {data.overview.mood.summary.averageIntensity}/100
+                  {t('dashboard.moodNow.current', {
+                    mood: data.overview.mood.currentMood,
+                    intensity: data.overview.mood.summary.averageIntensity,
+                  })}
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button onClick={() => router.push('/dashboard/mood')}>
                   <HeartPulse className="h-4 w-4" />
-                  Check-in mới
+                  {t('dashboard.moodNow.checkin')}
                 </Button>
                 <Button onClick={() => router.push('/dashboard/breaks')} variant="secondary">
                   <Music2 className="h-4 w-4" />
-                  Mở relax queue
+                  {t('dashboard.moodNow.openRelax')}
                 </Button>
               </div>
             </div>
@@ -135,8 +143,8 @@ export default function DashboardPage() {
         <MoodAreaDashboardChart data={data.timeline} />
         <Card>
           <SectionTitle
-            title="Theo dõi cảm xúc"
-            copy="Tỉ trọng các cảm xúc đang xuất hiện trong giai đoạn anh đang xem."
+            title={t('dashboard.section.moodTracking')}
+            copy={t('dashboard.section.moodTracking.copy')}
             action={<BarChart3 className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5">
@@ -153,10 +161,18 @@ export default function DashboardPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
         <WeatherCard weather={data.overview.weather} />
         <Card>
-          <SectionTitle title="Khoảnh khắc thư giãn gần đây" copy="Những phiên thư giãn mới nhất được ghi nhận từ API." />
+          <SectionTitle
+            title={t('dashboard.section.recentMoments')}
+            copy={t('dashboard.section.recentMoments.copy')}
+          />
           <div className="mt-5">
             <DataTable
-              columns={['Hoạt động', 'Thời gian', 'Duration', 'Relief']}
+              columns={[
+                t('dashboard.table.activity'),
+                t('dashboard.table.time'),
+                t('dashboard.table.duration'),
+                t('dashboard.table.relief'),
+              ]}
               rows={data.overview.relax.recentMoments.map((moment) => [
                 moment.title,
                 moment.time,

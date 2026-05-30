@@ -33,6 +33,7 @@ import {
   getStoredAccessToken,
 } from '@/lib/api';
 import { useAdminDashboardData } from '@/lib/live-dashboard';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const metricIcons = [Activity, Users, Users, CreditCard, Activity, Bell];
 const catalogLinks = [
@@ -46,13 +47,14 @@ const catalogLinks = [
 ];
 
 export default function AdminPage() {
+  const { t } = useTranslation();
   const adminFilters = useDashboardFilters('/admin/analytics/overview', 'overview');
   const data = useAdminDashboardData({
     overviewQuery: adminFilters.query,
   });
 
   return (
-    <DashboardShell admin eyebrow="Operations" title="Admin dashboard">
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.dashboard.title')}>
       <DashboardFilterBar {...adminFilters} title="Bộ lọc admin aggregate" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
