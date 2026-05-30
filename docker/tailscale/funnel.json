@@ -1,0 +1,20 @@
+{
+  "_comment": "Tailscale Serve + Funnel config. Reverse-proxies all incoming HTTPS on port 443 → backend container :6823. ${TS_CERT_DOMAIN} resolves to the actual <hostname>.<tailnet>.ts.net domain at runtime — DO NOT hard-code it. AllowFunnel=true is what makes the URL publicly reachable from the internet (not just the tailnet).",
+  "TCP": {
+    "443": {
+      "HTTPS": true
+    }
+  },
+  "Web": {
+    "${TS_CERT_DOMAIN}:443": {
+      "Handlers": {
+        "/": {
+          "Proxy": "http://backend:6823"
+        }
+      }
+    }
+  },
+  "AllowFunnel": {
+    "${TS_CERT_DOMAIN}:443": true
+  }
+}

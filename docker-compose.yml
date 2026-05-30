@@ -86,6 +86,54 @@ services:
       retries: 3
       start_period: 20s
 
+  # Tailscale Funnel — expose backend ra internet qua URL CỐ ĐỊNH
+  # (`<TS_HOSTNAME>.<tailnet>.ts.net`). Khác Cloudflare quick-tunnel: URL
+  # KHÔNG đổi giữa các restart. Free tier OK cho 1 service.
+  #
+  # Profile riêng `funnel` (không phải `api`) để a vẫn có thể chạy backend
+  # mà KHÔNG mở public — chỉ thêm `--profile funnel` khi cần.
+  #
+  # Setup 1 lần duy nhất:
+  #   1. Tạo Tailscale account: https://login.tailscale.com/start
+  #   2. Admin → DNS → enable "HTTPS Certificates"
+  #   3. Admin → Settings → "Funnel" → add machine to ACL với `funnel` access
+  #   4. Tạo auth key (reusable): admin → Settings → Keys
+  #   5. Set TS_AUTHKEY=tskey-auth-... trong env hoặc .env
+  #   6. `docker compose --profile api --profile funnel up -d`
+  # Lần sau: docker auto-restart container, URL giữ nguyên.
+  tailscale:
+    profiles: ["funnel"]
+    image: tailscale/tailscale:latest
+    container_name: digital-cigarette-tailscale
+    hostname: ${TS_HOSTNAME:-relax-backend}
+    restart: unless-stopped
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY:?TS_AUTHKEY required — tạo ở https://login.tailscale.com/admin/settings/keys}
+      TS_HOSTNAME: ${TS_HOSTNAME:-relax-backend}
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+      TS_EXTRA_ARGS: --accept-routes
+      # Funnel config — ${TS_CERT_DOMAIN} resolves to <hostname>.<tailnet>.ts.net
+      # tại runtime. Image substitute giúp em.
+      TS_SERVE_CONFIG: /config/funnel.json
+    volumes:
+      - tailscale_state:/var/lib/tailscale
+      - ./docker/tailscale/funnel.json:/config/funnel.json:ro
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "tailscale status >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
   # Web container chỉ chạy khi a muốn full-stack local (LAN sharing, dev offline).
   # Luồng production: frontend ở Vercel (https://relax-project-web-dashboard.vercel.app)
   # → bỏ qua service này, chỉ chạy `docker compose --profile api up`.
@@ -111,3 +159,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  # tailscale_state persists the device identity + key so the same machine
+  # rejoins the tailnet with the same URL after every restart. Wipe this
+  # volume → new identity → new URL (rare, only when you want to rotate).
+  tailscale_state:
