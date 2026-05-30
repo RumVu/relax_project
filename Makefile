@@ -57,36 +57,41 @@ share-ip: ## In LAN IP máy đang dùng (cho biết để gửi cho khách)
 # Vercel frontend (production) + backend ở docker + Cloudflare tunnel.
 # Dùng khi a muốn người ngoài internet vô frontend Vercel mà vẫn gọi
 # được backend chạy trên máy a. Không tốn $, URL frontend cố định.
-VERCEL_WEB_URL ?= https://relax-project-web-dashboard.vercel.app
-
 .PHONY: share-vercel
 share-vercel: ## Backend docker + tunnel public; frontend = Vercel
-	@set -e; \
-	export JWT_SECRET="$${JWT_SECRET:-$$(openssl rand -hex 24)}"; \
-	export CORS_ORIGINS="$(VERCEL_WEB_URL),http://localhost:3000,http://localhost:3233"; \
-	echo "→ Start backend (docker) với CORS cho $(VERCEL_WEB_URL)..."; \
-	docker compose --profile api up -d --build; \
-	echo "→ Đợi backend healthy..."; \
-	for i in 1 2 3 4 5 6 7 8 9 10; do \
-	  if curl -sf http://localhost:6823/health >/dev/null 2>&1; then echo "  ✓ backend ready"; break; fi; \
-	  sleep 2; \
-	done; \
-	echo ""; \
-	echo "→ Mở Cloudflare tunnel cho backend..."; \
-	echo "  (URL backend sẽ in ra dưới — copy phần https://*.trycloudflare.com)"; \
-	echo ""; \
-	echo "════════════════════════════════════════════════════════════"; \
-	echo "  Sau khi thấy URL backend:"; \
-	echo "    1. Vercel → Project → Settings → Environment Variables"; \
-	echo "    2. Set NEXT_PUBLIC_API_URL=<URL backend trycloudflare>"; \
-	echo "    3. Redeploy Vercel (Deployments → ⋯ → Redeploy)"; \
-	echo "    4. Frontend: $(VERCEL_WEB_URL)"; \
-	echo ""; \
-	echo "  Ctrl+C để stop tunnel. Backend docker vẫn chạy — dùng"; \
-	echo "  \`make down\` để stop hẳn."; \
-	echo "════════════════════════════════════════════════════════════"; \
-	echo ""; \
-	scripts/tunnel.sh --backend
+	scripts/share-vercel.sh
+
+.PHONY: doctor
+doctor: ## Kiểm tra prerequisites (docker, cloudflared, ports)
+	@echo "→ Docker:"; \
+	if command -v docker >/dev/null 2>&1; then \
+	  echo "  ✓ $$(docker --version)"; \
+	  if docker info >/dev/null 2>&1; then echo "  ✓ daemon up"; \
+	  else echo "  ✗ daemon DOWN — open -a Docker, đợi 30s"; fi; \
+	else echo "  ✗ chưa cài"; fi; \
+	echo "→ cloudflared:"; \
+	if command -v cloudflared >/dev/null 2>&1; then \
+	  echo "  ✓ $$(cloudflared --version 2>&1 | head -1)"; \
+	else echo "  ✗ chưa cài (brew install cloudflared)"; fi; \
+	echo "→ Port 6823 (backend):"; \
+	if lsof -nP -iTCP:6823 -sTCP:LISTEN >/dev/null 2>&1; then \
+	  echo "  ⚠ đang bị chiếm — chạy 'lsof -i :6823' để xem"; \
+	else echo "  ✓ trống"; fi; \
+	echo "→ JWT_SECRET:"; \
+	if [ -n "$$JWT_SECRET" ]; then echo "  ✓ set ($${#JWT_SECRET} chars)"; \
+	else echo "  ℹ chưa set — share-vercel sẽ tự tạo"; fi
+
+.PHONY: tunnel-url
+tunnel-url: ## In URL tunnel hiện tại (từ .tunnel-url) — copy vào Vercel
+	@if [ -f .tunnel-url ]; then \
+	  echo "$$(cat .tunnel-url)"; \
+	else \
+	  echo "✗ Chưa có tunnel — chạy 'make share-vercel' trước"; exit 1; \
+	fi
+
+.PHONY: backend-stop
+backend-stop: ## Stop backend docker stack (giữ data)
+	docker compose --profile api down
 
 .PHONY: logs
 logs: ## Tail logs for all running compose services
