@@ -74,9 +74,11 @@ doctor: ## Kiểm tra prerequisites (docker, cloudflared, ports)
 	  echo "  ✓ $$(cloudflared --version 2>&1 | head -1)"; \
 	else echo "  ✗ chưa cài (brew install cloudflared)"; fi; \
 	echo "→ Port 6823 (backend):"; \
-	if lsof -nP -iTCP:6823 -sTCP:LISTEN >/dev/null 2>&1; then \
-	  echo "  ⚠ đang bị chiếm — chạy 'lsof -i :6823' để xem"; \
-	else echo "  ✓ trống"; fi; \
+	if curl -sf http://localhost:6823/health >/dev/null 2>&1; then \
+	  echo "  ✓ backend đã chạy + healthy"; \
+	elif lsof -nP -iTCP:6823 -sTCP:LISTEN >/dev/null 2>&1; then \
+	  echo "  ⚠ port chiếm bởi process KHÁC — chạy 'lsof -i :6823' để xem"; \
+	else echo "  ✓ trống (share-vercel sẽ boot backend)"; fi; \
 	echo "→ JWT_SECRET:"; \
 	if [ -n "$$JWT_SECRET" ]; then echo "  ✓ set ($${#JWT_SECRET} chars)"; \
 	else echo "  ℹ chưa set — share-vercel sẽ tự tạo"; fi
