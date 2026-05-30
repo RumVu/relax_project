@@ -10,7 +10,11 @@ export default function GlobalError({
   reset: () => void;
 }) {
   return (
-    <html lang="en">
+    // Global error renders OUTSIDE I18nProvider so we can't use the
+    // useTranslation hook. Use Vietnamese as the default copy — covers
+    // the most common audience and matches the rest of the app's
+    // default locale.
+    <html lang="vi">
       <body>
         <main
           style={{
@@ -45,13 +49,13 @@ export default function GlobalError({
                 textTransform: 'uppercase',
               }}
             >
-              Global error
+              Lỗi nghiêm trọng
             </p>
             <h1 style={{ fontSize: 36, lineHeight: 1.05, margin: '12px 0' }}>
-              App bị ngắt ở tầng layout.
+              Ứng dụng bị ngắt ở tầng bố cục.
             </h1>
             <p style={{ color: '#aab4c7', fontWeight: 600 }}>
-              {error.message || 'Một lỗi không mong muốn vừa xảy ra.'}
+              {error.message || 'Một lỗi không mong muốn vừa xảy ra. Vui lòng thử lại.'}
             </p>
             {error.digest ? (
               <p style={{ color: '#dcd6ff', fontFamily: 'monospace' }}>

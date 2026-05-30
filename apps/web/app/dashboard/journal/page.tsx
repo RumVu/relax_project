@@ -24,6 +24,7 @@ import { apiFetch } from '@/lib/api';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const moodTypeOptions = [
   'HAPPY',
@@ -39,6 +40,7 @@ const moodTypeOptions = [
 ];
 
 export default function JournalPage() {
+  const { t } = useTranslation();
   const journalFilters = useDashboardFilters('/journals/me', 'journal');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
@@ -87,7 +89,7 @@ export default function JournalPage() {
   }, [journals.recent]);
 
   return (
-    <DashboardShell eyebrow="Reflection" title="Journal space">
+    <DashboardShell eyebrow={t('journal.eyebrow')} title={t('journal.title')}>
       <DashboardFilterBar {...journalFilters} title="Bộ lọc journal" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

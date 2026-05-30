@@ -17,8 +17,10 @@ import { Card } from '@/components/ui/card';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 export default function AnalyticsPage() {
+  const { t } = useTranslation();
   const analyticsFilters = useDashboardFilters('/mood-checkins/me/analytics', 'analytics');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
@@ -38,7 +40,7 @@ export default function AnalyticsPage() {
   const insights = buildInsights(data);
 
   return (
-    <DashboardShell eyebrow="Progress signals" title="Analytics">
+    <DashboardShell eyebrow={t('analytics.eyebrow')} title={t('analytics.title')}>
       <DashboardFilterBar {...analyticsFilters} title="Bộ lọc biểu đồ mood" />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

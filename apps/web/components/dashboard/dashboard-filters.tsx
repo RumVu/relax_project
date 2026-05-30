@@ -6,6 +6,7 @@ import { clampLimit, clampSkip, withQuery } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { SectionTitle } from './dashboard-ui';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type FilterMode = 'overview' | 'mood' | 'analytics' | 'journal' | 'relax' | 'notification';
 
@@ -129,8 +130,10 @@ export function DashboardFilterBar({
   mode,
   setField,
   state,
-  title = 'Bộ lọc API',
+  title,
 }: ReturnType<typeof useDashboardFilters> & { title?: string }) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('dashboard.filters.title');
   const showPeriod = ['overview', 'analytics', 'relax'].includes(mode);
   const showDateRange = mode !== 'overview';
   const showTimezone = ['overview', 'analytics', 'relax'].includes(mode);
@@ -139,18 +142,18 @@ export function DashboardFilterBar({
   return (
     <Card className="border-violet/25 bg-white/80">
       <SectionTitle
-        title={title}
-        copy="Lọc dữ liệu theo thời gian và ngữ cảnh để các khối bên dưới cập nhật đúng nội dung."
+        title={resolvedTitle}
+        copy={t('filter.area')}
         action={
           <Badge className="bg-violet/10 text-plum">
             <SlidersHorizontal className="mr-2 h-3.5 w-3.5" />
-            giới hạn tối đa 100
+            {t('filter.maxItems', { count: 100 })}
           </Badge>
         }
       />
       <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {showPeriod ? (
-          <Field label="Period" icon={Clock3}>
+          <Field label={t('filter.period.label')} icon={Clock3}>
             <select
               className={inputClass}
               onChange={(event) => setField('period', event.target.value)}
@@ -166,7 +169,7 @@ export function DashboardFilterBar({
         ) : null}
 
         {showTimezone ? (
-          <Field label="Timezone" icon={CalendarDays}>
+          <Field label={t('filter.timezone.label')} icon={CalendarDays}>
             <select
               className={inputClass}
               onChange={(event) => setField('timezone', event.target.value)}
@@ -183,7 +186,7 @@ export function DashboardFilterBar({
 
         {showDateRange ? (
           <>
-            <Field label="From" icon={CalendarDays}>
+            <Field label={t('filter.fromDate')} icon={CalendarDays}>
               <input
                 className={inputClass}
                 onChange={(event) => setField('from', event.target.value)}
@@ -191,7 +194,7 @@ export function DashboardFilterBar({
                 value={state.from}
               />
             </Field>
-            <Field label="To" icon={CalendarDays}>
+            <Field label={t('filter.toDate')} icon={CalendarDays}>
               <input
                 className={inputClass}
                 onChange={(event) => setField('to', event.target.value)}
@@ -203,20 +206,20 @@ export function DashboardFilterBar({
         ) : null}
 
         {mode === 'analytics' ? (
-          <Field label="Compare" icon={Filter}>
+          <Field label={t('filter.compare')} icon={Filter}>
             <select
               className={inputClass}
               onChange={(event) => setField('compare', event.target.value === 'true')}
               value={String(state.compare)}
             >
-              <option value="true">on</option>
-              <option value="false">off</option>
+              <option value="true">{t('common.confirm')}</option>
+              <option value="false">{t('common.cancel')}</option>
             </select>
           </Field>
         ) : null}
 
         {mode === 'mood' || mode === 'journal' ? (
-          <Field label="Mood" icon={Filter}>
+          <Field label={t('nav.mood')} icon={Filter}>
             <select
               className={inputClass}
               onChange={(event) => setField('mood', event.target.value)}
@@ -256,7 +259,7 @@ export function DashboardFilterBar({
         ) : null}
 
         {mode === 'relax' ? (
-          <Field label="Activity" icon={Filter}>
+          <Field label={t('dashboard.table.activity')} icon={Filter}>
             <select
               className={inputClass}
               onChange={(event) => setField('activityType', event.target.value)}
@@ -325,9 +328,7 @@ export function DashboardFilterBar({
         ) : null}
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-2">
-        <Badge className="bg-sun/25 text-ink">
-          Mood score: 100 = căng, 0 = thư giãn
-        </Badge>
+        <Badge className="bg-sun/25 text-ink">{t('filter.moodScoreHint')}</Badge>
       </div>
     </Card>
   );

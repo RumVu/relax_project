@@ -18,6 +18,7 @@ import { apiFetch } from '@/lib/api';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const activityIcons = {
   MUSIC: Headphones,
@@ -30,6 +31,7 @@ const activityIcons = {
 
 export default function BreaksPage() {
   const router = useRouter();
+  const { t } = useTranslation();
   const relaxFilters = useDashboardFilters('/relax-activities/me/stats', 'relax');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
@@ -57,7 +59,7 @@ export default function BreaksPage() {
   const ActiveIcon = activityIcons[active?.type as keyof typeof activityIcons] ?? Play;
 
   return (
-    <DashboardShell eyebrow="Break orchestration" title="Khu thư giãn">
+    <DashboardShell eyebrow={t('breaks.eyebrow')} title={t('breaks.title')}>
       <ActionModal
         description={
           sessionModal.phase === 'started'

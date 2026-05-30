@@ -32,6 +32,7 @@ import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { isSecureContext, requestGeolocation } from '@/lib/permissions';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type WeatherCurrent = {
   configured?: boolean;
@@ -86,6 +87,7 @@ type WeatherForecast = {
 };
 
 export default function WeatherPage() {
+  const { t } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [current, setCurrent] = useState<WeatherCurrent | null>(null);
   const [forecast, setForecast] = useState<WeatherForecast | null>(null);
@@ -180,7 +182,7 @@ export default function WeatherPage() {
   useEffect(() => setSecure(isSecureContext()), []);
 
   return (
-    <DashboardShell eyebrow="Atmosphere" title="Thời tiết">
+    <DashboardShell eyebrow={t('weather.eyebrow')} title={t('weather.title')}>
       {!secure ? (
         <Card className="border-coral/40 bg-coral/10">
           <p className="text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
