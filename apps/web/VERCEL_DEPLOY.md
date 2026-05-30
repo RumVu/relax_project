@@ -26,8 +26,8 @@ optionally **Preview**):
 
 | Key | Value | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_API_URL` | `https://api.yourdomain.com` | Public URL of the backend. Must include `https://` and **no** trailing slash. Required. |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | `xxxxxxx.apps.googleusercontent.com` | Optional. Enables the "Sign in with Google" button. Same value the backend uses for `GOOGLE_CLIENT_ID`. |
+| `NEXT_PUBLIC_API_URL` | `https://<random>.trycloudflare.com` | Public URL của backend. Lấy từ `make share-vercel` (in ra URL Cloudflare tunnel). Phải có `https://`, **không** trailing slash. Required. |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | `627379199532-…apps.googleusercontent.com` | Bật nút "Sign in with Google". Trùng với `GOOGLE_CLIENT_ID` ở backend. Client ID là PUBLIC nên commit/share thoải mái. |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | Optional. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Optional. |
 
