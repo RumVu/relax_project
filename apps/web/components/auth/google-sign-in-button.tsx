@@ -9,6 +9,7 @@ import {
 } from '@/lib/api';
 import { authRoutes } from '@/lib/auth';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
@@ -60,6 +61,7 @@ export function GoogleSignInButton({
 }) {
   const router = useRouter();
   const pushToast = useUiStore((state) => state.pushToast);
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
@@ -135,7 +137,7 @@ export function GoogleSignInButton({
         persistAuthSession(auth);
         pushToast({
           tone: 'success',
-          title: 'Đã đăng nhập bằng Google',
+          title: t('auth.google.success'),
           message: auth.user.email,
         });
         router.push(
@@ -146,10 +148,10 @@ export function GoogleSignInButton({
         const message =
           error && typeof error === 'object' && 'message' in error
             ? String((error as { message?: string }).message)
-            : 'Backend không nhận Google ID token.';
+            : t('auth.google.serverDenied');
         pushToast({
           tone: 'error',
-          title: 'Đăng nhập Google thất bại',
+          title: t('auth.google.failed'),
           message,
         });
       } finally {
@@ -160,13 +162,12 @@ export function GoogleSignInButton({
     return () => {
       cancelled = true;
     };
-  }, [clientId, mode, pushToast, router]);
+  }, [clientId, mode, pushToast, router, t]);
 
   if (!clientId) {
     return (
       <div className="rounded-2xl border border-dashed border-[var(--field-border)] bg-[var(--panel-bg)] px-4 py-3 text-xs font-semibold text-[var(--app-muted)]">
-        Đăng nhập Google chưa bật. Set <code>NEXT_PUBLIC_GOOGLE_CLIENT_ID</code>
-        {' '}rồi rebuild web.
+        {t('auth.google.notConfigured', { key: 'NEXT_PUBLIC_GOOGLE_CLIENT_ID' })}
       </div>
     );
   }
@@ -183,7 +184,7 @@ export function GoogleSignInButton({
       />
       {busy ? (
         <p className="text-center text-xs font-semibold text-[var(--app-muted)]">
-          Đang đăng nhập…
+          {t('auth.signingIn')}
         </p>
       ) : null}
     </div>

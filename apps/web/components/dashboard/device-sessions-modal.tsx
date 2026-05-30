@@ -32,6 +32,15 @@ import {
 import { useUiStore } from '@/stores/use-ui-store';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
+import type { TranslationKey } from '@/lib/i18n/dictionaries';
+
+const DEVICE_TYPE_KEY: Record<ParsedUserAgent['deviceType'], TranslationKey> = {
+  Desktop: 'sessions.deviceType.desktop',
+  Mobile: 'sessions.deviceType.mobile',
+  Tablet: 'sessions.deviceType.tablet',
+  Khác: 'sessions.deviceType.other',
+};
 
 interface SessionRow {
   id: string;
@@ -78,11 +87,11 @@ function detectCurrentDevice(): CurrentDevice {
   return { parsed, loginTime: new Date(), clientHints };
 }
 
-function formatVnDateTime(value: string | Date) {
+function formatDateTime(value: string | Date, locale: string) {
   try {
     const date = typeof value === 'string' ? new Date(value) : value;
     if (Number.isNaN(date.getTime())) return String(value);
-    return date.toLocaleString('vi-VN', {
+    return date.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -102,6 +111,7 @@ export function DeviceSessionsModal({
   onClose: () => void;
 }) {
   const pushToast = useUiStore((state) => state.pushToast);
+  const { t, locale } = useTranslation();
   const [current, setCurrent] = useState<CurrentDevice | null>(null);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [loading, setLoading] = useState(false);
@@ -115,12 +125,12 @@ export function DeviceSessionsModal({
       const rows = await apiFetch<SessionRow[]>('/sessions/me');
       setSessions(Array.isArray(rows) ? rows : []);
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Không tải được phiên đăng nhập.');
+      setError(cause instanceof Error ? cause.message : t('sessions.loadFailed'));
       setSessions([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!open) return;
@@ -147,9 +157,9 @@ export function DeviceSessionsModal({
   const copyToClipboard = async (value: string, label: string) => {
     try {
       await navigator.clipboard.writeText(value);
-      pushToast({ tone: 'success', title: `Đã copy ${label}` });
+      pushToast({ tone: 'success', title: t('common.copied', { label }) });
     } catch {
-      pushToast({ tone: 'error', title: 'Trình duyệt từ chối clipboard' });
+      pushToast({ tone: 'error', title: t('sessions.clipboard.denied') });
     }
   };
 
@@ -164,13 +174,13 @@ export function DeviceSessionsModal({
       >
         <header className="flex items-start justify-between gap-3 border-b border-cloud px-6 py-4">
           <div>
-            <h3 className="text-xl font-extrabold text-ink">Lịch sử đăng nhập</h3>
-            <p className="mt-1 text-sm text-slate">
-              Thiết bị hiện tại + các phiên đã đăng nhập vào tài khoản của a.
-            </p>
+            <h3 className="text-xl font-extrabold text-ink">
+              {t('sessions.title')}
+            </h3>
+            <p className="mt-1 text-sm text-slate">{t('sessions.description')}</p>
           </div>
           <button
-            aria-label="Đóng"
+            aria-label={t('common.close')}
             className="rounded-lg p-1 text-slate transition hover:bg-cloud hover:text-ink"
             onClick={onClose}
             type="button"
@@ -184,7 +194,7 @@ export function DeviceSessionsModal({
           {current ? (
             <section>
               <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
-                Thiết bị hiện tại
+                {t('sessions.current.heading')}
               </h4>
               <div className="mt-2 rounded-xl border border-mint/40 bg-mint/5 p-4">
                 <div className="flex items-start gap-3">
@@ -199,14 +209,19 @@ export function DeviceSessionsModal({
                       {formatUserAgentSummary(current.parsed)}
                     </p>
                     <p className="mt-0.5 text-xs font-semibold text-slate">
-                      Đăng nhập lúc {formatVnDateTime(current.loginTime)}
+                      {t('sessions.loginAt', {
+                        when: formatDateTime(current.loginTime, locale),
+                      })}
                     </p>
                   </div>
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
-                  <Field label="Thiết bị" value={current.parsed.deviceType} />
                   <Field
-                    label="OS"
+                    label={t('sessions.field.device')}
+                    value={t(DEVICE_TYPE_KEY[current.parsed.deviceType])}
+                  />
+                  <Field
+                    label={t('sessions.field.os')}
                     value={
                       current.parsed.osVersion
                         ? `${current.parsed.os} ${current.parsed.osVersion}`
@@ -214,7 +229,7 @@ export function DeviceSessionsModal({
                     }
                   />
                   <Field
-                    label="Browser"
+                    label={t('sessions.field.browser')}
                     value={
                       current.parsed.browserVersion
                         ? `${current.parsed.browser} ${current.parsed.browserVersion}`
@@ -222,18 +237,22 @@ export function DeviceSessionsModal({
                     }
                   />
                   <Field
-                    label="Client Hints"
-                    value={current.clientHints ?? 'Không hỗ trợ'}
+                    label={t('sessions.field.clientHints')}
+                    value={current.clientHints ?? t('common.notSupported')}
                     fullSpan
                   />
                 </dl>
                 <div className="mt-3 flex items-start gap-2 rounded-lg border border-cloud bg-white p-2 text-[11px] text-slate">
-                  <div className="flex-1 break-all font-mono">{current.parsed.raw || '—'}</div>
+                  <div className="flex-1 break-all font-mono">
+                    {current.parsed.raw || '—'}
+                  </div>
                   {current.parsed.raw ? (
                     <button
-                      aria-label="Copy User-Agent"
+                      aria-label={t('sessions.copyUserAgent')}
                       className="shrink-0 rounded-md p-1.5 text-slate transition hover:bg-cloud hover:text-ink"
-                      onClick={() => copyToClipboard(current.parsed.raw, 'User-Agent')}
+                      onClick={() =>
+                        copyToClipboard(current.parsed.raw, t('sessions.copy.label'))
+                      }
                       type="button"
                     >
                       <Copy className="h-3.5 w-3.5" />
@@ -248,7 +267,7 @@ export function DeviceSessionsModal({
           <section>
             <div className="flex items-center justify-between">
               <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
-                Tất cả phiên đăng nhập
+                {t('sessions.list.heading')}
               </h4>
               <Button
                 className="h-8 px-3 text-xs"
@@ -260,7 +279,7 @@ export function DeviceSessionsModal({
                 ) : (
                   <Activity className="h-3.5 w-3.5" />
                 )}
-                Làm mới
+                {t('common.refresh')}
               </Button>
             </div>
 
@@ -273,11 +292,11 @@ export function DeviceSessionsModal({
             <div className="mt-3 space-y-2">
               {loading && sessions.length === 0 ? (
                 <p className="rounded-lg border border-cloud bg-cloud/40 p-4 text-center text-sm text-slate">
-                  Đang tải…
+                  {t('sessions.loading')}
                 </p>
               ) : sessions.length === 0 && !error ? (
                 <p className="rounded-lg border border-cloud bg-cloud/40 p-4 text-center text-sm text-slate">
-                  Chưa có phiên nào.
+                  {t('sessions.list.empty')}
                 </p>
               ) : (
                 sessions.map((session) => {
@@ -310,23 +329,26 @@ export function DeviceSessionsModal({
                             </p>
                             {isCurrent ? (
                               <span className="rounded-full bg-mint px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-night">
-                                Phiên này
+                                {t('sessions.currentBadge')}
                               </span>
                             ) : null}
                           </div>
                           <p className="mt-0.5 text-xs font-semibold text-slate">
-                            {parsed.deviceType} • {parsed.os}
+                            {t(DEVICE_TYPE_KEY[parsed.deviceType])} • {parsed.os}
                             {parsed.osVersion ? ` ${parsed.osVersion}` : ''}
                           </p>
                           <dl className="mt-2 grid grid-cols-2 gap-2 text-[11px] sm:grid-cols-3">
-                            <Field label="IP" value={session.ipAddress || '—'} />
                             <Field
-                              label="Đăng nhập"
-                              value={formatVnDateTime(session.createdAt)}
+                              label={t('sessions.field.ip')}
+                              value={session.ipAddress || '—'}
                             />
                             <Field
-                              label="Hết hạn"
-                              value={formatVnDateTime(session.expiresAt)}
+                              label={t('sessions.field.loginTime')}
+                              value={formatDateTime(session.createdAt, locale)}
+                            />
+                            <Field
+                              label={t('sessions.field.expires')}
+                              value={formatDateTime(session.expiresAt, locale)}
                             />
                           </dl>
                           {session.userAgent ? (
@@ -335,10 +357,13 @@ export function DeviceSessionsModal({
                                 {session.userAgent}
                               </div>
                               <button
-                                aria-label="Copy User-Agent"
+                                aria-label={t('sessions.copyUserAgent')}
                                 className="shrink-0 rounded-md p-1 text-slate transition hover:bg-white hover:text-ink"
                                 onClick={() =>
-                                  copyToClipboard(session.userAgent ?? '', 'User-Agent')
+                                  copyToClipboard(
+                                    session.userAgent ?? '',
+                                    t('sessions.copy.label'),
+                                  )
                                 }
                                 type="button"
                               >
@@ -358,7 +383,7 @@ export function DeviceSessionsModal({
 
         <footer className="flex justify-end gap-2 border-t border-cloud px-6 py-3">
           <Button onClick={onClose} variant="secondary">
-            Đóng
+            {t('common.close')}
           </Button>
         </footer>
       </div>

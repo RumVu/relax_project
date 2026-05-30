@@ -13,11 +13,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   ChevronDown,
+  Globe,
   LogOut,
   ShieldCheck,
   UserCog,
   History,
   User as UserIcon,
+  Check,
 } from 'lucide-react';
 import {
   apiFetch,
@@ -27,6 +29,13 @@ import {
 } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
+import {
+  LOCALES,
+  LOCALE_LABELS,
+  LOCALE_SHORT,
+  type Locale,
+} from '@/lib/i18n/dictionaries';
 import { DeviceSessionsModal } from './device-sessions-modal';
 
 interface MeResponse {
@@ -50,9 +59,11 @@ function initialsOf(name?: string | null, email?: string | null) {
 export function AccountMenu() {
   const router = useRouter();
   const pushToast = useUiStore((state) => state.pushToast);
+  const { t, locale, setLocale } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [sessionsOpen, setSessionsOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
   const role = getStoredRole();
@@ -99,13 +110,14 @@ export function AccountMenu() {
       }
     } finally {
       clearAuthSession();
-      pushToast({ tone: 'success', title: 'Đã đăng xuất' });
+      pushToast({ tone: 'success', title: t('account.loggedOut') });
       router.push('/auth/login');
       router.refresh();
     }
-  }, [pushToast, router]);
+  }, [pushToast, router, t]);
 
-  const displayName = me?.profile?.displayName || me?.name || me?.email || 'Bạn';
+  const displayName =
+    me?.profile?.displayName || me?.name || me?.email || t('account.you');
   const email = me?.email ?? '';
   const isAdmin = (role ?? me?.role) === 'ADMIN';
 
@@ -171,12 +183,12 @@ export function AccountMenu() {
                 {isAdmin ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-violet/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet">
                     <ShieldCheck className="h-3 w-3" />
-                    Admin
+                    {t('account.role.admin')}
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1 rounded-full bg-cloud px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-slate">
                     <UserIcon className="h-3 w-3" />
-                    User
+                    {t('account.role.user')}
                   </span>
                 )}
               </div>
@@ -184,8 +196,8 @@ export function AccountMenu() {
             <div className="py-1">
               <MenuItem
                 icon={UserCog}
-                label="Quản lý profile"
-                hint="Tên, avatar, mật khẩu"
+                label={t('account.profile')}
+                hint={t('account.profile.hint')}
                 onClick={() => {
                   setOpen(false);
                   router.push('/dashboard/settings');
@@ -193,8 +205,8 @@ export function AccountMenu() {
               />
               <MenuItem
                 icon={History}
-                label="Lịch sử đăng nhập"
-                hint="Thiết bị + IP + browser"
+                label={t('account.sessions')}
+                hint={t('account.sessions.hint')}
                 onClick={() => {
                   setOpen(false);
                   setSessionsOpen(true);
@@ -203,8 +215,8 @@ export function AccountMenu() {
               {isAdmin ? (
                 <MenuItem
                   icon={ShieldCheck}
-                  label="Vào Admin Console"
-                  hint="Quản trị hệ thống"
+                  label={t('account.adminConsole')}
+                  hint={t('account.adminConsole.hint')}
                   onClick={() => {
                     setOpen(false);
                     router.push('/admin');
@@ -212,11 +224,55 @@ export function AccountMenu() {
                 />
               ) : null}
               <div className="my-1 h-px bg-cloud" />
+              {/* Language section — inline expander, no nested popups. */}
+              <button
+                aria-expanded={languageOpen}
+                className="flex w-full items-start gap-3 px-4 py-2.5 text-left text-sm text-ink transition hover:bg-cloud/60"
+                onClick={() => setLanguageOpen((current) => !current)}
+                type="button"
+              >
+                <Globe className="mt-0.5 h-4 w-4 shrink-0 text-violet" />
+                <span className="flex flex-1 flex-col leading-tight">
+                  <span className="text-sm font-semibold">
+                    {t('account.language')}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate">
+                    {LOCALE_LABELS[locale]}
+                  </span>
+                </span>
+                <span className="rounded-md border border-lilac bg-cloud/60 px-1.5 py-0.5 text-[10px] font-extrabold text-violet">
+                  {LOCALE_SHORT[locale]}
+                </span>
+              </button>
+              {languageOpen ? (
+                <div className="bg-cloud/30 px-2 py-1.5">
+                  {LOCALES.map((option) => (
+                    <button
+                      className={cn(
+                        'flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold transition',
+                        option === locale
+                          ? 'bg-violet/10 text-violet'
+                          : 'text-ink hover:bg-white',
+                      )}
+                      key={option}
+                      onClick={() => {
+                        setLocale(option as Locale);
+                        setLanguageOpen(false);
+                      }}
+                      type="button"
+                    >
+                      <span>{LOCALE_LABELS[option as Locale]}</span>
+                      {option === locale ? <Check className="h-4 w-4" /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              <div className="my-1 h-px bg-cloud" />
               <MenuItem
                 danger
                 icon={LogOut}
-                label={loggingOut ? 'Đang đăng xuất…' : 'Đăng xuất'}
-                hint="Kết thúc phiên này"
+                label={loggingOut ? t('account.loggingOut') : t('account.logout')}
+                hint={t('account.logout.hint')}
                 onClick={() => {
                   if (!loggingOut) void handleLogout();
                 }}
