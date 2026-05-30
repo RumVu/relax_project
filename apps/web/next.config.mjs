@@ -64,8 +64,22 @@ const nextConfig = {
             // blocked fetches to `http://192.168.1.x:6823` in the LAN
             // share flow — the catch block then surfaced as a
             // misleading "email or password incorrect" toast.
+            //
+            // Google Identity Services (Sign-In) needs:
+            //   script-src  https://accounts.google.com/gsi/client
+            //   frame-src   https://accounts.google.com  (FedCM/iframe popup)
+            //   connect-src https://accounts.google.com  (token exchange)
+            // Without these the GIS button never renders → login page chỉ
+            // có form email/password.
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' data: blob: https:; connect-src 'self' http: https: ws: wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+              "default-src 'self'; " +
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com; " +
+              "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
+              "img-src 'self' data: blob: https:; " +
+              "media-src 'self' data: blob: https:; " +
+              "connect-src 'self' http: https: ws: wss: https://accounts.google.com; " +
+              "frame-src 'self' https://accounts.google.com; " +
+              "frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
           },
           {
             key: 'Permissions-Policy',
