@@ -100,13 +100,16 @@ backend-stop: ## Stop backend docker stack (giữ data)
 # các restart. Phù hợp để Vercel env trỏ tới 1 lần xài mãi.
 
 .PHONY: funnel
-funnel: ## Backend + Tailscale Funnel (cần TS_AUTHKEY env)
-	@if [ -z "$$TS_AUTHKEY" ]; then \
-	  echo "✗ Cần TS_AUTHKEY trong env."; \
-	  echo "  Setup ở https://login.tailscale.com/admin/settings/keys"; \
-	  echo "  Đầy đủ hướng dẫn: docs/14-tailscale-funnel.md"; \
+funnel: ## Backend + Tailscale Funnel (auto-load apps/backend/.env nếu có)
+	@# Auto-source apps/backend/.env nếu tồn tại — để a không phải export
+	@# TS_AUTHKEY, SUPABASE_*, JWT_SECRET mỗi lần reboot.
+	@set -a; [ -f apps/backend/.env ] && . ./apps/backend/.env; set +a; \
+	if [ -z "$$TS_AUTHKEY" ]; then \
+	  echo "✗ Cần TS_AUTHKEY trong env hoặc apps/backend/.env"; \
+	  echo "  Setup: https://login.tailscale.com/admin/settings/keys"; \
+	  echo "  Doc:   docs/14-tailscale-funnel.md"; \
 	  exit 1; \
-	fi
+	fi; \
 	export JWT_SECRET="$${JWT_SECRET:-$$(openssl rand -hex 32)}"; \
 	docker compose --profile api --profile funnel up -d --build
 
