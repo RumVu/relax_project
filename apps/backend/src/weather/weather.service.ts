@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { normalizeTimezone } from '../common/timezone';
@@ -11,45 +11,31 @@ import {
   WeatherForecastQueryDto,
 } from './dto/current-weather-query.dto';
 
+import {
+  OpenMeteoCurrentPayload,
+  OpenMeteoForecastPayload,
+  fetchCurrentWeather,
+  fetchForecast,
+} from './clients/open-meteo.client';
+import {
+  ReverseGeocodeResult,
+  fetchReverseGeocode,
+} from './clients/reverse-geocode.client';
+import { describeWeather } from './helpers/weather-description';
+import {
+  buildFallbackGreeting,
+  buildGreeting,
+} from './helpers/weather-greeting';
+import {
+  coordinateCachePart,
+  mapCurrentSnapshot,
+  mapDailyForecast,
+} from './helpers/weather-mapper';
+import { assertCoordinatePair } from './helpers/weather-validation';
+
 const CURRENT_WEATHER_CACHE_TTL_SECONDS = 10 * 60;
 const FORECAST_CACHE_TTL_SECONDS = 30 * 60;
 const REVERSE_GEOCODE_CACHE_TTL_SECONDS = 24 * 60 * 60;
-
-interface OpenMeteoCurrentPayload {
-  current?: {
-    temperature_2m?: number;
-    apparent_temperature?: number;
-    relative_humidity_2m?: number;
-    weather_code?: number;
-    is_day?: number;
-    precipitation?: number;
-    wind_speed_10m?: number;
-    wind_direction_10m?: number;
-    time?: string;
-  };
-  current_units?: {
-    temperature_2m?: string;
-    relative_humidity_2m?: string;
-    wind_speed_10m?: string;
-    precipitation?: string;
-  };
-  timezone?: string;
-}
-
-interface OpenMeteoForecastPayload extends OpenMeteoCurrentPayload {
-  daily?: {
-    time?: string[];
-    weather_code?: number[];
-    temperature_2m_max?: number[];
-    temperature_2m_min?: number[];
-    precipitation_probability_max?: number[];
-  };
-  daily_units?: {
-    temperature_2m_max?: string;
-    temperature_2m_min?: string;
-    precipitation_probability_max?: string;
-  };
-}
 
 interface WeatherInput {
   latitude?: number | null;
@@ -60,30 +46,23 @@ interface WeatherInput {
   displayName?: string | null;
 }
 
-interface ReverseGeocodePayload {
-  city?: string;
-  locality?: string;
-  principalSubdivision?: string;
-  countryName?: string;
-  countryCode?: string;
-  latitude?: number;
-  longitude?: number;
-  lookupSource?: string;
+interface ForecastInput extends WeatherInput {
+  forecastDays?: number;
 }
 
-export interface ReverseGeocodeResult {
-  provider: 'bigdatacloud';
-  latitude: number;
-  longitude: number;
-  locationName: string | null;
-  city: string | null;
-  locality: string | null;
-  principalSubdivision: string | null;
-  countryName: string | null;
-  countryCode: string | null;
-  lookupSource: string | null;
-}
-
+/**
+ * WeatherService — orchestrator mỏng.
+ *
+ * Splits:
+ *   - clients/open-meteo.client.ts        Open-Meteo HTTP (timeout, fallback)
+ *   - clients/reverse-geocode.client.ts   BigDataCloud HTTP
+ *   - helpers/weather-description.ts      WMO code → vi label + icon
+ *   - helpers/weather-greeting.ts         display name + weather → hero card
+ *   - helpers/weather-mapper.ts           Open-Meteo payload → API DTO
+ *   - helpers/weather-validation.ts       lat/lng pair guard
+ *
+ * Service giữ: Prisma access, Redis caching, orchestration.
+ */
 @Injectable()
 export class WeatherService {
   constructor(
@@ -91,25 +70,25 @@ export class WeatherService {
     private readonly redisService: RedisService,
   ) {}
 
+  // ============================================================
+  // PUBLIC
+  // ============================================================
+
   async getCurrentForUser(userId: string, query: CurrentWeatherQueryDto) {
     const user = await this.getExistingUserWeatherContext(userId);
-    const preferences = user?.preferences;
-
-    const latitude = query.latitude ?? preferences?.latitude;
-    const longitude = query.longitude ?? preferences?.longitude;
-    const timezone = normalizeTimezone(query.timezone ?? preferences?.timezone);
+    const preferences = user.preferences;
 
     return this.getCurrent({
-      latitude,
-      longitude,
-      timezone,
+      latitude: query.latitude ?? preferences?.latitude,
+      longitude: query.longitude ?? preferences?.longitude,
+      timezone: normalizeTimezone(query.timezone ?? preferences?.timezone),
       locationName: preferences?.locationName,
       weatherEnabled: preferences?.weatherEnabled ?? true,
       displayName: this.resolveDisplayName(user),
     });
   }
 
-  async getCurrentForCoordinates(query: CurrentWeatherQueryDto) {
+  getCurrentForCoordinates(query: CurrentWeatherQueryDto) {
     return this.getCurrent({
       latitude: query.latitude,
       longitude: query.longitude,
@@ -120,16 +99,12 @@ export class WeatherService {
 
   async getForecastForUser(userId: string, query: WeatherForecastQueryDto) {
     const user = await this.getExistingUserWeatherContext(userId);
-    const preferences = user?.preferences;
-
-    const latitude = query.latitude ?? preferences?.latitude;
-    const longitude = query.longitude ?? preferences?.longitude;
-    const timezone = normalizeTimezone(query.timezone ?? preferences?.timezone);
+    const preferences = user.preferences;
 
     return this.getForecast({
-      latitude,
-      longitude,
-      timezone,
+      latitude: query.latitude ?? preferences?.latitude,
+      longitude: query.longitude ?? preferences?.longitude,
+      timezone: normalizeTimezone(query.timezone ?? preferences?.timezone),
       locationName: preferences?.locationName,
       weatherEnabled: preferences?.weatherEnabled ?? true,
       displayName: this.resolveDisplayName(user),
@@ -137,7 +112,7 @@ export class WeatherService {
     });
   }
 
-  async getForecastForCoordinates(query: WeatherForecastQueryDto) {
+  getForecastForCoordinates(query: WeatherForecastQueryDto) {
     return this.getForecast({
       latitude: query.latitude,
       longitude: query.longitude,
@@ -148,7 +123,7 @@ export class WeatherService {
   }
 
   reverseGeocode(query: ReverseGeocodeQueryDto) {
-    return this.fetchReverseGeocode(
+    return this.cachedReverseGeocode(
       query.latitude,
       query.longitude,
       query.localityLanguage,
@@ -156,10 +131,10 @@ export class WeatherService {
   }
 
   async updateUserLocation(userId: string, dto: UpdateWeatherLocationDto) {
-    this.assertCoordinatePair(dto.latitude, dto.longitude);
+    assertCoordinatePair(dto.latitude, dto.longitude);
 
     const user = await this.getExistingUserWeatherContext(userId);
-    const currentPreferences = user?.preferences;
+    const currentPreferences = user.preferences;
     const latitude = dto.latitude ?? currentPreferences?.latitude ?? null;
     const longitude = dto.longitude ?? currentPreferences?.longitude ?? null;
     const shouldReverseGeocode =
@@ -168,11 +143,7 @@ export class WeatherService {
       latitude != null &&
       longitude != null;
     const reverseGeocode = shouldReverseGeocode
-      ? await this.fetchReverseGeocode(
-          latitude,
-          longitude,
-          dto.localityLanguage,
-        )
+      ? await this.cachedReverseGeocode(latitude, longitude, dto.localityLanguage)
       : null;
     const timezone = normalizeTimezone(
       dto.timezone ?? currentPreferences?.timezone,
@@ -198,8 +169,7 @@ export class WeatherService {
         longitude,
         timezone,
         locationName,
-        weatherEnabled:
-          dto.weatherEnabled ?? currentPreferences?.weatherEnabled,
+        weatherEnabled: dto.weatherEnabled ?? currentPreferences?.weatherEnabled,
       },
     });
 
@@ -210,12 +180,16 @@ export class WeatherService {
     };
   }
 
+  // ============================================================
+  // PRIVATE — orchestration
+  // ============================================================
+
   private async getCurrent(input: WeatherInput) {
     if (!input.weatherEnabled) {
       return {
         configured: false,
         reason: 'WEATHER_DISABLED',
-        greeting: this.buildFallbackGreeting(input.timezone, input.displayName),
+        greeting: buildFallbackGreeting(input.timezone, input.displayName),
       };
     }
 
@@ -223,18 +197,17 @@ export class WeatherService {
       return {
         configured: false,
         reason: 'LOCATION_MISSING',
-        greeting: this.buildFallbackGreeting(input.timezone, input.displayName),
+        greeting: buildFallbackGreeting(input.timezone, input.displayName),
       };
     }
 
     const [payload, reverseGeocode] = await Promise.all([
-      this.fetchOpenMeteo(input.latitude, input.longitude, input.timezone),
+      this.cachedCurrentWeather(input.latitude, input.longitude, input.timezone),
       this.resolveReverseGeocode(input),
     ]);
-    const current = payload.current;
-    const weather = this.describeWeather(
-      current?.weather_code ?? 0,
-      current?.is_day !== 0,
+    const weather = describeWeather(
+      payload.current?.weather_code ?? 0,
+      payload.current?.is_day !== 0,
     );
 
     return {
@@ -247,92 +220,18 @@ export class WeatherService {
         timezone: payload.timezone ?? input.timezone,
       },
       reverseGeocode,
-      current: {
-        temperature: current?.temperature_2m ?? null,
-        temperatureUnit: payload.current_units?.temperature_2m ?? '°C',
-        apparentTemperature: current?.apparent_temperature ?? null,
-        humidity: current?.relative_humidity_2m ?? null,
-        humidityUnit: payload.current_units?.relative_humidity_2m ?? '%',
-        windSpeed: current?.wind_speed_10m ?? null,
-        windSpeedUnit: payload.current_units?.wind_speed_10m ?? 'km/h',
-        windDirection: current?.wind_direction_10m ?? null,
-        precipitation: current?.precipitation ?? null,
-        precipitationUnit: payload.current_units?.precipitation ?? 'mm',
-        weatherCode: current?.weather_code ?? null,
-        isDay: current?.is_day !== 0,
-        observedAt: current?.time ?? null,
-      },
-      greeting: this.buildGreeting(weather, input.displayName),
+      current: mapCurrentSnapshot(payload),
+      greeting: buildGreeting(weather, input.displayName),
     };
   }
 
-  private async fetchOpenMeteo(
-    latitude: number,
-    longitude: number,
-    timezone: string,
-  ) {
-    return this.redisService.remember(
-      [
-        'weather',
-        'current',
-        this.coordinateCachePart(latitude),
-        this.coordinateCachePart(longitude),
-        timezone,
-      ].join(':'),
-      CURRENT_WEATHER_CACHE_TTL_SECONDS,
-      () => this.fetchOpenMeteoDirect(latitude, longitude, timezone),
-    );
-  }
-
-  private async fetchOpenMeteoDirect(
-    latitude: number,
-    longitude: number,
-    timezone: string,
-  ): Promise<OpenMeteoCurrentPayload> {
-    const url = new URL('https://api.open-meteo.com/v1/forecast');
-    url.searchParams.set('latitude', String(latitude));
-    url.searchParams.set('longitude', String(longitude));
-    // Pull the extra Open-Meteo fields the dashboard needs to render
-    // its weather panels (humidity, wind, apparent temp, precipitation).
-    url.searchParams.set(
-      'current',
-      'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,precipitation,wind_speed_10m,wind_direction_10m',
-    );
-    url.searchParams.set('timezone', timezone);
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-
-      if (!response.ok) {
-        return { current: {}, current_units: {}, timezone };
-      }
-
-      return (await response.json()) as OpenMeteoCurrentPayload;
-    } catch {
-      return { current: {}, current_units: {}, timezone };
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
-  private async getForecast(input: {
-    latitude?: number | null;
-    longitude?: number | null;
-    timezone: string;
-    locationName?: string | null;
-    weatherEnabled: boolean;
-    displayName?: string | null;
-    forecastDays?: number;
-  }) {
+  private async getForecast(input: ForecastInput) {
     if (!input.weatherEnabled) {
       return {
         configured: false,
         reason: 'WEATHER_DISABLED',
         forecast: [],
-        greeting: this.buildFallbackGreeting(input.timezone, input.displayName),
+        greeting: buildFallbackGreeting(input.timezone, input.displayName),
       };
     }
 
@@ -341,13 +240,13 @@ export class WeatherService {
         configured: false,
         reason: 'LOCATION_MISSING',
         forecast: [],
-        greeting: this.buildFallbackGreeting(input.timezone, input.displayName),
+        greeting: buildFallbackGreeting(input.timezone, input.displayName),
       };
     }
 
     const forecastDays = input.forecastDays ?? 7;
     const [payload, reverseGeocode] = await Promise.all([
-      this.fetchOpenMeteoForecast(
+      this.cachedForecast(
         input.latitude,
         input.longitude,
         input.timezone,
@@ -355,10 +254,9 @@ export class WeatherService {
       ),
       this.resolveReverseGeocode(input),
     ]);
-    const current = payload.current;
-    const weather = this.describeWeather(
-      current?.weather_code ?? payload.daily?.weather_code?.[0] ?? 0,
-      current?.is_day !== 0,
+    const weather = describeWeather(
+      payload.current?.weather_code ?? payload.daily?.weather_code?.[0] ?? 0,
+      payload.current?.is_day !== 0,
     );
 
     return {
@@ -371,90 +269,51 @@ export class WeatherService {
         timezone: payload.timezone ?? input.timezone,
       },
       reverseGeocode,
-      current: {
-        temperature: current?.temperature_2m ?? null,
-        temperatureUnit: payload.current_units?.temperature_2m ?? '°C',
-        apparentTemperature: current?.apparent_temperature ?? null,
-        humidity: current?.relative_humidity_2m ?? null,
-        humidityUnit: payload.current_units?.relative_humidity_2m ?? '%',
-        windSpeed: current?.wind_speed_10m ?? null,
-        windSpeedUnit: payload.current_units?.wind_speed_10m ?? 'km/h',
-        windDirection: current?.wind_direction_10m ?? null,
-        precipitation: current?.precipitation ?? null,
-        precipitationUnit: payload.current_units?.precipitation ?? 'mm',
-        weatherCode: current?.weather_code ?? null,
-        isDay: current?.is_day !== 0,
-        observedAt: current?.time ?? null,
-      },
-      forecast: this.mapDailyForecast(payload),
-      greeting: this.buildGreeting(weather, input.displayName),
+      current: mapCurrentSnapshot(payload),
+      forecast: mapDailyForecast(payload),
+      greeting: buildGreeting(weather, input.displayName),
     };
   }
 
-  private async fetchOpenMeteoForecast(
+  // ============================================================
+  // PRIVATE — cache wrappers
+  // ============================================================
+
+  private cachedCurrentWeather(
     latitude: number,
     longitude: number,
     timezone: string,
-    forecastDays: number,
-  ) {
+  ): Promise<OpenMeteoCurrentPayload> {
     return this.redisService.remember(
-      [
-        'weather',
-        'forecast',
-        this.coordinateCachePart(latitude),
-        this.coordinateCachePart(longitude),
-        timezone,
-        forecastDays,
-      ].join(':'),
-      FORECAST_CACHE_TTL_SECONDS,
-      () =>
-        this.fetchOpenMeteoForecastDirect(
-          latitude,
-          longitude,
-          timezone,
-          forecastDays,
-        ),
+      ['weather', 'current', coordinateCachePart(latitude), coordinateCachePart(longitude), timezone].join(':'),
+      CURRENT_WEATHER_CACHE_TTL_SECONDS,
+      () => fetchCurrentWeather(latitude, longitude, timezone),
     );
   }
 
-  private async fetchOpenMeteoForecastDirect(
+  private cachedForecast(
     latitude: number,
     longitude: number,
     timezone: string,
     forecastDays: number,
   ): Promise<OpenMeteoForecastPayload> {
-    const url = new URL('https://api.open-meteo.com/v1/forecast');
-    url.searchParams.set('latitude', String(latitude));
-    url.searchParams.set('longitude', String(longitude));
-    // Pull the extra Open-Meteo fields the dashboard needs to render
-    // its weather panels (humidity, wind, apparent temp, precipitation).
-    url.searchParams.set(
-      'current',
-      'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day,precipitation,wind_speed_10m,wind_direction_10m',
+    return this.redisService.remember(
+      ['weather', 'forecast', coordinateCachePart(latitude), coordinateCachePart(longitude), timezone, forecastDays].join(':'),
+      FORECAST_CACHE_TTL_SECONDS,
+      () => fetchForecast(latitude, longitude, timezone, forecastDays),
     );
-    url.searchParams.set(
-      'daily',
-      'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max',
+  }
+
+  private cachedReverseGeocode(
+    latitude: number,
+    longitude: number,
+    localityLanguage = 'vi',
+  ): Promise<ReverseGeocodeResult | null> {
+    return this.redisService.remember(
+      ['weather', 'reverse-geocode', coordinateCachePart(latitude), coordinateCachePart(longitude), localityLanguage].join(':'),
+      REVERSE_GEOCODE_CACHE_TTL_SECONDS,
+      () => fetchReverseGeocode(latitude, longitude, localityLanguage),
     );
-    url.searchParams.set('timezone', timezone);
-    url.searchParams.set('forecast_days', String(forecastDays));
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-
-      if (!response.ok) {
-        return { current: {}, current_units: {}, daily: {}, timezone };
-      }
-
-      return (await response.json()) as OpenMeteoForecastPayload;
-    } catch {
-      return { current: {}, current_units: {}, daily: {}, timezone };
-    } finally {
-      clearTimeout(timeout);
-    }
   }
 
   private async resolveReverseGeocode(input: {
@@ -462,246 +321,22 @@ export class WeatherService {
     longitude?: number | null;
     locationName?: string | null;
   }) {
-    if (
-      input.locationName ||
-      input.latitude == null ||
-      input.longitude == null
-    ) {
+    if (input.locationName || input.latitude == null || input.longitude == null) {
       return null;
     }
-
-    return this.fetchReverseGeocode(input.latitude, input.longitude);
+    return this.cachedReverseGeocode(input.latitude, input.longitude);
   }
 
-  private async fetchReverseGeocode(
-    latitude: number,
-    longitude: number,
-    localityLanguage = 'vi',
-  ): Promise<ReverseGeocodeResult | null> {
-    return this.redisService.remember(
-      [
-        'weather',
-        'reverse-geocode',
-        this.coordinateCachePart(latitude),
-        this.coordinateCachePart(longitude),
-        localityLanguage,
-      ].join(':'),
-      REVERSE_GEOCODE_CACHE_TTL_SECONDS,
-      () =>
-        this.fetchReverseGeocodeDirect(latitude, longitude, localityLanguage),
-    );
-  }
+  // ============================================================
+  // PRIVATE — DB lookups
+  // ============================================================
 
-  private async fetchReverseGeocodeDirect(
-    latitude: number,
-    longitude: number,
-    localityLanguage = 'vi',
-  ): Promise<ReverseGeocodeResult | null> {
-    const url = new URL(
-      'https://api.bigdatacloud.net/data/reverse-geocode-client',
-    );
-    url.searchParams.set('latitude', String(latitude));
-    url.searchParams.set('longitude', String(longitude));
-    url.searchParams.set('localityLanguage', localityLanguage);
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5000);
-
-    try {
-      const response = await fetch(url, { signal: controller.signal });
-
-      if (!response.ok) {
-        return null;
-      }
-
-      const payload = (await response.json()) as ReverseGeocodePayload;
-
-      return {
-        provider: 'bigdatacloud',
-        latitude,
-        longitude,
-        locationName: this.buildLocationName(payload),
-        city: payload.city ?? null,
-        locality: payload.locality ?? null,
-        principalSubdivision: payload.principalSubdivision ?? null,
-        countryName: payload.countryName ?? null,
-        countryCode: payload.countryCode ?? null,
-        lookupSource: payload.lookupSource ?? null,
-      };
-    } catch {
-      return null;
-    } finally {
-      clearTimeout(timeout);
-    }
-  }
-
-  private buildLocationName(payload: ReverseGeocodePayload) {
-    return (
-      payload.city ||
-      payload.locality ||
-      payload.principalSubdivision ||
-      payload.countryName ||
-      null
-    );
-  }
-
-  private coordinateCachePart(value: number) {
-    return value.toFixed(4);
-  }
-
-  private assertCoordinatePair(
-    latitude?: number | null,
-    longitude?: number | null,
-  ) {
-    if (
-      (latitude == null && longitude != null) ||
-      (latitude != null && longitude == null)
-    ) {
-      throw new AppException(
-        ErrorCode.VALIDATION_FAILED,
-        'Latitude and longitude must be provided together',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
-  private mapDailyForecast(payload: OpenMeteoForecastPayload) {
-    const daily = payload.daily;
-    const dates = daily?.time ?? [];
-
-    return dates.map((date, index) => {
-      const weatherCode = daily?.weather_code?.[index] ?? null;
-      const weather = this.describeWeather(weatherCode ?? 0, true);
-
-      return {
-        date,
-        weatherCode,
-        iconKey: weather.iconKey,
-        title: this.buildForecastTitle(weather),
-        temperatureMax: daily?.temperature_2m_max?.[index] ?? null,
-        temperatureMin: daily?.temperature_2m_min?.[index] ?? null,
-        temperatureUnit: payload.daily_units?.temperature_2m_max ?? '°C',
-        precipitationProbability:
-          daily?.precipitation_probability_max?.[index] ?? null,
-        precipitationProbabilityUnit:
-          payload.daily_units?.precipitation_probability_max ?? '%',
-      };
-    });
-  }
-
-  private describeWeather(code: number, isDay: boolean) {
-    if (!isDay) {
-      return {
-        titleTemplate: 'Khuya rồi nè, {{name}} ơi',
-        subtitle: 'Đừng thức khuya quá đó nha ~',
-        iconKey: 'weather-night',
-      };
-    }
-
-    if (code === 0 || code === 1) {
-      return {
-        titleTemplate: 'Đã trở lại rồi nè, {{name}} ~',
-        subtitle: 'Trời nắng đẹp ghê!',
-        iconKey: 'weather-sunny',
-      };
-    }
-
-    if (code >= 51 && code <= 67) {
-      return {
-        title: 'Mưa nhẹ ngoài kia rồi nè',
-        subtitle: 'Ở yên một chút cho lòng dịu lại nha ~',
-        iconKey: 'weather-rain',
-      };
-    }
-
-    if (code >= 80 && code <= 99) {
-      return {
-        title: 'Trời đang hơi ồn ào đó',
-        subtitle: 'Mình chậm lại một nhịp nha ~',
-        iconKey: 'weather-storm',
-      };
-    }
-
-    return {
-      titleTemplate: 'Đã trở lại rồi nè, {{name}} ~',
-      subtitle: 'Thời tiết hôm nay cũng hợp để chill đó.',
-      iconKey: 'weather-cloudy',
-    };
-  }
-
-  private buildFallbackGreeting(timezone: string, displayName?: string | null) {
-    const hour = Number(
-      new Intl.DateTimeFormat('en-US', {
-        hour: '2-digit',
-        hourCycle: 'h23',
-        timeZone: timezone,
-      }).format(new Date()),
-    );
-
-    if (hour >= 21 || hour < 5) {
-      return this.buildGreeting(
-        {
-          titleTemplate: 'Khuya rồi nè, {{name}} ơi',
-          subtitle: 'Đừng thức khuya quá đó nha ~',
-          iconKey: 'weather-night',
-        },
-        displayName,
-      );
-    }
-
-    return this.buildGreeting(
-      {
-        titleTemplate: 'Đã trở lại rồi nè, {{name}} ~',
-        subtitle: 'Hôm nay mình chăm sóc cảm xúc một chút nha.',
-        iconKey: 'weather-default',
-      },
-      displayName,
-    );
-  }
-
-  private buildGreeting(
-    weather: {
-      title?: string;
-      titleTemplate?: string;
-      subtitle: string;
-      iconKey: string;
-    },
-    displayName?: string | null,
-  ) {
-    const name = displayName?.trim() || 'bạn';
-    const titleTemplate = weather.titleTemplate ?? weather.title ?? '';
-
-    return {
-      title: titleTemplate.replace('{{name}}', name),
-      titleTemplate,
-      displayName: displayName?.trim() || null,
-      subtitle: weather.subtitle,
-      iconKey: weather.iconKey,
-    };
-  }
-
-  private buildForecastTitle(weather: { title?: string; iconKey: string }) {
-    if (weather.title) {
-      return weather.title;
-    }
-
-    if (weather.iconKey === 'weather-sunny') return 'Trời nắng đẹp';
-    if (weather.iconKey === 'weather-night') return 'Trời đã về khuya';
-    if (weather.iconKey === 'weather-cloudy') return 'Trời dịu nhẹ';
-
-    return 'Thời tiết hôm nay';
-  }
-
-  private async getUserWeatherContext(userId: string) {
+  private getUserWeatherContext(userId: string) {
     return this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         name: true,
-        profile: {
-          select: {
-            displayName: true,
-          },
-        },
+        profile: { select: { displayName: true } },
         preferences: {
           select: {
             latitude: true,
@@ -717,22 +352,16 @@ export class WeatherService {
 
   private async getExistingUserWeatherContext(userId: string) {
     const user = await this.getUserWeatherContext(userId);
-
     if (!user) {
       throw AppException.notFound(ErrorCode.USER_NOT_FOUND, 'User not found');
     }
-
     return user;
   }
 
-  private resolveDisplayName(
-    user: {
-      name?: string | null;
-      profile?: {
-        displayName?: string | null;
-      } | null;
-    } | null,
-  ) {
+  private resolveDisplayName(user: {
+    name?: string | null;
+    profile?: { displayName?: string | null } | null;
+  } | null) {
     return user?.profile?.displayName || user?.name || null;
   }
 }

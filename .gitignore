@@ -42,3 +42,4 @@ pnpm-debug.log*
 # Local database backups are rescue artifacts only.
 apps/backend/prisma/backups/*.sql
 .tunnel-url
+apps/web/.vercel/

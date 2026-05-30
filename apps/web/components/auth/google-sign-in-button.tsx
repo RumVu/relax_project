@@ -109,6 +109,10 @@ export function GoogleSignInButton({
           cancel_on_tap_outside: true,
         });
         parent.innerHTML = '';
+        // GIS width must be 200-400. We hard-code 320 (a safe middle
+        // value) instead of reading `parent.clientWidth` because the
+        // flex container can render 0 wide before children exist,
+        // which silently produced an invisible 0px button on prod.
         gsi.renderButton(parent, {
           type: 'standard',
           theme: 'filled_blue',
@@ -116,7 +120,7 @@ export function GoogleSignInButton({
           shape: 'pill',
           text: mode === 'signup' ? 'signup_with' : 'continue_with',
           logo_alignment: 'left',
-          width: Math.min(parent.clientWidth || 320, 400),
+          width: 320,
         });
       })
       .catch(() => undefined);
@@ -169,7 +173,14 @@ export function GoogleSignInButton({
 
   return (
     <div className="space-y-2">
-      <div className="flex justify-center" ref={containerRef} />
+      {/* min-h ensures the row has measurable height even before GIS
+       *  injects its iframe — prevents the layout from flickering and
+       *  gives the user a "loading" affordance if the script is slow.
+       *  Inline-grid centring keeps the GIS iframe naturally sized. */}
+      <div
+        className="grid min-h-[44px] place-items-center"
+        ref={containerRef}
+      />
       {busy ? (
         <p className="text-center text-xs font-semibold text-[var(--app-muted)]">
           Đang đăng nhập…
