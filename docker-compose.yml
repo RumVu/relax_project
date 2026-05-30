@@ -67,6 +67,12 @@ services:
       # `make share-vercel` sẽ override để bồi thêm tunnel + reaffirm Vercel URL.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3233,https://relax-project-web-dashboard.vercel.app}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      # Swagger public mặc định để a/team xem /docs qua tunnel.
+      # Trong real prod nên SWAGGER_PUBLIC=false + basic auth user/pass.
+      SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
+      SWAGGER_PUBLIC: ${SWAGGER_PUBLIC:-true}
+      SWAGGER_BASIC_USER: ${SWAGGER_BASIC_USER:-}
+      SWAGGER_BASIC_PASSWORD: ${SWAGGER_BASIC_PASSWORD:-}
     ports:
       - "${BACKEND_PORT:-6823}:6823"
     healthcheck:
