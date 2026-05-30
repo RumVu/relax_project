@@ -149,6 +149,8 @@ export type UserDashboardData = {
     profile: {
       displayName: string;
       email: string;
+      /** Public URL của ảnh đại diện (Supabase). Null khi chưa upload. */
+      avatar: string | null;
       birthday: string;
       zodiacSign: string;
       chineseZodiac: string;
@@ -316,6 +318,7 @@ export const userDashboardData: UserDashboardData = {
     profile: {
       displayName: '',
       email: '',
+      avatar: null,
       birthday: '',
       zodiacSign: '',
       chineseZodiac: '',

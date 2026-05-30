@@ -538,6 +538,8 @@ function buildUserDashboardData(input: {
           asString(authMe?.name) ??
           base.settings.profile.displayName,
         email: asString(authMe?.email) ?? base.settings.profile.email,
+        avatar:
+          asString(authMe?.avatar) ?? base.settings.profile.avatar ?? null,
         birthday:
           formatDate(asString(profileRecord?.birthday)) ??
           base.settings.profile.birthday,
@@ -1485,6 +1487,7 @@ function createEmptyUserDashboardData(): UserDashboardData {
       profile: {
         displayName: '',
         email: '',
+        avatar: null,
         birthday: '',
         zodiacSign: '',
         chineseZodiac: '',

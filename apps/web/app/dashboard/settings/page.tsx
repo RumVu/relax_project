@@ -48,6 +48,7 @@ import {
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import { AvatarUploader } from '@/components/dashboard/avatar-uploader';
 
 type ThemeMode = 'SYSTEM' | 'LIGHT' | 'DARK';
 
@@ -411,6 +412,14 @@ export default function SettingsPage() {
             title="Trang cá nhân"
             copy="Cập nhật tên hiển thị và ngày sinh. Hai mục cung hoàng đạo bên dưới sẽ tự tính lại theo birthday."
           />
+          {/* Avatar uploader — direct Supabase upload via signed URL */}
+          <div className="mt-5 rounded-lg border border-lilac/60 bg-white/60 p-4">
+            <AvatarUploader
+              currentAvatar={settings.profile.avatar}
+              displayName={displayName}
+              onUpdated={() => triggerRefresh()}
+            />
+          </div>
           <div className="mt-5 grid gap-4">
             <Field
               label="Display name"
