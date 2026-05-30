@@ -19,6 +19,7 @@ import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import { AmbientSoundPlayer } from '@/components/dashboard/ambient-sound-player';
 
 const activityIcons = {
   MUSIC: Headphones,
@@ -88,6 +89,11 @@ export default function BreaksPage() {
         }
       />
       <DashboardFilterBar {...relaxFilters} title="Bộ lọc break/relax" />
+
+      {/* Sound player — fetch /v1/ambient-sounds, play through shared
+       *  <audio> element. Lives at the top so user can pick a soundscape
+       *  before / during their relax session. */}
+      <AmbientSoundPlayer />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard icon={Play} label="Tổng phiên" value={data.overview.relax.totalSessions} />
