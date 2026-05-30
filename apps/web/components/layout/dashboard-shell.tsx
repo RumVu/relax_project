@@ -34,6 +34,31 @@ import { RealtimeStatusBadge } from '@/components/dashboard/dashboard-ui';
 import { AccountMenu } from '@/components/dashboard/account-menu';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
+import type { TranslationKey } from '@/lib/i18n/dictionaries';
+
+// Map sidebar nav label → i18n key. The constant list keeps `label`
+// untranslated so we can switch language at runtime without re-fetching.
+const NAV_TRANSLATION_KEYS: Record<string, TranslationKey> = {
+  Overview: 'nav.overview',
+  Mood: 'nav.mood',
+  Breaks: 'nav.breaks',
+  Journal: 'nav.journal',
+  Analytics: 'nav.analytics',
+  Weather: 'nav.weather',
+  Settings: 'nav.settings',
+  'Admin Home': 'nav.adminHome',
+  Users: 'nav.users',
+  Search: 'nav.search',
+  Logs: 'nav.logs',
+  Quotes: 'nav.quotes',
+  Sounds: 'nav.sounds',
+  Exercises: 'nav.exercises',
+  Themes: 'nav.themes',
+  Onboarding: 'nav.onboarding',
+  'Companion Assets': 'nav.companionAssets',
+  'Companion Messages': 'nav.companionMessages',
+};
 
 const iconMap = {
   Overview: Home,
@@ -69,6 +94,7 @@ export function DashboardShell({
   const { focusMode, refreshNonce, toggleFocusMode, triggerRefresh } =
     useDashboardStore();
   const pushToast = useUiStore((state) => state.pushToast);
+  const { t } = useTranslation();
   const [role] = useState<string | undefined>(() => getStoredRole());
   const [alertOpen, setAlertOpen] = useState(false);
   // Mobile drawer state — opens the sidebar as an off-canvas overlay
@@ -219,17 +245,17 @@ export function DashboardShell({
           </div>
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--app-muted)]">
-              Digital Break
+              {t('brand.tagline')}
             </p>
             <p className="text-sm font-bold text-[var(--app-text)]">
-              {admin ? 'Admin Console' : 'Cozy Control'}
+              {admin ? t('brand.adminConsole') : t('brand.cozyControl')}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
           <AccountMenu />
           <button
-            aria-label="Mở menu"
+            aria-label={t('shell.openMenu')}
             className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] text-[var(--app-text)] transition hover:bg-violet/10"
             onClick={() => setMobileNavOpen(true)}
             type="button"
@@ -267,15 +293,15 @@ export function DashboardShell({
               </div>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-mist/60">
-                  Digital Break
+                  {t('brand.tagline')}
                 </p>
                 <h1 className="text-lg font-bold">
-                  {admin ? 'Admin Console' : 'Cozy Control'}
+                  {admin ? t('brand.adminConsole') : t('brand.cozyControl')}
                 </h1>
               </div>
             </div>
             <button
-              aria-label="Đóng menu"
+              aria-label={t('shell.closeMenu')}
               className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/15 text-mist transition hover:bg-white/10 lg:hidden"
               onClick={() => setMobileNavOpen(false)}
               type="button"
@@ -312,7 +338,7 @@ export function DashboardShell({
                 {nextReminder?.time ?? '21:00'}
               </div>
               <p className="mt-1 text-xs text-mist/60">
-                {nextReminder?.title ?? 'Evening reminder'}
+                {nextReminder?.title ?? t('shell.reminder.fallbackLabel')}
               </p>
             </button>
             <button
@@ -326,20 +352,20 @@ export function DashboardShell({
                 toggleFocusMode();
                 pushToast({
                   tone: 'info',
-                  title: focusMode ? 'Đã tắt focus mode' : 'Đã bật focus mode',
+                  title: focusMode ? t('shell.focus.off') : t('shell.focus.on'),
                   message: focusMode
-                    ? 'Giao diện đã trở lại chế độ bình thường.'
-                    : 'Giảm xao nhãng để tập trung thư giãn.',
+                    ? t('shell.focus.offMessage')
+                    : t('shell.focus.onMessage'),
                 });
               }}
               type="button"
             >
               <div className="flex items-center gap-2 text-sm font-semibold">
                 <Sparkles className="h-4 w-4 text-sun" />
-                Focus
+                {t('shell.focus.label')}
               </div>
               <p className="mt-1 text-xs text-mist/60">
-                {focusMode ? 'On' : 'Off'}
+                {focusMode ? t('shell.focus.on') : t('shell.focus.off')}
               </p>
             </button>
           </div>
@@ -347,16 +373,25 @@ export function DashboardShell({
 
         <section className="min-w-0 space-y-4">
           <div className="rounded-lg border border-[var(--panel-border)] bg-[image:var(--hero-bg)] p-5 shadow-panel">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              <div>
+            {/* Hero header layout strategy:
+             *  - Title (eyebrow + h2) wraps freely thanks to `min-w-0`.
+             *  - Action group (realtime/notif/refresh + AccountMenu) is
+             *    a single `inline-flex` row pinned top-right on desktop
+             *    via `lg:flex-row lg:items-start lg:justify-between`,
+             *    stacking BELOW the title on smaller widths.
+             *  - The action group itself wraps internally only when the
+             *    viewport is so narrow even smallest buttons overflow.
+             */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div className="min-w-0 flex-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-plum">
                   {eyebrow}
                 </p>
-                <h2 className="mt-2 text-3xl font-extrabold text-[var(--app-text)] md:text-4xl">
+                <h2 className="mt-2 break-words text-2xl font-extrabold text-[var(--app-text)] sm:text-3xl md:text-4xl">
                   {title}
                 </h2>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 lg:flex-nowrap">
                 <RealtimeStatusBadge onEvent={handleRealtimeEvent} />
                 <button
                   className="relative inline-flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink transition hover:border-violet"
@@ -369,7 +404,9 @@ export function DashboardShell({
                   type="button"
                 >
                   <Bell className="h-4 w-4 text-coral" />
-                  <span className="hidden sm:inline">{unreadCount} thông báo</span>
+                  <span className="hidden sm:inline">
+                    {t('shell.notifications.count', { count: unreadCount })}
+                  </span>
                   <span className="sm:hidden">{unreadCount}</span>
                   {unreadCount > 0 ? (
                     <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-coral px-1 text-[10px] font-bold text-white sm:hidden">
@@ -383,17 +420,17 @@ export function DashboardShell({
                     void loadChromeData();
                     pushToast({
                       tone: 'info',
-                      title: 'Đang làm mới dữ liệu',
-                      message: 'Dashboard sẽ refetch lại dữ liệu live.',
+                      title: t('shell.refresh.title'),
+                      message: t('shell.refresh.message'),
                     });
                   }}
                   variant="secondary"
                 >
                   <RefreshCcw className="h-4 w-4" />
-                  Refresh
+                  {t('common.refresh')}
                 </Button>
-                {/* Account menu — hidden on mobile (it lives in the mobile
-                 *  topbar already) so the desktop hero row doesn't double-up. */}
+                {/* Account menu — hidden on mobile (already in mobile
+                 *  topbar) so the desktop hero row doesn't double-up. */}
                 <div className="hidden lg:block">
                   <AccountMenu />
                 </div>
@@ -405,9 +442,11 @@ export function DashboardShell({
               <div className="mt-4 rounded-lg border border-lilac bg-white/95 p-4 shadow-panel">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-sm font-extrabold text-ink">Thông báo gần đây</p>
+                    <p className="text-sm font-extrabold text-ink">
+                      {t('shell.notifications.recent')}
+                    </p>
                     <p className="text-xs font-semibold text-slate">
-                      {unreadCount} chưa đọc
+                      {t('shell.notifications.unread', { count: unreadCount })}
                     </p>
                   </div>
                   <Button
@@ -418,18 +457,18 @@ export function DashboardShell({
                         await loadChromeData();
                         pushToast({
                           tone: 'success',
-                          title: 'Đã đánh dấu đã đọc',
+                          title: t('shell.notifications.markedRead'),
                         });
                       } catch {
                         pushToast({
                           tone: 'error',
-                          title: 'Không đánh dấu được thông báo',
+                          title: t('shell.notifications.markFailed'),
                         });
                       }
                     }}
                     variant="secondary"
                   >
-                    Read all
+                    {t('shell.notifications.readAll')}
                   </Button>
                 </div>
                 <div className="mt-4 space-y-2">
@@ -455,7 +494,7 @@ export function DashboardShell({
                           } catch {
                             pushToast({
                               tone: 'error',
-                              title: 'Không mở được thông báo',
+                              title: t('shell.notifications.openFailed'),
                             });
                           }
                         }}
@@ -469,7 +508,7 @@ export function DashboardShell({
                     ))
                   ) : (
                     <p className="text-sm font-semibold text-slate">
-                      Chưa có thông báo mới.
+                      {t('shell.notifications.empty')}
                     </p>
                   )}
                 </div>
@@ -492,7 +531,10 @@ function NavLink({
   href: string;
   label: string;
 }) {
+  const { t } = useTranslation();
   const Icon = iconMap[label as keyof typeof iconMap] ?? Home;
+  const translationKey = NAV_TRANSLATION_KEYS[label];
+  const translated = translationKey ? t(translationKey) : label;
 
   return (
     <Link
@@ -505,7 +547,7 @@ function NavLink({
       href={href}
     >
       <Icon className="h-4 w-4 shrink-0" />
-      <span>{label}</span>
+      <span>{translated}</span>
     </Link>
   );
 }
