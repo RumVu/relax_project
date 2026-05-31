@@ -2,6 +2,7 @@
 
 import { CheckCircle2, X } from 'lucide-react';
 import { Button } from './button';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type ActionModalProps = {
   open: boolean;
@@ -18,15 +19,18 @@ export function ActionModal({
   open,
   title,
   description,
-  primaryLabel = 'Xong rồi',
+  primaryLabel,
   secondaryLabel,
   onPrimary,
   onSecondary,
   onClose,
 }: ActionModalProps) {
+  const { t } = useTranslation();
   if (!open) {
     return null;
   }
+
+  const resolvedPrimaryLabel = primaryLabel ?? t('common.confirm');
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-night/55 p-4 backdrop-blur-sm">
@@ -55,7 +59,7 @@ export function ActionModal({
               {secondaryLabel}
             </Button>
           ) : null}
-          <Button onClick={onPrimary ?? onClose}>{primaryLabel}</Button>
+          <Button onClick={onPrimary ?? onClose}>{resolvedPrimaryLabel}</Button>
         </div>
       </div>
     </div>

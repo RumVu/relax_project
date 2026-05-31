@@ -9,12 +9,30 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const locale =
+    typeof window !== 'undefined'
+      ? window.localStorage.getItem('digital-break:locale')
+      : 'vi';
+  const copy =
+    locale === 'en'
+      ? {
+          eyebrow: 'Critical error',
+          title: 'The app crashed at the layout layer.',
+          fallback: 'An unexpected error occurred. Please try again.',
+          retry: 'Try again',
+        }
+      : {
+          eyebrow: 'Lỗi nghiêm trọng',
+          title: 'Ứng dụng bị ngắt ở tầng bố cục.',
+          fallback: 'Một lỗi không mong muốn vừa xảy ra. Vui lòng thử lại.',
+          retry: 'Thử lại',
+        };
   return (
     // Global error renders OUTSIDE I18nProvider so we can't use the
     // useTranslation hook. Use Vietnamese as the default copy — covers
     // the most common audience and matches the rest of the app's
     // default locale.
-    <html lang="vi">
+    <html lang={locale === 'en' ? 'en' : 'vi'}>
       <body>
         <main
           style={{
@@ -49,13 +67,13 @@ export default function GlobalError({
                 textTransform: 'uppercase',
               }}
             >
-              Lỗi nghiêm trọng
+              {copy.eyebrow}
             </p>
             <h1 style={{ fontSize: 36, lineHeight: 1.05, margin: '12px 0' }}>
-              Ứng dụng bị ngắt ở tầng bố cục.
+              {copy.title}
             </h1>
             <p style={{ color: '#aab4c7', fontWeight: 600 }}>
-              {error.message || 'Một lỗi không mong muốn vừa xảy ra. Vui lòng thử lại.'}
+              {error.message || copy.fallback}
             </p>
             {error.digest ? (
               <p style={{ color: '#dcd6ff', fontFamily: 'monospace' }}>
@@ -80,7 +98,7 @@ export default function GlobalError({
               type="button"
             >
               <RefreshCcw size={16} />
-              Thử lại
+              {copy.retry}
             </button>
           </section>
         </main>

@@ -62,7 +62,7 @@ const COPY_KEYS: Record<
  */
 export function PermissionsPanel() {
   const pushToast = useUiStore((state) => state.pushToast);
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
   const [reports, setReports] = useState<CapabilityReport[]>([]);
   const [busy, setBusy] = useState<CapabilityName | null>(null);
 
@@ -231,9 +231,9 @@ export function PermissionsPanel() {
                   {statusLabel}
                 </div>
               </div>
-              {report.hint ? (
+              {report.hint || report.status === 'insecure-context' ? (
                 <p className="mt-3 rounded-md border border-[var(--field-border)] bg-[var(--field-bg)] px-3 py-2 text-xs font-medium text-[var(--app-muted)]">
-                  {report.hint}
+                  {permissionHint(report, locale)}
                 </p>
               ) : null}
               {(needPrompt || denied) &&
@@ -258,4 +258,22 @@ export function PermissionsPanel() {
       </div>
     </Card>
   );
+}
+
+function permissionHint(report: CapabilityReport, locale: 'vi' | 'en') {
+  if (locale === 'en') {
+    if (report.name === 'geolocation' && report.status === 'insecure-context') {
+      return 'Browsers block geolocation on http://<LAN-IP>. Open the app through http://localhost:3233 or set up HTTPS.';
+    }
+    if (report.name === 'notification' && report.status === 'insecure-context') {
+      return 'The Notification API requires HTTPS or localhost.';
+    }
+    if (report.name === 'audio') {
+      return 'You need to click the page at least once before the browser allows sound playback.';
+    }
+    if (report.name === 'storage') {
+      return 'The browser is blocking cookies/storage. Check incognito mode or tracking protection.';
+    }
+  }
+  return report.hint ?? '';
 }

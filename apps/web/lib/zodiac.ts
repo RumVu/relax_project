@@ -100,7 +100,7 @@ function positiveModulo(value: number, divisor: number) {
 }
 
 // ---------------------------------------------------------------------------
-// Vietnamese display labels (matches the SettingsPage "Trang cá nhân" copy).
+// Localized display labels (matches the SettingsPage profile copy).
 // ---------------------------------------------------------------------------
 
 const ZODIAC_VI: Record<string, string> = {
@@ -133,12 +133,20 @@ const CHINESE_ZODIAC_VI: Record<string, string> = {
   Pig: 'Hợi (Heo)',
 };
 
-export function zodiacLabel(sign: string | null | undefined): string {
+export function zodiacLabel(
+  sign: string | null | undefined,
+  locale: 'vi' | 'en' = 'vi',
+): string {
   if (!sign) return '—';
+  if (locale === 'en') return sign;
   return ZODIAC_VI[sign] ?? sign;
 }
 
-export function chineseZodiacLabel(sign: string | null | undefined): string {
+export function chineseZodiacLabel(
+  sign: string | null | undefined,
+  locale: 'vi' | 'en' = 'vi',
+): string {
   if (!sign) return '—';
+  if (locale === 'en') return sign;
   return CHINESE_ZODIAC_VI[sign] ?? sign;
 }

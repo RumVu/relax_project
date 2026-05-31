@@ -149,8 +149,286 @@ type ThemeCard = {
   isActive: boolean;
 };
 
+const VI_SETTINGS_COPY = {
+  defaultReminderTitle: 'Nhắc thở nhẹ',
+  defaultReminderMessage: 'Đến lúc nghỉ một chút rồi hít thở nào.',
+  companionTitle: 'Companion studio',
+  companionCopy:
+    'Đây là chỗ để anh nuôi, đặt tên và đổi linh thú theo ngày sinh, cung hoàng đạo, con giáp hoặc tự chọn.',
+  noPreview: 'Chưa có preview',
+  companionName: 'Tên linh thú',
+  companionDefaultLabel: 'Linh thú',
+  currentLevel: 'cấp độ hiện tại',
+  affection: 'độ thân thiết',
+  energy: 'năng lượng',
+  renamedCompanion: 'Đã đổi tên linh thú',
+  renameCompanionFailed: 'Không đổi được tên linh thú',
+  saveName: 'Lưu tên',
+  petted: 'Đã vuốt ve linh thú',
+  fed: 'Đã cho linh thú ăn',
+  played: 'Đã chơi với linh thú',
+  interactFailed: 'Không tương tác được với linh thú',
+  pet: 'Vuốt ve',
+  feed: 'Cho ăn',
+  play: 'Chơi',
+  currentMode: 'mode đang áp dụng',
+  currentMood: 'cảm xúc hiện tại',
+  currentAction: 'trạng thái chuyển động',
+  mappedBy: (key: string) => `Đang map theo ${key}`,
+  customMode: 'Tự chọn linh thú theo ý anh',
+  defaultMode: 'Dùng asset mặc định của hệ thống',
+  changedMode: (mode: string) => `Đã chuyển sang ${mode}`,
+  changeModeFailed: 'Không đổi được mode linh thú',
+  selectAssetBelow: 'Chọn asset bên dưới',
+  inUse: 'Đang dùng',
+  apply: 'Áp dụng',
+  applying: 'Đang áp dụng',
+  syncedMode: (mode: string) => `Đã sync linh thú theo ${mode}`,
+  syncModeFailed: 'Không đổi được linh thú theo mode này',
+  customLibrary: 'Kho linh thú tự chọn',
+  customLibraryCopy:
+    'Đây là chỗ anh tự nạp linh thú cho profile hiện tại thay vì bị ràng theo cung hay con giáp.',
+  loadedAsset: (name: string) => `Đã nạp linh thú ${name}`,
+  loadAssetFailed: 'Không nạp được linh thú custom',
+  assetFallbackDescription: 'Linh thú đồng hành',
+  previewLoadFailed: 'Preview chưa tải được',
+  companionLoading: 'Đang tải studio linh thú...',
+  themeGalleryTitle: 'Theme gallery',
+  themeGalleryCopy:
+    'Chọn giao diện hợp mood của anh. Khi bấm áp dụng, app sẽ lưu mode và theme tương ứng vào preferences.',
+  themeApplied: (name: string) => `Đã áp dụng theme ${name}`,
+  themeApplyFailed: 'Không áp dụng được theme',
+  systemDefaultSuffix: '• mặc định hệ thống',
+  sessionsTitle: 'Thiết bị đăng nhập',
+  sessionsCopy:
+    'Theo dõi các phiên đã đăng nhập gần đây để biết tài khoản đang mở ở đâu.',
+  currentSession: 'Phiên hiện tại',
+  savedSession: 'Đã lưu',
+  sessionsNote:
+    'Bảng này đóng vai trò lịch sử đăng nhập. Cột Thiết bị chỉ hiển thị OS + dòng máy vì browser không cho phép app đọc tên máy thật (privacy). Muốn đặt tên thiết bị riêng, hãy đăng ký nó dưới mục Thiết bị push bên cạnh.',
+  pushDevicesTitle: 'Thiết bị push',
+  pushDevicesCopy:
+    'Đăng ký nhanh trình duyệt hiện tại để test thông báo, hoặc gỡ những thiết bị không còn dùng nữa.',
+  pushDeviceAdded: 'Đã thêm thiết bị web',
+  pushDeviceAddedMessage:
+    'Anh có thể dùng nó để test push/in-app notification ngay trong dashboard.',
+  pushDeviceAddFailed: 'Không thêm được thiết bị',
+  adding: 'Đang thêm',
+  registerCurrentBrowser: 'Đăng ký trình duyệt này',
+  pushDeviceRemoved: 'Đã gỡ thiết bị push',
+  pushDeviceRemoveFailed: 'Không gỡ được thiết bị push',
+  remove: 'Gỡ',
+  remindersTitle: 'Nhắc nhở',
+  remindersCopy:
+    'Tạo các mốc nhắc mới, bật tắt nhanh hoặc xoá hẳn khi lịch sống của anh thay đổi.',
+  titleLabel: 'Tiêu đề',
+  typeLabel: 'Loại',
+  datetimeLabel: 'Thời gian',
+  reminderCreated: 'Đã tạo reminder',
+  reminderCreatedMessage: (title: string) =>
+    `"${title}" — lưu OK. Title giữ nguyên cho lần tạo tiếp.`,
+  reminderCreateFailed: 'Tạo reminder thất bại',
+  creating: 'Đang tạo',
+  createReminder: 'Tạo reminder',
+  savedReminderCount: (count: number) => `${count} nhắc đang lưu`,
+  confirmDeleteAllReminders: (count: number) =>
+    `Xoá tất cả ${count} nhắc? Hành động này không hoàn tác được.`,
+  deletedReminderCount: (count: number) => `Đã xoá ${count} nhắc`,
+  deleteAll: 'Xoá tất cả',
+  scheduleLabel: 'Lịch',
+  on: 'On',
+  off: 'Off',
+  reminderDisabled: 'Đã tắt reminder',
+  reminderEnabled: 'Đã bật reminder',
+  reminderStatusFailed: 'Không đổi được trạng thái reminder',
+  disable: 'Tắt',
+  enable: 'Bật',
+  reminderDeleted: 'Đã xoá reminder',
+  reminderDeleteFailed: 'Xoá reminder thất bại',
+  billingTitle: 'Gói cước & nâng cấp',
+  billingCopy:
+    'Xem plan đang dùng và tạo checkout intent để backend ghi nhận nhu cầu nâng cấp.',
+  currentPlan: 'Gói hiện tại',
+  billingStatus: (status: string, renewal: string) =>
+    `Trạng thái ${status} • gia hạn ${renewal}`,
+  choosePlan: 'Chọn gói này',
+  billingEmpty: 'Chưa tải được danh sách gói từ API billing.',
+  activatedNote: (plan: string, status: string) =>
+    `Đã kích hoạt gói ${plan}. Subscription chuyển sang ${status}.`,
+  activatedTitle: (plan: string) => `Đã kích hoạt ${plan}`,
+  activatedMessage: 'Thanh toán đã được xác nhận và gói đã được kích hoạt.',
+  intentCreated: (plan: string) => `Đã tạo yêu cầu ${plan}`,
+  intentRecorded: 'Backend đã ghi nhận checkout intent cho gói này.',
+  upgradeFailed: 'Không hoàn tất được nâng cấp',
+  upgradeFailedMessage: 'Kiểm tra backend billing rồi thử lại.',
+  show: 'Hiển thị',
+  sessionsPerPage: 'phiên / trang',
+  previousPage: 'Trang trước',
+  nextPage: 'Trang sau',
+  reminderTime: 'Giờ nhắc',
+  quickAddMessage: 'Nhắc nhẹ trong ngày từ Quick add.',
+  quickAdded: (time: string) => `Đã thêm nhắc ${time}`,
+  quickAddFailed: 'Không thêm được nhắc',
+  quickAdd: 'Thêm nhanh',
+  checkoutTitle: 'Tạo thanh khoản',
+  checkoutCopy:
+    'Xác nhận gói để backend tạo payment pending và trả trạng thái provider.',
+  closeCheckout: 'Đóng checkout',
+  upgradable: 'Có thể nâng cấp',
+  intentReady: 'Backend đã tạo intent',
+  paymentPendingNote:
+    'Payment pending đã được ghi vào database. Khi cấu hình provider, chỗ này sẽ nhận checkout URL thật.',
+  creatingIntent: 'Đang tạo intent',
+  createCheckout: 'Tạo thanh khoản',
+  modeZodiac: 'Theo cung hoàng đạo',
+  modeChineseZodiac: 'Theo 12 con giáp',
+  modeCustom: 'Tự chọn linh thú',
+  modeDefault: 'Mặc định',
+  free: 'Miễn phí',
+};
+
+const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
+  ...VI_SETTINGS_COPY,
+  defaultReminderTitle: 'Gentle breathing reminder',
+  defaultReminderMessage: 'Time to pause for a quick breath.',
+  companionTitle: 'Companion studio',
+  companionCopy:
+    'Name, nurture and switch your companion by birthday, zodiac, Chinese zodiac or a custom pick.',
+  noPreview: 'No preview yet',
+  companionName: 'Companion name',
+  companionDefaultLabel: 'Companion',
+  currentLevel: 'current level',
+  affection: 'affection',
+  energy: 'energy',
+  renamedCompanion: 'Companion renamed',
+  renameCompanionFailed: 'Could not rename companion',
+  saveName: 'Save name',
+  petted: 'Companion petted',
+  fed: 'Companion fed',
+  played: 'Played with companion',
+  interactFailed: 'Could not interact with companion',
+  pet: 'Pet',
+  feed: 'Feed',
+  play: 'Play',
+  currentMode: 'current mode',
+  currentMood: 'current mood',
+  currentAction: 'current action',
+  mappedBy: (key: string) => `Mapped by ${key}`,
+  customMode: 'Choose your own companion',
+  defaultMode: 'Use the system default asset',
+  changedMode: (mode: string) => `Switched to ${mode}`,
+  changeModeFailed: 'Could not change companion mode',
+  selectAssetBelow: 'Select an asset below',
+  inUse: 'In use',
+  apply: 'Apply',
+  applying: 'Applying',
+  syncedMode: (mode: string) => `Synced companion by ${mode}`,
+  syncModeFailed: 'Could not switch companion for this mode',
+  customLibrary: 'Custom companion library',
+  customLibraryCopy:
+    'Pick a custom companion for this profile instead of binding it to zodiac or Chinese zodiac.',
+  loadedAsset: (name: string) => `Loaded companion ${name}`,
+  loadAssetFailed: 'Could not load custom companion',
+  assetFallbackDescription: 'Companion buddy',
+  previewLoadFailed: 'Preview could not load',
+  companionLoading: 'Loading companion studio...',
+  themeGalleryTitle: 'Theme gallery',
+  themeGalleryCopy:
+    'Choose a theme that matches your mood. Applying saves the matching mode and theme to preferences.',
+  themeApplied: (name: string) => `Applied theme ${name}`,
+  themeApplyFailed: 'Could not apply theme',
+  systemDefaultSuffix: '• system default',
+  sessionsTitle: 'Signed-in devices',
+  sessionsCopy:
+    'Review recent signed-in sessions and where the account is currently open.',
+  currentSession: 'Current session',
+  savedSession: 'Saved',
+  sessionsNote:
+    'This table is your login history. The Device column only shows OS and model because browsers do not expose the real device name for privacy. To set a friendly device name, register it under Push devices.',
+  pushDevicesTitle: 'Push devices',
+  pushDevicesCopy:
+    'Register the current browser to test notifications, or remove devices you no longer use.',
+  pushDeviceAdded: 'Web device added',
+  pushDeviceAddedMessage:
+    'You can use it to test push or in-app notifications from the dashboard.',
+  pushDeviceAddFailed: 'Could not add device',
+  adding: 'Adding',
+  registerCurrentBrowser: 'Register this browser',
+  pushDeviceRemoved: 'Push device removed',
+  pushDeviceRemoveFailed: 'Could not remove push device',
+  remove: 'Remove',
+  remindersTitle: 'Reminders',
+  remindersCopy:
+    'Create reminder times, toggle them quickly or delete them when your routine changes.',
+  titleLabel: 'Title',
+  typeLabel: 'Type',
+  datetimeLabel: 'Time',
+  reminderCreated: 'Reminder created',
+  reminderCreatedMessage: (title: string) =>
+    `"${title}" was saved. The title stays for the next reminder.`,
+  reminderCreateFailed: 'Could not create reminder',
+  creating: 'Creating',
+  createReminder: 'Create reminder',
+  savedReminderCount: (count: number) => `${count} reminders saved`,
+  confirmDeleteAllReminders: (count: number) =>
+    `Delete all ${count} reminders? This cannot be undone.`,
+  deletedReminderCount: (count: number) => `Deleted ${count} reminders`,
+  deleteAll: 'Delete all',
+  scheduleLabel: 'Schedule',
+  on: 'On',
+  off: 'Off',
+  reminderDisabled: 'Reminder disabled',
+  reminderEnabled: 'Reminder enabled',
+  reminderStatusFailed: 'Could not update reminder status',
+  disable: 'Disable',
+  enable: 'Enable',
+  reminderDeleted: 'Reminder deleted',
+  reminderDeleteFailed: 'Could not delete reminder',
+  billingTitle: 'Plans & upgrades',
+  billingCopy:
+    'Review the current plan and create a checkout intent so the backend records the upgrade request.',
+  currentPlan: 'Current plan',
+  billingStatus: (status: string, renewal: string) =>
+    `Status ${status} • renews ${renewal}`,
+  choosePlan: 'Choose this plan',
+  billingEmpty: 'Could not load billing plans from the API.',
+  activatedNote: (plan: string, status: string) =>
+    `Activated ${plan}. Subscription moved to ${status}.`,
+  activatedTitle: (plan: string) => `${plan} activated`,
+  activatedMessage: 'Payment was confirmed and the plan was activated.',
+  intentCreated: (plan: string) => `Created request for ${plan}`,
+  intentRecorded: 'Backend recorded the checkout intent for this plan.',
+  upgradeFailed: 'Could not complete upgrade',
+  upgradeFailedMessage: 'Check backend billing and try again.',
+  show: 'Show',
+  sessionsPerPage: 'sessions / page',
+  previousPage: 'Previous page',
+  nextPage: 'Next page',
+  reminderTime: 'Reminder time',
+  quickAddMessage: 'Quick daily reminder.',
+  quickAdded: (time: string) => `Added reminder at ${time}`,
+  quickAddFailed: 'Could not add reminder',
+  quickAdd: 'Quick add',
+  checkoutTitle: 'Create checkout intent',
+  checkoutCopy:
+    'Confirm the plan so the backend can create a pending payment and return provider status.',
+  closeCheckout: 'Close checkout',
+  upgradable: 'Upgradeable',
+  intentReady: 'Backend created the intent',
+  paymentPendingNote:
+    'A pending payment was written to the database. Once a provider is configured, this area can receive a real checkout URL.',
+  creatingIntent: 'Creating intent',
+  createCheckout: 'Create intent',
+  modeZodiac: 'By zodiac',
+  modeChineseZodiac: 'By Chinese zodiac',
+  modeCustom: 'Custom companion',
+  modeDefault: 'Default',
+  free: 'Free',
+};
+
 export default function SettingsPage() {
-  const { t } = useTranslation();
+  const { locale, t } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -169,8 +447,14 @@ export default function SettingsPage() {
     birthday: string;
   } | null>(null);
   const [reminderDraft, setReminderDraft] = useState<ReminderDraft>({
-    title: 'Nhắc thở nhẹ',
-    message: 'Đến lúc nghỉ một chút rồi hít thở nào.',
+    title:
+      locale === 'en'
+        ? EN_SETTINGS_COPY.defaultReminderTitle
+        : VI_SETTINGS_COPY.defaultReminderTitle,
+    message:
+      locale === 'en'
+        ? EN_SETTINGS_COPY.defaultReminderMessage
+        : VI_SETTINGS_COPY.defaultReminderMessage,
     type: 'BREATHING',
     scheduledAt: nextLocalReminderTime(),
   });
@@ -285,7 +569,7 @@ export default function SettingsPage() {
         setCompanionOptions(
           modes.map((option) => ({
             mode: String(option.mode ?? 'DEFAULT') as CompanionMode,
-            label: String(option.label ?? 'Linh thú'),
+            label: String(option.label ?? copy.companionDefaultLabel),
             key: (option.key as string | null | undefined) ?? null,
             available: Boolean(option.available),
             assets: Array.isArray(option.assets)
@@ -373,7 +657,7 @@ export default function SettingsPage() {
     return () => {
       cancelled = true;
     };
-  }, [refreshKey]);
+  }, [copy.companionDefaultLabel, refreshKey]);
 
   return (
     <>
@@ -452,12 +736,12 @@ export default function SettingsPage() {
               // to the server-rendered values when the draft is empty.
               const previewed = computeZodiac(birthday);
               const liveZodiac =
-                zodiacLabel(previewed.zodiacSign) !== '—'
-                  ? zodiacLabel(previewed.zodiacSign)
+                zodiacLabel(previewed.zodiacSign, locale) !== '—'
+                  ? zodiacLabel(previewed.zodiacSign, locale)
                   : settings.profile.zodiacSign;
               const liveChinese =
-                chineseZodiacLabel(previewed.chineseZodiac) !== '—'
-                  ? chineseZodiacLabel(previewed.chineseZodiac)
+                chineseZodiacLabel(previewed.chineseZodiac, locale) !== '—'
+                  ? chineseZodiacLabel(previewed.chineseZodiac, locale)
                   : settings.profile.chineseZodiac;
               return (
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -852,8 +1136,8 @@ export default function SettingsPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <Card>
           <SectionTitle
-            title="Companion studio"
-            copy="Đây là chỗ để anh nuôi, đặt tên và đổi linh thú theo ngày sinh, cung hoàng đạo, con giáp hoặc tự chọn."
+            title={copy.companionTitle}
+            copy={copy.companionCopy}
             action={<WandSparkles className="h-5 w-5 text-violet" />}
           />
           {companion ? (
@@ -874,29 +1158,29 @@ export default function SettingsPage() {
                     />
                   ) : (
                     <div className="flex h-44 items-center justify-center text-sm font-semibold text-slate">
-                      Chưa có preview
+                      {copy.noPreview}
                     </div>
                   )}
                 </div>
                 <div className="space-y-3">
                   <Field
-                    label="Tên linh thú"
+                    label={copy.companionName}
                     value={companionNameDraft}
                     onChange={setCompanionNameDraft}
                   />
                   <div className="grid gap-3 sm:grid-cols-3">
                     <StatusMiniCard
-                      note="cấp độ hiện tại"
+                      note={copy.currentLevel}
                       title="Level"
                       value={String(companion.level)}
                     />
                     <StatusMiniCard
-                      note="độ thân thiết"
+                      note={copy.affection}
                       title="Affection"
                       value={`${companion.affection}%`}
                     />
                     <StatusMiniCard
-                      note="năng lượng"
+                      note={copy.energy}
                       title="Energy"
                       value={`${companion.energy}%`}
                     />
@@ -915,12 +1199,12 @@ export default function SettingsPage() {
                           triggerRefresh();
                           pushToast({
                             tone: 'success',
-                            title: 'Đã đổi tên linh thú',
+                            title: copy.renamedCompanion,
                           });
                         } catch {
                           pushToast({
                             tone: 'error',
-                            title: 'Không đổi được tên linh thú',
+                            title: copy.renameCompanionFailed,
                           });
                         } finally {
                           setCompanionState('idle');
@@ -928,7 +1212,7 @@ export default function SettingsPage() {
                       }}
                     >
                       <Save className="h-4 w-4" />
-                      Lưu tên
+                      {copy.saveName}
                     </Button>
                     {(['PET', 'FEED', 'PLAY'] as const).map((action) => (
                       <Button
@@ -945,25 +1229,25 @@ export default function SettingsPage() {
                               tone: 'success',
                               title:
                                 action === 'PET'
-                                  ? 'Đã vuốt ve linh thú'
+                                  ? copy.petted
                                   : action === 'FEED'
-                                    ? 'Đã cho linh thú ăn'
-                                    : 'Đã chơi với linh thú',
+                                    ? copy.fed
+                                    : copy.played,
                             });
                           } catch {
                             pushToast({
                               tone: 'error',
-                              title: 'Không tương tác được với linh thú',
+                              title: copy.interactFailed,
                             });
                           }
                         }}
                         variant="secondary"
                       >
                         {action === 'PET'
-                          ? 'Vuốt ve'
+                          ? copy.pet
                           : action === 'FEED'
-                            ? 'Cho ăn'
-                            : 'Chơi'}
+                            ? copy.feed
+                            : copy.play}
                       </Button>
                     ))}
                   </div>
@@ -972,17 +1256,17 @@ export default function SettingsPage() {
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <StatusMiniCard
-                  note="mode đang áp dụng"
+                  note={copy.currentMode}
                   title="Personalization"
-                  value={modeLabel(companion.personalizationMode)}
+                  value={modeLabel(companion.personalizationMode, copy)}
                 />
                 <StatusMiniCard
-                  note="cảm xúc hiện tại"
+                  note={copy.currentMood}
                   title="Mood"
                   value={companion.mood}
                 />
                 <StatusMiniCard
-                  note="trạng thái chuyển động"
+                  note={copy.currentAction}
                   title="Action"
                   value={companion.action}
                 />
@@ -996,13 +1280,15 @@ export default function SettingsPage() {
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
-                        <p className="text-lg font-extrabold text-ink">{option.label}</p>
+                        <p className="text-lg font-extrabold text-ink">
+                          {companionOptionLabel(option, copy)}
+                        </p>
                         <p className="mt-1 text-sm text-slate">
                           {option.key
-                            ? `Đang map theo ${option.key}`
+                            ? copy.mappedBy(option.key)
                             : option.mode === 'CUSTOM'
-                              ? 'Tự chọn linh thú theo ý anh'
-                              : 'Dùng asset mặc định của hệ thống'}
+                              ? copy.customMode
+                              : copy.defaultMode}
                         </p>
                       </div>
                       <Button
@@ -1022,12 +1308,14 @@ export default function SettingsPage() {
                             triggerRefresh();
                             pushToast({
                               tone: 'success',
-                              title: `Đã chuyển sang ${option.label.toLowerCase()}`,
+                              title: copy.changedMode(
+                                companionOptionLabel(option, copy).toLowerCase(),
+                              ),
                             });
                           } catch {
                             pushToast({
                               tone: 'error',
-                              title: 'Không đổi được mode linh thú',
+                              title: copy.changeModeFailed,
                             });
                           } finally {
                             setCompanionState('idle');
@@ -1041,10 +1329,10 @@ export default function SettingsPage() {
                         }
                       >
                         {option.mode === 'CUSTOM'
-                          ? 'Chọn asset bên dưới'
+                          ? copy.selectAssetBelow
                           : companion.personalizationMode === option.mode
-                            ? 'Đang dùng'
-                            : 'Áp dụng'}
+                            ? copy.inUse
+                            : copy.apply}
                       </Button>
                     </div>
 
@@ -1069,12 +1357,14 @@ export default function SettingsPage() {
                                 triggerRefresh();
                                 pushToast({
                                   tone: 'success',
-                                  title: `Đã sync linh thú theo ${option.label.toLowerCase()}`,
+                                  title: copy.syncedMode(
+                                    companionOptionLabel(option, copy).toLowerCase(),
+                                  ),
                                 });
                               } catch {
                                 pushToast({
                                   tone: 'error',
-                                  title: 'Không đổi được linh thú theo mode này',
+                                  title: copy.syncModeFailed,
                                 });
                               } finally {
                                 setCompanionState('idle');
@@ -1092,9 +1382,9 @@ export default function SettingsPage() {
               <div className="rounded-xl border border-lilac/70 bg-white/75 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-lg font-extrabold text-ink">Kho linh thú tự chọn</p>
+                    <p className="text-lg font-extrabold text-ink">{copy.customLibrary}</p>
                     <p className="mt-1 text-sm text-slate">
-                      Đây là chỗ anh tự nạp linh thú cho profile hiện tại thay vì bị ràng theo cung hay con giáp.
+                      {copy.customLibraryCopy}
                     </p>
                   </div>
                 </div>
@@ -1119,12 +1409,12 @@ export default function SettingsPage() {
                           triggerRefresh();
                           pushToast({
                             tone: 'success',
-                            title: `Đã nạp linh thú ${asset.name}`,
+                            title: copy.loadedAsset(asset.name),
                           });
                         } catch {
                           pushToast({
                             tone: 'error',
-                            title: 'Không nạp được linh thú custom',
+                            title: copy.loadAssetFailed,
                           });
                         } finally {
                           setCompanionState('idle');
@@ -1141,25 +1431,25 @@ export default function SettingsPage() {
             </div>
           ) : (
             <div className="mt-5 rounded-xl border border-dashed border-lilac bg-white/70 p-6 text-sm font-medium text-slate">
-              Đang tải studio linh thú...
+              {copy.companionLoading}
             </div>
           )}
         </Card>
 
         <Card>
           <SectionTitle
-            title="Theme gallery"
-            copy="Chọn giao diện hợp mood của anh. Khi bấm áp dụng, app sẽ lưu mode và theme tương ứng vào preferences."
+            title={copy.themeGalleryTitle}
+            copy={copy.themeGalleryCopy}
             action={<Moon className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 space-y-3">
             {themeCatalog.map((theme) => {
               const isActiveTheme = activeThemeId === theme.id;
               const statusLabel = isActiveTheme
-                ? 'Đang dùng'
+                ? copy.inUse
                 : themeState === theme.id
-                  ? 'Đang áp dụng'
-                  : 'Áp dụng';
+                  ? copy.applying
+                  : copy.apply;
               // Auto-fix unreadable palettes (e.g. dark ink on a dark
               // surface). If the admin's textColor has enough contrast we
               // keep it; otherwise we fall back to white/near-black.
@@ -1204,7 +1494,7 @@ export default function SettingsPage() {
                       triggerRefresh();
                       pushToast({
                         tone: 'success',
-                        title: `Đã áp dụng theme ${theme.name}`,
+                        title: copy.themeApplied(theme.name),
                       });
                     } catch {
                       const currentTheme = themeCatalog.find(
@@ -1217,7 +1507,7 @@ export default function SettingsPage() {
                       );
                       pushToast({
                         tone: 'error',
-                        title: 'Không áp dụng được theme',
+                        title: copy.themeApplyFailed,
                       });
                     } finally {
                       setThemeState(null);
@@ -1247,7 +1537,7 @@ export default function SettingsPage() {
                         className="mt-1 text-sm"
                         style={{ color: readableMuted }}
                       >
-                        {theme.mode} {theme.isDefault ? '• mặc định hệ thống' : ''}
+                        {theme.mode} {theme.isDefault ? copy.systemDefaultSuffix : ''}
                       </p>
                     </div>
                     <div
@@ -1291,19 +1581,19 @@ export default function SettingsPage() {
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <SectionTitle
-            title="Thiết bị đăng nhập"
-            copy="Theo dõi các phiên đã đăng nhập gần đây để biết tài khoản đang mở ở đâu."
+            title={copy.sessionsTitle}
+            copy={copy.sessionsCopy}
             action={<Laptop className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5">
             <DataTable
               columns={[
-                'Thiết bị',
-                'Trình duyệt',
+                t('sessions.field.device'),
+                t('sessions.field.browser'),
                 'IP',
-                'Đăng nhập',
-                'Hết hạn',
-                'Trạng thái',
+                t('sessions.field.loginTime'),
+                t('sessions.field.expires'),
+                t('catalog.col.status'),
               ]}
               rows={settings.sessions
                 .slice(
@@ -1316,7 +1606,7 @@ export default function SettingsPage() {
                     key={`${session.id}-device`}
                     title={session.device}
                   >
-                    <p className="font-bold">{describeDevice(session.device)}</p>
+                    <p className="font-bold">{describeDevice(session.device, locale)}</p>
                   </div>,
                   <span
                     className="text-sm font-semibold"
@@ -1332,7 +1622,7 @@ export default function SettingsPage() {
                   </code>,
                   session.createdAt,
                   session.expiresAt,
-                  session.current ? 'Phiên hiện tại' : 'Đã lưu',
+                  session.current ? copy.currentSession : copy.savedSession,
                 ])}
             />
             <SessionsPagination
@@ -1344,19 +1634,14 @@ export default function SettingsPage() {
             />
           </div>
           <p className="mt-4 text-sm text-[var(--app-muted,theme(colors.slate))]">
-            Bảng này đóng vai trò lịch sử đăng nhập. Cột{' '}
-            <strong>Thiết bị</strong> chỉ hiển thị OS + dòng máy (Pixel 9,
-            iPhone…) vì <em>browser không cho phép app đọc tên máy thật</em>{' '}
-            (privacy). Muốn đặt tên thiết bị riêng (vd &ldquo;MacBook ở công ty&rdquo;),
-            hãy đăng ký nó dưới mục <strong>Thiết bị push</strong> bên cạnh —
-            chỗ đó cho phép gắn label tuỳ ý.
+            {copy.sessionsNote}
           </p>
         </Card>
 
         <Card>
           <SectionTitle
-            title="Thiết bị push"
-            copy="Đăng ký nhanh trình duyệt hiện tại để test thông báo, hoặc gỡ những thiết bị không còn dùng nữa."
+            title={copy.pushDevicesTitle}
+            copy={copy.pushDevicesCopy}
             action={<Smartphone className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 flex flex-wrap gap-3">
@@ -1379,15 +1664,14 @@ export default function SettingsPage() {
                   triggerRefresh();
                   pushToast({
                     tone: 'success',
-                    title: 'Đã thêm thiết bị web',
-                    message:
-                      'Anh có thể dùng nó để test push/in-app notification ngay trong dashboard.',
+                    title: copy.pushDeviceAdded,
+                    message: copy.pushDeviceAddedMessage,
                   });
                 } catch {
                   pushToast({
                     tone: 'error',
-                    title: 'Không thêm được thiết bị',
-                    message: 'Kiểm tra backend hoặc quyền đăng nhập rồi thử lại.',
+                    title: copy.pushDeviceAddFailed,
+                    message: t('settings.toast.serverHint'),
                   });
                 } finally {
                   setDeviceState('idle');
@@ -1395,12 +1679,12 @@ export default function SettingsPage() {
               }}
             >
               <Smartphone className="h-4 w-4" />
-              {deviceState === 'saving' ? 'Đang thêm' : 'Đăng ký trình duyệt này'}
+              {deviceState === 'saving' ? copy.adding : copy.registerCurrentBrowser}
             </Button>
           </div>
           <div className="mt-5">
             <DataTable
-              columns={['Label', 'Platform', 'Active', 'Action']}
+              columns={['Label', 'Platform', t('state.active'), t('catalog.col.actions')]}
               rows={settings.pushDevices.map((device) => [
                 device.label,
                 device.platform,
@@ -1417,18 +1701,18 @@ export default function SettingsPage() {
                       triggerRefresh();
                       pushToast({
                         tone: 'success',
-                        title: 'Đã gỡ thiết bị push',
+                        title: copy.pushDeviceRemoved,
                       });
                     } catch {
                       pushToast({
                         tone: 'error',
-                        title: 'Không gỡ được thiết bị push',
+                        title: copy.pushDeviceRemoveFailed,
                       });
                     }
                   }}
                   variant="secondary"
                 >
-                  Gỡ
+                  {copy.remove}
                 </Button>,
               ])}
             />
@@ -1437,8 +1721,8 @@ export default function SettingsPage() {
 
         <Card>
           <SectionTitle
-            title="Nhắc nhở"
-            copy="Tạo các mốc nhắc mới, bật tắt nhanh hoặc xoá hẳn khi lịch sống của anh thay đổi."
+            title={copy.remindersTitle}
+            copy={copy.remindersCopy}
             action={<Repeat className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 grid gap-4">
@@ -1448,14 +1732,14 @@ export default function SettingsPage() {
              *  field to 0px on intermediate widths. */}
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_180px_220px_auto]">
               <Field
-                label="Tiêu đề"
+                label={copy.titleLabel}
                 value={reminderDraft.title}
                 onChange={(value) =>
                   setReminderDraft((current) => ({ ...current, title: value }))
                 }
               />
               <Field
-                label="Loại"
+                label={copy.typeLabel}
                 select
                 value={reminderDraft.type}
                 options={['WATER', 'REST', 'BREATHING', 'JOURNAL', 'SLEEP', 'CUSTOM']}
@@ -1467,7 +1751,7 @@ export default function SettingsPage() {
                 }
               />
               <Field
-                label="Thời gian"
+                label={copy.datetimeLabel}
                 type="datetime-local"
                 value={reminderDraft.scheduledAt}
                 onChange={(value) =>
@@ -1506,14 +1790,14 @@ export default function SettingsPage() {
                       }));
                       pushToast({
                         tone: 'success',
-                        title: 'Đã tạo reminder',
-                        message: `"${reminderDraft.title}" — lưu OK. Title giữ nguyên cho lần tạo tiếp.`,
+                        title: copy.reminderCreated,
+                        message: copy.reminderCreatedMessage(reminderDraft.title),
                       });
                     } catch {
                       pushToast({
                         tone: 'error',
-                        title: 'Tạo reminder thất bại',
-                        message: 'Kiểm tra dữ liệu nhập hoặc phiên đăng nhập.',
+                        title: copy.reminderCreateFailed,
+                        message: t('settings.toast.serverHint'),
                       });
                     } finally {
                       setReminderState('idle');
@@ -1521,13 +1805,13 @@ export default function SettingsPage() {
                   }}
                 >
                   <Save className="h-4 w-4" />
-                  {reminderState === 'saving' ? 'Đang tạo' : 'Tạo reminder'}
+                  {reminderState === 'saving' ? copy.creating : copy.createReminder}
                 </Button>
               </div>
             </div>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
               <p className="text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-                {settings.reminders.length} nhắc đang lưu
+                {copy.savedReminderCount(settings.reminders.length)}
               </p>
               {settings.reminders.length > 0 ? (
                 <Button
@@ -1535,7 +1819,7 @@ export default function SettingsPage() {
                   disabled={reminderState === 'saving'}
                   onClick={async () => {
                     const ok = window.confirm(
-                      `Xoá tất cả ${settings.reminders.length} nhắc? Hành động này không hoàn tác được.`,
+                      copy.confirmDeleteAllReminders(settings.reminders.length),
                     );
                     if (!ok) return;
                     setReminderState('saving');
@@ -1551,7 +1835,7 @@ export default function SettingsPage() {
                       triggerRefresh();
                       pushToast({
                         tone: 'success',
-                        title: `Đã xoá ${settings.reminders.length} nhắc`,
+                        title: copy.deletedReminderCount(settings.reminders.length),
                       });
                     } finally {
                       setReminderState('idle');
@@ -1560,12 +1844,18 @@ export default function SettingsPage() {
                   variant="secondary"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  Xoá tất cả
+                  {copy.deleteAll}
                 </Button>
               ) : null}
             </div>
             <DataTable
-              columns={['Loại', 'Tiêu đề', 'Lịch', 'Trạng thái', 'Hành động']}
+              columns={[
+                copy.typeLabel,
+                copy.titleLabel,
+                copy.scheduleLabel,
+                t('catalog.col.status'),
+                t('catalog.col.actions'),
+              ]}
               rows={settings.reminders.map((reminder) => [
                 <span
                   className="inline-flex rounded-full bg-violet/15 px-2 py-0.5 text-xs font-bold text-violet"
@@ -1575,7 +1865,7 @@ export default function SettingsPage() {
                 </span>,
                 reminder.title,
                 reminder.schedule,
-                reminder.active ? 'On' : 'Off',
+                reminder.active ? copy.on : copy.off,
                 <div className="flex gap-2" key={reminder.id}>
                   <Button
                     className="h-8 px-3 text-xs"
@@ -1592,19 +1882,19 @@ export default function SettingsPage() {
                         pushToast({
                           tone: 'success',
                           title: reminder.active
-                            ? 'Đã tắt reminder'
-                            : 'Đã bật reminder',
+                            ? copy.reminderDisabled
+                            : copy.reminderEnabled,
                         });
                       } catch {
                         pushToast({
                           tone: 'error',
-                          title: 'Không đổi được trạng thái reminder',
+                          title: copy.reminderStatusFailed,
                         });
                       }
                     }}
                     variant="secondary"
                   >
-                    {reminder.active ? 'Tắt' : 'Bật'}
+                    {reminder.active ? copy.disable : copy.enable}
                   </Button>
                   <Button
                     className="h-8 px-3 text-xs"
@@ -1617,17 +1907,17 @@ export default function SettingsPage() {
                         triggerRefresh();
                         pushToast({
                           tone: 'success',
-                          title: 'Đã xoá reminder',
+                          title: copy.reminderDeleted,
                         });
                       } catch {
                         pushToast({
                           tone: 'error',
-                          title: 'Xoá reminder thất bại',
+                          title: copy.reminderDeleteFailed,
                         });
                       }
                     }}
                   >
-                    Xoá
+                    {t('btn.delete')}
                   </Button>
                 </div>,
               ])}
@@ -1637,19 +1927,19 @@ export default function SettingsPage() {
 
         <Card>
           <SectionTitle
-            title="Gói cước & nâng cấp"
-            copy="Xem plan đang dùng và tạo checkout intent để backend ghi nhận nhu cầu nâng cấp."
+            title={copy.billingTitle}
+            copy={copy.billingCopy}
             action={<CreditCard className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5 rounded-lg border border-lilac/70 bg-white/75 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate">
-              Gói hiện tại
+              {copy.currentPlan}
             </p>
             <p className="mt-2 text-2xl font-extrabold text-ink">
               {settings.billing.planName}
             </p>
             <p className="mt-1 text-sm font-medium text-plum">
-              Trạng thái {settings.billing.status} • gia hạn {settings.billing.renewal}
+              {copy.billingStatus(settings.billing.status, settings.billing.renewal)}
             </p>
           </div>
           <div className="mt-5 grid gap-3">
@@ -1662,7 +1952,7 @@ export default function SettingsPage() {
                   <div>
                     <p className="text-lg font-extrabold text-ink">{plan.title}</p>
                     <p className="mt-1 text-sm font-semibold text-plum">
-                      {formatPlanPrice(plan.price, plan.currency)}
+                      {formatPlanPrice(plan.price, plan.currency, locale)}
                     </p>
                   </div>
                   <Button
@@ -1682,10 +1972,10 @@ export default function SettingsPage() {
                     }
                   >
                     {settings.billing.planName === plan.name
-                      ? 'Đang dùng'
+                      ? copy.inUse
                       : billingState === plan.name
-                        ? 'Đang tạo'
-                        : 'Chọn gói này'}
+                        ? copy.creating
+                        : copy.choosePlan}
                   </Button>
                 </div>
                 {plan.features.length > 0 ? (
@@ -1703,7 +1993,7 @@ export default function SettingsPage() {
               </div>
             )) : (
               <div className="rounded-lg border border-dashed border-lilac bg-white/70 p-5 text-sm font-medium text-slate">
-                Chưa tải được danh sách gói từ API billing.
+                {copy.billingEmpty}
               </div>
             )}
           </div>
@@ -1755,35 +2045,33 @@ export default function SettingsPage() {
                   },
                   checkout: {
                     status: 'ACTIVATED',
-                    note: `Đã kích hoạt gói ${
-                      activated.subscription?.planName ?? checkoutPlan.title
-                    }. Subscription chuyển sang ${
-                      activated.subscription?.status ?? 'ACTIVE'
-                    }.`,
+                    note: copy.activatedNote(
+                      activated.subscription?.planName ?? checkoutPlan.title,
+                      activated.subscription?.status ?? 'ACTIVE',
+                    ),
                   },
                 });
                 triggerRefresh();
                 pushToast({
                   tone: 'success',
-                  title: `Đã kích hoạt ${checkoutPlan.title}`,
-                  message:
-                    'Thanh toán đã được xác nhận và gói đã được kích hoạt.',
+                  title: copy.activatedTitle(checkoutPlan.title),
+                  message: copy.activatedMessage,
                 });
               } else {
                 triggerRefresh();
                 pushToast({
                   tone: 'info',
-                  title: `Đã tạo yêu cầu ${checkoutPlan.title}`,
+                  title: copy.intentCreated(checkoutPlan.title),
                   message:
                     result.checkout?.note ??
-                    'Backend đã ghi nhận checkout intent cho gói này.',
+                    copy.intentRecorded,
                 });
               }
             } catch {
               pushToast({
                 tone: 'error',
-                title: 'Không hoàn tất được nâng cấp',
-                message: 'Kiểm tra backend billing rồi thử lại.',
+                title: copy.upgradeFailed,
+                message: copy.upgradeFailedMessage,
               });
             } finally {
               setBillingState(null);
@@ -1810,6 +2098,8 @@ function SessionsPagination({
   setPageSize: (next: number) => void;
   total: number;
 }) {
+  const { locale } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const pageSizes = [10, 20, 50];
   const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
   const showingFrom = total === 0 ? 0 : page * pageSize + 1;
@@ -1818,9 +2108,9 @@ function SessionsPagination({
   return (
     <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-        <span>Hiển thị</span>
+        <span>{copy.show}</span>
         <select
-          aria-label="Số phiên / trang"
+          aria-label={copy.sessionsPerPage}
           className="h-9 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-2 text-sm font-bold text-[var(--app-text)]"
           onChange={(event) => {
             setPageSize(Number(event.target.value));
@@ -1834,7 +2124,7 @@ function SessionsPagination({
             </option>
           ))}
         </select>
-        <span>phiên / trang</span>
+        <span>{copy.sessionsPerPage}</span>
       </div>
       <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
         <span className="text-[var(--app-muted,theme(colors.slate))]">
@@ -1842,7 +2132,7 @@ function SessionsPagination({
         </span>
         <div className="flex items-center gap-1">
           <button
-            aria-label="Trang trước"
+            aria-label={copy.previousPage}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
             disabled={page <= 0}
             onClick={() => setPage(Math.max(0, page - 1))}
@@ -1854,7 +2144,7 @@ function SessionsPagination({
             {page + 1} / {Math.max(1, lastPage + 1)}
           </span>
           <button
-            aria-label="Trang sau"
+            aria-label={copy.nextPage}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
             disabled={page >= lastPage}
             onClick={() => setPage(Math.min(lastPage, page + 1))}
@@ -1876,6 +2166,8 @@ function QuickAddReminder({
   onCreated: () => void;
 }) {
   const pushToast = useUiStore((state) => state.pushToast);
+  const { locale } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const [time, setTime] = useState(() => {
     const d = new Date();
     d.setHours(d.getHours() + 1, 0, 0, 0);
@@ -1887,7 +2179,7 @@ function QuickAddReminder({
     <div className="mt-3 flex flex-wrap items-end gap-3">
       <label className="flex-1 min-w-[120px]">
         <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
-          Giờ nhắc
+          {copy.reminderTime}
         </span>
         <input
           className="mt-2 h-11 w-full rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-sm font-semibold text-[var(--app-text,theme(colors.ink))] outline-none"
@@ -1912,16 +2204,16 @@ function QuickAddReminder({
               method: 'POST',
               body: JSON.stringify({
                 title: defaultTitle,
-                message: 'Nhắc nhẹ trong ngày từ Quick add.',
+                message: copy.quickAddMessage,
                 type: 'BREATHING',
                 scheduledAt: scheduled.toISOString(),
                 isActive: true,
               }),
             });
             onCreated();
-            pushToast({ tone: 'success', title: `Đã thêm nhắc ${time}` });
+            pushToast({ tone: 'success', title: copy.quickAdded(time) });
           } catch {
-            pushToast({ tone: 'error', title: 'Không thêm được nhắc' });
+            pushToast({ tone: 'error', title: copy.quickAddFailed });
           } finally {
             setBusy(false);
           }
@@ -1929,7 +2221,7 @@ function QuickAddReminder({
         variant="secondary"
       >
         <Save className="h-4 w-4" />
-        {busy ? 'Đang thêm' : 'Thêm nhanh'}
+        {busy ? copy.adding : copy.quickAdd}
       </Button>
     </div>
   );
@@ -1950,6 +2242,8 @@ function CheckoutModal({
   plan: BillingPlan;
   result: CheckoutResult | null;
 }) {
+  const { locale, t } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const creating = billingState === plan.name;
   const currentPlan = currentPlanName === plan.name;
 
@@ -1961,13 +2255,13 @@ function CheckoutModal({
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
               Checkout intent
             </p>
-            <h2 className="mt-2 text-2xl font-extrabold">Tạo thanh khoản</h2>
+            <h2 className="mt-2 text-2xl font-extrabold">{copy.checkoutTitle}</h2>
             <p className="mt-1 text-sm font-medium text-[var(--app-muted)]">
-              Xác nhận gói để backend tạo payment pending và trả trạng thái provider.
+              {copy.checkoutCopy}
             </p>
           </div>
           <button
-            aria-label="Đóng checkout"
+            aria-label={copy.closeCheckout}
             className="rounded-full border border-[var(--field-border)] p-2 text-[var(--app-text)] transition hover:bg-violet/10"
             onClick={onClose}
             type="button"
@@ -1981,11 +2275,11 @@ function CheckoutModal({
             <div>
               <p className="text-xl font-extrabold">{plan.title}</p>
               <p className="mt-1 text-sm font-semibold text-violet">
-                {formatPlanPrice(plan.price, plan.currency)}
+                {formatPlanPrice(plan.price, plan.currency, locale)}
               </p>
             </div>
             <span className="rounded-full bg-cloud px-3 py-1 text-xs font-bold text-ink">
-              {currentPlan ? 'Gói hiện tại' : 'Có thể nâng cấp'}
+              {currentPlan ? copy.currentPlan : copy.upgradable}
             </span>
           </div>
           {plan.features.length > 0 ? (
@@ -2004,7 +2298,7 @@ function CheckoutModal({
 
         {result ? (
           <div className="mt-4 rounded-xl border border-mint/40 bg-mint/10 p-4">
-            <p className="font-extrabold text-mint">Backend đã tạo intent</p>
+            <p className="font-extrabold text-mint">{copy.intentReady}</p>
             <div className="mt-3 grid gap-2 text-sm font-semibold sm:grid-cols-2">
               <span>Payment: {result.payment?.id ?? '-'}</span>
               <span>Status: {result.payment?.status ?? '-'}</span>
@@ -2014,19 +2308,20 @@ function CheckoutModal({
                 {formatPlanPrice(
                   result.payment?.amount ?? plan.price,
                   result.payment?.currency ?? plan.currency,
+                  locale,
                 )}
               </span>
             </div>
             <p className="mt-3 text-sm font-medium text-[var(--app-muted)]">
               {result.checkout?.note ??
-                'Payment pending đã được ghi vào database. Khi cấu hình provider, chỗ này sẽ nhận checkout URL thật.'}
+                copy.paymentPendingNote}
             </p>
           </div>
         ) : null}
 
         <div className="mt-5 flex flex-wrap justify-end gap-3">
           <Button onClick={onClose} type="button" variant="secondary">
-            Đóng
+            {t('common.close')}
           </Button>
           <Button
             disabled={creating || currentPlan}
@@ -2034,7 +2329,7 @@ function CheckoutModal({
             type="button"
           >
             <CreditCard className="h-4 w-4" />
-            {creating ? 'Đang tạo intent' : currentPlan ? 'Đang dùng' : 'Tạo thanh khoản'}
+            {creating ? copy.creatingIntent : currentPlan ? copy.inUse : copy.createCheckout}
           </Button>
         </div>
       </div>
@@ -2169,6 +2464,9 @@ function CompanionAssetCard({
   selected: boolean;
   onSelect: () => void;
 }) {
+  const { locale } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
+
   return (
     <button
       className={`overflow-hidden rounded-xl border text-left transition ${
@@ -2194,7 +2492,7 @@ function CompanionAssetCard({
       <div className="p-4">
         <p className="font-extrabold text-ink">{asset.name}</p>
         <p className="mt-1 text-sm text-slate">
-          {asset.description || 'Linh thú đồng hành'}
+          {asset.description || copy.assetFallbackDescription}
         </p>
       </div>
     </button>
@@ -2210,6 +2508,8 @@ function SafeCompanionImage({
   className: string;
   src: string;
 }) {
+  const { locale } = useTranslation();
+  const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const [failed, setFailed] = useState(false);
 
   if (failed) {
@@ -2217,7 +2517,7 @@ function SafeCompanionImage({
       <div
         className={`${className} flex items-center justify-center bg-violet/10 text-xs font-bold text-violet`}
       >
-        Preview chưa tải được
+        {copy.previewLoadFailed}
       </div>
     );
   }
@@ -2277,19 +2577,20 @@ function nextLocalReminderTime() {
   return `${year}-${month}-${day}T${hour}:${minute}`;
 }
 
-function formatPlanPrice(price: number, currency: string) {
+function formatPlanPrice(price: number, currency: string, locale: 'vi' | 'en') {
   if (price <= 0) {
-    return 'Miễn phí';
+    return locale === 'en' ? EN_SETTINGS_COPY.free : VI_SETTINGS_COPY.free;
   }
 
+  const intlLocale = locale === 'en' ? 'en-US' : 'vi-VN';
   try {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat(intlLocale, {
       style: 'currency',
       currency,
       maximumFractionDigits: 0,
     }).format(price);
   } catch {
-    return `${new Intl.NumberFormat('vi-VN', {
+    return `${new Intl.NumberFormat(intlLocale, {
       maximumFractionDigits: 0,
     }).format(price)} ${currency}`;
   }
@@ -2315,9 +2616,16 @@ function dispatchDashboardTheme(
   );
 }
 
-function modeLabel(mode: CompanionMode) {
-  if (mode === 'ZODIAC') return 'Theo cung hoàng đạo';
-  if (mode === 'CHINESE_ZODIAC') return 'Theo 12 con giáp';
-  if (mode === 'CUSTOM') return 'Tự chọn linh thú';
-  return 'Mặc định';
+function modeLabel(mode: CompanionMode, copy: typeof VI_SETTINGS_COPY) {
+  if (mode === 'ZODIAC') return copy.modeZodiac;
+  if (mode === 'CHINESE_ZODIAC') return copy.modeChineseZodiac;
+  if (mode === 'CUSTOM') return copy.modeCustom;
+  return copy.modeDefault;
+}
+
+function companionOptionLabel(
+  option: CompanionOptionGroup,
+  copy: typeof VI_SETTINGS_COPY,
+) {
+  return modeLabel(option.mode, copy);
 }
