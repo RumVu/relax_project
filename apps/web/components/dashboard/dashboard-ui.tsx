@@ -34,10 +34,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMounted } from '@/hooks/use-mounted';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const colors = ['#7357f6', '#40c9a2', '#ef767a', '#f7c948', '#9f7aea', '#7c8cf8'];
 
 export function DataSyncBadge({ endpoint }: { endpoint: string }) {
+  const { t } = useTranslation();
   const [state, setState] = useState<'checking' | 'live' | 'error'>('checking');
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
@@ -71,10 +73,10 @@ export function DataSyncBadge({ endpoint }: { endpoint: string }) {
 
   const label =
     state === 'checking'
-      ? 'Đang dò API'
+      ? t('status.probing')
       : state === 'live'
         ? 'Live API'
-        : 'API lỗi';
+        : t('status.apiError');
   const Icon = state === 'live' ? Wifi : state === 'error' ? WifiOff : RefreshCcw;
 
   return (
@@ -99,8 +101,9 @@ export function RealtimeStatusBadge({
 }: {
   onEvent?: (eventName: string, payload?: unknown) => void;
 }) {
+  const { t } = useTranslation();
   const [state, setState] = useState<'idle' | 'connecting' | 'live' | 'offline'>('idle');
-  const [lastEvent, setLastEvent] = useState('Realtime đang kết nối');
+  const [lastEvent, setLastEvent] = useState(() => t('status.rt.connecting'));
 
   useEffect(() => {
     const token = getStoredAccessToken();
@@ -121,11 +124,11 @@ export function RealtimeStatusBadge({
 
     socket.on('connect', () => {
       setState('live');
-      setLastEvent('Realtime đã kết nối');
+      setLastEvent(t('status.rt.connected'));
     });
     socket.on('realtime.ready', () => {
       setState('live');
-      setLastEvent('Realtime đã kết nối');
+      setLastEvent(t('status.rt.connected'));
     });
     socket.on('realtime.auth_failed', async () => {
       try {
@@ -134,12 +137,12 @@ export function RealtimeStatusBadge({
         socket.connect();
       } catch {
         setState('offline');
-        setLastEvent('Realtime cần đăng nhập lại');
+        setLastEvent(t('status.rt.needsLogin'));
       }
     });
     socket.on('connect_error', () => {
       setState('offline');
-      setLastEvent('Realtime mất kết nối');
+      setLastEvent(t('status.rt.disconnected'));
     });
 
     for (const eventName of [
@@ -332,13 +335,14 @@ export function MoodAreaDashboardChart({
 }: {
   data: Array<Record<string, string | number>>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[380px]">
       <SectionTitle
-        title="Đường mood theo thời gian"
-        copy="Mood score 0-100: điểm cao là căng, điểm thấp là thư giãn. Đường đi xuống mới là tốt."
+        title={t('chart.moodTimeline.title')}
+        copy={t('chart.moodTimeline.copy')}
       />
       <ChartFrame mounted={mounted}>
         <AreaChart data={data} margin={{ left: -18, right: 8, top: 16 }}>
@@ -361,8 +365,7 @@ export function MoodAreaDashboardChart({
         </AreaChart>
       </ChartFrame>
       <p className="mt-3 text-xs font-semibold text-slate">
-        Đường mood càng đi xuống thì đầu óc càng dịu lại; đường stress càng thấp thì
-        mức căng thẳng càng bớt.
+        {t('chart.moodTimeline.copy')}
       </p>
     </Card>
   );
@@ -373,13 +376,14 @@ export function DistributionChart({
 }: {
   data: Array<{ mood: string; count: number; percent: number }>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[380px]">
       <SectionTitle
-        title="Phân bố cảm xúc"
-        copy="Nhìn nhanh cảm xúc nào đang xuất hiện nhiều nhất trong giai đoạn anh đang xem."
+        title={t('chart.moodDistribution.title')}
+        copy={t('chart.moodDistribution.copy')}
       />
       <ChartFrame mounted={mounted}>
         <BarChart data={data} margin={{ left: -18, right: 8, top: 16 }}>
@@ -403,13 +407,14 @@ export function WeeklyStatsChart({
 }: {
   data: Array<Record<string, string | number>>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[380px]">
       <SectionTitle
-        title="Nhịp mood theo tuần"
-        copy="Cột tím là điểm mood trung bình, đường xanh là mức cải thiện stress giữa các tuần."
+        title={t('chart.weeklyStats.title')}
+        copy={t('chart.weeklyStats.copy')}
       />
       <ChartFrame mounted={mounted}>
         <ComposedChart data={data} margin={{ left: -18, right: 8, top: 16 }}>
@@ -430,13 +435,14 @@ export function RelaxActivityChart({
 }: {
   data: Array<Record<string, string | number>>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[340px]">
       <SectionTitle
-        title="Hiệu quả thư giãn"
-        copy="So sánh tần suất dùng và mức relief tương đối giữa các hoạt động nghỉ ngơi."
+        title={t('chart.relaxEffect.title')}
+        copy={t('chart.relaxEffect.copy')}
       />
       <ChartFrame height="h-[230px]" mounted={mounted}>
         <ComposedChart data={data} margin={{ left: -18, right: 8, top: 16 }}>
@@ -457,11 +463,12 @@ export function AdminGrowthChart({
 }: {
   data: Array<Record<string, string | number>>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[390px]">
-      <SectionTitle title="DAU / user mới / doanh thu" copy="Toàn cảnh tăng trưởng theo ngày" />
+      <SectionTitle title={t('chart.adminGrowth.title')} copy={t('chart.adminGrowth.copy')} />
       <ChartFrame mounted={mounted}>
         <ComposedChart data={data} margin={{ left: -18, right: 8, top: 16 }}>
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
@@ -482,11 +489,12 @@ export function DonutChart({
 }: {
   data: Array<{ name: string; value: number }>;
 }) {
+  const { t } = useTranslation();
   const mounted = useMounted();
 
   return (
     <Card className="min-h-[390px]">
-      <SectionTitle title="Engagement nội dung" copy="Tỉ trọng tương tác theo nhóm nội dung" />
+      <SectionTitle title={t('chart.contentEngagement.title')} copy={t('chart.contentEngagement.copy')} />
       <ChartFrame mounted={mounted}>
         <PieChart>
           <Tooltip contentStyle={tooltipStyle} />
