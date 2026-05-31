@@ -108,15 +108,44 @@ TRACKS=(
   "campfire|CRACKLE|Lửa trại|Tiếng lửa trại lép bép nhẹ.|https://images.unsplash.com/photo-1475139441338-693e7dbe20b6?w=600|anoisesrc=color=white:duration=30:amplitude=0.45|highpass=f=800,lowpass=f=4500,vibrato=f=12:d=0.4"
 )
 
-# meditation + calm-piano use multi-input filter_complex
+# meditation + music tracks use multi-input filter_complex.
+#
+# Synthesised "instrument" timbres (since we don't ship real recordings):
+#   piano       sine + tremolo + lowpass    → bell-like sustain
+#   violin      sawtooth + vibrato + chorus → bowed reedy sustain
+#   saxophone   square+sawtooth mix + reso  → breathy reed
+#   lofi-music  pink-noise + soft chord pad → background bed
 MULTI_TRACKS=(
+  # MEDITATION (4)
   "meditation-432|MEDITATION|Tần số thiền 432Hz|Dải tần ấm áp dùng trong thiền định.|https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600|MULTI:sine=frequency=432:duration=30;sine=frequency=648:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.3,tremolo=f=0.15:d=0.4"
   "meditation-528|MEDITATION|Tần số chữa lành 528Hz|Tần số được cho là giúp thư thái.|https://images.unsplash.com/photo-1591291621164-2c6367723315?w=600|MULTI:sine=frequency=528:duration=30;sine=frequency=792:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.3,tremolo=f=0.18:d=0.4"
   "meditation-low|MEDITATION|Drone trầm|Âm trầm cho thiền sâu.|https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600|MULTI:sine=frequency=80:duration=30;sine=frequency=120:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.35,tremolo=f=0.12:d=0.3"
   "meditation-bowl|MEDITATION|Chuông thiền|Âm chuông Tây Tạng kéo dài.|https://images.unsplash.com/photo-1591291621099-fd31fcc7b9f7?w=600|MULTI:sine=frequency=256:duration=30;sine=frequency=384:duration=30;sine=frequency=512:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.3,tremolo=f=0.2:d=0.5"
-  "piano-major|PIANO|Hợp âm C trưởng|Hợp âm Đô trưởng dịu nhẹ.|https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600|MULTI:sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;sine=frequency=392.00:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.5:d=0.2,lowpass=f=2500"
-  "piano-minor|PIANO|Hợp âm A thứ|Hợp âm La thứ man mác.|https://images.unsplash.com/photo-1466150036782-869a824aeb25?w=600|MULTI:sine=frequency=220.00:duration=30;sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.4:d=0.25,lowpass=f=2300"
-  "piano-evening|PIANO|Piano buổi tối|Hợp âm piano cho lúc thư giãn tối.|https://images.unsplash.com/photo-1571115332905-d8c5dcdaa9a4?w=600|MULTI:sine=frequency=196:duration=30;sine=frequency=246.94:duration=30;sine=frequency=293.66:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.32,tremolo=f=0.4:d=0.3,lowpass=f=2400"
+
+  # PIANO (5) — Đô/La/Sol/Rê/Fa trưởng-thứ
+  "piano-c-major|PIANO|Hợp âm Đô trưởng (C)|Hợp âm Đô trưởng dịu nhẹ — cổ điển và sáng.|https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600|MULTI:sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;sine=frequency=392.00:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.5:d=0.2,lowpass=f=2500"
+  "piano-a-minor|PIANO|Hợp âm La thứ (Am)|Hợp âm La thứ man mác buồn nhẹ.|https://images.unsplash.com/photo-1466150036782-869a824aeb25?w=600|MULTI:sine=frequency=220.00:duration=30;sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.4:d=0.25,lowpass=f=2300"
+  "piano-g-major|PIANO|Hợp âm Sol trưởng (G)|Sol trưởng ấm áp, hợp lúc trầm tư.|https://images.unsplash.com/photo-1571115332905-d8c5dcdaa9a4?w=600|MULTI:sine=frequency=196:duration=30;sine=frequency=246.94:duration=30;sine=frequency=293.66:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.32,tremolo=f=0.4:d=0.3,lowpass=f=2400"
+  "piano-d-minor|PIANO|Hợp âm Rê thứ (Dm)|Rê thứ sâu lắng — buổi tối yên tĩnh.|https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600|MULTI:sine=frequency=293.66:duration=30;sine=frequency=349.23:duration=30;sine=frequency=440.00:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.33,tremolo=f=0.4:d=0.25,lowpass=f=2200"
+  "piano-f-major|PIANO|Hợp âm Fa trưởng (F)|Fa trưởng rộng mở, dịu dàng.|https://images.unsplash.com/photo-1552422535-c45813c61732?w=600|MULTI:sine=frequency=174.61:duration=30;sine=frequency=220.00:duration=30;sine=frequency=261.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.34,tremolo=f=0.45:d=0.22,lowpass=f=2400"
+
+  # VIOLIN (4) — sawtooth + vibrato + lowpass → bowed string
+  "violin-andante|VIOLIN|Violin Andante|Violin nhẹ tempo chậm, giai điệu Rê trưởng.|https://images.unsplash.com/photo-1465821185615-20b3c2fbf41b?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*293.66*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*369.99*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5.5:d=0.4,lowpass=f=3500,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.7"
+  "violin-adagio|VIOLIN|Violin Adagio|Violin cực chậm, hợp khi cần sự dịu dàng.|https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*246.94*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*311.13*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4:d=0.5,lowpass=f=3200,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.65"
+  "violin-evening|VIOLIN|Violin buổi tối|Violin trầm ấm cho buổi tối nghỉ ngơi.|https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*220*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*277.18*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.4,lowpass=f=3000,chorus=0.6:0.9:50:0.4:0.25:2,volume=0.7"
+  "violin-morning|VIOLIN|Violin ban mai|Violin sáng tươi, hợp lúc khởi đầu ngày.|https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*329.63*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*415.30*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=6:d=0.35,lowpass=f=4000,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.65"
+
+  # SAXOPHONE (4) — square+sine mix + resonant filter → breathy reed
+  "sax-smooth|SAXOPHONE|Saxophone êm dịu|Sax êm buổi tối — phong cách jazz lounge.|https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*220*t)+0.5*sin(2*PI*440*t)+0.3*sin(2*PI*660*t)):d=30;aevalsrc=0.4*(sin(2*PI*261.63*t)+0.5*sin(2*PI*523.25*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.5,lowpass=f=2800,volume=0.55"
+  "sax-blue|SAXOPHONE|Saxophone blue|Sax giai điệu blue man mác.|https://images.unsplash.com/photo-1455368109333-ac6cc92f5d9c?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*246.94*t)+0.5*sin(2*PI*493.88*t)):d=30;aevalsrc=0.4*(sin(2*PI*311.13*t)+0.5*sin(2*PI*622.25*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4.5:d=0.55,lowpass=f=2600,volume=0.55"
+  "sax-bossa|SAXOPHONE|Saxophone bossa|Sax phong cách bossa nova chiều thu.|https://images.unsplash.com/photo-1453538179742-fc1c6a26c5b2?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*293.66*t)+0.5*sin(2*PI*587.33*t)):d=30;aevalsrc=0.4*(sin(2*PI*369.99*t)+0.5*sin(2*PI*739.99*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.5,lowpass=f=2700,volume=0.5"
+  "sax-late-night|SAXOPHONE|Saxophone đêm khuya|Sax sâu lắng, đêm muộn quán nhỏ.|https://images.unsplash.com/photo-1518972559570-7cc1309f3229?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*196*t)+0.5*sin(2*PI*392*t)):d=30;aevalsrc=0.4*(sin(2*PI*246.94*t)+0.5*sin(2*PI*493.88*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4:d=0.6,lowpass=f=2400,volume=0.55"
+
+  # LOFI MUSIC (4) — pink-noise bed + chord pad
+  "lofi-music-rain|LOFI|Lo-fi mưa đêm|Bài lo-fi nền cùng tiếng mưa nhẹ.|https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.35;sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3:d=0.3,lowpass=f=2500,volume=0.6"
+  "lofi-music-study|LOFI|Lo-fi học bài|Lo-fi đều đặn để tập trung học.|https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.3;sine=frequency=220:duration=30;sine=frequency=277.18:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=4:d=0.25,lowpass=f=2700,volume=0.55"
+  "lofi-music-cafe|LOFI|Lo-fi quán cà phê|Lo-fi pha không gian quán cà phê.|https://images.unsplash.com/photo-1559070169-a3077159ee16?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.4;sine=frequency=196:duration=30;sine=frequency=261.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3.5:d=0.3,lowpass=f=2400,volume=0.55"
+  "lofi-music-sunset|LOFI|Lo-fi hoàng hôn|Lo-fi nhẹ lúc trời tắt nắng.|https://images.unsplash.com/photo-1495995083802-c39e3a35a45e?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.35;sine=frequency=174.61:duration=30;sine=frequency=220:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3:d=0.3,lowpass=f=2300,volume=0.6"
 )
 
 # ---- Generate sounds with ffmpeg --------------------------------------------
