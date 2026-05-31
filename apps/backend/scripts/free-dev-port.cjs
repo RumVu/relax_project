@@ -21,6 +21,16 @@ function killPid(pid, reason) {
     return;
   }
 
+  const command = commandForPid(pid);
+  if (isDockerProcess(command)) {
+    console.error(
+      `Port ${port} is owned by Docker Desktop; not killing PID ${pid}. ` +
+        'Stop the compose backend first (`docker compose stop backend`) or use a different PORT.',
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   try {
     process.kill(pid, 'SIGKILL');
     console.log(`Freed backend dev process ${pid} (${reason})`);
@@ -40,8 +50,26 @@ function list(command) {
   }
 }
 
+function commandForPid(pid) {
+  try {
+    return execSync(`ps -o command= -p ${pid} 2>/dev/null || true`, {
+      encoding: 'utf8',
+    }).trim();
+  } catch {
+    return '';
+  }
+}
+
+function isDockerProcess(command) {
+  return command.includes('/Docker.app/') || command.includes('com.docker.');
+}
+
 for (const line of list(`lsof -ti tcp:${port} 2>/dev/null || true`)) {
   killPid(Number(line), `port ${port}`);
+}
+
+if (process.exitCode) {
+  process.exit(process.exitCode);
 }
 
 for (const line of list(`ps -ax -o pid=,command= 2>/dev/null || true`)) {

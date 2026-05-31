@@ -53,7 +53,10 @@ services:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-123456}@postgres:5432/${POSTGRES_DB:-digital_cigarette_break}?schema=public
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      # Local compose commands such as `docker compose up postgres redis`
+      # still interpolate every service. Keep a safe dev fallback here and
+      # require real secrets in deployment/runtime envs instead.
+      JWT_SECRET: ${JWT_SECRET:-local-dev-only-change-me}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-digital-cigarette-break-api}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-digital-cigarette-break-app}
@@ -108,7 +111,9 @@ services:
     hostname: ${TS_HOSTNAME:-relax-backend}
     restart: unless-stopped
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY:?TS_AUTHKEY required — tạo ở https://login.tailscale.com/admin/settings/keys}
+      # Leave blank unless the `funnel` profile is intentionally started.
+      # The Makefile's `funnel` target validates this before compose runs.
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
       TS_HOSTNAME: ${TS_HOSTNAME:-relax-backend}
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"

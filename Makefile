@@ -21,7 +21,7 @@ infra-reset: ## Stop + remove volumes (DESTRUCTIVE)
 
 .PHONY: up
 up: ## Start full stack (infra + backend + web) via compose profiles
-	docker compose --profile full up -d --build
+	JWT_SECRET="$${JWT_SECRET:-$$(openssl rand -hex 32)}" docker compose --profile full up -d --build
 
 .PHONY: down
 down: ## Stop all compose services
