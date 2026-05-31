@@ -56,6 +56,10 @@ describe('User and Auth APIs (e2e)', () => {
         expect(body.user.preferences.language).toBe('vi');
       });
     const { accessToken, refreshToken, user } = registered.body;
+    const issuedRefreshCookie = registered.headers['set-cookie']?.find(
+      (cookie: string) => cookie.startsWith('relax_refresh_token='),
+    );
+    expect(issuedRefreshCookie).toContain('HttpOnly');
     const storedSession = await prisma.session.findFirstOrThrow({
       where: { userId: user.id },
     });
@@ -154,6 +158,40 @@ describe('User and Auth APIs (e2e)', () => {
       .send({ refreshToken: refreshed.body.refreshToken })
       .expect(201)
       .expect(({ body }) => expect(body.success).toBe(true));
+
+    const cookieLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({ email, password })
+      .expect(201);
+    const refreshCookie = cookieLogin.headers['set-cookie']?.find(
+      (cookie: string) => cookie.startsWith('relax_refresh_token='),
+    );
+    expect(refreshCookie).toBeTruthy();
+
+    const cookieRefreshed = await request(app.getHttpServer())
+      .post('/auth/refresh')
+      .set('Cookie', refreshCookie)
+      .expect(201)
+      .expect(({ body }) => {
+        expect(body.accessToken).toBeTruthy();
+        expect(body.refreshToken).toBeTruthy();
+      });
+
+    const rotatedCookie = cookieRefreshed.headers['set-cookie']?.find(
+      (cookie: string) => cookie.startsWith('relax_refresh_token='),
+    );
+    expect(rotatedCookie).toContain('HttpOnly');
+
+    await request(app.getHttpServer())
+      .post('/auth/logout')
+      .set('Cookie', rotatedCookie)
+      .expect(201)
+      .expect(({ headers, body }) => {
+        expect(body.success).toBe(true);
+        expect(headers['set-cookie']?.join(';')).toContain(
+          'relax_refresh_token=;',
+        );
+      });
 
     await request(app.getHttpServer())
       .delete(`/sessions/user/${user.id}`)

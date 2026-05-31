@@ -2,7 +2,7 @@ import { UserResponseDto } from '../../users/dto/user-response.dto';
 
 export class AuthResponseDto {
   accessToken!: string;
-  refreshToken!: string;
+  refreshToken?: string;
   expiresAt!: Date;
   sessionId?: string;
   user!: UserResponseDto;

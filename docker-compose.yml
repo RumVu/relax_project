@@ -49,11 +49,13 @@ services:
         condition: service_healthy
     environment:
       PORT: ${BACKEND_PORT:-6823}
-      NODE_ENV: ${NODE_ENV:-production}
+      NODE_ENV: ${NODE_ENV:-development}
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-123456}@postgres:5432/${POSTGRES_DB:-digital_cigarette_break}?schema=public
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      # Local compose fallback only. Production uses docker-compose.prod.yml,
+      # where JWT_SECRET is required and has no default.
+      JWT_SECRET: ${JWT_SECRET:-local-compose-jwt-9f8c7e6d5b4a3210f1e2d3c4b5a69788}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-digital-cigarette-break-api}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-digital-cigarette-break-app}
@@ -71,12 +73,15 @@ services:
       # `make share-vercel` sẽ override để bồi thêm tunnel + reaffirm Vercel URL.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3233,https://relax-project-web-dashboard.vercel.app}
       LOG_LEVEL: ${LOG_LEVEL:-info}
-      # Swagger public mặc định để a/team xem /docs qua tunnel.
-      # Trong real prod nên SWAGGER_PUBLIC=false + basic auth user/pass.
+      # Dev/demo can opt into public docs with SWAGGER_PUBLIC=true. Production
+      # should use SWAGGER_PUBLIC=false + basic auth, or disable Swagger.
       SWAGGER_ENABLED: ${SWAGGER_ENABLED:-true}
-      SWAGGER_PUBLIC: ${SWAGGER_PUBLIC:-true}
+      SWAGGER_PUBLIC: ${SWAGGER_PUBLIC:-false}
       SWAGGER_BASIC_USER: ${SWAGGER_BASIC_USER:-}
       SWAGGER_BASIC_PASSWORD: ${SWAGGER_BASIC_PASSWORD:-}
+      AUTH_REFRESH_COOKIE_NAME: ${AUTH_REFRESH_COOKIE_NAME:-relax_refresh_token}
+      AUTH_REFRESH_COOKIE_SECURE: ${AUTH_REFRESH_COOKIE_SECURE:-}
+      AUTH_REFRESH_COOKIE_SAME_SITE: ${AUTH_REFRESH_COOKIE_SAME_SITE:-}
     ports:
       - "${BACKEND_PORT:-6823}:6823"
     healthcheck:
@@ -108,7 +113,7 @@ services:
     hostname: ${TS_HOSTNAME:-relax-backend}
     restart: unless-stopped
     environment:
-      TS_AUTHKEY: ${TS_AUTHKEY:?TS_AUTHKEY required — tạo ở https://login.tailscale.com/admin/settings/keys}
+      TS_AUTHKEY: ${TS_AUTHKEY:-}
       TS_HOSTNAME: ${TS_HOSTNAME:-relax-backend}
       TS_STATE_DIR: /var/lib/tailscale
       TS_USERSPACE: "false"

@@ -21,7 +21,6 @@ import { JwtPayload } from './auth.types';
 import { DeleteAccountDto, DeleteAccountMode } from './dto/delete-account.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { LoginDto } from './dto/login.dto';
-import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -120,9 +119,9 @@ export class AuthService {
     return this.createAuthResponse(user, userAgent, ipAddress);
   }
 
-  async refresh(dto: RefreshTokenDto, userAgent?: string, ipAddress?: string) {
+  async refresh(refreshToken: string, userAgent?: string, ipAddress?: string) {
     const session = await this.prisma.session.findUnique({
-      where: { refreshToken: hashToken(dto.refreshToken) },
+      where: { refreshToken: hashToken(refreshToken) },
       include: { user: { include: { profile: true, preferences: true } } },
     });
 
@@ -233,10 +232,12 @@ export class AuthService {
     );
   }
 
-  async logout(refreshToken: string) {
-    await this.prisma.session.deleteMany({
-      where: { refreshToken: hashToken(refreshToken) },
-    });
+  async logout(refreshToken?: string) {
+    if (refreshToken) {
+      await this.prisma.session.deleteMany({
+        where: { refreshToken: hashToken(refreshToken) },
+      });
+    }
     return { success: true };
   }
 

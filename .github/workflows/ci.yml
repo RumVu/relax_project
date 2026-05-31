@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, backend_dev, front-moblie-dev]
+    branches: [main, backend-dev, front-mobile-dev]
   pull_request:
     branches: [main]
 
