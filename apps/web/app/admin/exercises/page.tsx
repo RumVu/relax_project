@@ -7,7 +7,7 @@ export default function AdminExercisesPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Quản lý bài hít thở và thiền mẫu — nhịp thở, thời lượng, mức độ khó và hướng dẫn."
+      copy={t('admin.exercises.copy')}
       endpoint="/breathing-exercises"
       kind="exercises"
       title={t('admin.exercises.title')}

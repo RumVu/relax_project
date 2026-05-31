@@ -29,7 +29,7 @@ type PageResponse<T> = {
 };
 
 export default function AdminLogsPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [logs, setLogs] = useState<AdminLog[]>([]);
   const [total, setTotal] = useState(0);
@@ -53,12 +53,12 @@ export default function AdminLogsPage() {
     } catch {
       pushToast({
         tone: 'error',
-        title: 'Không tải được audit logs',
+        title: t('admin.logs.toast.loadFailed'),
       });
     } finally {
       setLoading(false);
     }
-  }, [action, pushToast, targetType]);
+  }, [action, pushToast, targetType, t]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -73,29 +73,29 @@ export default function AdminLogsPage() {
   return (
     <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.logs.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <MetricCard icon={FileClock} label="Tổng log khớp filter" value={total} />
+        <MetricCard icon={FileClock} label={t('admin.logs.metric.total')} value={total} />
         <MetricCard
           icon={Filter}
-          label="Action filter"
+          label={t('admin.logs.filter.action')}
           tone="lilac"
-          value={action || 'All'}
+          value={action || t('admin.logs.filter.allActions')}
         />
         <MetricCard
           icon={RefreshCcw}
-          label="Target filter"
+          label={t('admin.logs.filter.target')}
           tone="mint"
-          value={targetType || 'All'}
+          value={targetType || t('admin.logs.filter.allTargets')}
         />
       </div>
 
       <Card>
         <SectionTitle
-          title="Bộ lọc audit"
-          copy="Đọc trực tiếp từ GET /admin-logs, dùng để kiểm tra ai vừa tạo/sửa/xoá nội dung nào."
+          title={t('admin.logs.filter.title')}
+          copy={t('admin.logs.filter.copy')}
           action={
             <Button disabled={loading} onClick={() => void loadLogs()} variant="secondary">
               <RefreshCcw className="h-4 w-4" />
-              {loading ? 'Đang tải' : 'Reload'}
+              {loading ? t('common.loading') : t('common.refresh')}
             </Button>
           }
         />
@@ -105,7 +105,7 @@ export default function AdminLogsPage() {
             <input
               className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white px-3 text-ink outline-none"
               onChange={(event) => setAction(event.target.value)}
-              placeholder="VD: CREATE, UPDATE, DELETE"
+            placeholder={t('admin.logs.filter.actionPlaceholder')}
               value={action}
             />
           </label>
@@ -114,7 +114,7 @@ export default function AdminLogsPage() {
             <input
               className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white px-3 text-ink outline-none"
               onChange={(event) => setTargetType(event.target.value)}
-              placeholder="VD: cozy-quotes, users"
+            placeholder={t('admin.logs.filter.targetPlaceholder')}
               value={targetType}
             />
           </label>
@@ -123,14 +123,14 @@ export default function AdminLogsPage() {
 
       <Card>
         <SectionTitle
-          title="Lịch sử thao tác"
-          copy="Chi tiết request đã được backend sanitize trước khi ghi log."
+          title={t('admin.logs.history.title')}
+          copy={t('admin.logs.history.copy')}
         />
         <div className="mt-5">
           <DataTable
-            columns={['Thời gian', 'Admin', 'Action', 'Target', 'Details']}
+            columns={[t('admin.logs.col.when'), t('admin.logs.col.admin'), t('admin.logs.col.action'), t('admin.logs.col.target'), t('admin.logs.col.detail')]}
             rows={logs.map((log) => [
-              formatDateTime(log.createdAt),
+              formatDateTime(log.createdAt, locale),
               log.admin?.email ?? log.admin?.name ?? '-',
               log.action,
               [log.targetType, log.targetId].filter(Boolean).join(' / ') || '-',
@@ -143,13 +143,13 @@ export default function AdminLogsPage() {
   );
 }
 
-function formatDateTime(value: string) {
+function formatDateTime(value: string, locale: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return '-';
   }
 
-  return date.toLocaleString('vi-VN', {
+  return date.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
     dateStyle: 'short',
     timeStyle: 'short',
   });

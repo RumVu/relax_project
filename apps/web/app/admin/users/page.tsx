@@ -65,23 +65,23 @@ export default function AdminUsersPage() {
   return (
     <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.users.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard icon={Users} label="Tổng user" value={users.length} />
+        <MetricCard icon={Users} label={t('admin.users.metric.total')} value={users.length} />
         <MetricCard
           icon={ShieldCheck}
-          label="Đang hoạt động"
+          label={t('admin.users.filter.active')}
           tone="mint"
           value={users.filter((user) => user.status === 'ACTIVE').length}
         />
         <MetricCard
           icon={ShieldX}
-          label="Đã khoá"
+          label={t('admin.users.filter.inactive')}
           tone="coral"
           value={users.filter((user) => user.status !== 'ACTIVE').length}
         />
         <MetricCard
           icon={UserCog}
           label="Admin"
-          note="có quyền quản trị"
+          note={t('admin.users.metric.adminNote')}
           tone="lilac"
           value={users.filter((user) => user.role === 'ADMIN').length}
         />
@@ -89,20 +89,20 @@ export default function AdminUsersPage() {
 
       <Card>
         <SectionTitle
-          title="Điều khiển user"
-          copy="Khóa/mở tài khoản, đổi role và revoke toàn bộ session của từng người ngay tại đây."
+          title={t('admin.users.control.title')}
+          copy={t('admin.users.control.copy')}
           action={
             <div className="flex flex-wrap gap-2">
               <Button onClick={() => setCreateOpen(true)}>
                 <UserPlus className="h-4 w-4" />
-                Tạo user
+                {t('admin.users.create.submit')}
               </Button>
               <div className="flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm">
                 <Search className="h-4 w-4 text-violet" />
                 <input
                   className="w-40 bg-transparent outline-none"
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Tìm user"
+                  placeholder={t('admin.users.searchPlaceholder')}
                   value={query}
                 />
               </div>
@@ -113,7 +113,7 @@ export default function AdminUsersPage() {
                 }
                 value={filterRole}
               >
-                <option value="ALL">Tất cả role</option>
+                <option value="ALL">{t('admin.users.filter.allRoles')}</option>
                 <option value="ADMIN">Admin</option>
                 <option value="USER">User</option>
               </select>
@@ -124,9 +124,9 @@ export default function AdminUsersPage() {
                 }
                 value={filterStatus}
               >
-                <option value="ALL">Tất cả trạng thái</option>
-                <option value="ACTIVE">Đang mở</option>
-                <option value="INACTIVE">Đã khoá</option>
+                <option value="ALL">{t('admin.users.filter.allStatuses')}</option>
+                <option value="ACTIVE">{t('admin.users.filter.active')}</option>
+                <option value="INACTIVE">{t('admin.users.filter.inactive')}</option>
               </select>
               <select
                 className="h-10 rounded-lg border border-lilac bg-white px-3 text-sm font-semibold text-ink"
@@ -135,9 +135,9 @@ export default function AdminUsersPage() {
                 }
                 value={filterVerified}
               >
-                <option value="ALL">Tất cả xác thực</option>
-                <option value="VERIFIED">Đã xác thực</option>
-                <option value="UNVERIFIED">Chưa xác thực</option>
+                <option value="ALL">{t('admin.users.filter.allVerified')}</option>
+                <option value="VERIFIED">{t('admin.users.filter.verifiedYes')}</option>
+                <option value="UNVERIFIED">{t('admin.users.filter.verifiedNo')}</option>
               </select>
             </div>
           }
@@ -145,23 +145,23 @@ export default function AdminUsersPage() {
         <div className="mt-5">
           <DataTable
             columns={[
-              'Tên',
-              'Email',
-              'Role',
-              'Trạng thái',
-              'Plan',
-              'Xác thực',
-              'Streak',
-              'Last login',
-              'Hành động',
+              t('admin.users.col.name'),
+              t('admin.users.col.email'),
+              t('admin.table.role'),
+              t('admin.users.col.status'),
+              t('admin.users.col.plan'),
+              t('admin.users.col.verified'),
+              t('admin.users.col.streak'),
+              t('admin.users.col.lastLogin'),
+              t('admin.table.actions'),
             ]}
             rows={filteredUsers.map((user) => [
               user.name,
               user.email,
               user.role,
-              user.status === 'ACTIVE' ? 'Đang mở' : 'Đã khoá',
+              user.status === 'ACTIVE' ? t('admin.users.filter.active') : t('admin.users.filter.inactive'),
               user.plan,
-              user.emailVerified ? 'Verified' : 'Chưa verify',
+              user.emailVerified ? t('admin.users.filter.verifiedYes') : t('admin.users.filter.verifiedNo'),
               user.streak,
               user.lastLogin,
               <div className="flex flex-wrap gap-2" key={user.id}>
@@ -179,13 +179,13 @@ export default function AdminUsersPage() {
                       setRefreshKey((current) => current + 1);
                       pushToast({
                         tone: 'success',
-                        title: `Đã đổi role sang ${nextRole}`,
-                        message: `${user.email} đã được cập nhật quyền.`,
+                        title: t('admin.users.toast.roleChanged', { role: nextRole }),
+                        message: t('admin.users.toast.userUpdated', { email: user.email }),
                       });
                     } catch {
                       pushToast({
                         tone: 'error',
-                        title: 'Không đổi được role',
+                        title: t('admin.users.toast.roleFailed'),
                       });
                     } finally {
                       setBusyKey(null);
@@ -193,7 +193,7 @@ export default function AdminUsersPage() {
                   }}
                   variant="secondary"
                 >
-                  {user.role === 'ADMIN' ? 'Hạ xuống USER' : 'Nâng lên ADMIN'}
+                  {user.role === 'ADMIN' ? t('admin.users.action.demote') : t('admin.users.action.promote')}
                 </Button>
                 <Button
                   className="h-8 px-3 text-xs"
@@ -209,20 +209,20 @@ export default function AdminUsersPage() {
                       setRefreshKey((current) => current + 1);
                       pushToast({
                         tone: 'success',
-                        title: nextActive ? 'Đã mở user' : 'Đã khoá user',
-                        message: `${user.email} vừa được cập nhật trạng thái.`,
+                        title: nextActive ? t('admin.users.toast.activated') : t('admin.users.toast.deactivated'),
+                        message: t('admin.users.toast.statusUpdated', { email: user.email }),
                       });
                     } catch {
                       pushToast({
                         tone: 'error',
-                        title: 'Không đổi được trạng thái user',
+                        title: t('admin.users.toast.statusFailed'),
                       });
                     } finally {
                       setBusyKey(null);
                     }
                   }}
                 >
-                  {user.status === 'ACTIVE' ? 'Khoá user' : 'Mở user'}
+                  {user.status === 'ACTIVE' ? t('admin.users.toggle.deactivate') : t('admin.users.toggle.activate')}
                 </Button>
                 <Button
                   className="h-8 px-3 text-xs"
@@ -235,13 +235,13 @@ export default function AdminUsersPage() {
                       });
                       pushToast({
                         tone: 'success',
-                        title: 'Đã revoke session',
-                        message: `Toàn bộ session của ${user.email} đã bị thu hồi.`,
+                        title: t('admin.users.toast.sessionsRevoked'),
+                        message: t('admin.users.toast.sessionsRevokedMessage', { email: user.email }),
                       });
                     } catch {
                       pushToast({
                         tone: 'error',
-                        title: 'Không revoke được session',
+                        title: t('admin.users.toast.sessionsRevokeFailed'),
                       });
                     } finally {
                       setBusyKey(null);
@@ -249,7 +249,7 @@ export default function AdminUsersPage() {
                   }}
                   variant="ghost"
                 >
-                  Revoke session
+                  {t('admin.users.action.revokeSessions')}
                 </Button>
               </div>,
             ])}
@@ -264,8 +264,8 @@ export default function AdminUsersPage() {
             setRefreshKey((current) => current + 1);
             pushToast({
               tone: 'success',
-              title: 'Đã tạo user mới',
-              message: 'User mới sẽ xuất hiện trong bảng điều khiển.',
+              title: t('admin.users.create.success'),
+              message: t('admin.users.create.successMessage'),
             });
           }}
         />
@@ -281,6 +281,7 @@ function CreateUserModal({
   onClose: () => void;
   onCreated: () => void;
 }) {
+  const { t } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
@@ -313,8 +314,8 @@ function CreateUserModal({
       const message =
         error && typeof error === 'object' && 'message' in error
           ? String((error as { message?: string }).message)
-          : 'Có thể email đã tồn tại hoặc password chưa đủ mạnh.';
-      pushToast({ tone: 'error', title: 'Không tạo được user', message });
+          : t('admin.users.create.errorHint');
+      pushToast({ tone: 'error', title: t('admin.users.create.failed'), message });
     } finally {
       setBusy(false);
     }
@@ -331,13 +332,13 @@ function CreateUserModal({
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
               Admin
             </p>
-            <h2 className="mt-2 text-2xl font-extrabold">Tạo user mới</h2>
+            <h2 className="mt-2 text-2xl font-extrabold">{t('admin.users.create.title')}</h2>
             <p className="mt-1 text-sm font-medium text-[var(--app-muted)]">
-              User được tạo ở đây sẽ login bằng email + password ngay (LOCAL provider).
+              {t('admin.users.create.copy')}
             </p>
           </div>
           <button
-            aria-label="Đóng tạo user"
+            aria-label={t('admin.users.create.close')}
             className="rounded-full border border-[var(--field-border)] p-2 transition hover:bg-violet/10"
             onClick={onClose}
             type="button"
@@ -367,14 +368,14 @@ function CreateUserModal({
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="grid gap-2">
               <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--app-muted)]">
-                Tên hiển thị
+                {t('admin.users.create.name')}
               </span>
               <input
                 className="h-11 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-sm font-semibold"
                 onChange={(e) =>
                   setForm((f) => ({ ...f, name: e.target.value }))
                 }
-                placeholder="Tuỳ chọn"
+                placeholder={t('admin.users.create.optional')}
                 value={form.name}
               />
             </label>
@@ -409,13 +410,13 @@ function CreateUserModal({
               onChange={(e) =>
                 setForm((f) => ({ ...f, password: e.target.value }))
               }
-              placeholder="≥ 8 ký tự, có chữ + số + ký tự đặc biệt"
+              placeholder={t('admin.users.create.passwordPlaceholder')}
               required
               type="text"
               value={form.password}
             />
             <span className="text-[11px] text-[var(--app-muted)]">
-              Tip: bấm <code>Tạo password</code> để sinh password ngẫu nhiên.
+              {t('admin.users.create.passwordTip.before')} <code>{t('admin.users.create.generatePassword')}</code> {t('admin.users.create.passwordTip.after')}
             </span>
             <button
               className="self-start text-xs font-bold text-violet hover:underline"
@@ -424,7 +425,7 @@ function CreateUserModal({
               }
               type="button"
             >
-              Tạo password ngẫu nhiên
+              {t('admin.users.create.generatePassword')}
             </button>
           </label>
 
@@ -438,9 +439,9 @@ function CreateUserModal({
                 type="checkbox"
               />
               <div>
-                <p className="text-sm font-bold">Coi như đã verify email</p>
+                <p className="text-sm font-bold">{t('admin.users.create.verifyNow')}</p>
                 <p className="text-xs text-[var(--app-muted)]">
-                  Bỏ qua bước xác minh hộp thư.
+                  {t('admin.users.create.verifyNowHint')}
                 </p>
               </div>
             </label>
@@ -453,9 +454,9 @@ function CreateUserModal({
                 type="checkbox"
               />
               <div>
-                <p className="text-sm font-bold">Active ngay</p>
+                <p className="text-sm font-bold">{t('admin.users.create.activeNow')}</p>
                 <p className="text-xs text-[var(--app-muted)]">
-                  Bỏ tick = user bị khoá ngay từ đầu.
+                  {t('admin.users.create.activeNowHint')}
                 </p>
               </div>
             </label>
@@ -464,11 +465,11 @@ function CreateUserModal({
 
         <div className="mt-5 flex flex-wrap justify-end gap-3">
           <Button onClick={onClose} type="button" variant="secondary">
-            Huỷ
+            {t('common.cancel')}
           </Button>
           <Button disabled={busy || !form.email || !form.password} type="submit">
             <UserPlus className="h-4 w-4" />
-            {busy ? 'Đang tạo' : 'Tạo user'}
+            {busy ? t('admin.users.create.creating') : t('admin.users.create.submit')}
           </Button>
         </div>
       </form>

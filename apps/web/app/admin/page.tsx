@@ -164,8 +164,8 @@ export default function AdminPage() {
               const endpoint = stats?.endpoint ?? '—';
 
               return [
-                <span className="font-bold" key={`${link.area}-area`}>
-                  {link.area}
+        <span className="font-bold" key={`${link.area}-area`}>
+                  {t(areaKey(link.area))}
                 </span>,
                 <code
                   className="rounded bg-[var(--field-bg)] px-2 py-1 text-xs"
@@ -202,11 +202,12 @@ export default function AdminPage() {
 }
 
 function EmptyAdminPanel({ title, copy }: { title: string; copy: string }) {
+  const { t } = useTranslation();
   return (
     <Card className="min-h-[390px]">
       <SectionTitle title={title} copy={copy} />
       <div className="mt-5 rounded-2xl border border-dashed border-[var(--field-border,theme(colors.lilac))] bg-[var(--panel-bg)] p-8 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-        Chưa có dữ liệu thật để vẽ biểu đồ.
+        {t('admin.empty.chartData')}
       </div>
     </Card>
   );
@@ -386,7 +387,7 @@ function InfraHealthCard() {
                   : 'bg-coral/15 text-coral'
               }`}
             >
-              {allUp ? 'Tất cả OK' : 'Có dịch vụ lỗi'}
+              {allUp ? t('infra.allOk') : t('infra.hasIssues')}
             </span>
             <button
               aria-label="Refresh health"
@@ -448,4 +449,17 @@ function InfraHealthCard() {
       </div>
     </Card>
   );
+}
+
+function areaKey(area: string) {
+  const keys: Record<string, Parameters<ReturnType<typeof useTranslation>['t']>[0]> = {
+    Quotes: 'nav.quotes',
+    Sounds: 'nav.sounds',
+    Exercises: 'nav.exercises',
+    Themes: 'nav.themes',
+    Onboarding: 'nav.onboarding',
+    'Companion Assets': 'nav.companionAssets',
+    'Companion Messages': 'nav.companionMessages',
+  };
+  return keys[area] ?? 'admin.content.col.area';
 }

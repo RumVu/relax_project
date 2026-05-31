@@ -381,7 +381,7 @@ export default function SettingsPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={UserRound}
-          label="Hồ sơ"
+          label={t('settings.metric.profile')}
           note={settings.profile.email}
           value={settings.profile.displayName}
         />
@@ -393,14 +393,14 @@ export default function SettingsPage() {
         />
         <MetricCard
           icon={MapPin}
-          label="Vị trí thời tiết"
+          label={t('settings.metric.location')}
           tone="mint"
           value={settings.preferences.locationName}
         />
         <MetricCard
           icon={CreditCard}
-          label="Gói cước"
-          note={`Gia hạn: ${settings.billing.renewal}`}
+          label={t('settings.metric.plan')}
+          note={t('settings.metric.planRenewal', { date: settings.billing.renewal })}
           tone="sun"
           value={settings.billing.planName}
         />
@@ -409,8 +409,8 @@ export default function SettingsPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Card>
           <SectionTitle
-            title="Trang cá nhân"
-            copy="Cập nhật tên hiển thị và ngày sinh. Hai mục cung hoàng đạo bên dưới sẽ tự tính lại theo birthday."
+            title={t('settings.section.profile.title')}
+            copy={t('settings.section.profile.copy')}
           />
           {/* Avatar uploader — direct Supabase upload via signed URL */}
           <div className="mt-5 rounded-lg border border-lilac/60 bg-white/60 p-4">
@@ -422,7 +422,7 @@ export default function SettingsPage() {
           </div>
           <div className="mt-5 grid gap-4">
             <Field
-              label="Display name"
+              label={t('settings.field.displayName')}
               value={displayName}
               onChange={(value) =>
                 setProfileDraft((current) => ({
@@ -434,7 +434,7 @@ export default function SettingsPage() {
               }
             />
             <Field
-              label="Birthday"
+              label={t('settings.field.birthday')}
               type="date"
               value={birthday}
               onChange={(value) =>
@@ -463,14 +463,14 @@ export default function SettingsPage() {
                 <div className="grid gap-3 sm:grid-cols-2">
                   <DerivedCard
                     icon={WandSparkles}
-                    label="Zodiac"
-                    note="Tự đổi ngay khi chọn ngày sinh"
+                    label={t('settings.field.zodiacWestern')}
+                    note={t('settings.zodiac.auto')}
                     value={liveZodiac}
                   />
                   <DerivedCard
                     icon={WandSparkles}
-                    label="Chinese zodiac"
-                    note="Theo năm sinh — cập nhật tức thì"
+                    label={t('settings.field.zodiacChinese')}
+                    note={t('settings.zodiac.chineseAuto')}
                     value={liveChinese}
                   />
                 </div>
@@ -501,14 +501,14 @@ export default function SettingsPage() {
                 setProfileDraft(null);
                 pushToast({
                   tone: 'success',
-                  title: 'Đã cập nhật hồ sơ',
-                  message: 'Tên hiển thị và ngày sinh đã được lưu.',
+                  title: t('settings.toast.profileSaved'),
+                  message: t('settings.toast.profileSavedMessage'),
                 });
               } catch {
                 pushToast({
                   tone: 'error',
-                  title: 'Lưu hồ sơ thất bại',
-                  message: 'Kiểm tra đăng nhập hoặc backend rồi thử lại.',
+                  title: t('settings.toast.profileFailed'),
+                  message: t('settings.toast.serverHint'),
                 });
               } finally {
                 setProfileState('idle');
@@ -516,19 +516,19 @@ export default function SettingsPage() {
             }}
           >
             <Save className="h-4 w-4" />
-            {profileState === 'saving' ? 'Đang lưu' : 'Lưu cấu hình'}
+            {profileState === 'saving' ? t('settings.btn.savingProfile') : t('settings.btn.saveProfile')}
           </Button>
         </Card>
 
         <Card>
           <SectionTitle
-            title="Thông báo & thời tiết"
-            copy="Chọn theme, timezone, vị trí dự báo và các kiểu nhắc mà anh muốn app bật lên hằng ngày."
+            title={t('settings.section.preferences.title')}
+            copy={t('settings.section.preferences.copy')}
           />
           <div className="mt-5 grid gap-4">
             <div className="grid gap-4 sm:grid-cols-3">
               <Field
-                label="Theme mode"
+                label={t('settings.field.themeMode')}
                 select
                 value={themeMode}
                 options={['SYSTEM', 'LIGHT', 'DARK']}
@@ -588,7 +588,7 @@ export default function SettingsPage() {
                 }
               />
               <Field
-                label="Weather location"
+                label={t('settings.metric.location')}
                 value={locationName}
                 onChange={(value) =>
                   setDraftPreferences((current) => ({
@@ -615,7 +615,7 @@ export default function SettingsPage() {
               <ToggleCard
                 checked={weatherEnabled}
                 icon={MapPin}
-                label="Weather"
+                label={t('settings.section.weather.title')}
                 onClick={() =>
                   setDraftPreferences((current) => ({
                     weatherEnabled:
@@ -640,7 +640,7 @@ export default function SettingsPage() {
               <ToggleCard
                 checked={pushEnabled}
                 icon={Bell}
-                label="Push"
+                label={t('settings.field.notifyPush')}
                 onClick={() =>
                   setDraftPreferences((current) => ({
                     weatherEnabled:
@@ -666,7 +666,7 @@ export default function SettingsPage() {
               <ToggleCard
                 checked={soundEnabled}
                 icon={Moon}
-                label="Sound"
+                label={t('settings.field.notifySound')}
                 onClick={() =>
                   setDraftPreferences((current) => ({
                     weatherEnabled:
@@ -692,22 +692,22 @@ export default function SettingsPage() {
 
             <div className="grid gap-3 sm:grid-cols-3">
               <StatusMiniCard
-                note="Tự đổi theo hệ thống nếu chọn SYSTEM"
-                title="Theme hiện tại"
+                note={t('settings.theme.systemNote')}
+                title={t('settings.theme.current')}
                 value={themeMode}
               />
               <StatusMiniCard
-                note={weatherEnabled ? 'Dự báo đang bật' : 'Dự báo đang tắt'}
-                title="Vị trí dự báo"
+                note={weatherEnabled ? t('settings.weather.on') : t('settings.weather.off')}
+                title={t('settings.weather.location')}
                 value={locationName}
               />
               <StatusMiniCard
-                note="Có thể thêm/xoá ở phần reminder phía dưới"
-                title="Nhịp nhắc trong ngày"
+                note={t('settings.reminders.quickNote')}
+                title={t('settings.reminders.dailyRhythm')}
                 value={
                   settings.preferences.reminderTimes.length > 0
                     ? settings.preferences.reminderTimes.join(' • ')
-                    : 'Chưa có'
+                    : t('settings.reminders.empty.full')
                 }
               />
             </div>
@@ -715,7 +715,7 @@ export default function SettingsPage() {
 
           <div className="mt-5">
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--app-muted,theme(colors.slate))]">
-              Quick add nhắc trong ngày
+              {t('settings.reminders.quickAdd')}
             </p>
             <div className="flex flex-wrap items-center gap-2">
               {settings.preferences.reminderTimes.map((time) => (
@@ -729,12 +729,12 @@ export default function SettingsPage() {
               ))}
               {settings.preferences.reminderTimes.length === 0 ? (
                 <span className="text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
-                  Chưa có nhắc nào — pick thời điểm phía dưới để thêm nhanh.
+                  {t('settings.reminders.quickEmpty')}
                 </span>
               ) : null}
             </div>
             <QuickAddReminder
-              defaultTitle="Nhắc thở nhẹ"
+              defaultTitle={t('settings.reminders.defaultBreathing')}
               onCreated={() => {
                 setRefreshKey((current) => current + 1);
                 triggerRefresh();
@@ -764,15 +764,14 @@ export default function SettingsPage() {
                   setDraftPreferences(null);
                   pushToast({
                     tone: 'success',
-                    title: 'Đã lưu preferences',
-                    message:
-                      'Theme, timezone và các toggle thông báo đã được cập nhật.',
+                    title: t('settings.toast.preferencesSaved'),
+                    message: t('settings.toast.preferencesSavedMessage'),
                   });
                 } catch {
                   pushToast({
                     tone: 'error',
-                    title: 'Lưu preferences thất bại',
-                    message: 'Backend chưa phản hồi hoặc token đã hết hạn.',
+                    title: t('settings.toast.preferencesFailed'),
+                    message: t('settings.toast.serverHint'),
                   });
                 } finally {
                   setSaveState('idle');
@@ -780,7 +779,7 @@ export default function SettingsPage() {
               }}
             >
               <Save className="h-4 w-4" />
-              {saveState === 'saving' ? 'Đang lưu' : 'Lưu preferences'}
+              {saveState === 'saving' ? t('settings.btn.savingPreferences') : t('settings.btn.savePreferences')}
             </Button>
             <Button
               onClick={async () => {
@@ -798,14 +797,13 @@ export default function SettingsPage() {
                   triggerRefresh();
                   pushToast({
                     tone: 'success',
-                    title: 'Đã cập nhật vị trí',
-                    message:
-                      'Backend sẽ lấy thời tiết theo vị trí hiện tại của anh.',
+                    title: t('weather.locateGranted'),
+                    message: t('settings.toast.locationSavedMessage'),
                   });
                 } catch (error) {
                   pushToast({
                     tone: 'error',
-                    title: 'Không lấy được vị trí',
+                    title: t('weather.locateFailed.title'),
                     message:
                       error instanceof Error ? error.message : 'Unknown',
                   });
@@ -814,7 +812,7 @@ export default function SettingsPage() {
               variant="secondary"
             >
               <Navigation className="h-4 w-4" />
-              Dùng vị trí hiện tại
+              {t('weather.locate')}
             </Button>
             <Button
               onClick={async () => {
@@ -822,8 +820,8 @@ export default function SettingsPage() {
                   await apiFetch('/notifications/me/test', {
                     method: 'POST',
                     body: JSON.stringify({
-                      title: 'Test popup từ dashboard',
-                      message: 'Thông báo thử đã được tạo từ settings.',
+                      title: t('settings.notification.testTitle'),
+                      message: t('settings.notification.testMessage'),
                       type: 'IN_APP',
                     }),
                   });
@@ -831,22 +829,21 @@ export default function SettingsPage() {
                   triggerRefresh();
                   pushToast({
                     tone: 'info',
-                    title: 'Đã tạo test notification',
-                    message:
-                      'Notification mới đã được gửi vào tài khoản hiện tại.',
+                    title: t('settings.toast.testNotificationCreated'),
+                    message: t('settings.toast.testNotificationMessage'),
                   });
                 } catch {
                   pushToast({
                     tone: 'error',
-                    title: 'Không tạo được notification',
-                    message: 'Kiểm tra backend hoặc token đăng nhập.',
+                    title: t('settings.toast.testNotificationFailed'),
+                    message: t('settings.toast.serverHint'),
                   });
                 }
               }}
               variant="secondary"
             >
               <Bell className="h-4 w-4" />
-              Gửi test notification
+              {t('settings.btn.testNotification')}
             </Button>
           </div>
         </Card>

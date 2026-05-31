@@ -33,6 +33,9 @@ import { apiFetch } from '@/lib/api';
 import { isSecureContext, requestGeolocation } from '@/lib/permissions';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import type { TranslationKey } from '@/lib/i18n/dictionaries';
+
+type TranslationFn = (key: TranslationKey, params?: Record<string, string | number>) => string;
 
 type WeatherCurrent = {
   configured?: boolean;
@@ -87,7 +90,7 @@ type WeatherForecast = {
 };
 
 export default function WeatherPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [current, setCurrent] = useState<WeatherCurrent | null>(null);
   const [forecast, setForecast] = useState<WeatherForecast | null>(null);
@@ -140,39 +143,40 @@ export default function WeatherPage() {
       });
       pushToast({
         tone: 'success',
-        title: 'Đã cập nhật vị trí',
-        message: 'Đang lấy thời tiết theo vị trí hiện tại của anh.',
+        title: t('weather.locateGranted'),
+        message: t('weather.locateGranted.message'),
       });
       await reload();
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
-          : 'Không lấy được vị trí.';
+          : t('weather.locateFailed');
       pushToast({
         tone: 'error',
-        title: 'Không lấy được vị trí',
+        title: t('weather.locateFailed.title'),
         message,
       });
     } finally {
       setLocating(false);
     }
-  }, [pushToast, reload]);
+  }, [pushToast, reload, t]);
 
   const advice = useMemo(
-    () => buildAdvice(current, forecast?.forecast?.[0]),
-    [current, forecast],
+    () => buildAdvice(current, forecast?.forecast?.[0], t),
+    [current, forecast, t],
   );
+  const greeting = useMemo(() => buildWeatherGreeting(current, t), [current, t]);
 
   const chartData = useMemo(
     () =>
       (forecast?.forecast ?? []).map((d) => ({
-        day: formatDay(d.date),
+        day: formatDay(d.date, locale),
         high: roundTemp(d.temperatureMax),
         low: roundTemp(d.temperatureMin),
         rain: Math.round(d.precipitationProbability ?? 0),
       })),
-    [forecast],
+    [forecast, locale],
   );
 
   const locationMissing =
@@ -186,22 +190,22 @@ export default function WeatherPage() {
       {!secure ? (
         <Card className="border-coral/40 bg-coral/10">
           <p className="text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
-            ⚠️ App đang chạy ở chế độ không an toàn (HTTP qua LAN IP)
+            {t('weather.insecure.title')}
           </p>
           <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">
-            Trình duyệt CHẶN gọi định vị / notification trên origin{' '}
+            {t('weather.insecure.copy.before')}{' '}
             <code className="rounded bg-[var(--field-bg)] px-1 py-0.5 text-xs">
               {typeof window !== 'undefined' ? window.location.origin : 'http://…'}
             </code>{' '}
-            — không hiện popup, không báo lỗi. Để dùng được:
+            {t('weather.insecure.copy.after')}
           </p>
           <ul className="mt-2 list-disc pl-6 text-sm text-[var(--app-muted,theme(colors.slate))]">
             <li>
-              Mở app qua <code>http://localhost:3233</code> (cùng máy chạy
-              Docker) — localhost được coi là secure context.
+              {t('weather.insecure.localhost.before')} <code>http://localhost:3233</code>{' '}
+              {t('weather.insecure.localhost.after')}
             </li>
             <li>
-              Hoặc setup HTTPS (Caddy/nginx + Let&apos;s Encrypt / mkcert).
+              {t('weather.insecure.https')}
             </li>
           </ul>
         </Card>
@@ -211,16 +215,15 @@ export default function WeatherPage() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
-                Cần cấp vị trí cho app
+                {t('weather.missing.title')}
               </p>
               <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">
-                Bấm nút bên phải để dùng vị trí trình duyệt — app sẽ lưu
-                lat/long và lấy thời tiết theo nơi anh đang ngồi.
+                {t('weather.missing.copy')}
               </p>
             </div>
             <Button disabled={locating} onClick={useMyLocation}>
               <Navigation className="h-4 w-4" />
-              {locating ? 'Đang định vị…' : 'Dùng vị trí của tôi'}
+              {locating ? t('weather.locating') : t('weather.locate')}
             </Button>
           </div>
         </Card>
@@ -230,13 +233,13 @@ export default function WeatherPage() {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--app-muted,theme(colors.plum))]">
-              Khu vực
+              {t('weather.location.heading')}
             </p>
             <h3 className="mt-2 text-2xl font-extrabold text-[var(--app-text,theme(colors.ink))]">
-              {current?.greeting?.title ?? 'Đang tải…'}
+              {greeting.title}
             </h3>
             <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">
-              {current?.greeting?.subtitle ?? '—'}
+              {greeting.subtitle}
             </p>
             {current?.location?.name ? (
               <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[var(--field-bg)] px-3 py-1 text-xs font-bold text-[var(--app-text,theme(colors.ink))]">
@@ -251,12 +254,12 @@ export default function WeatherPage() {
                 {formatTemp(current?.current?.temperature)}°
               </p>
               <p className="text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-                cảm giác {formatTemp(current?.current?.apparentTemperature)}°
+                {t('weather.metric.feelsLike')} {formatTemp(current?.current?.apparentTemperature)}°
               </p>
             </div>
             <Button onClick={reload} variant="secondary">
               <RefreshCcw className="h-4 w-4" />
-              Refresh
+              {t('common.refresh')}
             </Button>
           </div>
         </div>
@@ -265,16 +268,17 @@ export default function WeatherPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={Sun}
-          label="Trạng thái"
+          label={t('weather.metric.status')}
           tone="sun"
           value={describeWeatherCode(
             current?.current?.weatherCode,
             current?.current?.isDay,
+            t,
           )}
         />
         <MetricCard
           icon={Droplets}
-          label="Độ ẩm"
+          label={t('weather.metric.humidity')}
           tone="lilac"
           value={
             current?.current?.humidity != null
@@ -284,7 +288,7 @@ export default function WeatherPage() {
         />
         <MetricCard
           icon={Wind}
-          label="Gió"
+          label={t('weather.metric.wind')}
           tone="mint"
           value={
             current?.current?.windSpeed != null
@@ -294,7 +298,7 @@ export default function WeatherPage() {
         />
         <MetricCard
           icon={CloudRain}
-          label="Mưa hôm nay"
+          label={t('weather.metric.rainToday')}
           value={
             forecast?.forecast?.[0]?.precipitationProbability != null
               ? `${Math.round(forecast.forecast[0].precipitationProbability)}%`
@@ -305,8 +309,8 @@ export default function WeatherPage() {
 
       <Card>
         <SectionTitle
-          title="Lời khuyên cho hôm nay"
-          copy="Sinh ra từ thời tiết hiện tại + dự báo trong ngày."
+          title={t('weather.section.advice')}
+          copy={t('weather.section.advice.copy')}
           action={<Thermometer className="h-5 w-5 text-violet" />}
         />
         <ul className="mt-4 grid gap-2 text-sm font-medium text-[var(--app-text,theme(colors.ink))] sm:grid-cols-2">
@@ -324,11 +328,11 @@ export default function WeatherPage() {
 
       <Card>
         <SectionTitle
-          title="Dự báo 7 ngày"
-          copy="Nhiệt độ cao/thấp và xác suất mưa từng ngày."
+          title={t('weather.forecast.title')}
+          copy={t('weather.forecast.copy')}
           action={<CloudSun className="h-5 w-5 text-violet" />}
         />
-        <ChartBox emptyHint={loading ? 'Đang tải dự báo…' : 'Chưa có dữ liệu — cấp vị trí trước.'} hasData={chartData.length > 0} height={260} mounted={mounted}>
+        <ChartBox emptyHint={loading ? t('weather.forecast.loading') : t('weather.forecast.empty')} hasData={chartData.length > 0} height={260} mounted={mounted}>
           {(width) => (
             <LineChart data={chartData} height={260} margin={{ left: -18, right: 8, top: 16 }} width={width}>
               <CartesianGrid stroke="var(--field-border)" strokeDasharray="3 3" />
@@ -341,8 +345,8 @@ export default function WeatherPage() {
                   color: 'var(--app-text)',
                 }}
               />
-              <Line dataKey="high" dot={{ r: 3 }} name="Cao" stroke="#ef767a" strokeWidth={2} type="monotone" />
-              <Line dataKey="low" dot={{ r: 3 }} name="Thấp" stroke="#7357f6" strokeWidth={2} type="monotone" />
+              <Line dataKey="high" dot={{ r: 3 }} name={t('weather.forecast.high')} stroke="#ef767a" strokeWidth={2} type="monotone" />
+              <Line dataKey="low" dot={{ r: 3 }} name={t('weather.forecast.low')} stroke="#7357f6" strokeWidth={2} type="monotone" />
             </LineChart>
           )}
         </ChartBox>
@@ -378,7 +382,7 @@ export default function WeatherPage() {
                 <Area
                   dataKey="rain"
                   fill="url(#rainFill)"
-                  name="Xác suất mưa"
+                  name={t('weather.forecast.rain')}
                   stroke="#7357f6"
                   strokeWidth={2}
                   type="monotone"
@@ -390,8 +394,8 @@ export default function WeatherPage() {
 
       <Card>
         <SectionTitle
-          title="Chi tiết từng ngày"
-          copy="Mỗi card là một ngày trong tuần tới."
+          title={t('weather.forecast.detailTitle')}
+          copy={t('weather.forecast.detailCopy')}
           action={<CloudSun className="h-5 w-5 text-violet" />}
         />
         <div className="mt-5 grid gap-3 sm:grid-cols-3 xl:grid-cols-7">
@@ -401,22 +405,22 @@ export default function WeatherPage() {
               key={day.date}
             >
               <p className="text-xs font-bold text-[var(--app-muted,theme(colors.slate))]">
-                {formatDay(day.date)}
+                {formatDay(day.date, locale)}
               </p>
               <p className="mt-2 text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
                 {formatTemp(day.temperatureMax)}° / {formatTemp(day.temperatureMin)}°
               </p>
               <p className="mt-1 text-xs font-semibold text-violet">
-                {Math.round(day.precipitationProbability ?? 0)}% mưa
+                {t('weather.forecast.rainValue', { percent: Math.round(day.precipitationProbability ?? 0) })}
               </p>
               <p className="mt-1 text-[11px] text-[var(--app-muted,theme(colors.slate))]">
-                {describeWeatherCode(day.weatherCode, true)}
+                {describeWeatherCode(day.weatherCode, true, t)}
               </p>
             </div>
           ))}
           {!forecast?.forecast?.length && !loading ? (
             <p className="col-span-full text-sm font-medium text-[var(--app-muted,theme(colors.slate))]">
-              Chưa có dữ liệu dự báo.
+              {t('weather.forecast.noData')}
             </p>
           ) : null}
         </div>
@@ -428,11 +432,12 @@ export default function WeatherPage() {
 function buildAdvice(
   current: WeatherCurrent | null,
   today: ForecastDay | undefined,
+  t: TranslationFn,
 ): string[] {
   if (!current || current.configured === false) {
     return [
-      'Cấp vị trí cho app để bắt đầu nhận thông tin thời tiết.',
-      'Bấm "Dùng vị trí của tôi" ở trên — chỉ cần 1 click.',
+      t('weather.advice.needLocation'),
+      t('weather.advice.needLocationAction'),
     ];
   }
   const tips: string[] = [];
@@ -454,141 +459,177 @@ function buildAdvice(
   // ---- Temperature buckets ------------------------------------------------
   if (temp != null) {
     if (temp >= 36) {
-      tips.push('🥵 Nắng gắt cực — tránh ra ngoài hoàn toàn từ 11–15h. Bật điều hoà 26–27°.');
-      tips.push('Mang chai nước theo — uống ≥ 2.5L nay nếu hoạt động bình thường.');
+      tips.push(t('weather.advice.temp.extreme'));
+      tips.push(t('weather.advice.temp.water'));
     } else if (temp >= 33) {
-      tips.push('☀️ Nắng nóng (≥ 33°) — chống nắng, kính râm, mũ rộng vành.');
-      tips.push('Bữa trưa nên ăn nhẹ, nhiều rau và trái cây mọng nước.');
+      tips.push(t('weather.advice.temp.hot'));
+      tips.push(t('weather.advice.temp.lightLunch'));
     } else if (temp >= 28) {
-      tips.push('🌤 Nắng ấm — mặc đồ thoáng, bôi kem chống nắng SPF 30+ nếu ra ngoài.');
+      tips.push(t('weather.advice.temp.warm'));
     } else if (temp >= 24) {
-      tips.push('😎 Nhiệt độ dễ chịu — hợp đi bộ, chạy bộ ngắn hoặc đạp xe.');
+      tips.push(t('weather.advice.temp.comfort'));
     } else if (temp >= 20) {
-      tips.push('🍃 Mát mẻ — hợp ngồi cà phê ngoài trời, đọc sách dưới tán cây.');
+      tips.push(t('weather.advice.temp.cool'));
     } else if (temp >= 16) {
-      tips.push('🧥 Hơi mát — mang áo khoác mỏng nếu ra ngoài tối.');
+      tips.push(t('weather.advice.temp.chilly'));
     } else if (temp >= 10) {
-      tips.push('🧣 Lạnh — mặc nhiều lớp, uống trà / cà phê nóng.');
+      tips.push(t('weather.advice.temp.cold'));
     } else {
-      tips.push('🥶 Rất lạnh — giữ ấm cổ + tay chân, hạn chế ra ngoài lúc gió mạnh.');
+      tips.push(t('weather.advice.temp.freezing'));
     }
   }
 
   // ---- Apparent vs actual -------------------------------------------------
   if (apparent != null && temp != null && Math.abs(apparent - temp) >= 3) {
-    const direction = apparent > temp ? 'nóng hơn' : 'mát hơn';
+    const direction = apparent > temp ? t('weather.advice.apparent.hotter') : t('weather.advice.apparent.cooler');
     tips.push(
-      `🌡 Cảm giác ngoài trời ${Math.round(apparent)}° — ${direction} so với nhiệt độ thực ${Math.round(temp)}°.`,
+      t('weather.advice.apparent', { apparent: Math.round(apparent), direction, temp: Math.round(temp) }),
     );
   }
 
   // ---- Day temp swing -----------------------------------------------------
   if (todayHigh != null && todayLow != null && todayHigh - todayLow >= 10) {
     tips.push(
-      `🔁 Hôm nay chênh nhiệt lớn (${Math.round(todayLow)}° → ${Math.round(todayHigh)}°) — chuẩn bị 1 áo khoác cầm tay.`,
+      t('weather.advice.swing', { low: Math.round(todayLow), high: Math.round(todayHigh) }),
     );
   }
 
   // ---- Rain ---------------------------------------------------------------
   if (rainChance >= 80) {
-    tips.push(`☔ Khả năng mưa rất cao (${Math.round(rainChance)}%) — mang ô + áo mưa.`);
-    tips.push('Tránh đi xe máy đường ngập / khu hay đọng nước.');
+    tips.push(t('weather.advice.rain.veryHigh', { percent: Math.round(rainChance) }));
+    tips.push(t('weather.advice.rain.flood'));
   } else if (rainChance >= 60) {
-    tips.push(`🌧 Có thể mưa lớn (${Math.round(rainChance)}%) — mang ô / áo mưa.`);
+    tips.push(t('weather.advice.rain.high', { percent: Math.round(rainChance) }));
   } else if (rainChance >= 40) {
-    tips.push('☂ Mưa rào rải rác — bỏ ô gấp trong cặp cho yên tâm.');
+    tips.push(t('weather.advice.rain.scattered'));
   } else if (rainChance >= 20) {
-    tips.push('🌥 Ít khả năng mưa, nhưng vẫn nên check lại trước khi ra ngoài.');
+    tips.push(t('weather.advice.rain.low'));
   }
 
   // ---- Humidity -----------------------------------------------------------
   if (humidity >= 90) {
-    tips.push('💧 Độ ẩm rất cao (≥ 90%) — phòng ngủ bật quạt/máy hút ẩm để dễ ngủ.');
+    tips.push(t('weather.advice.humidity.veryHigh'));
   } else if (humidity >= 80) {
-    tips.push('Độ ẩm cao — dễ bí, tránh mặc đồ bó sát.');
+    tips.push(t('weather.advice.humidity.high'));
   } else if (humidity <= 30) {
-    tips.push('🏜 Không khí khô — uống thêm nước, bôi kem dưỡng ẩm môi & tay.');
+    tips.push(t('weather.advice.humidity.dry'));
   } else if (humidity <= 45) {
-    tips.push('Hơi khô — đặt 1 cốc nước cạnh bàn làm việc cho dễ nhớ uống.');
+    tips.push(t('weather.advice.humidity.slightDry'));
   }
 
   // ---- Wind ---------------------------------------------------------------
   if (wind >= 50) {
-    tips.push(`🌬 Gió rất mạnh (${Math.round(wind)} km/h) — hạn chế đi xe máy, cẩn thận biển hiệu.`);
+    tips.push(t('weather.advice.wind.veryStrong', { wind: Math.round(wind) }));
   } else if (wind >= 30) {
-    tips.push(`💨 Gió mạnh (${Math.round(wind)} km/h) — đội mũ bảo hiểm có dây cài chắc.`);
+    tips.push(t('weather.advice.wind.strong', { wind: Math.round(wind) }));
   } else if (wind >= 15) {
-    tips.push('🍃 Có gió nhẹ — dễ chịu nếu ngồi sân thượng / hiên nhà.');
+    tips.push(t('weather.advice.wind.light'));
   }
 
   // ---- Storm / specific weather codes -------------------------------------
   if (code != null && code >= 95) {
-    tips.push('⛈ Có dông — rút phích sạc, tránh đứng dưới cây / cột điện.');
+    tips.push(t('weather.advice.code.storm'));
   }
   if (code != null && code >= 45 && code <= 48) {
-    tips.push('🌫 Sương mù — bật đèn xe sớm, giữ khoảng cách an toàn.');
+    tips.push(t('weather.advice.code.fog'));
   }
   if (code != null && code >= 80 && code <= 82) {
-    tips.push('🌧 Mưa rào dồn dập — chuẩn bị đồ chống thấm cho cặp/điện thoại.');
+    tips.push(t('weather.advice.code.showers'));
   }
 
   // ---- Time of day --------------------------------------------------------
   if (hour >= 5 && hour < 9) {
-    tips.push('🌅 Sáng sớm — thử thở sâu 1 phút trước khi mở điện thoại.');
+    tips.push(t('weather.advice.time.morning'));
   } else if (hour >= 11 && hour < 14) {
-    tips.push('🍽 Giờ trưa — ăn từ tốn, nghỉ mắt 5 phút khỏi màn hình.');
+    tips.push(t('weather.advice.time.noon'));
   } else if (hour >= 14 && hour < 17) {
-    tips.push('☕ Giữa chiều — đứng dậy đi vài bước, uống ngụm nước thay đường.');
+    tips.push(t('weather.advice.time.afternoon'));
   } else if (hour >= 17 && hour < 20) {
-    tips.push('🌇 Cuối ngày — dành 10 phút thư giãn trước khi vào việc gia đình.');
+    tips.push(t('weather.advice.time.evening'));
   } else if (hour >= 20 && hour < 23) {
-    tips.push('🌙 Tối muộn — giảm sáng màn hình, tránh cà phê sau 19h.');
+    tips.push(t('weather.advice.time.night'));
   } else if (hour >= 23 || hour < 5) {
-    tips.push('🌌 Khuya rồi — nghỉ ngơi đi nha, ngủ đủ giấc quan trọng hơn deadline.');
+    tips.push(t('weather.advice.time.late'));
   }
 
   // ---- Weekend / weekday --------------------------------------------------
   if (isWeekend) {
-    tips.push('🛋 Cuối tuần — thử dành 30 phút không màn hình, đọc sách / pha trà / nghe nhạc.');
+    tips.push(t('weather.advice.weekend'));
   } else {
-    tips.push('💼 Ngày làm việc — đặt 1 reminder 90 phút/lần để đứng dậy duỗi người.');
+    tips.push(t('weather.advice.weekday'));
   }
 
   // ---- Seasonal hints (VN miền Nam) ---------------------------------------
   if (month >= 5 && month <= 10) {
-    tips.push('🌦 Mùa mưa — kiểm tra dự báo trước khi đi xa, nạp pin điện thoại đầy.');
+    tips.push(t('weather.advice.season.rainy'));
   } else if (month >= 11 || month <= 2) {
-    tips.push('🌬 Mùa khô — uống đủ nước, dưỡng môi, giữ ấm vào sáng sớm.');
+    tips.push(t('weather.advice.season.dry'));
   } else {
-    tips.push('🌸 Giao mùa — dễ cảm vặt, ăn nhiều rau xanh & ngủ đủ.');
+    tips.push(t('weather.advice.season.transition'));
   }
 
   // ---- Day/night ----------------------------------------------------------
   if (!isDay) {
-    tips.push('🔦 Đã tối — nếu đi ngoài nhớ mặc đồ sáng màu / có phản quang.');
+    tips.push(t('weather.advice.dayNight.night'));
   } else if (temp != null && temp >= 28) {
-    tips.push('🕶 Đeo kính râm chống UV nếu ra ngoài lâu.');
+    tips.push(t('weather.advice.dayNight.sun'));
   }
 
   // ---- Always-on mindfulness ---------------------------------------------
-  tips.push('🧘 Đừng quên: 4 nhịp hít vào - 7 giữ - 8 thở ra giúp giảm stress trong 1 phút.');
+  tips.push(t('weather.advice.mindfulness'));
 
   return tips;
 }
 
-function describeWeatherCode(code: number | undefined, isDay: boolean | undefined): string {
+function buildWeatherGreeting(current: WeatherCurrent | null, t: TranslationFn) {
+  if (!current) {
+    return { title: t('common.loading'), subtitle: '—' };
+  }
+  if (current.configured === false) {
+    return {
+      title: t('weather.missing.title'),
+      subtitle: t('weather.missing.copy'),
+    };
+  }
+
+  const temp = current.current?.temperature;
+  const code = current.current?.weatherCode;
+  const isDay = current.current?.isDay;
+  const hour = new Date().getHours();
+  const period =
+    hour >= 23 || hour < 5
+      ? 'late'
+      : hour < 11
+        ? 'morning'
+        : hour < 17
+          ? 'day'
+          : hour < 21
+            ? 'evening'
+            : 'night';
+  const condition = describeWeatherCode(code, isDay, t).toLowerCase();
+  const tempLabel = temp == null ? '' : t('weather.greeting.temp', { temp: Math.round(temp) });
+
+  return {
+    title: t(`weather.greeting.${period}` as TranslationKey),
+    subtitle: tempLabel
+      ? t('weather.greeting.subtitleWithTemp', { condition, temp: tempLabel })
+      : t('weather.greeting.subtitle', { condition }),
+  };
+}
+
+function describeWeatherCode(code: number | undefined, isDay: boolean | undefined, t: TranslationFn): string {
   // Open-Meteo WMO weather codes — abbreviated for the UI.
   if (code == null) return '—';
-  if (code === 0) return isDay === false ? 'Trời quang (đêm)' : 'Trời quang';
-  if (code <= 2) return 'Chủ yếu quang';
-  if (code === 3) return 'Nhiều mây';
-  if (code >= 45 && code <= 48) return 'Sương mù';
-  if (code >= 51 && code <= 57) return 'Mưa phùn';
-  if (code >= 61 && code <= 67) return 'Mưa';
-  if (code >= 71 && code <= 77) return 'Tuyết';
-  if (code >= 80 && code <= 82) return 'Mưa rào';
-  if (code >= 85 && code <= 86) return 'Mưa tuyết';
-  if (code >= 95) return 'Dông';
+  if (code === 0) return isDay === false ? t('weather.code.clearNight') : t('weather.code.clear');
+  if (code <= 2) return t('weather.code.mainlyClear');
+  if (code === 3) return t('weather.code.cloudy');
+  if (code >= 45 && code <= 48) return t('weather.code.fog');
+  if (code >= 51 && code <= 57) return t('weather.code.drizzle');
+  if (code >= 61 && code <= 67) return t('weather.code.rain');
+  if (code >= 71 && code <= 77) return t('weather.code.snow');
+  if (code >= 80 && code <= 82) return t('weather.code.showers');
+  if (code >= 85 && code <= 86) return t('weather.code.snowShowers');
+  if (code >= 95) return t('weather.code.thunderstorm');
   return '—';
 }
 
@@ -602,11 +643,11 @@ function roundTemp(value: number | undefined): number | null {
   return Math.round(value);
 }
 
-function formatDay(date: string | undefined): string {
+function formatDay(date: string | undefined, locale: string): string {
   if (!date) return '—';
   try {
     const d = new Date(date);
-    return d.toLocaleDateString('vi-VN', { weekday: 'short', day: '2-digit' });
+    return d.toLocaleDateString(locale === 'vi' ? 'vi-VN' : 'en-US', { weekday: 'short', day: '2-digit' });
   } catch {
     return date;
   }

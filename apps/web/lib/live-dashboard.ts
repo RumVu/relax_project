@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiFetch, getStoredAccessToken, getStoredSessionId } from '@/lib/api';
 import { adminDashboardData, userDashboardData } from '@/lib/dashboard-data';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
+import type { Locale } from '@/lib/i18n/dictionaries';
 
 type UserDashboardData = typeof userDashboardData;
 type AdminDashboardData = typeof adminDashboardData;
@@ -22,6 +24,11 @@ const moodOptionByType = new Map<string, MoodOption>(
 const moodLabelByType = new Map<string, string>(
   userDashboardData.moodOptions.map((option) => [option.type, option.label]),
 );
+const moodLabelEnByType = new Map<string, string>(
+  userDashboardData.moodOptions.map((option) => [option.type, titleize(option.type)]),
+);
+
+let activeLocale: Locale = 'vi';
 
 const EMPTY_USER_DASHBOARD_DATA = createEmptyUserDashboardData();
 const EMPTY_ADMIN_DASHBOARD_DATA = createEmptyAdminDashboardData();
@@ -45,8 +52,9 @@ type AdminDashboardRequestOptions = {
 };
 
 export function useUserDashboardData(options: UserDashboardRequestOptions = {}) {
+  const { locale } = useTranslation();
   const [data, setData] = useState<UserDashboardData>(EMPTY_USER_DASHBOARD_DATA);
-  const requestKey = JSON.stringify(options);
+  const requestKey = JSON.stringify({ ...options, locale });
   const stableOptions = useMemo(
     () => JSON.parse(requestKey) as UserDashboardRequestOptions,
     [requestKey],
@@ -206,6 +214,7 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
       const relaxSessions = getSettledValue<PageResponse<Record<string, unknown>> | Array<Record<string, unknown>>>(relaxSessionsResult);
 
       const nextData = buildUserDashboardData({
+        locale,
         base: EMPTY_USER_DASHBOARD_DATA,
         overview,
         moodOptionsResponse,
@@ -240,14 +249,15 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
     return () => {
       cancelled = true;
     };
-  }, [requestKey, stableOptions]);
+  }, [requestKey, stableOptions, locale]);
 
   return data;
 }
 
 export function useAdminDashboardData(options: AdminDashboardRequestOptions = {}) {
+  const { locale } = useTranslation();
   const [data, setData] = useState<AdminDashboardData>(EMPTY_ADMIN_DASHBOARD_DATA);
-  const requestKey = JSON.stringify(options);
+  const requestKey = JSON.stringify({ ...options, locale });
   const stableOptions = useMemo(
     () => JSON.parse(requestKey) as AdminDashboardRequestOptions,
     [requestKey],
@@ -273,6 +283,7 @@ export function useAdminDashboardData(options: AdminDashboardRequestOptions = {}
       const overview = getSettledValue<Record<string, unknown>>(overviewResult);
       const users = getSettledValue<PageResponse<Record<string, unknown>>>(usersResult);
 
+      activeLocale = locale;
       setData(buildAdminDashboardData(EMPTY_ADMIN_DASHBOARD_DATA, overview, users));
     }
 
@@ -281,12 +292,13 @@ export function useAdminDashboardData(options: AdminDashboardRequestOptions = {}
     return () => {
       cancelled = true;
     };
-  }, [requestKey, stableOptions]);
+  }, [requestKey, stableOptions, locale]);
 
   return data;
 }
 
 function buildUserDashboardData(input: {
+  locale?: Locale;
   base: UserDashboardData;
   overview?: Record<string, unknown>;
   moodOptionsResponse?: Array<Record<string, unknown>> | PageResponse<Record<string, unknown>>;
@@ -338,6 +350,7 @@ function buildUserDashboardData(input: {
     relaxStats,
     relaxSessions,
   } = input;
+  activeLocale = input.locale ?? 'vi';
 
   const moodAnalyticsSummary = asRecord(moodAnalytics?.summary);
   const moodAnalyticsDelta = asRecord(moodAnalytics?.delta);
@@ -662,7 +675,7 @@ function mapMoodOptions(items: Array<Record<string, unknown>> | undefined) {
         asString(item.label) ??
         fallback?.label ??
         toMoodLabel(type) ??
-        'Bình thường',
+        (activeLocale === 'vi' ? 'Bình thường' : 'Neutral'),
       icon: fallback?.icon ?? 'sparkles',
       value:
         asNumber(item.value) ??
@@ -703,7 +716,7 @@ function mapMoodHistory(items: Array<Record<string, unknown>> | undefined) {
     note:
       truncate(asString(item.note), 120) ??
       truncate(asString(item.description), 120) ??
-      'Không có ghi chú',
+      (activeLocale === 'vi' ? 'Không có ghi chú' : 'No note'),
     intensity: asNumber(item.intensity) ?? 0,
   }));
 }
@@ -744,14 +757,14 @@ function mapRelaxActivities(
       subtitle:
         asString(item.description) ??
         asString(item.subtitle) ??
-        'Hoạt động thư giãn',
+        (activeLocale === 'vi' ? 'Hoạt động thư giãn' : 'Relax activity'),
       duration:
         formatDurationFromMinutes(
           asNumber(item.defaultDurationMinutes) ?? asNumber(item.durationMinutes),
         ) ??
         asString(item.durationLabel) ??
         formatDurationFromSeconds(asNumber(item.durationSeconds)) ??
-        '0 phút',
+        zeroDurationLabel(),
       sessions: asNumber(matched?.count) ?? 0,
       relief: readReliefPercent(matched) ?? readReliefPercent(item) ?? 0,
     };
@@ -765,7 +778,7 @@ function mapFavoriteActivities(items: Array<Record<string, unknown>> | undefined
 
   return items.map((item) => ({
     activityType: asString(item.type) ?? 'MUSIC',
-    label: asString(item.title) ?? 'Hoạt động',
+    label: asString(item.title) ?? (activeLocale === 'vi' ? 'Hoạt động' : 'Activity'),
     totalDurationSeconds: asNumber(item.durationSeconds) ?? 0,
     sessions: asNumber(item.count) ?? 0,
   }));
@@ -780,7 +793,7 @@ function mapRecentMoments(items: Array<Record<string, unknown>> | undefined) {
     title: asString(item.title) ?? 'Session',
     time: formatClock(asString(item.endedAt) ?? asString(item.startedAt)) ?? '--:--',
     duration:
-      formatDurationFromSeconds(asNumber(item.durationSeconds)) ?? '0 phút',
+      formatDurationFromSeconds(asNumber(item.durationSeconds)) ?? zeroDurationLabel(),
     relief: readReliefPercent(item) ?? 0,
   }));
 }
@@ -792,7 +805,7 @@ function mapJournalRecent(items: Array<Record<string, unknown>> | undefined) {
 
   return items.map((item) => ({
     id: asString(item.id) ?? crypto.randomUUID(),
-    title: asString(item.title) ?? 'Nhật ký',
+    title: asString(item.title) ?? (activeLocale === 'vi' ? 'Nhật ký' : 'Journal'),
     content: asString(item.content) ?? '',
     moodType: asString(item.mood) ?? 'NEUTRAL',
     mood: toMoodLabel(asString(item.mood)) ?? 'Neutral',
@@ -864,7 +877,7 @@ function formatIpAddress(ipAddress?: string) {
   const value = ipAddress?.trim();
 
   if (!value) {
-    return 'Chưa ghi nhận';
+    return activeLocale === 'vi' ? 'Chưa ghi nhận' : 'Not recorded';
   }
 
   if (value === '::1' || value === '127.0.0.1') {
@@ -918,7 +931,7 @@ function mapReminderTable(items: Array<Record<string, unknown>> | undefined) {
 function mapBilling(subscription?: Record<string, unknown>) {
   if (!subscription) {
     return {
-      planName: 'Chưa có gói',
+      planName: activeLocale === 'vi' ? 'Chưa có gói' : 'No plan yet',
       status: 'inactive',
       renewal: '—',
     };
@@ -987,8 +1000,8 @@ function mapWeather(
 
   return {
     greeting: {
-      title: asString(greeting?.title) ?? 'Hello',
-      subtitle: asString(greeting?.subtitle) ?? '',
+      title: localWeatherGreeting(asNumber(currentWeather?.temperature)),
+      subtitle: localWeatherSubtitle(asNumber(currentWeather?.temperature)),
       iconKey: asString(greeting?.iconKey) ?? 'weather-day',
     },
     current: {
@@ -1240,7 +1253,36 @@ function toMoodLabel(mood: string | undefined) {
     return undefined;
   }
 
-  return moodLabelByType.get(mood) ?? titleize(mood);
+  return (activeLocale === 'vi' ? moodLabelByType : moodLabelEnByType).get(mood) ?? titleize(mood);
+}
+
+function localeCode() {
+  return activeLocale === 'vi' ? 'vi-VN' : 'en-US';
+}
+
+function localWeatherGreeting(temp: number | undefined) {
+  const hour = new Date().getHours();
+  if (activeLocale === 'vi') {
+    if (hour >= 23 || hour < 5) return 'Khuya rồi nè';
+    if (hour < 11) return 'Chào buổi sáng';
+    if (hour < 17) return 'Thời tiết hôm nay';
+    if (hour < 21) return 'Chiều tối rồi nè';
+    return 'Tối muộn rồi nè';
+  }
+  if (hour >= 23 || hour < 5) return 'It is late';
+  if (hour < 11) return 'Good morning';
+  if (hour < 17) return "Today's weather";
+  if (hour < 21) return 'Evening weather check';
+  return 'Late evening check-in';
+}
+
+function localWeatherSubtitle(temp: number | undefined) {
+  if (temp === undefined) {
+    return '';
+  }
+  return activeLocale === 'vi'
+    ? `${Math.round(temp)}° ngoài trời.`
+    : `${Math.round(temp)}° outside.`;
 }
 
 function intensityToPercent(value: number | undefined) {
@@ -1261,7 +1303,7 @@ function formatDateTime(value: string | undefined) {
     return undefined;
   }
 
-  return date.toLocaleString('vi-VN', {
+  return date.toLocaleString(localeCode(), {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -1280,7 +1322,7 @@ function formatDate(value: string | undefined) {
     return undefined;
   }
 
-  return date.toLocaleDateString('vi-VN');
+  return date.toLocaleDateString(localeCode());
 }
 
 function formatClock(value: string | undefined) {
@@ -1293,7 +1335,7 @@ function formatClock(value: string | undefined) {
     return undefined;
   }
 
-  return date.toLocaleTimeString('vi-VN', {
+  return date.toLocaleTimeString(localeCode(), {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -1313,7 +1355,7 @@ function formatDurationFromSeconds(value: number | undefined) {
       : `${hours}h`;
   }
 
-  return `${minutes} phút`;
+  return activeLocale === 'vi' ? `${minutes} phút` : `${minutes} min`;
 }
 
 function formatDurationFromMinutes(value: number | undefined) {
@@ -1327,7 +1369,13 @@ function formatDurationFromMinutes(value: number | undefined) {
     return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
   }
 
-  return `${Math.max(1, Math.round(value))} phút`;
+  return activeLocale === 'vi'
+    ? `${Math.max(1, Math.round(value))} phút`
+    : `${Math.max(1, Math.round(value))} min`;
+}
+
+function zeroDurationLabel() {
+  return activeLocale === 'vi' ? '0 phút' : '0 min';
 }
 
 function formatReminderSchedule(item: Record<string, unknown>) {
@@ -1341,7 +1389,7 @@ function formatCompact(value: number | undefined) {
     return '-';
   }
 
-  return new Intl.NumberFormat('vi-VN', {
+  return new Intl.NumberFormat(localeCode(), {
     notation: 'compact',
     maximumFractionDigits: 1,
   }).format(value);
@@ -1352,7 +1400,7 @@ function formatCurrency(value: number | undefined) {
     return '-';
   }
 
-  return new Intl.NumberFormat('vi-VN', {
+  return new Intl.NumberFormat(localeCode(), {
     style: 'currency',
     currency: 'VND',
     maximumFractionDigits: 0,
@@ -1407,7 +1455,7 @@ function formatForecastDay(value: string | undefined) {
     return undefined;
   }
 
-  return date.toLocaleDateString('vi-VN', { weekday: 'short' });
+    return date.toLocaleDateString(localeCode(), { weekday: 'short' });
 }
 
 function createEmptyUserDashboardData(): UserDashboardData {

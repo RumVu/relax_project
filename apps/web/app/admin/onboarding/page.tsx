@@ -7,7 +7,7 @@ export default function AdminOnboardingPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Quản lý nội dung hướng dẫn ban đầu — thứ tự hiển thị, ảnh hoặc hoạt hình và trạng thái xuất bản."
+      copy={t('admin.onboarding.copy')}
       endpoint="/onboarding-slides"
       kind="onboarding"
       title={t('admin.onboarding.title')}

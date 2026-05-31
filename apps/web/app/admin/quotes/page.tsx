@@ -7,7 +7,7 @@ export default function AdminQuotesPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Quản lý câu trích dẫn theo cảm xúc, trọng số, trạng thái hoạt động và nội dung hiển thị."
+      copy={t('admin.quotes.copy')}
       endpoint="/cozy-quotes"
       kind="quotes"
       title={t('admin.quotes.title')}

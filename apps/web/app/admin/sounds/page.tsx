@@ -7,7 +7,7 @@ export default function AdminSoundsPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Quản lý âm thanh không gian theo nhóm, thời lượng, đường dẫn tài nguyên và trạng thái xuất bản."
+      copy={t('admin.sounds.copy')}
       endpoint="/ambient-sounds"
       kind="sounds"
       title={t('admin.sounds.title')}

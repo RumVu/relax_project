@@ -35,39 +35,39 @@ export default function AnalyticsPage() {
     avgScore: 0,
     stressReducePct: 0,
     streakDays: 0,
-    dominantMood: 'Chưa có dữ liệu',
+    dominantMood: t('ui.empty'),
   };
-  const insights = buildInsights(data);
+  const insights = buildInsights(data, t);
 
   return (
     <DashboardShell eyebrow={t('analytics.eyebrow')} title={t('analytics.title')}>
-      <DashboardFilterBar {...analyticsFilters} title="Bộ lọc biểu đồ mood" />
+      <DashboardFilterBar {...analyticsFilters} title={t('analytics.filterTitle')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={Gauge}
-          label="Avg score tuần"
-          note="điểm trung bình tuần gần nhất"
+          label={t('analytics.metric.weekScore')}
+          note={t('analytics.metric.weekScore.note')}
           value={latestWeek.avgScore}
         />
         <MetricCard
           icon={TrendingDown}
-          label="Stress giảm"
-          note="so với giai đoạn trước"
+          label={t('analytics.metric.reduction')}
+          note={t('analytics.metric.reduction.note')}
           tone="mint"
           value={`${latestWeek.stressReducePct}%`}
         />
         <MetricCard
           icon={Trophy}
-          label="Streak tuần"
-          note="ngày"
+          label={t('analytics.metric.streak')}
+          note={t('analytics.metric.streak.note')}
           tone="sun"
           value={latestWeek.streakDays}
         />
         <MetricCard
           icon={Brain}
-          label="Dominant mood"
-          note="mood chiếm ưu thế"
+          label={t('analytics.metric.dominant')}
+          note={t('analytics.metric.dominant.note')}
           tone="lilac"
           value={latestWeek.dominantMood}
         />
@@ -77,22 +77,22 @@ export default function AnalyticsPage() {
         <MoodAreaDashboardChart data={data.timeline} />
         <Card>
           <SectionTitle
-            title="Insight tự sinh"
-            copy="Tóm tắt nhanh từ xu hướng mood, chuỗi check-in và hoạt động thư giãn gần đây."
+            title={t('analytics.section.insights')}
+            copy={t('analytics.section.insights.copy')}
             action={
               <Button
                 onClick={() => {
                   triggerRefresh();
                   pushToast({
                     tone: 'info',
-                    title: 'Đã làm mới analytics',
-                    message: 'Mọi biểu đồ và phần tóm tắt đang nạp lại từ backend.',
+                    title: t('analytics.toast.refreshed'),
+                    message: t('analytics.toast.refreshedMessage'),
                   });
                 }}
                 variant="secondary"
               >
                 <RefreshCcw className="h-4 w-4" />
-                Làm mới insight
+                {t('analytics.action.refreshInsights')}
               </Button>
             }
           />
@@ -114,17 +114,17 @@ export default function AnalyticsPage() {
       <div className="grid gap-4 xl:grid-cols-2">
         <Card>
           <SectionTitle
-            title="Tiến trình theo tuần"
-            copy="Nhìn lại từng tuần để thấy rõ mood trung bình, chuỗi ngày giữ nhịp và mức giảm stress."
+            title={t('analytics.section.weeklyTimeline')}
+            copy={t('analytics.section.weeklyTimeline.copy')}
           />
           <div className="mt-5">
             <DataTable
-              columns={['Tuần bắt đầu', 'Mood trung bình', 'Stress giảm', 'Streak', 'Mood chính']}
+              columns={[t('analytics.col.weekStart'), t('analytics.col.avgMood'), t('analytics.col.stressReduced'), t('analytics.col.streak'), t('analytics.col.dominantMood')]}
               rows={data.weeklyStats.map((week) => [
                 week.weekStart,
                 week.avgScore,
                 `${week.stressReducePct}%`,
-                `${week.streakDays} ngày`,
+                t('analytics.value.days', { count: week.streakDays }),
                 week.dominantMood,
               ])}
             />
@@ -133,12 +133,12 @@ export default function AnalyticsPage() {
 
         <Card>
           <SectionTitle
-            title="Hoạt động giúp nhẹ đầu nhất"
-            copy="Tổng hợp nhanh hoạt động nào được dùng nhiều và thường mang lại cảm giác nhẹ hơn."
+            title={t('analytics.section.relaxActivities')}
+            copy={t('analytics.section.relaxActivities.copy')}
           />
           <div className="mt-5">
             <DataTable
-              columns={['Hoạt động', 'Số phiên', 'Thời lượng gợi ý', 'Relief']}
+              columns={[t('analytics.col.activity'), t('analytics.col.sessions'), t('analytics.col.duration'), t('analytics.col.relief')]}
               rows={data.relaxActivities.map((activity) => [
                 activity.title,
                 activity.sessions,
@@ -163,17 +163,18 @@ function Insight({ text }: { text: string }) {
 
 function buildInsights(
   data: ReturnType<typeof useUserDashboardData>,
+  t: ReturnType<typeof useTranslation>['t'],
 ) {
   const latestWeek = data.weeklyStats[data.weeklyStats.length - 1] ?? {
     avgScore: 0,
     stressReducePct: 0,
   };
   const bestActivity = data.relaxActivities[0] ?? {
-    title: 'Hoạt động thư giãn',
+    title: t('analytics.fallback.relaxActivity'),
     relief: 0,
   };
   const strongestMood = data.distribution[0] ?? {
-    mood: 'Chưa rõ',
+    mood: t('common.unknown'),
     percent: 0,
   };
   const lowestStressDay = data.timeline[0] ?? { label: '--', stressScore: 0 };
@@ -195,9 +196,9 @@ function buildInsights(
   }
 
   return [
-    `${bestActivity.title} đang là hoạt động cho cảm giác nhẹ đầu tốt nhất với relief khoảng ${bestActivity.relief}%.`,
-    `Tuần gần nhất mood trung bình ở mức ${latestWeek.avgScore} và stress đã giảm ${latestWeek.stressReducePct}% so với giai đoạn trước.`,
-    `${strongestMood.mood} hiện là cảm xúc xuất hiện dày nhất, chiếm khoảng ${strongestMood.percent}% tổng phân bố.`,
-    `Ngày ${lowestStressDay.label} có stress thấp nhất, trong khi ${highestRelaxDay.label} lại là lúc thời gian thư giãn cao nhất.`,
+    t('analytics.insight.bestActivity', { activity: bestActivity.title, relief: bestActivity.relief }),
+    t('analytics.insight.latestWeek', { score: latestWeek.avgScore, reduction: latestWeek.stressReducePct }),
+    t('analytics.insight.strongestMood', { mood: strongestMood.mood, percent: strongestMood.percent }),
+    t('analytics.insight.bestDays', { lowDay: lowestStressDay.label, relaxDay: highestRelaxDay.label }),
   ];
 }

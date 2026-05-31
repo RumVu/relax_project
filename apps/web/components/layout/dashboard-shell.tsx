@@ -94,7 +94,7 @@ export function DashboardShell({
   const { focusMode, refreshNonce, toggleFocusMode, triggerRefresh } =
     useDashboardStore();
   const pushToast = useUiStore((state) => state.pushToast);
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const [role] = useState<string | undefined>(() => getStoredRole());
   const [alertOpen, setAlertOpen] = useState(false);
   // Mobile drawer state — opens the sidebar as an off-canvas overlay
@@ -149,11 +149,11 @@ export function DashboardShell({
           message?: string;
           type?: string;
         };
-        const title = p.title || 'Thông báo mới';
+        const title = p.title || t('shell.notifications.new');
         const message = p.message || '';
 
         pushToast({
-          tone: title.toLowerCase().includes('thiết bị') ? 'info' : 'success',
+          tone: title.toLowerCase().includes('thiết bị') || title.toLowerCase().includes('device') ? 'info' : 'success',
           title,
           message,
         });
@@ -162,7 +162,7 @@ export function DashboardShell({
         showBrowserNotification(title, message);
       }
     },
-    [pushToast, triggerRefresh],
+    [pushToast, t, triggerRefresh],
   );
 
   // Ask for browser-level Notification permission once per session so
@@ -204,7 +204,7 @@ export function DashboardShell({
         setNextReminder({
           id: String(firstReminder.id ?? 'reminder'),
           title: String(firstReminder.title ?? 'Reminder'),
-          time: formatReminderTime(scheduledAt),
+          time: formatReminderTime(scheduledAt, locale),
         });
       }
     } catch {
@@ -212,7 +212,7 @@ export function DashboardShell({
       setUnreadCount(0);
       setNextReminder(null);
     }
-  }, []);
+  }, [locale]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -552,13 +552,13 @@ function NavLink({
   );
 }
 
-function formatReminderTime(value: string) {
+function formatReminderTime(value: string, locale: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return '21:00';
   }
 
-  return date.toLocaleTimeString('vi-VN', {
+  return date.toLocaleTimeString(locale === 'vi' ? 'vi-VN' : 'en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });

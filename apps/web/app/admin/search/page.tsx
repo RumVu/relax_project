@@ -37,10 +37,10 @@ const entityOptions = [
   { label: 'Companion messages', value: 'COMPANION_MESSAGE' },
 ];
 
-const quickQueries = ['stress', 'calm', 'linh thú', 'podcast', 'thở', 'onboarding'];
+const quickQueries = ['stress', 'calm', 'companion', 'podcast', 'breathing', 'onboarding'];
 
 export default function AdminSearchPage() {
-  const { t } = useTranslation();
+  const { t, locale } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
   const [query, setQuery] = useState('');
   const [entityType, setEntityType] = useState('');
@@ -72,13 +72,13 @@ export default function AdminSearchPage() {
     } catch {
       pushToast({
         tone: 'error',
-        title: 'Không search được',
-        message: 'Kiểm tra token admin hoặc query tối thiểu 2 ký tự.',
+        title: t('admin.search.toast.failed'),
+        message: t('admin.search.toast.queryHint'),
       });
     } finally {
       setLoading(false);
     }
-  }, [pushToast]);
+  }, [pushToast, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -98,8 +98,8 @@ export default function AdminSearchPage() {
         if (!cancelled) {
           pushToast({
             tone: 'error',
-            title: 'Không search được',
-            message: 'Kiểm tra token admin hoặc backend.',
+            title: t('admin.search.toast.failed'),
+            message: t('catalog.toast.serverHint'),
           });
         }
       }
@@ -110,7 +110,7 @@ export default function AdminSearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [pushToast]);
+  }, [pushToast, t]);
 
   function searchQuick(value: string) {
     setQuery(value);
@@ -120,31 +120,31 @@ export default function AdminSearchPage() {
   return (
     <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.search.title')}>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <MetricCard icon={Search} label="Kết quả" value={total} />
+        <MetricCard icon={Search} label={t('admin.search.metric.results')} value={total} />
         <MetricCard icon={Database} label="Index source" tone="mint" value="SearchIndex" />
-        <MetricCard icon={Tag} label="Entity filter" tone="lilac" value={entityType || 'All'} />
+        <MetricCard icon={Tag} label={t('admin.search.entity')} tone="lilac" value={entityType || t('admin.search.allContent')} />
       </div>
 
       <Card>
         <SectionTitle
-          title="Tìm kiếm toàn cục"
-          copy="Gọi GET /admin/search trên SearchIndex: title/content/tags. Bỏ trống query để xem index mới nhất."
+          title={t('admin.search.globalTitle')}
+          copy={t('admin.search.globalCopy')}
         />
         <form
           className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_260px_auto]"
           onSubmit={(event) => void runSearch(event, query, entityType)}
         >
           <label className="text-sm font-bold text-slate">
-            Query
+            {t('admin.search.input')}
             <input
               className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white px-3 text-ink outline-none"
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Nhập ít nhất 2 ký tự..."
+              placeholder={t('admin.search.inputPlaceholder')}
               value={query}
             />
           </label>
           <label className="text-sm font-bold text-slate">
-            Entity type
+            {t('admin.search.entity')}
             <select
               className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white px-3 text-ink outline-none"
               onChange={(event) => setEntityType(event.target.value)}
@@ -159,7 +159,7 @@ export default function AdminSearchPage() {
           </label>
           <Button className="self-end" disabled={loading || query.trim().length === 1} type="submit">
             <Search className="h-4 w-4" />
-            {loading ? 'Đang tìm' : 'Search'}
+            {loading ? t('admin.search.running') : t('admin.search.run')}
           </Button>
         </form>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -183,7 +183,7 @@ export default function AdminSearchPage() {
             variant="secondary"
           >
             <RefreshCcw className="h-3.5 w-3.5" />
-            Latest
+            {t('admin.search.latest')}
           </Button>
         </div>
         {note ? (
@@ -194,17 +194,17 @@ export default function AdminSearchPage() {
       </Card>
 
       <Card>
-        <SectionTitle title="Kết quả search" copy="Mỗi dòng trỏ về entityId để admin lần tiếp theo mở đúng module CRUD." />
+        <SectionTitle title={t('admin.search.resultsTitle')} copy={t('admin.search.resultsCopy')} />
         <div className="mt-5">
           <DataTable
-            columns={['Type', 'Title', 'Content', 'Entity ID', 'Tags', 'Updated']}
+            columns={[t('admin.search.col.type'), t('admin.search.col.title'), t('admin.search.col.content'), t('admin.search.col.entityId'), t('admin.search.col.tags'), t('admin.search.col.updated')]}
             rows={items.map((item) => [
               item.entityType,
               item.title,
               truncate(item.content, 110),
               item.entityId,
               item.tags.join(', ') || '-',
-              formatDateTime(item.updatedAt),
+              formatDateTime(item.updatedAt, locale),
             ])}
           />
         </div>
@@ -217,13 +217,13 @@ function truncate(value: string, length: number) {
   return value.length <= length ? value : `${value.slice(0, length - 1)}...`;
 }
 
-function formatDateTime(value: string) {
+function formatDateTime(value: string, locale: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return '-';
   }
 
-  return date.toLocaleString('vi-VN', {
+  return date.toLocaleString(locale === 'vi' ? 'vi-VN' : 'en-US', {
     dateStyle: 'short',
     timeStyle: 'short',
   });

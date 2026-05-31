@@ -101,17 +101,17 @@ export function AmbientSoundPlayer() {
       next.volume = volume;
       next.addEventListener('ended', () => setPlayingId(null));
       next.addEventListener('error', () => {
-        setError(`Không phát được ${sound.title}`);
+        setError(t('sound.error.playFailed', { title: sound.title }));
         setPlayingId(null);
       });
       audioRef.current = next;
       void next.play().catch(() => {
-        setError(`Trình duyệt chặn phát ${sound.title}`);
+        setError(t('sound.error.browserBlocked', { title: sound.title }));
         setPlayingId(null);
       });
       setPlayingId(sound.id);
     },
-    [playingId, volume],
+    [playingId, volume, t],
   );
 
   const iconFor = (category: string) => {

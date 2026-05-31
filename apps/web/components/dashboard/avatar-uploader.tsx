@@ -65,16 +65,16 @@ export function AvatarUploader({
       if (!ACCEPTED_MIME.includes(file.type)) {
         pushToast({
           tone: 'error',
-          title: 'Định dạng ảnh không hỗ trợ',
-          message: 'Chọn PNG, JPEG, WEBP hoặc GIF.',
+          title: t('settings.avatar.unsupportedType'),
+          message: t('settings.avatar.supportedTypes'),
         });
         return;
       }
       if (file.size > MAX_BYTES) {
         pushToast({
           tone: 'error',
-          title: 'Ảnh lớn hơn 5 MB',
-          message: 'Em chỉ chấp nhận tối đa 5 MB cho ảnh đại diện.',
+          title: t('settings.avatar.tooLarge'),
+          message: t('settings.avatar.maxSize'),
         });
         return;
       }
@@ -120,7 +120,7 @@ export function AvatarUploader({
         pushToast({
           tone: 'success',
           title: t('settings.profile.saved'),
-          message: 'Ảnh đại diện đã được cập nhật.',
+          message: t('settings.avatar.updated'),
         });
         onUpdated?.(publicUrl);
       } catch (cause) {
@@ -129,7 +129,7 @@ export function AvatarUploader({
         URL.revokeObjectURL(localPreview);
         pushToast({
           tone: 'error',
-          title: 'Không tải được ảnh',
+          title: t('settings.avatar.uploadFailed'),
           message: cause instanceof Error ? cause.message : t('common.unknown'),
         });
       } finally {
@@ -148,12 +148,12 @@ export function AvatarUploader({
         body: JSON.stringify({ avatar: null }),
       });
       setPreview(null);
-      pushToast({ tone: 'success', title: 'Đã xoá ảnh đại diện' });
+      pushToast({ tone: 'success', title: t('settings.avatar.removed') });
       onUpdated?.('');
     } catch (cause) {
       pushToast({
         tone: 'error',
-        title: 'Không xoá được ảnh',
+        title: t('settings.avatar.removeFailed'),
         message: cause instanceof Error ? cause.message : t('common.unknown'),
       });
     } finally {
@@ -223,7 +223,7 @@ export function AvatarUploader({
           ) : null}
         </div>
         <p className="text-xs font-semibold text-[var(--app-muted)]">
-          PNG / JPEG / WEBP / GIF, tối đa 5 MB.
+          {t('settings.avatar.help')}
         </p>
       </div>
     </div>

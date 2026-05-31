@@ -64,8 +64,8 @@ export default function BreaksPage() {
       <ActionModal
         description={
           sessionModal.phase === 'started'
-            ? `${active?.title ?? 'Phiên thư giãn'} đã bắt đầu. Khi xong anh có thể quay lại đây để finish hoặc đi thẳng sang Mood check-in.`
-            : `${active?.title ?? 'Phiên thư giãn'} đã kết thúc. Anh có thể check-in lại mood ngay để ghi nhận mức nhẹ đầu sau phiên thư giãn.`
+            ? t('breaks.modal.started', { activity: active?.title ?? '' })
+            : t('breaks.modal.finished', { activity: active?.title ?? '' })
         }
         onClose={() => setSessionModal((current) => ({ ...current, open: false }))}
         onPrimary={() => {
@@ -79,16 +79,16 @@ export default function BreaksPage() {
         onSecondary={() => setSessionModal((current) => ({ ...current, open: false }))}
         open={sessionModal.open}
         primaryLabel={
-          sessionModal.phase === 'started' ? 'Tiếp tục phiên' : 'Qua Mood check-in'
+          sessionModal.phase === 'started' ? t('breaks.modal.continue') : t('breaks.modal.toMood')
         }
-        secondaryLabel="Đóng"
+        secondaryLabel={t('common.close')}
         title={
           sessionModal.phase === 'started'
-            ? 'Phiên đã bắt đầu'
-            : 'Phiên đã hoàn tất'
+            ? t('breaks.modal.sessionStarted')
+            : t('breaks.modal.sessionFinished')
         }
       />
-      <DashboardFilterBar {...relaxFilters} title="Bộ lọc break/relax" />
+      <DashboardFilterBar {...relaxFilters} title={t('breaks.filterTitle')} />
 
       {/* Sound player — fetch /v1/ambient-sounds, play through shared
        *  <audio> element. Lives at the top so user can pick a soundscape
@@ -96,15 +96,15 @@ export default function BreaksPage() {
       <AmbientSoundPlayer />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard icon={Play} label="Tổng phiên" value={data.overview.relax.totalSessions} />
-        <MetricCard icon={Pause} label="Tổng thời gian" tone="lilac" value={data.overview.relax.totalDurationLabel} />
-        <MetricCard icon={CheckCircle2} label="Streak thư giãn" note="ngày" tone="sun" value={data.overview.relax.streak} />
-        <MetricCard icon={Wind} label="Relief trung bình" note="after activity" tone="mint" value={`${data.overview.relax.relief}%`} />
+        <MetricCard icon={Play} label={t('breaks.metric.totalSessions')} value={data.overview.relax.totalSessions} />
+        <MetricCard icon={Pause} label={t('breaks.metric.totalTime')} tone="lilac" value={data.overview.relax.totalDurationLabel} />
+        <MetricCard icon={CheckCircle2} label={t('breaks.metric.relaxStreak')} note={t('breaks.metric.relaxStreak.note')} tone="sun" value={data.overview.relax.streak} />
+        <MetricCard icon={Wind} label={t('breaks.metric.avgRelief')} note={t('breaks.metric.avgRelief.note')} tone="mint" value={`${data.overview.relax.relief}%`} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
         <Card>
-          <SectionTitle title="Catalog hoạt động" copy="MUSIC/PODCAST/JOURNAL/BREATHING/MYSTERY/MEDITATION" />
+          <SectionTitle title={t('breaks.catalog.title')} copy={t('breaks.catalog.copy')} />
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {data.relaxActivities.map((activity, index) => {
               const Icon = activityIcons[activity.type as keyof typeof activityIcons] ?? Play;
@@ -135,7 +135,7 @@ export default function BreaksPage() {
             })}
             {data.relaxActivities.length === 0 ? (
               <div className="rounded-lg border border-dashed border-lilac bg-white/70 p-6 text-sm font-medium text-slate">
-                Chưa tải được danh sách hoạt động thư giãn từ API.
+                {t('ui.empty')}
               </div>
             ) : null}
           </div>
@@ -143,8 +143,8 @@ export default function BreaksPage() {
 
         <Card className="bg-night text-white">
           <SectionTitle
-            title="Phiên đang chọn"
-            copy="Start/finish flow cho popup check-in sau activity"
+            title={t('breaks.session.heading')}
+            copy={t('breaks.session.start')}
             action={<ActiveIcon className="h-5 w-5 text-mint" />}
           />
           <div className="mt-8 rounded-lg border border-white/10 bg-white/10 p-5">
@@ -152,15 +152,15 @@ export default function BreaksPage() {
               <ActiveIcon className="h-8 w-8" />
             </div>
             <h3 className="mt-5 text-2xl font-extrabold">
-              {active?.title ?? 'Chưa có hoạt động'}
+              {active?.title ?? t('breaks.session.empty')}
             </h3>
             <p className="mt-2 text-sm text-mist/70">
-              {active?.subtitle ?? 'Kết nối API để nạp catalog thư giãn.'}
+              {active?.subtitle ?? t('common.loading')}
             </p>
             <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
               <div className="h-full w-2/3 rounded-full bg-mint" />
             </div>
-            <p className="mt-2 text-xs font-semibold text-mist/60">Đang chuẩn bị không gian thư giãn...</p>
+            <p className="mt-2 text-xs font-semibold text-mist/60">{t('common.loading')}</p>
           </div>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             <Button
@@ -187,20 +187,20 @@ export default function BreaksPage() {
                   setSessionModal({ open: true, phase: 'started' });
                   pushToast({
                     tone: 'success',
-                    title: 'Đã bắt đầu phiên thư giãn',
-                    message: `${active.title} đang chạy.`,
+                    title: t('breaks.session.start'),
+                    message: active.title,
                   });
                 } catch {
                   setActionState('error');
                   pushToast({
                     tone: 'error',
-                    title: 'Không start được session',
+                    title: t('breaks.session.start'),
                   });
                 }
               }}
             >
               <Play className="h-4 w-4" />
-              {actionState === 'starting' ? 'Starting' : 'Start'}
+              {actionState === 'starting' ? t('breaks.session.starting') : t('breaks.session.start')}
             </Button>
             <Button
               disabled={actionState === 'finishing' || !activeSessionId}
@@ -224,21 +224,21 @@ export default function BreaksPage() {
                   setSessionModal({ open: true, phase: 'finished' });
                   pushToast({
                     tone: 'success',
-                    title: 'Đã kết thúc phiên thư giãn',
-                    message: 'Bảng thống kê và lịch sử đã được làm mới.',
+                    title: t('breaks.session.finish'),
+                    message: t('mood.toast.savedMessage'),
                   });
                 } catch {
                   setActionState('error');
                   pushToast({
                     tone: 'error',
-                    title: 'Không finish được session',
+                    title: t('breaks.session.finish'),
                   });
                 }
               }}
               variant="secondary"
             >
               <CheckCircle2 className="h-4 w-4" />
-              {actionState === 'finishing' ? 'Finishing' : 'Finish'}
+              {actionState === 'finishing' ? t('breaks.session.finishing') : t('breaks.session.finish')}
             </Button>
           </div>
           {actionState === 'started' || actionState === 'finished' || actionState === 'error' ? (
@@ -248,10 +248,10 @@ export default function BreaksPage() {
               }`}
             >
               {actionState === 'error'
-                ? 'Phiên chưa đổi trạng thái vì API trả lỗi.'
+                ? t('mood.toast.saveFailed')
                 : actionState === 'started'
-                  ? 'Phiên đã start qua API.'
-                  : 'Phiên đã finish qua API.'}
+                  ? t('breaks.modal.sessionStarted')
+                  : t('breaks.modal.sessionFinished')}
             </p>
           ) : null}
         </Card>
@@ -260,10 +260,10 @@ export default function BreaksPage() {
       <RelaxActivityChart data={data.relaxActivities} />
 
       <Card>
-        <SectionTitle title="Lịch sử phiên" copy="Các phiên thư giãn gần đây của anh." />
+        <SectionTitle title={t('breaks.history.title')} copy={t('breaks.history.copy')} />
         <div className="mt-5">
           <DataTable
-            columns={['Activity', 'Time', 'Duration', 'Relief']}
+            columns={[t('breaks.col.activity'), t('breaks.col.time'), t('breaks.col.duration'), t('breaks.col.relief')]}
             rows={data.overview.relax.recentMoments.map((moment) => [
               moment.title,
               moment.time,

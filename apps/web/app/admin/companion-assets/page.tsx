@@ -7,7 +7,7 @@ export default function AdminCompanionAssetsPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Tải lên và chỉnh sửa người bạn đồng hành — ảnh xem trước, sprite sheet, hoạt hình, bảng màu, mặc định và trạng thái xuất bản."
+      copy={t('admin.companionAssets.copy')}
       endpoint="/companion-assets"
       kind="companion-assets"
       title={t('admin.companionAssets.title')}
