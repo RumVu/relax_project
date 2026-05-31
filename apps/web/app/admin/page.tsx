@@ -55,7 +55,7 @@ export default function AdminPage() {
 
   return (
     <DashboardShell admin eyebrow={t('admin.eyebrow')} title={t('admin.dashboard.title')}>
-      <DashboardFilterBar {...adminFilters} title="Bộ lọc admin aggregate" />
+      <DashboardFilterBar {...adminFilters} title={t('admin.filters.title')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         {data.metrics.map((metric, index) => {
@@ -79,26 +79,33 @@ export default function AdminPage() {
           <AdminGrowthChart data={data.userGrowth} />
         ) : (
           <EmptyAdminPanel
-            copy="Chưa có dữ liệu aggregate từ /admin/analytics/overview."
-            title="DAU / user mới / doanh thu"
+            copy={t('admin.empty.growth.copy')}
+            title={t('admin.empty.growth.title')}
           />
         )}
         {data.contentEngagement.length > 0 ? (
           <DonutChart data={data.contentEngagement} />
         ) : (
           <EmptyAdminPanel
-            copy="Chưa có dữ liệu engagement từ backend."
-            title="Engagement nội dung"
+            copy={t('admin.empty.engagement.copy')}
+            title={t('admin.empty.engagement.title')}
           />
         )}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_420px]">
         <Card>
-          <SectionTitle title="Quản lý user" copy="Các tài khoản đang hoạt động và mức gắn bó gần đây." />
+          <SectionTitle title={t('admin.users.heading')} copy={t('admin.users.copy')} />
           <div className="mt-5">
             <DataTable
-              columns={['Name', 'Email', 'Status', 'Plan', 'Streak', 'Last login']}
+              columns={[
+                t('admin.users.col.name'),
+                t('admin.users.col.email'),
+                t('admin.users.col.status'),
+                t('admin.users.col.plan'),
+                t('admin.users.col.streak'),
+                t('admin.users.col.lastLogin'),
+              ]}
               rows={data.users.map((user) => [
                 user.name,
                 user.email,
@@ -116,20 +123,20 @@ export default function AdminPage() {
 
       <Card>
         <SectionTitle
-          title="Quản lý nội dung"
-          copy="Số lượng publish/draft lấy trực tiếp từ /admin/analytics/overview.content."
+          title={t('admin.content.heading')}
+          copy={t('admin.content.copy')}
           action={
             <div className="flex flex-wrap gap-2">
               <Link href="/admin/search">
                 <Button className="h-8 px-3 text-xs" variant="secondary">
                   <Search className="h-4 w-4" />
-                  Global search
+                  {t('admin.btn.globalSearch')}
                 </Button>
               </Link>
               <Link href="/admin/logs">
                 <Button className="h-8 px-3 text-xs" variant="secondary">
                   <FileClock className="h-4 w-4" />
-                  Audit logs
+                  {t('admin.btn.auditLogs')}
                 </Button>
               </Link>
             </div>
@@ -137,7 +144,13 @@ export default function AdminPage() {
         />
         <div className="mt-5">
           <DataTable
-            columns={['Khu vực', 'Endpoint', 'Live', 'Draft', 'Hành động']}
+            columns={[
+              t('admin.content.col.area'),
+              t('admin.content.col.endpoint'),
+              t('admin.content.col.live'),
+              t('admin.content.col.drafts'),
+              t('admin.content.col.action'),
+            ]}
             rows={catalogLinks.map((link) => {
               // ALWAYS render the full 7-area catalog; pull live/draft
               // figures from data.content by area name. Avoids the
@@ -171,7 +184,7 @@ export default function AdminPage() {
                 </span>,
                 <Link href={link.href} key={link.href}>
                   <Button className="h-8 px-3 text-xs" variant="secondary">
-                    Mở quản lý
+                    {t('admin.content.open')}
                   </Button>
                 </Link>,
               ];
@@ -179,8 +192,7 @@ export default function AdminPage() {
           />
           {data.content.length === 0 ? (
             <p className="mt-3 text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
-              Đang tải số liệu live/draft từ /admin/analytics/overview… nếu sau 5s vẫn 0
-              hết, kiểm tra token admin hoặc backend.
+              {t('admin.content.loading')}
             </p>
           ) : null}
         </div>
@@ -287,6 +299,7 @@ function summariseHealthPayload(payload: Record<string, unknown>): string {
 }
 
 function InfraHealthCard() {
+  const { t } = useTranslation();
   const [items, setItems] = useState<InfraHealth[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -340,7 +353,7 @@ function InfraHealthCard() {
             detail:
               error && typeof error === 'object' && 'message' in error
                 ? String((error as { message?: string }).message)
-                : 'không phản hồi',
+                : t('infra.error.failedToFetch'),
           };
         }
       }),
@@ -362,8 +375,8 @@ function InfraHealthCard() {
   return (
     <Card>
       <SectionTitle
-        title="Sức khoẻ hạ tầng"
-        copy="Theo dõi các dịch vụ lõi phục vụ dashboard và realtime. Tự refresh mỗi 15s."
+        title={t('infra.heading')}
+        copy={t('infra.copy', { seconds: 15 })}
         action={
           <div className="flex items-center gap-2">
             <span
@@ -390,7 +403,7 @@ function InfraHealthCard() {
       <div className="mt-5 space-y-2">
         {items.length === 0 && !loading ? (
           <p className="text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-            Đang chờ dữ liệu sức khoẻ...
+            {t('common.loading')}
           </p>
         ) : null}
         {items.map((service) => {
@@ -421,7 +434,7 @@ function InfraHealthCard() {
                     ok ? 'text-mint' : 'text-coral'
                   }`}
                 >
-                  {ok ? 'UP' : 'DOWN'}
+                  {ok ? t('infra.status.up') : t('infra.status.down')}
                 </p>
                 <p className="text-[11px] font-semibold text-[var(--app-muted,theme(colors.slate))]">
                   {service.latencyMs != null
