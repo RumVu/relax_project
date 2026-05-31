@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch, extractList } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
+import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type Kind =
   | 'quotes'
@@ -264,6 +265,7 @@ export function AdminCatalogPage({
   endpoint: string;
   copy: string;
 }) {
+  const { t } = useTranslation();
   const config = catalogConfig[kind];
   const pushToast = useUiStore((state) => state.pushToast);
   const [items, setItems] = useState<CatalogItem[]>([]);
@@ -437,11 +439,11 @@ export function AdminCatalogPage({
   }
 
   return (
-    <DashboardShell admin eyebrow="Content" title={title}>
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title={title}>
       <div className="grid gap-4 sm:grid-cols-3">
-        <MetricCard icon={ToggleRight} label="Live" tone="mint" value={activeCount} />
-        <MetricCard icon={Edit3} label="Draft" tone="sun" value={draftCount} />
-        <MetricCard icon={Plus} label="Total" value={items.length} />
+        <MetricCard icon={ToggleRight} label={t('catalog.filter.active')} tone="mint" value={activeCount} />
+        <MetricCard icon={Edit3} label={t('catalog.filter.inactive')} tone="sun" value={draftCount} />
+        <MetricCard icon={Plus} label={t('catalog.filter.all')} value={items.length} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(340px,0.8fr)]">
@@ -456,7 +458,7 @@ export function AdminCatalogPage({
                   <input
                     className="w-40 bg-transparent outline-none"
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Tìm nội dung"
+                    placeholder={t('catalog.searchPlaceholder')}
                     value={query}
                   />
                 </div>
@@ -467,17 +469,17 @@ export function AdminCatalogPage({
                   }
                   value={statusFilter}
                 >
-                  <option value="ALL">Tất cả</option>
-                  <option value="ACTIVE">Đang publish</option>
-                  <option value="DRAFT">Draft/ẩn</option>
+                  <option value="ALL">{t('catalog.filter.all')}</option>
+                  <option value="ACTIVE">{t('catalog.filter.active')}</option>
+                  <option value="DRAFT">{t('catalog.filter.inactive')}</option>
                 </select>
                 <Button onClick={() => void loadItems(false)} variant="secondary">
                   <RefreshCcw className="h-4 w-4" />
-                  Reload
+                  {t('catalog.refresh')}
                 </Button>
                 <Button onClick={resetDraft}>
                   <Plus className="h-4 w-4" />
-                  New
+                  {t('catalog.create.new')}
                 </Button>
               </div>
             }
@@ -496,30 +498,30 @@ export function AdminCatalogPage({
                     onClick={() => startEdit(row.raw)}
                     variant="secondary"
                   >
-                    Sửa
+                    {t('btn.edit')}
                   </Button>
                   <Button
                     className="h-8 px-3 text-xs"
                     onClick={() => void toggleItem(row.raw)}
                     variant="secondary"
                   >
-                    {row.active ? 'Ẩn' : 'Bật'}
+                    {row.active ? t('state.inactive') : t('state.active')}
                   </Button>
                   <Button className="h-8 px-3 text-xs" onClick={() => void removeItem(row.raw)}>
                     <Trash2 className="h-3.5 w-3.5" />
-                    Xoá
+                    {t('btn.delete')}
                   </Button>
                 </div>,
               ])}
             />
             {loading ? (
               <p className="mt-4 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-                Đang tải dữ liệu catalog...
+                {t('catalog.loading')}
               </p>
             ) : null}
             {!loading && rows.length === 0 ? (
               <p className="mt-4 rounded-lg border border-dashed border-[var(--field-border,theme(colors.lilac))] bg-[var(--panel-bg)] p-4 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-                Chưa có nội dung nào khớp bộ lọc hiện tại.
+                {t('catalog.empty')}
               </p>
             ) : null}
             <PaginationBar
@@ -534,8 +536,8 @@ export function AdminCatalogPage({
 
         <Card>
           <SectionTitle
-            title={editingId ? `Chỉnh sửa ${title}` : `Tạo ${title} mới`}
-            copy="Các thay đổi được ghi trực tiếp vào backend sau khi lưu."
+            title={editingId ? t('catalog.edit.title') : t('catalog.create.title')}
+            copy={copy}
           />
           <div className="mt-5 space-y-4">
             {config.fields.map((field) => (
@@ -552,11 +554,11 @@ export function AdminCatalogPage({
           <div className="mt-5 flex gap-2">
             <Button disabled={saving} onClick={() => void saveItem()}>
               <Plus className="h-4 w-4" />
-              {saving ? 'Đang lưu' : editingId ? 'Cập nhật' : 'Tạo mới'}
+              {saving ? t('mood.checkin.saving') : editingId ? t('btn.update') : t('btn.create')}
             </Button>
             {editingId ? (
               <Button onClick={resetDraft} variant="secondary">
-                Huỷ sửa
+                {t('btn.cancel')}
               </Button>
             ) : null}
           </div>

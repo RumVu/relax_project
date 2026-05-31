@@ -506,6 +506,60 @@ const vi = {
   'infra.status.down': 'Mất kết nối',
   'infra.error.failedToFetch': 'Không gọi được máy chủ',
   'infra.error.unauthorized': 'Cần đăng nhập quản trị',
+
+  // ===== Charts / shared widgets =====
+  'chart.moodTimeline.title': 'Đường cảm xúc theo thời gian',
+  'chart.moodTimeline.copy': 'Điểm cảm xúc 0-100: điểm cao là căng thẳng, điểm thấp là thư giãn. Đường đi xuống mới là tốt.',
+  'chart.moodDistribution.title': 'Phân bố cảm xúc',
+  'chart.moodDistribution.copy': 'Nhìn nhanh cảm xúc nào đang xuất hiện nhiều nhất trong giai đoạn bạn đang xem.',
+  'chart.weeklyStats.title': 'Nhịp cảm xúc theo tuần',
+  'chart.weeklyStats.copy': 'Cột tím là điểm cảm xúc trung bình, đường xanh là mức cải thiện căng thẳng giữa các tuần.',
+  'chart.relaxEffect.title': 'Hiệu quả thư giãn',
+  'chart.relaxEffect.copy': 'So sánh tần suất dùng và mức giảm căng thẳng tương đối giữa các hoạt động nghỉ ngơi.',
+  'chart.adminGrowth.title': 'Số người dùng hằng ngày / mới / doanh thu',
+  'chart.adminGrowth.copy': 'Toàn cảnh tăng trưởng theo ngày.',
+  'chart.contentEngagement.title': 'Mức tương tác nội dung',
+  'chart.contentEngagement.copy': 'Tỉ trọng tương tác theo nhóm nội dung.',
+
+  // ===== Realtime status =====
+  'status.probing': 'Đang dò máy chủ',
+  'status.apiError': 'Máy chủ lỗi',
+  'status.rt.connecting': 'Trực tuyến đang kết nối',
+  'status.rt.connected': 'Trực tuyến đã kết nối',
+  'status.rt.needsLogin': 'Trực tuyến cần đăng nhập lại',
+  'status.rt.disconnected': 'Trực tuyến mất kết nối',
+
+  // ===== Admin catalog (shared) =====
+  'catalog.refresh': 'Tải lại',
+  'catalog.create.new': 'Tạo mới',
+  'catalog.col.title': 'Tiêu đề',
+  'catalog.col.subtitle': 'Mô tả ngắn',
+  'catalog.col.order': 'Thứ tự',
+  'catalog.col.status': 'Trạng thái',
+  'catalog.col.actions': 'Hành động',
+  'catalog.action.edit': 'Sửa',
+  'catalog.action.delete': 'Xoá',
+  'catalog.filter.allOption': 'Tất cả',
+  'catalog.searchPlaceholder': 'Tìm nội dung',
+  'catalog.limit.max': 'Tối đa 100',
+
+  // ===== Generic actions repeated across pages =====
+  'btn.delete': 'Xoá',
+  'btn.edit': 'Sửa',
+  'btn.add': 'Thêm',
+  'btn.update': 'Cập nhật',
+  'btn.create': 'Tạo',
+  'btn.cancel': 'Huỷ',
+  'btn.confirm': 'Xác nhận',
+  'btn.saveDraft': 'Lưu nháp',
+  'btn.publish': 'Xuất bản',
+  'btn.upload': 'Tải lên',
+  'btn.download': 'Tải về',
+  'btn.viewAll': 'Xem tất cả',
+  'btn.viewDetail': 'Xem chi tiết',
+  'state.active': 'Đang hoạt động',
+  'state.inactive': 'Tạm ngưng',
+  'state.publishing': 'Đang xuất bản',
 } as const;
 
 const en: Record<keyof typeof vi, string> = {
@@ -991,6 +1045,60 @@ const en: Record<keyof typeof vi, string> = {
   'infra.status.down': 'Down',
   'infra.error.failedToFetch': 'Failed to fetch',
   'infra.error.unauthorized': 'Admin sign-in required',
+
+  // ===== Charts / shared widgets =====
+  'chart.moodTimeline.title': 'Mood timeline',
+  'chart.moodTimeline.copy': 'Mood score 0-100: high = stressed, low = relaxed. A descending line is what we want.',
+  'chart.moodDistribution.title': 'Mood distribution',
+  'chart.moodDistribution.copy': 'Quick look at which moods are showing up most during the selected period.',
+  'chart.weeklyStats.title': 'Weekly mood rhythm',
+  'chart.weeklyStats.copy': 'Violet bar = average mood score, green line = stress improvement between weeks.',
+  'chart.relaxEffect.title': 'Relax effectiveness',
+  'chart.relaxEffect.copy': 'Compare usage frequency and relative stress relief across relax activities.',
+  'chart.adminGrowth.title': 'DAU / new users / revenue',
+  'chart.adminGrowth.copy': 'Day-by-day growth overview.',
+  'chart.contentEngagement.title': 'Content engagement',
+  'chart.contentEngagement.copy': 'Engagement share by content group.',
+
+  // ===== Realtime status =====
+  'status.probing': 'Probing server',
+  'status.apiError': 'Server error',
+  'status.rt.connecting': 'Realtime connecting',
+  'status.rt.connected': 'Realtime connected',
+  'status.rt.needsLogin': 'Realtime needs sign-in',
+  'status.rt.disconnected': 'Realtime disconnected',
+
+  // ===== Admin catalog (shared) =====
+  'catalog.refresh': 'Reload',
+  'catalog.create.new': 'New',
+  'catalog.col.title': 'Title',
+  'catalog.col.subtitle': 'Subtitle',
+  'catalog.col.order': 'Order',
+  'catalog.col.status': 'Status',
+  'catalog.col.actions': 'Actions',
+  'catalog.action.edit': 'Edit',
+  'catalog.action.delete': 'Delete',
+  'catalog.filter.allOption': 'All',
+  'catalog.searchPlaceholder': 'Search content',
+  'catalog.limit.max': 'Max 100',
+
+  // ===== Generic actions repeated across pages =====
+  'btn.delete': 'Delete',
+  'btn.edit': 'Edit',
+  'btn.add': 'Add',
+  'btn.update': 'Update',
+  'btn.create': 'Create',
+  'btn.cancel': 'Cancel',
+  'btn.confirm': 'Confirm',
+  'btn.saveDraft': 'Save draft',
+  'btn.publish': 'Publish',
+  'btn.upload': 'Upload',
+  'btn.download': 'Download',
+  'btn.viewAll': 'View all',
+  'btn.viewDetail': 'View detail',
+  'state.active': 'Active',
+  'state.inactive': 'Inactive',
+  'state.publishing': 'Publishing',
 };
 
 export type TranslationKey = keyof typeof vi;
