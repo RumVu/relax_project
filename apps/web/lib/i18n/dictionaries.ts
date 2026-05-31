@@ -472,6 +472,40 @@ const vi = {
   'mood.history.delete': 'Xoá',
   'mood.history.selected': 'Đã chọn: {{label}} • {{used}}/{{max}} ký tự',
   'mood.history.rawScore': 'Điểm gốc {{value}}/100',
+
+  // ===== Admin overview page =====
+  'admin.filters.title': 'Bộ lọc tổng quan quản trị',
+  'admin.empty.growth.title': 'Số người dùng hằng ngày / mới / doanh thu',
+  'admin.empty.growth.copy': 'Chưa có dữ liệu tổng hợp từ máy chủ.',
+  'admin.empty.engagement.title': 'Mức tương tác với nội dung',
+  'admin.empty.engagement.copy': 'Chưa có dữ liệu tương tác từ máy chủ.',
+  'admin.users.heading': 'Quản lý người dùng',
+  'admin.users.copy': 'Các tài khoản đang hoạt động và mức gắn bó gần đây.',
+  'admin.users.col.name': 'Tên',
+  'admin.users.col.email': 'Thư điện tử',
+  'admin.users.col.status': 'Trạng thái',
+  'admin.users.col.plan': 'Gói cước',
+  'admin.users.col.streak': 'Chuỗi ngày',
+  'admin.users.col.lastLogin': 'Đăng nhập gần nhất',
+  'admin.content.heading': 'Quản lý nội dung',
+  'admin.content.copy': 'Số lượng đã xuất bản / nháp lấy trực tiếp từ máy chủ.',
+  'admin.content.col.area': 'Khu vực',
+  'admin.content.col.endpoint': 'Điểm truy cập',
+  'admin.content.col.live': 'Đang hoạt động',
+  'admin.content.col.drafts': 'Nháp',
+  'admin.content.col.action': 'Hành động',
+  'admin.content.open': 'Mở quản lý',
+  'admin.content.loading': 'Đang tải số liệu từ máy chủ. Nếu sau vài giây vẫn 0 hết, kiểm tra quyền quản trị hoặc kết nối.',
+  'admin.btn.globalSearch': 'Tìm kiếm toàn hệ thống',
+  'admin.btn.auditLogs': 'Nhật ký kiểm toán',
+
+  // ===== Infra health =====
+  'infra.heading': 'Sức khoẻ hạ tầng',
+  'infra.copy': 'Theo dõi các dịch vụ phục vụ bảng điều khiển và sự kiện trực tuyến. Tự làm mới mỗi {{seconds}} giây.',
+  'infra.status.up': 'Hoạt động',
+  'infra.status.down': 'Mất kết nối',
+  'infra.error.failedToFetch': 'Không gọi được máy chủ',
+  'infra.error.unauthorized': 'Cần đăng nhập quản trị',
 } as const;
 
 const en: Record<keyof typeof vi, string> = {
@@ -923,6 +957,40 @@ const en: Record<keyof typeof vi, string> = {
   'mood.history.delete': 'Delete',
   'mood.history.selected': 'Selected: {{label}} • {{used}}/{{max}} chars',
   'mood.history.rawScore': 'Raw score {{value}}/100',
+
+  // ===== Admin overview page =====
+  'admin.filters.title': 'Admin overview filters',
+  'admin.empty.growth.title': 'DAU / new users / revenue',
+  'admin.empty.growth.copy': 'No aggregate data from the server yet.',
+  'admin.empty.engagement.title': 'Content engagement',
+  'admin.empty.engagement.copy': 'No engagement data from the server yet.',
+  'admin.users.heading': 'Users',
+  'admin.users.copy': 'Active accounts and recent engagement.',
+  'admin.users.col.name': 'Name',
+  'admin.users.col.email': 'Email',
+  'admin.users.col.status': 'Status',
+  'admin.users.col.plan': 'Plan',
+  'admin.users.col.streak': 'Streak',
+  'admin.users.col.lastLogin': 'Last login',
+  'admin.content.heading': 'Content',
+  'admin.content.copy': 'Live / draft counts pulled directly from the server.',
+  'admin.content.col.area': 'Area',
+  'admin.content.col.endpoint': 'Endpoint',
+  'admin.content.col.live': 'Live',
+  'admin.content.col.drafts': 'Drafts',
+  'admin.content.col.action': 'Action',
+  'admin.content.open': 'Open',
+  'admin.content.loading': 'Loading numbers from the server. If they stay 0 after a few seconds, check admin permissions or connectivity.',
+  'admin.btn.globalSearch': 'Global search',
+  'admin.btn.auditLogs': 'Audit logs',
+
+  // ===== Infra health =====
+  'infra.heading': 'Infrastructure health',
+  'infra.copy': 'Watches the services that power the dashboard and realtime events. Auto-refreshes every {{seconds}}s.',
+  'infra.status.up': 'Up',
+  'infra.status.down': 'Down',
+  'infra.error.failedToFetch': 'Failed to fetch',
+  'infra.error.unauthorized': 'Admin sign-in required',
 };
 
 export type TranslationKey = keyof typeof vi;
