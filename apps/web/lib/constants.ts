@@ -17,6 +17,7 @@ export const adminNav: NavItem[] = [
   { label: 'Logs', href: '/admin/logs' },
   { label: 'Quotes', href: '/admin/quotes' },
   { label: 'Sounds', href: '/admin/sounds' },
+  { label: 'Podcasts', href: '/admin/podcasts' },
   { label: 'Exercises', href: '/admin/exercises' },
   { label: 'Themes', href: '/admin/themes' },
   { label: 'Onboarding', href: '/admin/onboarding' },

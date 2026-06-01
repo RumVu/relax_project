@@ -10,6 +10,7 @@ import {
   Search,
   ToggleRight,
   Trash2,
+  UploadCloud,
 } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { DataTable, MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
@@ -321,11 +322,13 @@ export function AdminCatalogPage({
   title,
   endpoint,
   copy,
+  fixedCategory,
 }: {
   kind: Kind;
   title: string;
   endpoint: string;
   copy: string;
+  fixedCategory?: string;
 }) {
   const { t } = useTranslation();
   const config = catalogConfig[kind];
@@ -339,7 +342,13 @@ export function AdminCatalogPage({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Draft>(() => createDraft(config.fields));
+  const [draft, setDraft] = useState<Draft>(() =>
+    createDraft(config.fields, fixedCategory),
+  );
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const visibleFields = fixedCategory
+    ? config.fields.filter((field) => field.key !== 'category')
+    : config.fields;
 
   // Reset to first page whenever the search / filter / page-size changes
   // so the user doesn't end up on an empty page.
@@ -355,7 +364,7 @@ export function AdminCatalogPage({
 
     try {
       const payload = await apiFetch<unknown>(endpoint, undefined, {
-        query: catalogQuery(query, statusFilter, page, pageSize),
+        query: catalogQuery(query, statusFilter, page, pageSize, fixedCategory),
       });
       setItems(extractList<CatalogItem>(payload));
       setTotal(extractTotal(payload, pageSize));
@@ -376,7 +385,7 @@ export function AdminCatalogPage({
     async function bootstrap() {
       try {
         const payload = await apiFetch<unknown>(endpoint, undefined, {
-          query: catalogQuery(query, statusFilter, page, pageSize),
+          query: catalogQuery(query, statusFilter, page, pageSize, fixedCategory),
         });
         if (!cancelled) {
           setItems(extractList<CatalogItem>(payload));
@@ -402,7 +411,7 @@ export function AdminCatalogPage({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, pushToast, query, statusFilter, title, page, pageSize, t]);
+  }, [endpoint, fixedCategory, pushToast, query, statusFilter, title, page, pageSize, t]);
 
   const rows = useMemo(
     () => items.map(config.buildRow),
@@ -417,7 +426,10 @@ export function AdminCatalogPage({
     try {
       await apiFetch(editingId ? `${endpoint}/${editingId}` : endpoint, {
         method: editingId ? 'PATCH' : 'POST',
-        body: JSON.stringify(buildPayload(config.fields, draft)),
+        body: JSON.stringify({
+          ...buildPayload(config.fields, draft),
+          ...(fixedCategory ? { category: fixedCategory } : {}),
+        }),
       });
 
       resetDraft();
@@ -440,7 +452,7 @@ export function AdminCatalogPage({
 
   function resetDraft() {
     setEditingId(null);
-    setDraft(createDraft(config.fields));
+    setDraft(createDraft(config.fields, fixedCategory));
   }
 
   function startEdit(item: CatalogItem) {
@@ -450,7 +462,40 @@ export function AdminCatalogPage({
     }
 
     setEditingId(id);
-    setDraft(draftFromItem(config.fields, item));
+    setDraft(draftFromItem(config.fields, item, fixedCategory));
+  }
+
+  async function uploadAsset(field: FieldConfig, file: File) {
+    const upload = uploadConfigForField(field, fixedCategory);
+    if (!upload) return;
+
+    setUploadingField(field.key);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', `${upload.pathPrefix}/${Date.now()}-${slugFileName(file.name)}`);
+      formData.append('upsert', 'true');
+
+      const uploaded = await apiFetch<{ publicUrl: string }>('/storage/admin/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      setDraft((current) => ({ ...current, [field.key]: uploaded.publicUrl }));
+      pushToast({
+        tone: 'success',
+        title: t('catalog.toast.uploaded'),
+        message: file.name,
+      });
+    } catch {
+      pushToast({
+        tone: 'error',
+        title: t('catalog.toast.uploadFailed'),
+        message: t('catalog.toast.serverHint'),
+      });
+    } finally {
+      setUploadingField(null);
+    }
   }
 
   async function toggleItem(item: CatalogItem) {
@@ -602,7 +647,7 @@ export function AdminCatalogPage({
             copy={copy}
           />
           <div className="mt-5 space-y-4">
-            {config.fields.map((field) => (
+            {visibleFields.map((field) => (
               <CatalogField
                 field={field}
                 key={field.key}
@@ -610,6 +655,9 @@ export function AdminCatalogPage({
                 onChange={(value) =>
                   setDraft((current) => ({ ...current, [field.key]: value }))
                 }
+                onUpload={(file) => void uploadAsset(field, file)}
+                upload={uploadConfigForField(field, fixedCategory)}
+                uploading={uploadingField === field.key}
                 value={draft[field.key]}
               />
             ))}
@@ -636,9 +684,11 @@ function catalogQuery(
   statusFilter: 'ALL' | 'ACTIVE' | 'DRAFT',
   page: number,
   pageSize: number,
+  category?: string,
 ) {
   return {
     q: query.trim() || undefined,
+    category,
     isActive: statusFilter === 'ALL' ? undefined : statusFilter === 'ACTIVE',
     limit: pageSize,
     skip: page * pageSize,
@@ -667,12 +717,20 @@ function CatalogField({
   label,
   value,
   onChange,
+  upload,
+  uploading,
+  onUpload,
 }: {
   field: FieldConfig;
   label: string;
   value: string | boolean;
   onChange: (value: string | boolean) => void;
+  upload?: { accept: string; pathPrefix: string };
+  uploading?: boolean;
+  onUpload?: (file: File) => void;
 }) {
+  const { t } = useTranslation();
+
   if (field.type === 'boolean') {
     return (
       <button
@@ -727,24 +785,54 @@ function CatalogField({
   return (
     <label className="block">
       <span className="text-sm font-semibold text-slate">{label}</span>
-      <input
-        className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
-        onChange={(event) => onChange(event.target.value)}
-        required={field.required}
-        type={field.type === 'url' ? 'url' : field.type}
-        value={String(value)}
-      />
+      <div className={upload ? 'mt-2 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]' : 'mt-2'}>
+        <input
+          className="h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
+          onChange={(event) => onChange(event.target.value)}
+          required={field.required}
+          type={field.type === 'url' ? 'url' : field.type}
+          value={String(value)}
+        />
+        {upload ? (
+          <span className="relative inline-flex">
+            <input
+              accept={upload.accept}
+              className="absolute inset-0 cursor-pointer opacity-0"
+              disabled={uploading}
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) onUpload?.(file);
+                event.currentTarget.value = '';
+              }}
+              type="file"
+            />
+            <Button className="h-11" disabled={uploading} type="button" variant="secondary">
+              <UploadCloud className="h-4 w-4" />
+              {uploading ? t('catalog.uploading') : t('catalog.upload')}
+            </Button>
+          </span>
+        ) : null}
+      </div>
     </label>
   );
 }
 
-function createDraft(fields: FieldConfig[]): Draft {
-  return Object.fromEntries(fields.map((field) => [field.key, field.defaultValue]));
+function createDraft(fields: FieldConfig[], fixedCategory?: string): Draft {
+  return Object.fromEntries(
+    fields.map((field) => [
+      field.key,
+      field.key === 'category' && fixedCategory ? fixedCategory : field.defaultValue,
+    ]),
+  );
 }
 
-function draftFromItem(fields: FieldConfig[], item: CatalogItem): Draft {
+function draftFromItem(fields: FieldConfig[], item: CatalogItem, fixedCategory?: string): Draft {
   return Object.fromEntries(
     fields.map((field) => {
+      if (field.key === 'category' && fixedCategory) {
+        return [field.key, fixedCategory];
+      }
+
       if (field.type === 'boolean') {
         return [field.key, asBoolean(item[field.key]) ?? Boolean(field.defaultValue)];
       }
@@ -756,6 +844,37 @@ function draftFromItem(fields: FieldConfig[], item: CatalogItem): Draft {
       ];
     }),
   );
+}
+
+function uploadConfigForField(field: FieldConfig, fixedCategory?: string) {
+  if (field.key === 'soundUrl') {
+    return {
+      accept: 'audio/*',
+      pathPrefix: fixedCategory === 'PODCAST' ? 'podcasts' : 'ambient-sounds',
+    };
+  }
+
+  if (field.key === 'imageUrl' || field.key === 'previewImageUrl') {
+    return {
+      accept: 'image/*',
+      pathPrefix: fixedCategory === 'PODCAST' ? 'podcast-covers' : 'sound-covers',
+    };
+  }
+
+  return undefined;
+}
+
+function slugFileName(name: string) {
+  const parts = name.split('.');
+  const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : '';
+  const base =
+    (parts.join('.') || 'upload')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'upload';
+
+  return ext ? `${base}.${ext.replace(/[^a-z0-9]/g, '')}` : base;
 }
 
 function buildPayload(fields: FieldConfig[], draft: Draft) {

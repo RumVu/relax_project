@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 import { useUiStore } from '@/stores/use-ui-store';
 import { cn } from '@/lib/utils';
@@ -14,10 +14,25 @@ const iconByTone = {
 export function ToastRegion() {
   const toasts = useUiStore((state) => state.toasts);
   const removeToast = useUiStore((state) => state.removeToast);
+  const [closingIds, setClosingIds] = useState<Set<string>>(() => new Set());
+  const closeToast = useCallback(
+    (id: string) => {
+      setClosingIds((current) => new Set(current).add(id));
+      window.setTimeout(() => {
+        removeToast(id);
+        setClosingIds((current) => {
+          const next = new Set(current);
+          next.delete(id);
+          return next;
+        });
+      }, 280);
+    },
+    [removeToast],
+  );
 
   useEffect(() => {
     const timers = toasts.map((toast) =>
-      window.setTimeout(() => removeToast(toast.id), 3600),
+      window.setTimeout(() => closeToast(toast.id), 2000),
     );
 
     return () => {
@@ -25,17 +40,19 @@ export function ToastRegion() {
         window.clearTimeout(timer);
       }
     };
-  }, [removeToast, toasts]);
+  }, [closeToast, toasts]);
 
   return (
     <div className="pointer-events-none fixed right-4 top-4 z-50 flex w-[min(92vw,360px)] flex-col gap-3">
       {toasts.map((toast) => {
         const Icon = iconByTone[toast.tone];
+        const closing = closingIds.has(toast.id);
 
         return (
           <div
             className={cn(
-              'pointer-events-auto rounded-2xl border bg-white/95 p-4 shadow-panel backdrop-blur',
+              'pointer-events-auto rounded-2xl border bg-white/95 p-4 shadow-panel backdrop-blur transition-all duration-300 ease-in-out',
+              closing ? 'translate-x-[120%] scale-95 opacity-0' : 'translate-x-0 opacity-100',
               toast.tone === 'success' && 'border-mint/40',
               toast.tone === 'error' && 'border-coral/40',
               toast.tone === 'info' && 'border-violet/30',
@@ -61,7 +78,7 @@ export function ToastRegion() {
               </div>
               <button
                 className="text-slate transition hover:text-ink"
-                onClick={() => removeToast(toast.id)}
+                onClick={() => closeToast(toast.id)}
                 type="button"
               >
                 <X className="h-4 w-4" />

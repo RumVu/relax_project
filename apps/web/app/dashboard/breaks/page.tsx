@@ -60,8 +60,9 @@ export default function BreaksPage() {
     open: false,
     phase: 'started',
   });
+  const selectedActivityId = activeActivity || data.relaxActivities[0]?.id || '';
   const active =
-    data.relaxActivities.find((activity) => activity.id === activeActivity) ??
+    data.relaxActivities.find((activity) => activity.id === selectedActivityId) ??
     data.relaxActivities[0];
   const hasActivities = Boolean(active);
   const ActiveIcon = activityIcons[active?.type as keyof typeof activityIcons] ?? Play;
@@ -115,7 +116,7 @@ export default function BreaksPage() {
           <div className="mt-5 grid gap-3 md:grid-cols-2">
             {data.relaxActivities.map((activity, index) => {
               const Icon = activityIcons[activity.type as keyof typeof activityIcons] ?? Play;
-              const activeRow = activeActivity === activity.id;
+              const activeRow = selectedActivityId === activity.id;
 
               return (
                 <button
@@ -211,9 +212,19 @@ export default function BreaksPage() {
               )}
             </div>
             <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
-              <div className="h-full w-2/3 rounded-full bg-mint" />
+              <div
+                className={`h-full rounded-full bg-mint transition-all ${
+                  actionState === 'started' ? 'w-full' : 'w-1/4'
+                }`}
+              />
             </div>
-            <p className="mt-2 text-xs font-semibold text-mist/60">{t('common.loading')}</p>
+            <p className="mt-2 text-xs font-semibold text-mist/60">
+              {actionState === 'started'
+                ? t('breaks.modal.sessionStarted')
+                : hasActivities
+                  ? t('breaks.session.ready')
+                  : t('common.loading')}
+            </p>
           </div>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             <Button
@@ -237,6 +248,7 @@ export default function BreaksPage() {
                   );
                   setActiveSessionId(session.id ?? null);
                   setActionState('started');
+                  triggerRefresh();
                   setSessionModal({ open: true, phase: 'started' });
                   pushToast({
                     tone: 'success',

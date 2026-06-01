@@ -23,12 +23,23 @@ export interface StorageStatus {
   error?: string;
 }
 
+export interface UploadedStorageFile {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
 @Injectable()
 export class StorageService {
   private readonly publicCatalogPrefixes = [
     'companions/',
     'onboarding/',
     'sounds/',
+    'ambient-sounds/',
+    'podcasts/',
+    'podcast-covers/',
+    'sound-covers/',
     'breathing/',
     'quotes/',
   ];
@@ -102,6 +113,8 @@ export class StorageService {
         companions: 'companions/{asset-key}/{state}.png',
         onboarding: 'onboarding/{slide-key}.png',
         sounds: 'sounds/{category}/{sound-key}.mp3',
+        ambientSounds: 'ambient-sounds/{sound-key}.mp3',
+        podcasts: 'podcasts/{podcast-key}.mp3',
         breathing: 'breathing/{exercise-key}.png',
         quotes: 'quotes/{mood-key}.png',
         userUploads: 'user-uploads/{user-id}/{filename}',
@@ -178,6 +191,87 @@ export class StorageService {
 
   createAdminSignedUploadUrl(path: string, upsert = false) {
     return this.createSignedUploadUrl(this.normalizePath(path), upsert);
+  }
+
+  async uploadUserFile(
+    userId: string,
+    file: UploadedStorageFile | undefined,
+    path: string,
+    options: { upsert?: boolean; isPublic?: boolean; metadata?: Record<string, unknown> } = {},
+  ) {
+    return this.uploadFile(
+      this.normalizeUserUploadPath(userId, path),
+      file,
+      {
+        ...options,
+        userId,
+      },
+    );
+  }
+
+  async uploadAdminFile(
+    file: UploadedStorageFile | undefined,
+    path: string,
+    options: { upsert?: boolean; isPublic?: boolean; metadata?: Record<string, unknown> } = {},
+  ) {
+    return this.uploadFile(this.normalizePath(path), file, options);
+  }
+
+  private async uploadFile(
+    normalizedPath: string,
+    file: UploadedStorageFile | undefined,
+    options: {
+      userId?: string;
+      upsert?: boolean;
+      isPublic?: boolean;
+      metadata?: Record<string, unknown>;
+    },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new AppException(
+        ErrorCode.STORAGE_INVALID_PATH,
+        'Upload file is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const { data, error } = await this.getClient()
+      .storage.from(this.getBucket())
+      .upload(normalizedPath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: options.upsert ?? true,
+      });
+
+    if (error) {
+      this.throwStorageOperationError(error.message);
+    }
+
+    const publicUrl = this.getPublicUrl(data.path).publicUrl;
+
+    await this.prisma.storageFile.create({
+      data: {
+        userId: options.userId,
+        filename: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+        provider: 'supabase',
+        bucket: this.supabaseBucket,
+        path: data.path,
+        url: publicUrl,
+        publicUrl,
+        isPublic: options.isPublic ?? true,
+        metadata: (options.metadata ?? {}) as Prisma.InputJsonValue,
+      },
+    });
+
+    return {
+      bucket: this.getBucket(),
+      path: data.path,
+      publicUrl,
+      filename: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+    };
   }
 
   private async createSignedUploadUrl(path: string, upsert = false) {

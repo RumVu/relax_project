@@ -23,6 +23,12 @@ const CATEGORY_IMAGES = {
     'https://images.unsplash.com/photo-1466150036782-869a824aeb25?w=600',
     'https://images.unsplash.com/photo-1571115332905-d8c5dcdaa9a4?w=600',
   ],
+  PODCAST: [
+    'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=600',
+    'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=600',
+    'https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=600',
+    'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=600',
+  ],
 };
 
 const TRACKS = {
@@ -114,6 +120,18 @@ const TRACKS = {
     ['romantic-vacation', 'Romantic Vacation', 89, 112],
     ['classical-3', 'Classical 3', 710, 108],
   ],
+  PODCAST: [
+    ['mindful-reset', 'Mindful Reset', 480, 100],
+    ['late-night-check-in', 'Late Night Check-in', 640, 142],
+    ['soft-focus-note', 'Soft Focus Note', 27, 119],
+    ['tiny-breath-break', 'Tiny Breath Break', 750, 130],
+    ['calm-room-talk', 'Calm Room Talk', 109, 147],
+    ['gentle-work-pause', 'Gentle Work Pause', 150, 200],
+    ['after-stress-reset', 'After Stress Reset', 662, 116],
+    ['sleepy-evening-note', 'Sleepy Evening Note', 723, 96],
+    ['daily-kindness-prompt', 'Daily Kindness Prompt', 646, 136],
+    ['quiet-confidence', 'Quiet Confidence', 183, 267],
+  ],
 };
 
 const CATEGORY_DESCRIPTIONS = {
@@ -121,6 +139,7 @@ const CATEGORY_DESCRIPTIONS = {
   CHILL: 'Nhạc chill/ambient êm, không gắt tai và hợp thư giãn dài hơn.',
   VIOLIN: 'Violin/strings nhẹ, hợp cảm xúc buổi tối và mood sâu.',
   PIANO: 'Piano/classical nhẹ, hợp đọc, viết nhật ký hoặc thở chậm.',
+  PODCAST: 'Podcast thư giãn ngắn với nền chill nhẹ, hợp check-in và nghỉ giữa giờ.',
 };
 
 const AMBIENT_SOUND_CATALOG = Object.entries(TRACKS).flatMap(

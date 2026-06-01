@@ -10,6 +10,7 @@ import {
   BookOpenText,
   CloudSun,
   FileClock,
+  Headphones,
   Home,
   Leaf,
   Menu,
@@ -53,6 +54,7 @@ const NAV_TRANSLATION_KEYS: Record<string, TranslationKey> = {
   Logs: 'nav.logs',
   Quotes: 'nav.quotes',
   Sounds: 'nav.sounds',
+  Podcasts: 'nav.podcasts',
   Exercises: 'nav.exercises',
   Themes: 'nav.themes',
   Onboarding: 'nav.onboarding',
@@ -74,6 +76,7 @@ const iconMap = {
   Logs: FileClock,
   Quotes: Sparkles,
   Sounds: Volume2,
+  Podcasts: Headphones,
   Exercises: Activity,
 };
 

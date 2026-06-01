@@ -78,6 +78,10 @@ export class AmbientSoundsService {
       where.isActive = query.isActive;
     }
 
+    if (query.category?.trim()) {
+      where.category = query.category.trim().toUpperCase();
+    }
+
     return where;
   }
 }

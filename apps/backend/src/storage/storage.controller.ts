@@ -6,17 +6,21 @@ import {
   Param,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiConsumes,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { AuthUser } from '../auth/auth.types';
@@ -29,6 +33,10 @@ import { RemoveStorageObjectDto } from './dto/remove-storage-object.dto';
 import { StorageFileResponseDto } from './dto/storage-file-response.dto';
 import { StorageHealthQueryDto } from './dto/storage-health-query.dto';
 import { StorageService } from './storage.service';
+import type { UploadedStorageFile } from './storage.service';
+
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const ADMIN_UPLOAD_MAX_BYTES = 50 * 1024 * 1024;
 
 @ApiTags('Storage')
 @Controller('storage')
@@ -85,6 +93,49 @@ export class StorageController {
   @Post('admin/signed-upload-url')
   createAdminSignedUploadUrl(@Body() dto: CreateSignedUploadUrlDto) {
     return this.storageService.createAdminSignedUploadUrl(dto.path, dto.upsert);
+  }
+
+  @ApiOperation({ summary: 'Upload the current user avatar through the API' })
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({ description: 'Uploaded avatar storage metadata.' })
+  @ApiBearerAuth('access-token')
+  @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: AVATAR_MAX_BYTES } }),
+  )
+  @Post('me/avatar')
+  uploadAvatar(
+    @CurrentUser() user: AuthUser,
+    @UploadedFile() file?: UploadedStorageFile,
+  ) {
+    const ext = extensionForMime(file?.mimetype) ?? 'png';
+    return this.storageService.uploadUserFile(user.id, file, `avatars/avatar.${ext}`, {
+      upsert: true,
+      isPublic: true,
+      metadata: { domain: 'profile-avatar' },
+    });
+  }
+
+  @ApiOperation({ summary: 'Upload an admin/catalog file through the API' })
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({ description: 'Uploaded catalog storage metadata.' })
+  @AdminOnly()
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: ADMIN_UPLOAD_MAX_BYTES } }),
+  )
+  @Post('admin/upload')
+  uploadAdminFile(
+    @UploadedFile() file: UploadedStorageFile | undefined,
+    @Body('path') path: string,
+    @Body('upsert') upsert?: string,
+  ) {
+    const resolvedPath = path || `uploads/${Date.now()}-${safeFileName(file?.originalname)}`;
+    return this.storageService.uploadAdminFile(file, resolvedPath, {
+      upsert: upsert !== 'false',
+      isPublic: true,
+      metadata: { domain: 'catalog-upload' },
+    });
   }
 
   @ApiOperation({ summary: 'Create a signed read URL for a storage object' })
@@ -201,4 +252,20 @@ export class StorageController {
   removeObjects(@Body() dto: RemoveStorageObjectDto) {
     return this.storageService.removeObjects(dto.paths);
   }
+}
+
+function extensionForMime(mimetype?: string) {
+  if (mimetype === 'image/jpeg') return 'jpg';
+  if (mimetype === 'image/png') return 'png';
+  if (mimetype === 'image/webp') return 'webp';
+  if (mimetype === 'image/gif') return 'gif';
+  return undefined;
+}
+
+function safeFileName(name = 'upload.bin') {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9.]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 100) || 'upload.bin';
 }

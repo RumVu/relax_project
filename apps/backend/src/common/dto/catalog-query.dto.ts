@@ -16,6 +16,11 @@ export class CatalogQueryDto {
   q?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  category?: string;
+
+  @IsOptional()
   @Type(() => Boolean)
   @IsBoolean()
   isActive?: boolean;

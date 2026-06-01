@@ -4,15 +4,11 @@
  * Avatar uploader for /dashboard/settings.
  *
  * Flow:
- *   1. User picks file → onChange
- *   2. POST /v1/storage/signed-upload-url body `{path, upsert:true}`
- *      → backend creates signed URL via Supabase service role
- *   3. PUT the file binary to that signed URL (direct to Supabase,
- *      backend doesn't proxy bytes)
- *   4. Compute public URL: <SUPABASE>/storage/v1/object/public/<bucket>/<path>
- *   5. PATCH /v1/user-profiles/me/profile body `{avatar: publicUrl}`
- *      → backend updates User.avatar (separate from profile upsert)
- *   6. Call `onUpdated(publicUrl)` so the parent settings page refreshes
+ *   1. User picks file → local preview
+ *   2. POST multipart to /v1/storage/me/avatar
+ *   3. Backend uploads to Supabase using service role and returns publicUrl
+ *   4. PATCH /v1/user-profiles/me/profile body `{avatar: publicUrl}`
+ *   5. Call `onUpdated(publicUrl)` so the parent settings page refreshes
  */
 
 import { useCallback, useRef, useState } from 'react';
@@ -23,17 +19,11 @@ import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { cn } from '@/lib/utils';
 
-const SUPABASE_URL =
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://koshdbyfhivhpmydcgst.supabase.co';
-
 const MAX_BYTES = 5 * 1024 * 1024; // 5 MB — plenty for an avatar PNG/JPEG.
 const ACCEPTED_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
-interface SignedUpload {
-  bucket: string;
-  path: string;
-  signedUrl: string;
-  token: string;
+interface UploadedAvatar {
+  publicUrl: string;
 }
 
 export function AvatarUploader({
@@ -85,29 +75,14 @@ export function AvatarUploader({
       setPreview(localPreview);
 
       try {
-        // 1. Get a signed upload URL scoped to this user's path.
-        // `upsert: true` lets re-uploads overwrite their previous file.
-        const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
-        const signed = await apiFetch<SignedUpload>('/storage/signed-upload-url', {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploaded = await apiFetch<UploadedAvatar>('/storage/me/avatar', {
           method: 'POST',
-          body: JSON.stringify({
-            path: `avatar.${ext}`,
-            upsert: true,
-          }),
+          body: formData,
         });
-
-        // 2. PUT the file binary directly to Supabase (no proxy through backend).
-        const uploadRes = await fetch(signed.signedUrl, {
-          method: 'PUT',
-          headers: { 'Content-Type': file.type, 'x-upsert': 'true' },
-          body: file,
-        });
-        if (!uploadRes.ok) {
-          throw new Error(`Upload failed: HTTP ${uploadRes.status}`);
-        }
-
-        // 3. Build the public URL (bucket is public-assets so no signing needed).
-        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${signed.bucket}/${signed.path}?v=${Date.now()}`;
+        const publicUrl = `${uploaded.publicUrl}?v=${Date.now()}`;
 
         // 4. Save URL on user profile.
         await apiFetch('/user-profiles/me/profile', {

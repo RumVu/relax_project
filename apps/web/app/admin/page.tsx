@@ -39,6 +39,7 @@ const metricIcons = [Activity, Users, Users, CreditCard, Activity, Bell];
 const catalogLinks = [
   { area: 'Quotes', href: '/admin/quotes' },
   { area: 'Sounds', href: '/admin/sounds' },
+  { area: 'Podcasts', href: '/admin/podcasts' },
   { area: 'Exercises', href: '/admin/exercises' },
   { area: 'Themes', href: '/admin/themes' },
   { area: 'Onboarding', href: '/admin/onboarding' },
@@ -455,6 +456,7 @@ function areaKey(area: string) {
   const keys: Record<string, Parameters<ReturnType<typeof useTranslation>['t']>[0]> = {
     Quotes: 'nav.quotes',
     Sounds: 'nav.sounds',
+    Podcasts: 'nav.podcasts',
     Exercises: 'nav.exercises',
     Themes: 'nav.themes',
     Onboarding: 'nav.onboarding',
