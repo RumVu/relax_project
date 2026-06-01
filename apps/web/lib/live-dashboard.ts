@@ -765,6 +765,14 @@ function mapRelaxActivities(
         asString(item.durationLabel) ??
         formatDurationFromSeconds(asNumber(item.durationSeconds)) ??
         zeroDurationLabel(),
+      resources: (asArray<Record<string, unknown>>(item.resources) ?? []).map(
+        (resource) => ({
+          id: asString(resource.id) ?? crypto.randomUUID(),
+          title: asString(resource.title) ?? asString(resource.name) ?? titleize(type),
+          category: asString(resource.category) ?? type,
+          duration: asNumber(resource.duration),
+        }),
+      ),
       sessions: asNumber(matched?.count) ?? 0,
       relief: readReliefPercent(matched) ?? readReliefPercent(item) ?? 0,
     };

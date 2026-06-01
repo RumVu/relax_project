@@ -18,6 +18,9 @@ const {
   UserRole,
 } = require('@prisma/client');
 const bcrypt = require('bcrypt');
+const {
+  AMBIENT_SOUND_CATALOG,
+} = require('./ambient-sounds.catalog.cjs');
 
 const prisma = new PrismaClient();
 const ASSET_BASE =
@@ -794,191 +797,16 @@ async function seedCompanionMessages() {
 }
 
 async function seedAmbientSounds() {
-  const sounds = [
-    {
-      title: 'Serene View',
-      description: 'Chillout nhẹ, sạch tai cho lúc cần hạ nhịp.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/serene-view.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1453738773917-9c3eff1db985?w=600',
-      duration: 114,
-      isActive: true,
-    },
-    {
-      title: 'Sweet September',
-      description: 'Beat chill/hip-hop dịu, hợp dashboard thư giãn.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/sweet-september.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600',
-      duration: 99,
-      isActive: true,
-    },
-    {
-      title: 'Sleepy Cat',
-      description: 'Nhạc chill mềm, hợp màn nghỉ ngắn buổi tối.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/sleepy-cat.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=600',
-      duration: 119,
-      isActive: true,
-    },
-    {
-      title: 'Thinking About You',
-      description: 'Nhạc nền chillout ấm, hợp viết nhật ký và thư giãn.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/thinking-about-you.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1495995083802-c39e3a35a45e?w=600',
-      duration: 118,
-      isActive: true,
-    },
-    {
-      title: 'Digital Clouds',
-      description: 'Lofi điện tử nhẹ, không quá sáng, không quá buồn.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/digital-clouds.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=600',
-      duration: 101,
-      isActive: true,
-    },
-    {
-      title: "Day Dreamin' with U",
-      description: 'Chill R&B/lofi mềm, nghe dễ vào mood.',
-      category: 'LOFI',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/day-dreamin-with-u.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1495567720989-cebdbdd97913?w=600',
-      duration: 118,
-      isActive: true,
-    },
-    {
-      title: 'Curiosity',
-      description: 'Chillout sáng, đủ nhẹ để làm nền không gây mệt.',
-      category: 'CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/curiosity.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600',
-      duration: 100,
-      isActive: true,
-    },
-    {
-      title: 'Smooth Jazz',
-      description: 'Downtempo jazz nhẹ, lịch sự hơn bộ synth cũ.',
-      category: 'CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/smooth-jazz.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600',
-      duration: 142,
-      isActive: true,
-    },
-    {
-      title: 'Serene Moments',
-      description: 'Chillout yên hơn, hợp nghỉ mắt và đọc vài dòng.',
-      category: 'CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/serene-moments.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=600',
-      duration: 119,
-      isActive: true,
-    },
-    {
-      title: 'Relaxation 04',
-      description: 'Chill nhẹ, vừa đủ nhịp để thư giãn mà không buồn ngủ.',
-      category: 'CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/relaxation-04.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600',
-      duration: 130,
-      isActive: true,
-    },
-    {
-      title: 'Valley Sunset',
-      description: 'Ambient thiền nhẹ, hợp thả lỏng cuối ngày.',
-      category: 'MEDITATION',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/valley-sunset.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=600',
-      duration: 134,
-      isActive: true,
-    },
-    {
-      title: 'Relax Beat',
-      description: 'Beat chậm kiểu thiền hiện đại, sạch và dễ nghe.',
-      category: 'MEDITATION',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/relax-beat.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600',
-      duration: 108,
-      isActive: true,
-    },
-    {
-      title: 'Spirit in the Woods',
-      description: 'Ambient rừng sâu, hợp thở chậm và ngắt stress.',
-      category: 'MEDITATION',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/spirit-in-the-woods.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600',
-      duration: 113,
-      isActive: true,
-    },
-    {
-      title: 'Forest Treasure',
-      description: 'Ambient mềm, có cảm giác tĩnh và rộng.',
-      category: 'MEDITATION',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/forest-treasure.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=600',
-      duration: 104,
-      isActive: true,
-    },
-    {
-      title: 'Meditation',
-      description: 'Track thiền êm, hợp popup thư giãn sau khi finish.',
-      category: 'MEDITATION',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/meditation.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1593811167562-9cef47bfc4d7?w=600',
-      duration: 118,
-      isActive: true,
-    },
-    {
-      title: 'Smooth Meditation',
-      description: 'Thiền êm và sâu hơn, không bị tiếng hiệu ứng lạc mood.',
-      category: 'BUDDHA_CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/smooth-meditation.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600',
-      duration: 154,
-      isActive: true,
-    },
-    {
-      title: 'Yoga Song',
-      description: 'Chill thiền/yoga gọn, hợp session ngắn.',
-      category: 'BUDDHA_CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/yoga-song.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600',
-      duration: 98,
-      isActive: true,
-    },
-    {
-      title: 'Nature Yoga',
-      description: 'Yoga/meditation sáng, nghe nhẹ mà không bị sến.',
-      category: 'BUDDHA_CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/nature-yoga.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600',
-      duration: 108,
-      isActive: true,
-    },
-    {
-      title: 'Deep Meditation',
-      description: 'Ambient sâu, hợp lúc cần giảm nhịp thật sự.',
-      category: 'BUDDHA_CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/deep-meditation.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600',
-      duration: 147,
-      isActive: true,
-    },
-    {
-      title: 'Nap Time',
-      description: 'Track nghỉ ngắn, chill thiền nhẹ trước khi quay lại việc.',
-      category: 'BUDDHA_CHILL',
-      soundUrl: `${ASSET_BASE}/ambient-sounds/nap-time.mp3`,
-      imageUrl: 'https://images.unsplash.com/photo-1495195134817-aeb325a55b65?w=600',
-      duration: 103,
-      isActive: true,
-    },
-  ];
-
-  for (const sound of sounds) {
-    await upsertByField(prisma.ambientSound, 'title', sound.title, sound);
+  for (const sound of AMBIENT_SOUND_CATALOG) {
+    await upsertByField(prisma.ambientSound, 'title', sound.title, {
+      title: sound.title,
+      description: sound.description,
+      category: sound.category,
+      soundUrl: `${ASSET_BASE}/ambient-sounds/${sound.key}.mp3`,
+      imageUrl: sound.imageUrl,
+      duration: sound.duration,
+      isActive: sound.isActive,
+    });
   }
 }
 

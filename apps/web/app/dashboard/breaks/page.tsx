@@ -30,6 +30,13 @@ const activityIcons = {
   MEDITATION: CheckCircle2,
 };
 
+function formatTrackDuration(seconds?: number | null) {
+  if (!seconds) return '';
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${String(rest).padStart(2, '0')}`;
+}
+
 export default function BreaksPage() {
   const router = useRouter();
   const { t } = useTranslation();
@@ -129,7 +136,19 @@ export default function BreaksPage() {
                   </div>
                   <h3 className="mt-4 text-lg font-extrabold">{activity.title}</h3>
                   <p className={`mt-1 text-sm ${activeRow ? 'text-white/70' : 'text-slate'}`}>{activity.subtitle}</p>
-                  <p className="mt-3 text-sm font-bold">{activity.duration} • relief {activity.relief}%</p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-bold">
+                    <span>{activity.duration}</span>
+                    <span>relief {activity.relief}%</span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] ${
+                        activeRow ? 'bg-white/15 text-white' : 'bg-lilac text-plum'
+                      }`}
+                    >
+                      {t('breaks.catalog.resources', {
+                        count: activity.resources.length,
+                      })}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -157,6 +176,40 @@ export default function BreaksPage() {
             <p className="mt-2 text-sm text-mist/70">
               {active?.subtitle ?? t('common.loading')}
             </p>
+            <div className="mt-5 rounded-lg border border-white/10 bg-night/30 p-3">
+              <p className="text-xs font-bold uppercase tracking-[0.18em] text-mist/60">
+                {t('breaks.session.resources')}
+              </p>
+              {active?.resources.length ? (
+                <div className="mt-3 space-y-2">
+                  {active.resources.slice(0, 4).map((resource) => (
+                    <div
+                      className="flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2 text-sm"
+                      key={resource.id}
+                    >
+                      <span className="min-w-0 flex-1 truncate font-semibold">
+                        {resource.title}
+                      </span>
+                      <span className="shrink-0 text-xs font-bold text-mist/70">
+                        {resource.category}
+                        {resource.duration ? ` · ${formatTrackDuration(resource.duration)}` : ''}
+                      </span>
+                    </div>
+                  ))}
+                  {active.resources.length > 4 ? (
+                    <p className="text-xs font-semibold text-mist/60">
+                      {t('breaks.session.moreResources', {
+                        count: active.resources.length - 4,
+                      })}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm font-semibold text-mist/60">
+                  {t('breaks.session.noResources')}
+                </p>
+              )}
+            </div>
             <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
               <div className="h-full w-2/3 rounded-full bg-mint" />
             </div>

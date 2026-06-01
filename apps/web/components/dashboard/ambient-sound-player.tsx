@@ -4,7 +4,8 @@
  * Ambient sound player widget. Fetches active AmbientSounds from the
  * backend, displays them as a clickable grid, and streams the selected
  * one via a single shared <audio> element so only one track plays at a
- * time. Loops by default (the seeded clips are 30s).
+ * time. Loops by default so short relax sessions can keep the selected
+ * track running without restarting manually.
  *
  * Used in the dashboard /breaks page so the user can preview/play music
  * for their relax session without leaving the page.
@@ -33,8 +34,10 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   RAIN: 'from-sky-300/30 via-blue-400/20 to-indigo-500/10',
   NATURE: 'from-emerald-300/30 via-green-400/20 to-teal-500/10',
   LOFI: 'from-amber-300/30 via-orange-400/20 to-rose-500/10',
+  CHILL: 'from-cyan-300/30 via-blue-400/20 to-violet-500/10',
+  VIOLIN: 'from-rose-300/30 via-fuchsia-400/20 to-violet-500/10',
+  PIANO: 'from-violet-300/30 via-purple-400/20 to-indigo-500/10',
   AMBIENT: 'from-slate-300/30 via-zinc-400/20 to-stone-500/10',
-  PIANO: 'from-violet-300/30 via-purple-400/20 to-fuchsia-500/10',
   MEDITATION: 'from-cyan-300/30 via-sky-400/20 to-blue-500/10',
 };
 

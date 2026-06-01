@@ -435,7 +435,11 @@ export function WeeklyStatsChart({
 export function RelaxActivityChart({
   data,
 }: {
-  data: Array<Record<string, string | number>>;
+  data: Array<{
+    title: string;
+    sessions: number;
+    relief: number;
+  }>;
 }) {
   const { t } = useTranslation();
   const mounted = useMounted();

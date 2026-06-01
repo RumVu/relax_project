@@ -71,8 +71,7 @@ export class RelaxActivitiesService {
     const [sounds, breathingExercises] = await Promise.all([
       this.prisma.ambientSound.findMany({
         where: { isActive: true },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
+        orderBy: [{ category: 'asc' }, { title: 'asc' }],
       }),
       this.prisma.breathingExercise.findMany({
         where: { isActive: true },

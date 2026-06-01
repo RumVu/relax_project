@@ -144,6 +144,12 @@ export type UserDashboardData = {
     duration: string;
     sessions: number;
     relief: number;
+    resources: Array<{
+      id: string;
+      title: string;
+      category: string;
+      duration?: number | null;
+    }>;
   }>;
   settings: {
     profile: {
