@@ -604,6 +604,9 @@ const vi = {
 
   // ===== Breaks page (extended) =====
   'breaks.filterTitle': 'Bộ lọc phiên nghỉ',
+  'breaks.start.pagination': 'Đang hiển thị {{from}}-{{to}} / {{total}} nội dung',
+  'breaks.start.prev': 'Trang trước',
+  'breaks.start.next': 'Trang sau',
   'breaks.modal.sessionStarted': 'Phiên đã bắt đầu',
   'breaks.modal.sessionFinished': 'Phiên đã hoàn tất',
   'breaks.modal.started': '{{activity}} đã bắt đầu. Khi xong bạn có thể quay lại đây để kết thúc hoặc qua trang ghi nhận cảm xúc.',
@@ -1703,6 +1706,9 @@ const en: Record<keyof typeof vi, string> = {
 
   // ===== Breaks page (extended) =====
   'breaks.filterTitle': 'Break filters',
+  'breaks.start.pagination': 'Showing {{from}}-{{to}} / {{total}} items',
+  'breaks.start.prev': 'Previous page',
+  'breaks.start.next': 'Next page',
   'breaks.modal.sessionStarted': 'Session started',
   'breaks.modal.sessionFinished': 'Session finished',
   'breaks.modal.started': '{{activity}} has started. When you finish, come back here to wrap up or jump to the mood check-in.',
