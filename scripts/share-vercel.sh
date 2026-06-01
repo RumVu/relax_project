@@ -24,7 +24,7 @@ cd "$ROOT"
 
 BACKEND_PORT="${BACKEND_PORT:-6823}"
 VERCEL_WEB_URL="${VERCEL_WEB_URL:-https://relax-project-web-dashboard.vercel.app}"
-GOOGLE_CLIENT_ID_DEFAULT="627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID_DEFAULT="884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com"
 
 red()    { printf '\033[31m%s\033[0m\n' "$*"; }
 green()  { printf '\033[32m%s\033[0m\n' "$*"; }
@@ -68,6 +68,10 @@ export NODE_ENV="${NODE_ENV:-production}"
 
 echo "  CORS_ORIGINS  = $CORS_ORIGINS"
 echo "  Google Client = ${GOOGLE_CLIENT_ID:0:30}…"
+if [[ -z "${GOOGLE_CLIENT_SECRET:-}" ]]; then
+  yellow "  ! GOOGLE_CLIENT_SECRET chưa có trong shell. Backend vẫn có thể lấy từ apps/backend/.env,"
+  yellow "    nhưng Google OAuth code flow sẽ fail nếu backend deploy không có secret của client mới."
+fi
 
 # ----- 3. Boot backend stack -------------------------------------------------
 
@@ -147,6 +151,13 @@ VERCEL dashboard → relax-project-web-dashboard → Settings → Environment Va
 
   NEXT_PUBLIC_API_URL              =  $TUNNEL_URL
   NEXT_PUBLIC_GOOGLE_CLIENT_ID     =  $GOOGLE_CLIENT_ID
+
+Backend deploy/local env cũng phải có:
+  GOOGLE_CLIENT_ID                 =  $GOOGLE_CLIENT_ID
+  GOOGLE_CLIENT_SECRET             =  <secret của OAuth client mới>
+
+Google Cloud OAuth client phải có redirect URI:
+  ${VERCEL_WEB_URL}/auth/google/callback
 
 Sau đó: Deployments → ⋯ → Redeploy (bỏ chọn "use existing build cache").
 

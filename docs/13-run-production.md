@@ -53,7 +53,7 @@ script in URL ra:
 2. Settings → Environment Variables
 3. Set/update:
    - `NEXT_PUBLIC_API_URL` = URL trycloudflare vừa lấy
-   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` = `627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com`
+   - `NEXT_PUBLIC_GOOGLE_CLIENT_ID` = `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com`
 4. Deployments → click ⋯ trên deployment mới nhất → **Redeploy**
    (bỏ tick "Use existing build cache" để env mới chắc chắn được pickup)
 5. Đợi ~2-3 phút build xong.
@@ -120,11 +120,20 @@ chạy tay xem có in URL không.
 
 ### Google Sign-In thất bại
 - Vercel env `NEXT_PUBLIC_GOOGLE_CLIENT_ID` set chưa? Redeploy chưa?
+- Backend env `GOOGLE_CLIENT_ID` có trùng client mới không?
+- Backend env `GOOGLE_CLIENT_SECRET` đã set chưa? Flow hiện tại dùng
+  authorization code nên backend bắt buộc có secret để đổi code với Google.
+- Google Cloud Console đang dùng OAuth client mới:
+  `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com`.
 - Authorized JavaScript origins ở Google Cloud Console có Vercel URL chưa?
   https://console.cloud.google.com → APIs & Services → Credentials →
   click Client → Authorized JavaScript origins → add Vercel URL.
-- Backend `GOOGLE_CLIENT_ID` trùng với frontend không? Mặc định
-  share-vercel.sh hardcode đúng — nhưng nếu a override env thì kiểm tra.
+- Authorized redirect URIs phải có đúng:
+  `https://relax-project-web-dashboard.vercel.app/auth/google/callback`.
+- Nếu test local callback thì thêm:
+  `http://localhost:3233/auth/google/callback`.
+- Nếu vẫn gặp `redirect_uri_mismatch`, xoá OAuth client cũ khỏi env/deploy
+  và redeploy lại bằng client mới.
 
 ### URL tunnel cố định (không đổi mỗi lần)
 

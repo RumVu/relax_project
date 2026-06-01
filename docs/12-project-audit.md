@@ -59,24 +59,35 @@ Sau đó vào Vercel dashboard:
 - Settings → Environment Variables
 - Set `NEXT_PUBLIC_API_URL` = URL `*.trycloudflare.com` vừa lấy
 - Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` =
-  `627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com`
+  `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com`
 - Deployments → ⋯ → Redeploy
 
 ## Google Sign-In — Client ID dùng chung
 
 | Vị trí | Key | Giá trị |
 |---|---|---|
-| Backend (`.env`) | `GOOGLE_CLIENT_ID` | `627379199532-…apps.googleusercontent.com` |
+| Backend (`.env`) | `GOOGLE_CLIENT_ID` | `884741112800-…apps.googleusercontent.com` |
+| Backend (`.env`) | `GOOGLE_CLIENT_SECRET` | secret của OAuth client mới |
 | Frontend Vercel (env) | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | giống y |
 | Docker compose | mặc định | đã hard-code Client ID public |
 
-**Client Secret không cần** — flow ID Token: web nhận token từ Google
-Identity Services, gửi cho backend, backend verify bằng `google-auth-
-library` (chỉ cần Client ID khớp `aud`, không cần secret).
+Flow hiện tại là **OAuth authorization code**:
+- Web redirect qua Google bằng client mới.
+- Google redirect về `/auth/google/callback`.
+- Web gửi `authorizationCode` + `redirectUri` cho backend.
+- Backend dùng `GOOGLE_CLIENT_SECRET` để đổi code lấy token rồi verify user.
 
-⚠️ Secret a đã lộ (`GOCSPX-…EkMW`) — **rotate trong Google Cloud
-Console → APIs & Services → Credentials → Client → Reset secret**.
-Sau khi rotate cũng không cần update code (vì code không dùng secret).
+Google Cloud OAuth client mới phải có:
+- Authorized JavaScript origins:
+  `https://relax-project-web-dashboard.vercel.app`
+  và `http://localhost:3233` nếu test local.
+- Authorized redirect URIs:
+  `https://relax-project-web-dashboard.vercel.app/auth/google/callback`
+  và `http://localhost:3233/auth/google/callback` nếu test local.
+
+OAuth client cũ không còn được dùng trong project.
+Sau khi rotate secret, cần cập nhật `GOOGLE_CLIENT_SECRET` trên backend env
+rồi restart/redeploy backend.
 
 ## Authorized JavaScript origins (Google Cloud)
 
