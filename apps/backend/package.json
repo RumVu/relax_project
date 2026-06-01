@@ -18,6 +18,7 @@
     "prisma:migrate:dev": "npm run prisma:sync-schema && prisma migrate dev",
     "prisma:migrate:deploy": "npm run prisma:sync-schema && prisma migrate deploy",
     "prisma:seed": "npm run prisma:sync-schema && node ./prisma/seed.cjs",
+    "storage:sync-ambient-sounds": "node ./prisma/scripts/sync-ambient-sounds-to-supabase.cjs",
     "prisma:cleanup-test-data": "node ./prisma/scripts/cleanup-test-data.cjs",
     "prisma:studio": "npm run prisma:sync-schema && prisma studio",
     "prisma:validate": "npm run prisma:sync-schema && DATABASE_URL=${DATABASE_URL:-postgresql://postgres:123456@localhost:5555/digital_cigarette_break?schema=public} prisma validate",

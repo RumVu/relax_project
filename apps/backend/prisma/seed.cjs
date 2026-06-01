@@ -24,8 +24,13 @@ const {
 const { EXTRA_COZY_QUOTES } = require('./cozy-quotes.extra.cjs');
 
 const prisma = new PrismaClient();
+const supabaseAssetUrl =
+  process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAssetBucket = process.env.SUPABASE_BUCKET ?? 'public-assets';
 const ASSET_BASE =
-  'https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets';
+  supabaseAssetUrl
+    ? `${supabaseAssetUrl}/storage/v1/object/public/${supabaseAssetBucket}`
+    : 'https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets';
 
 async function upsertByField(model, field, value, data) {
   const existing = await model.findFirst({

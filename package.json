@@ -16,6 +16,7 @@
     "prisma:generate": "npm --workspace apps/backend run prisma:generate",
     "prisma:migrate:deploy": "npm --workspace apps/backend run prisma:migrate:deploy",
     "prisma:seed": "npm --workspace apps/backend run prisma:seed",
+    "storage:sync-ambient-sounds": "npm --workspace apps/backend run storage:sync-ambient-sounds --",
     "prisma:cleanup-test-data": "node apps/backend/prisma/scripts/cleanup-test-data.cjs"
   },
   "dependencies": {
