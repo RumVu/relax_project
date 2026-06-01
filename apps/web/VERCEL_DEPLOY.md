@@ -45,6 +45,7 @@ must have:
 |---|---|
 | `GOOGLE_CLIENT_ID` | Same OAuth client ID as `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. |
 | `GOOGLE_CLIENT_SECRET` | OAuth client secret. Backend-only, never expose to web/mobile. |
+| `GOOGLE_REDIRECT_URI` | `https://relax-project-web-dashboard.vercel.app/auth/google/callback`. Must match Google Cloud exactly. |
 | `SUPABASE_URL` | Supabase project URL. |
 | `SUPABASE_PUBLISHABLE_KEY` | Public anon/publishable key. |
 | `SUPABASE_SECRET_KEY` | Service-role/secret key used only by backend uploads. |

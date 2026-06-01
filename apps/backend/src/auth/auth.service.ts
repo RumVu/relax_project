@@ -248,12 +248,23 @@ export class AuthService {
             'Google sign-in is not configured (missing GOOGLE_CLIENT_SECRET on backend).',
         });
       }
+      const redirectUri =
+        this.configService.get<string>('app.googleRedirectUri') ||
+        dto.redirectUri ||
+        '';
+      if (!redirectUri) {
+        throw new UnauthorizedException({
+          code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+          message:
+            'Google sign-in is not configured (missing GOOGLE_REDIRECT_URI on backend).',
+        });
+      }
 
       return exchangeGoogleAuthorizationCode(
         dto.authorizationCode,
         clientId,
         clientSecret,
-        dto.redirectUri ?? '',
+        redirectUri,
       );
     }
 

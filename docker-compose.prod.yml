@@ -67,6 +67,7 @@ services:
       SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
       SUPABASE_BUCKET: ${SUPABASE_BUCKET:-public-assets}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-}
     ports:
       - "${BACKEND_PORT:-6823}:6823"
     healthcheck:

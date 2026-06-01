@@ -123,6 +123,9 @@ chạy tay xem có in URL không.
 - Backend env `GOOGLE_CLIENT_ID` có trùng client mới không?
 - Backend env `GOOGLE_CLIENT_SECRET` đã set chưa? Flow hiện tại dùng
   authorization code nên backend bắt buộc có secret để đổi code với Google.
+- Backend env `GOOGLE_REDIRECT_URI` có đúng
+  `https://relax-project-web-dashboard.vercel.app/auth/google/callback`
+  không? Sai 1 ký tự là Google từ chối đổi code.
 - Google Cloud Console đang dùng OAuth client mới:
   `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com`.
 - Authorized JavaScript origins ở Google Cloud Console có Vercel URL chưa?

@@ -68,6 +68,7 @@ Sau đó vào Vercel dashboard:
 |---|---|---|
 | Backend (`.env`) | `GOOGLE_CLIENT_ID` | `884741112800-…apps.googleusercontent.com` |
 | Backend (`.env`) | `GOOGLE_CLIENT_SECRET` | secret của OAuth client mới |
+| Backend (`.env`) | `GOOGLE_REDIRECT_URI` | `https://relax-project-web-dashboard.vercel.app/auth/google/callback` |
 | Frontend Vercel (env) | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | giống y |
 | Docker compose | mặc định | đã hard-code Client ID public |
 
@@ -75,7 +76,8 @@ Flow hiện tại là **OAuth authorization code**:
 - Web redirect qua Google bằng client mới.
 - Google redirect về `/auth/google/callback`.
 - Web gửi `authorizationCode` + `redirectUri` cho backend.
-- Backend dùng `GOOGLE_CLIENT_SECRET` để đổi code lấy token rồi verify user.
+- Backend dùng `GOOGLE_CLIENT_SECRET` + `GOOGLE_REDIRECT_URI` để đổi code lấy
+  token rồi verify user.
 
 Google Cloud OAuth client mới phải có:
 - Authorized JavaScript origins:

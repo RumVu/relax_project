@@ -64,10 +64,12 @@ step "2/5  Chuẩn bị env"
 export JWT_SECRET="${JWT_SECRET:-$(openssl rand -hex 32)}"
 export CORS_ORIGINS="${CORS_ORIGINS:-${VERCEL_WEB_URL},http://localhost:3000,http://localhost:3233}"
 export GOOGLE_CLIENT_ID="${GOOGLE_CLIENT_ID:-$GOOGLE_CLIENT_ID_DEFAULT}"
+export GOOGLE_REDIRECT_URI="${GOOGLE_REDIRECT_URI:-${VERCEL_WEB_URL}/auth/google/callback}"
 export NODE_ENV="${NODE_ENV:-production}"
 
 echo "  CORS_ORIGINS  = $CORS_ORIGINS"
 echo "  Google Client = ${GOOGLE_CLIENT_ID:0:30}…"
+echo "  Google Redirect = $GOOGLE_REDIRECT_URI"
 if [[ -z "${GOOGLE_CLIENT_SECRET:-}" ]]; then
   yellow "  ! GOOGLE_CLIENT_SECRET chưa có trong shell. Backend vẫn có thể lấy từ apps/backend/.env,"
   yellow "    nhưng Google OAuth code flow sẽ fail nếu backend deploy không có secret của client mới."
@@ -155,9 +157,10 @@ VERCEL dashboard → relax-project-web-dashboard → Settings → Environment Va
 Backend deploy/local env cũng phải có:
   GOOGLE_CLIENT_ID                 =  $GOOGLE_CLIENT_ID
   GOOGLE_CLIENT_SECRET             =  <secret của OAuth client mới>
+  GOOGLE_REDIRECT_URI              =  $GOOGLE_REDIRECT_URI
 
 Google Cloud OAuth client phải có redirect URI:
-  ${VERCEL_WEB_URL}/auth/google/callback
+  $GOOGLE_REDIRECT_URI
 
 Sau đó: Deployments → ⋯ → Redeploy (bỏ chọn "use existing build cache").
 

@@ -69,6 +69,7 @@ services:
       # with an explicit STORAGE_NOT_CONFIGURED response.
       # Google Client ID PUBLIC (an toàn commit). Override bằng env nếu xài dự án khác.
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com}
+      GOOGLE_REDIRECT_URI: ${GOOGLE_REDIRECT_URI:-https://relax-project-web-dashboard.vercel.app/auth/google/callback}
       # CORS mặc định: localhost dev + Vercel production web.
       # `make share-vercel` sẽ override để bồi thêm tunnel + reaffirm Vercel URL.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3233,https://relax-project-web-dashboard.vercel.app}
