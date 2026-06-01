@@ -21,6 +21,7 @@ const bcrypt = require('bcrypt');
 const {
   AMBIENT_SOUND_CATALOG,
 } = require('./ambient-sounds.catalog.cjs');
+const { EXTRA_COZY_QUOTES } = require('./cozy-quotes.extra.cjs');
 
 const prisma = new PrismaClient();
 const ASSET_BASE =
@@ -1263,7 +1264,15 @@ async function seedCozyQuotes() {
     },
   ];
 
-  for (const quote of quotes) {
+  const extraQuotes = EXTRA_COZY_QUOTES.map(([content, mood], index) => ({
+    content,
+    author: index % 5 === 0 ? 'Mồn Lèo' : 'Thì Ai Chill',
+    mood: MoodType[mood] ?? MoodType.NEUTRAL,
+    imageUrl: `${ASSET_BASE}/quotes/extra-${String(index + 1).padStart(2, '0')}.png`,
+    isActive: true,
+  }));
+
+  for (const quote of [...quotes, ...extraQuotes]) {
     await upsertByField(prisma.cozyQuote, 'content', quote.content, quote);
   }
 }

@@ -66,6 +66,9 @@ export default function BreaksPage() {
     data.relaxActivities[0];
   const hasActivities = Boolean(active);
   const ActiveIcon = activityIcons[active?.type as keyof typeof activityIcons] ?? Play;
+  const sessionRunning = actionState === 'started' && Boolean(activeSessionId);
+  const queue = active?.resources ?? [];
+  const queuePreviewCount = sessionRunning ? 8 : 4;
 
   return (
     <DashboardShell eyebrow={t('breaks.eyebrow')} title={t('breaks.title')}>
@@ -179,28 +182,41 @@ export default function BreaksPage() {
             </p>
             <div className="mt-5 rounded-lg border border-white/10 bg-night/30 p-3">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-mist/60">
-                {t('breaks.session.resources')}
+                {sessionRunning
+                  ? t('breaks.session.runningQueue')
+                  : t('breaks.session.resources')}
               </p>
-              {active?.resources.length ? (
+              {queue.length ? (
                 <div className="mt-3 space-y-2">
-                  {active.resources.slice(0, 4).map((resource) => (
+                  {queue.slice(0, queuePreviewCount).map((resource, index) => (
                     <div
-                      className="flex items-center justify-between gap-3 rounded-lg bg-white/10 px-3 py-2 text-sm"
+                      className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm ${
+                        sessionRunning && index === 0
+                          ? 'bg-mint/20 ring-1 ring-mint/40'
+                          : 'bg-white/10'
+                      }`}
                       key={resource.id}
                     >
-                      <span className="min-w-0 flex-1 truncate font-semibold">
-                        {resource.title}
-                      </span>
+                      <div className="min-w-0 flex-1">
+                        <span className="block truncate font-semibold">
+                          {resource.title}
+                        </span>
+                        {sessionRunning && index === 0 ? (
+                          <span className="mt-0.5 block text-[11px] font-bold text-mint">
+                            {t('breaks.session.nowPlaying')}
+                          </span>
+                        ) : null}
+                      </div>
                       <span className="shrink-0 text-xs font-bold text-mist/70">
                         {resource.category}
                         {resource.duration ? ` · ${formatTrackDuration(resource.duration)}` : ''}
                       </span>
                     </div>
                   ))}
-                  {active.resources.length > 4 ? (
+                  {queue.length > queuePreviewCount ? (
                     <p className="text-xs font-semibold text-mist/60">
                       {t('breaks.session.moreResources', {
-                        count: active.resources.length - 4,
+                        count: queue.length - queuePreviewCount,
                       })}
                     </p>
                   ) : null}
@@ -219,8 +235,8 @@ export default function BreaksPage() {
               />
             </div>
             <p className="mt-2 text-xs font-semibold text-mist/60">
-              {actionState === 'started'
-                ? t('breaks.modal.sessionStarted')
+              {sessionRunning
+                ? t('breaks.session.runningHint', { count: queue.length })
                 : hasActivities
                   ? t('breaks.session.ready')
                   : t('common.loading')}
@@ -228,7 +244,7 @@ export default function BreaksPage() {
           </div>
           <div className="mt-5 grid gap-2 sm:grid-cols-2">
             <Button
-              disabled={actionState === 'starting' || !hasActivities}
+              disabled={actionState === 'starting' || !hasActivities || Boolean(activeSessionId)}
               onClick={async () => {
                 setActionState('starting');
                 try {

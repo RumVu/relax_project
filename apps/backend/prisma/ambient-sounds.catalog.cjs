@@ -131,6 +131,12 @@ const TRACKS = {
     ['sleepy-evening-note', 'Sleepy Evening Note', 723, 96],
     ['daily-kindness-prompt', 'Daily Kindness Prompt', 646, 136],
     ['quiet-confidence', 'Quiet Confidence', 183, 267],
+    ['chua-lanh', 'Podcast chữa lành', 441, 118],
+    ['dem-mua', 'Podcast đêm mưa', 444, 98],
+    ['don-phuong', 'Podcast đơn phương', 442, 108],
+    ['tinh-yeu', 'Podcast tình yêu', 480, 100],
+    ['vuc-day-ban-than', 'Podcast vực dậy bản thân', 662, 116],
+    ['nguoi-ke-ben', 'Podcast người kề bên', 723, 96],
   ],
 };
 
