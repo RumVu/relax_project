@@ -32,7 +32,7 @@ export function ToastRegion() {
 
   useEffect(() => {
     const timers = toasts.map((toast) =>
-      window.setTimeout(() => closeToast(toast.id), 2000),
+      window.setTimeout(() => closeToast(toast.id), 6000),
     );
 
     return () => {
