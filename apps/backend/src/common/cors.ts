@@ -48,9 +48,12 @@ function isPrivateIpOrigin(origin: string): boolean {
   if (!match) {
     return false;
   }
-  const ip = match[1]!;
+  const ip = match[1];
   const parts = ip.split('.').map(Number);
-  if (parts.length !== 4 || parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)) {
+  if (
+    parts.length !== 4 ||
+    parts.some((part) => Number.isNaN(part) || part < 0 || part > 255)
+  ) {
     return false;
   }
   const [a, b] = parts as [number, number, number, number];

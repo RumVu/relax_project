@@ -307,7 +307,6 @@ function shouldEnableSwagger(configService: ConfigService) {
   }
 
   return (
-    configured === 'true' ||
     configService.get<string>('app.swaggerPublic') === 'true' ||
     Boolean(
       configService.get<string>('app.swaggerBasicUser') &&

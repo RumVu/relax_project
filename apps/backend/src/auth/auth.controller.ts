@@ -6,8 +6,11 @@ import {
   Headers,
   Post,
   Req,
+  Res,
   UseGuards,
+  UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -17,8 +20,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { minutes, Throttle } from '@nestjs/throttler';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { getClientIp } from '../common/client-ip';
+import { ErrorCode } from '../common/errors/error-code';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
@@ -40,12 +44,15 @@ import { UserResponseDto } from '../users/dto/user-response.dto';
 })
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @ApiOperation({ summary: 'Register a local user and create a session' })
   @ApiCreatedResponse({
     type: AuthResponseDto,
-    description: 'User, access token, and refresh token.',
+    description: 'User, access token, and HttpOnly refresh cookie.',
   })
   @Throttle({
     default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
@@ -55,14 +62,18 @@ export class AuthController {
     @Body() dto: RegisterDto,
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.register(dto, userAgent, getClientIp(request));
+    return this.withRefreshCookie(
+      response,
+      this.authService.register(dto, userAgent, getClientIp(request)),
+    );
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiCreatedResponse({
     type: AuthResponseDto,
-    description: 'User, access token, and refresh token.',
+    description: 'User, access token, and HttpOnly refresh cookie.',
   })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials or inactive user.',
@@ -75,14 +86,18 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.login(dto, userAgent, getClientIp(request));
+    return this.withRefreshCookie(
+      response,
+      this.authService.login(dto, userAgent, getClientIp(request)),
+    );
   }
 
   @ApiOperation({ summary: 'Exchange a Google ID token for an app session' })
   @ApiCreatedResponse({
     type: AuthResponseDto,
-    description: 'User, access token and refresh token (Google account).',
+    description: 'User, access token and HttpOnly refresh cookie.',
   })
   @ApiUnauthorizedResponse({
     description:
@@ -96,14 +111,19 @@ export class AuthController {
     @Body() dto: GoogleLoginDto,
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.googleLogin(dto, userAgent, getClientIp(request));
+    return this.withRefreshCookie(
+      response,
+      this.authService.googleLogin(dto, userAgent, getClientIp(request)),
+    );
   }
 
   @ApiOperation({ summary: 'Rotate a refresh token' })
   @ApiCreatedResponse({
     type: AuthResponseDto,
-    description: 'Fresh access token, refresh token, and user.',
+    description:
+      'Fresh access token, rotated HttpOnly refresh cookie, and user.',
   })
   @ApiUnauthorizedResponse({
     description: 'Refresh token is invalid or expired.',
@@ -113,8 +133,21 @@ export class AuthController {
     @Body() dto: RefreshTokenDto,
     @Headers('user-agent') userAgent: string | undefined,
     @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authService.refresh(dto, userAgent, getClientIp(request));
+    const refreshToken =
+      dto.refreshToken ?? this.getRefreshTokenCookie(request);
+    if (!refreshToken) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_REFRESH_TOKEN_INVALID,
+        message: 'Refresh token is invalid or expired',
+      });
+    }
+
+    return this.withRefreshCookie(
+      response,
+      this.authService.refresh(refreshToken, userAgent, getClientIp(request)),
+    );
   }
 
   @ApiOperation({ summary: 'Logout by revoking one refresh token' })
@@ -123,8 +156,15 @@ export class AuthController {
     description: 'Logout success payload.',
   })
   @Post('logout')
-  logout(@Body() dto: RefreshTokenDto) {
-    return this.authService.logout(dto.refreshToken);
+  logout(
+    @Body() dto: RefreshTokenDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    this.clearRefreshCookie(response);
+    return this.authService.logout(
+      dto.refreshToken ?? this.getRefreshTokenCookie(request),
+    );
   }
 
   @ApiOperation({ summary: 'Request a password reset email' })
@@ -212,5 +252,87 @@ export class AuthController {
   @Delete('me')
   deleteMine(@CurrentUser() user: AuthUser, @Body() dto: DeleteAccountDto) {
     return this.authService.deleteMine(user.id, dto);
+  }
+
+  private async withRefreshCookie(
+    response: Response,
+    authPromise: Promise<AuthResponseDto>,
+  ) {
+    const auth = await authPromise;
+    if (auth.refreshToken) {
+      this.setRefreshCookie(response, auth.refreshToken);
+    }
+    return auth;
+  }
+
+  private setRefreshCookie(response: Response, refreshToken: string) {
+    response.cookie(this.refreshCookieName, refreshToken, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60 * 24 * 30,
+      path: '/v1/auth',
+      sameSite: this.refreshCookieSameSite,
+      secure: this.refreshCookieSecure,
+    });
+  }
+
+  private clearRefreshCookie(response: Response) {
+    response.clearCookie(this.refreshCookieName, {
+      path: '/v1/auth',
+      sameSite: this.refreshCookieSameSite,
+      secure: this.refreshCookieSecure,
+    });
+  }
+
+  private getRefreshTokenCookie(request: Request) {
+    const cookieHeader = request.headers.cookie;
+    if (!cookieHeader) {
+      return undefined;
+    }
+
+    return cookieHeader
+      .split(';')
+      .map((part) => part.trim())
+      .map((part) => {
+        const separator = part.indexOf('=');
+        if (separator === -1) {
+          return undefined;
+        }
+        return [
+          decodeURIComponent(part.slice(0, separator)),
+          decodeURIComponent(part.slice(separator + 1)),
+        ] as const;
+      })
+      .find((entry) => entry?.[0] === this.refreshCookieName)?.[1];
+  }
+
+  private get refreshCookieName() {
+    return (
+      this.configService.get<string>('app.authRefreshCookieName') ??
+      'relax_refresh_token'
+    );
+  }
+
+  private get refreshCookieSecure() {
+    const configured = this.configService.get<string>(
+      'app.authRefreshCookieSecure',
+    );
+    if (configured) {
+      return configured === 'true';
+    }
+    return this.configService.get<string>('app.nodeEnv') === 'production';
+  }
+
+  private get refreshCookieSameSite(): 'lax' | 'strict' | 'none' {
+    const configured = this.configService
+      .get<string>('app.authRefreshCookieSameSite')
+      ?.toLowerCase();
+    if (
+      configured === 'lax' ||
+      configured === 'strict' ||
+      configured === 'none'
+    ) {
+      return configured;
+    }
+    return this.refreshCookieSecure ? 'none' : 'lax';
   }
 }

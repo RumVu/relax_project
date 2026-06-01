@@ -83,11 +83,17 @@ describe('Billing checkout and activation (e2e)', () => {
       .send({ planName })
       .expect(201)
       .expect(({ body }) => {
+        const subscription = body.subscription as {
+          endDate: string;
+          planName: string;
+          startDate: string;
+          status: string;
+        };
         expect(body.payment.status).toBe('COMPLETED');
-        expect(body.subscription.status).toBe('ACTIVE');
-        expect(body.subscription.planName).toBe(planName);
-        expect(new Date(body.subscription.endDate).getTime()).toBeGreaterThan(
-          new Date(body.subscription.startDate).getTime(),
+        expect(subscription.status).toBe('ACTIVE');
+        expect(subscription.planName).toBe(planName);
+        expect(new Date(subscription.endDate).getTime()).toBeGreaterThan(
+          new Date(subscription.startDate).getTime(),
         );
       });
 

@@ -4,7 +4,6 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:6823
 // applied here at the HTTP layer only.
 export const API_VERSION_PREFIX = '/v1';
 const ACCESS_TOKEN_KEY = 'relax_access_token';
-const REFRESH_TOKEN_KEY = 'relax_refresh_token';
 const SESSION_ID_KEY = 'relax_session_id';
 const ROLE_KEY = 'relax_user_role';
 const AUTH_COOKIE_KEY = 'relax_session';
@@ -85,6 +84,7 @@ async function sendApiRequest<T>(
       ...init,
       headers,
       cache: 'no-store',
+      credentials: 'include',
     },
   );
   const payload = await parseJsonResponse(response);
@@ -110,7 +110,7 @@ async function sendApiRequest<T>(
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
   expiresAt: string;
   sessionId?: string;
   user: {
@@ -185,7 +185,6 @@ export function persistAuthSession(auth: AuthResponse) {
   }
 
   window.localStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
-  window.localStorage.setItem(REFRESH_TOKEN_KEY, auth.refreshToken);
   if (auth.sessionId) {
     window.localStorage.setItem(SESSION_ID_KEY, auth.sessionId);
   } else {
@@ -201,7 +200,6 @@ export function clearAuthSession() {
   }
 
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
-  window.localStorage.removeItem(REFRESH_TOKEN_KEY);
   window.localStorage.removeItem(SESSION_ID_KEY);
   window.localStorage.removeItem(ROLE_KEY);
   document.cookie = `${AUTH_COOKIE_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
@@ -213,14 +211,6 @@ export function getStoredAccessToken() {
   }
 
   return window.localStorage.getItem(ACCESS_TOKEN_KEY) ?? undefined;
-}
-
-export function getStoredRefreshToken() {
-  if (typeof window === 'undefined') {
-    return undefined;
-  }
-
-  return window.localStorage.getItem(REFRESH_TOKEN_KEY) ?? undefined;
 }
 
 export function getStoredSessionId() {
@@ -256,24 +246,12 @@ export async function refreshAuthSession() {
     return refreshPromise;
   }
 
-  const refreshToken = getStoredRefreshToken();
-  if (!refreshToken) {
-    clearAuthSession();
-    throw new ApiError({
-      success: false,
-      statusCode: 401,
-      code: 'AUTH_REFRESH_TOKEN_INVALID',
-      message: 'Missing refresh token',
-    });
-  }
-
   refreshPromise = (async () => {
     try {
       const auth = await sendApiRequest<AuthResponse>(
         '/auth/refresh',
         {
           method: 'POST',
-          body: JSON.stringify({ refreshToken }),
         },
         { skipAuth: true, retryOnAuthError: false },
         false,
@@ -347,8 +325,7 @@ function shouldAttemptRefresh(error: ApiError) {
       'AUTH_TOKEN_INVALID',
       'AUTH_UNAUTHORIZED',
       'AUTH_REFRESH_TOKEN_INVALID',
-    ].includes(error.code) &&
-    Boolean(getStoredRefreshToken())
+    ].includes(error.code)
   );
 }
 

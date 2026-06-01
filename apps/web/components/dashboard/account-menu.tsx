@@ -24,7 +24,6 @@ import {
 import {
   apiFetch,
   clearAuthSession,
-  getStoredRefreshToken,
   getStoredRole,
 } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
@@ -100,14 +99,8 @@ export function AccountMenu() {
 
   const handleLogout = useCallback(async () => {
     setLoggingOut(true);
-    const refreshToken = getStoredRefreshToken();
     try {
-      if (refreshToken) {
-        await apiFetch('/auth/logout', {
-          method: 'POST',
-          body: JSON.stringify({ refreshToken }),
-        }).catch(() => undefined); // server-side revoke best-effort
-      }
+      await apiFetch('/auth/logout', { method: 'POST' }).catch(() => undefined);
     } finally {
       clearAuthSession();
       pushToast({ tone: 'success', title: t('account.loggedOut') });

@@ -2,10 +2,7 @@
  * Build the weather-aware greeting card. Pure — needs only timezone +
  * displayName + weather description.
  */
-import {
-  WeatherDescription,
-  describeWeather,
-} from './weather-description';
+import { WeatherDescription, describeWeather } from './weather-description';
 
 export interface WeatherGreeting {
   title: string;

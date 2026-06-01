@@ -35,6 +35,22 @@ Default local backend:
 - Realtime health: `http://localhost:6823/realtime/health` (`ADMIN`)
 - Socket.IO namespace: `ws://localhost:6823/realtime`
 
+## Production hardening notes
+
+- Refresh tokens are issued as `HttpOnly` cookies by the backend. The web app
+  keeps the short-lived access token client-side, then calls `/v1/auth/refresh`
+  with `credentials: include` so the refresh token is not persisted in
+  `localStorage`.
+- Swagger is not public by default in production. Use
+  `SWAGGER_ENABLED=false`, or set `SWAGGER_PUBLIC=false` with
+  `SWAGGER_BASIC_USER` and `SWAGGER_BASIC_PASSWORD`.
+- Local `docker-compose.yml` remains developer-friendly. For deployment, use
+  `docker-compose.prod.yml` with `.env.production`; Postgres and Redis are not
+  exposed on host ports and secrets have no weak fallbacks.
+- Keep `AUTH_REFRESH_COOKIE_SECURE=true` and
+  `AUTH_REFRESH_COOKIE_SAME_SITE=none` when the web and API are on separate
+  HTTPS domains.
+
 Storage setup is documented in `docs/08-storage-supabase.md`.
 User/auth APIs are documented in `docs/09-user-auth-api.md`.
 Backend provider readiness, schema cleanup rules, and canonical data ownership

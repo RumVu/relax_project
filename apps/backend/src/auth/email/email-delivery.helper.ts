@@ -49,7 +49,9 @@ export function buildEmailDelivery(
 const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 const THIRTY_MIN_MS = 1000 * 60 * 30;
 
-export function getEmailVerificationTtlMs(configService: ConfigService): number {
+export function getEmailVerificationTtlMs(
+  configService: ConfigService,
+): number {
   return Number(
     configService.get<string>('EMAIL_VERIFICATION_TTL_MS') ?? ONE_DAY_MS,
   );

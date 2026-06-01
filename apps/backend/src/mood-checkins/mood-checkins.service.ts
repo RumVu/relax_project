@@ -30,10 +30,7 @@ import {
   round2,
   scoreFromMood,
 } from './helpers/mood-scoring';
-import {
-  buildDistribution,
-  getTopMood,
-} from './helpers/mood-distribution';
+import { buildDistribution, getTopMood } from './helpers/mood-distribution';
 import {
   MoodDateRange,
   getCheckinDate,
@@ -540,10 +537,7 @@ export class MoodCheckinsService {
   private buildScoredAtRangeWhere(from?: Date, to?: Date) {
     const dateFilter: Prisma.DateTimeFilter = { gte: from, lte: to };
     return {
-      OR: [
-        { scoredAt: dateFilter },
-        { scoredAt: null, createdAt: dateFilter },
-      ],
+      OR: [{ scoredAt: dateFilter }, { scoredAt: null, createdAt: dateFilter }],
     } satisfies Prisma.MoodCheckinWhereInput;
   }
 
@@ -573,7 +567,13 @@ export class MoodCheckinsService {
     const actions: MoodActionType[] = [...option.recommendedActions];
 
     return actions.map((action) =>
-      buildRecommendation(action, mood, breathingExercise, ambientSound, cozyQuote),
+      buildRecommendation(
+        action,
+        mood,
+        breathingExercise,
+        ambientSound,
+        cozyQuote,
+      ),
     );
   }
 
@@ -658,7 +658,10 @@ export class MoodCheckinsService {
           )
         : avgScore;
 
-    const streakDays = calculateStreaks(streakCheckins, timezoneContext).current;
+    const streakDays = calculateStreaks(
+      streakCheckins,
+      timezoneContext,
+    ).current;
     const dominantMood = getTopMood(checkins);
     const stressReducePct = round2(previousAvgScore - avgScore);
 
