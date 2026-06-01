@@ -143,7 +143,11 @@ export class WeatherService {
       latitude != null &&
       longitude != null;
     const reverseGeocode = shouldReverseGeocode
-      ? await this.cachedReverseGeocode(latitude, longitude, dto.localityLanguage)
+      ? await this.cachedReverseGeocode(
+          latitude,
+          longitude,
+          dto.localityLanguage,
+        )
       : null;
     const timezone = normalizeTimezone(
       dto.timezone ?? currentPreferences?.timezone,
@@ -169,7 +173,8 @@ export class WeatherService {
         longitude,
         timezone,
         locationName,
-        weatherEnabled: dto.weatherEnabled ?? currentPreferences?.weatherEnabled,
+        weatherEnabled:
+          dto.weatherEnabled ?? currentPreferences?.weatherEnabled,
       },
     });
 
@@ -202,7 +207,11 @@ export class WeatherService {
     }
 
     const [payload, reverseGeocode] = await Promise.all([
-      this.cachedCurrentWeather(input.latitude, input.longitude, input.timezone),
+      this.cachedCurrentWeather(
+        input.latitude,
+        input.longitude,
+        input.timezone,
+      ),
       this.resolveReverseGeocode(input),
     ]);
     const weather = describeWeather(
@@ -285,7 +294,13 @@ export class WeatherService {
     timezone: string,
   ): Promise<OpenMeteoCurrentPayload> {
     return this.redisService.remember(
-      ['weather', 'current', coordinateCachePart(latitude), coordinateCachePart(longitude), timezone].join(':'),
+      [
+        'weather',
+        'current',
+        coordinateCachePart(latitude),
+        coordinateCachePart(longitude),
+        timezone,
+      ].join(':'),
       CURRENT_WEATHER_CACHE_TTL_SECONDS,
       () => fetchCurrentWeather(latitude, longitude, timezone),
     );
@@ -298,7 +313,14 @@ export class WeatherService {
     forecastDays: number,
   ): Promise<OpenMeteoForecastPayload> {
     return this.redisService.remember(
-      ['weather', 'forecast', coordinateCachePart(latitude), coordinateCachePart(longitude), timezone, forecastDays].join(':'),
+      [
+        'weather',
+        'forecast',
+        coordinateCachePart(latitude),
+        coordinateCachePart(longitude),
+        timezone,
+        forecastDays,
+      ].join(':'),
       FORECAST_CACHE_TTL_SECONDS,
       () => fetchForecast(latitude, longitude, timezone, forecastDays),
     );
@@ -310,7 +332,13 @@ export class WeatherService {
     localityLanguage = 'vi',
   ): Promise<ReverseGeocodeResult | null> {
     return this.redisService.remember(
-      ['weather', 'reverse-geocode', coordinateCachePart(latitude), coordinateCachePart(longitude), localityLanguage].join(':'),
+      [
+        'weather',
+        'reverse-geocode',
+        coordinateCachePart(latitude),
+        coordinateCachePart(longitude),
+        localityLanguage,
+      ].join(':'),
       REVERSE_GEOCODE_CACHE_TTL_SECONDS,
       () => fetchReverseGeocode(latitude, longitude, localityLanguage),
     );
@@ -321,7 +349,11 @@ export class WeatherService {
     longitude?: number | null;
     locationName?: string | null;
   }) {
-    if (input.locationName || input.latitude == null || input.longitude == null) {
+    if (
+      input.locationName ||
+      input.latitude == null ||
+      input.longitude == null
+    ) {
       return null;
     }
     return this.cachedReverseGeocode(input.latitude, input.longitude);
@@ -358,10 +390,12 @@ export class WeatherService {
     return user;
   }
 
-  private resolveDisplayName(user: {
-    name?: string | null;
-    profile?: { displayName?: string | null } | null;
-  } | null) {
+  private resolveDisplayName(
+    user: {
+      name?: string | null;
+      profile?: { displayName?: string | null } | null;
+    } | null,
+  ) {
     return user?.profile?.displayName || user?.name || null;
   }
 }

@@ -163,8 +163,11 @@ describe('User and Auth APIs (e2e)', () => {
       .post('/auth/login')
       .send({ email, password })
       .expect(201);
-    const refreshCookie = cookieLogin.headers['set-cookie']?.find(
-      (cookie: string) => cookie.startsWith('relax_refresh_token='),
+    const loginCookies = cookieLogin.headers['set-cookie'] as
+      | string[]
+      | undefined;
+    const refreshCookie = loginCookies?.find((cookie) =>
+      cookie.startsWith('relax_refresh_token='),
     );
     expect(refreshCookie).toBeTruthy();
 
@@ -177,8 +180,11 @@ describe('User and Auth APIs (e2e)', () => {
         expect(body.refreshToken).toBeTruthy();
       });
 
-    const rotatedCookie = cookieRefreshed.headers['set-cookie']?.find(
-      (cookie: string) => cookie.startsWith('relax_refresh_token='),
+    const refreshedCookies = cookieRefreshed.headers['set-cookie'] as
+      | string[]
+      | undefined;
+    const rotatedCookie = refreshedCookies?.find((cookie) =>
+      cookie.startsWith('relax_refresh_token='),
     );
     expect(rotatedCookie).toContain('HttpOnly');
 

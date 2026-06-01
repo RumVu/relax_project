@@ -15,11 +15,7 @@ export type DateRange = {
 };
 
 export function resolveRange(query: AdminDashboardQueryDto): DateRange {
-  if (
-    query.period === AdminDashboardPeriod.CUSTOM &&
-    query.from &&
-    query.to
-  ) {
+  if (query.period === AdminDashboardPeriod.CUSTOM && query.from && query.to) {
     return { from: startOfDay(query.from), to: endOfDay(query.to) };
   }
 
@@ -63,7 +59,10 @@ export function endOfDay(date: Date): Date {
       date.getUTCFullYear(),
       date.getUTCMonth(),
       date.getUTCDate(),
-      23, 59, 59, 999,
+      23,
+      59,
+      59,
+      999,
     ),
   );
 }

@@ -4,9 +4,7 @@
  * Decision: when the range spans > 60 days OR the period is QUARTER/YEAR
  * we group monthly (otherwise the chart has too many bars). Daily otherwise.
  */
-import {
-  AdminDashboardPeriod,
-} from '../dto/admin-dashboard-query.dto';
+import { AdminDashboardPeriod } from '../dto/admin-dashboard-query.dto';
 import { DateRange, dateKey, daysBetween } from './date-range.helper';
 
 export type Bucket = {

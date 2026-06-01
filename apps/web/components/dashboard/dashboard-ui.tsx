@@ -163,7 +163,7 @@ export function RealtimeStatusBadge({
       window.clearTimeout(connectingTimer);
       socket.disconnect();
     };
-  }, [onEvent]);
+  }, [onEvent, t]);
 
   const Icon = state === 'live' ? Wifi : state === 'connecting' ? RefreshCcw : WifiOff;
 

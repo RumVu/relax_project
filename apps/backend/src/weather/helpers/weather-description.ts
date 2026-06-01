@@ -15,7 +15,10 @@ export interface WeatherDescription {
   iconKey: string;
 }
 
-export function describeWeather(code: number, isDay: boolean): WeatherDescription {
+export function describeWeather(
+  code: number,
+  isDay: boolean,
+): WeatherDescription {
   if (!isDay) {
     return {
       titleTemplate: 'Khuya rồi nè, {{name}} ơi',

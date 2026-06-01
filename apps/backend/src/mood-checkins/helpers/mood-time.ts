@@ -53,9 +53,4 @@ export function listLocalDays(
 
 // Re-export the most common time helpers so service code only needs to
 // import from this one file.
-export {
-  getStartOfLocalDay,
-  getEndOfLocalDay,
-  getLocalDateKey,
-  addLocalDays,
-};
+export { getStartOfLocalDay, getEndOfLocalDay, getLocalDateKey, addLocalDays };

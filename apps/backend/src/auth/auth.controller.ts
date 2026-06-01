@@ -122,7 +122,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Rotate a refresh token' })
   @ApiCreatedResponse({
     type: AuthResponseDto,
-    description: 'Fresh access token, rotated HttpOnly refresh cookie, and user.',
+    description:
+      'Fresh access token, rotated HttpOnly refresh cookie, and user.',
   })
   @ApiUnauthorizedResponse({
     description: 'Refresh token is invalid or expired.',
@@ -134,7 +135,8 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = dto.refreshToken ?? this.getRefreshTokenCookie(request);
+    const refreshToken =
+      dto.refreshToken ?? this.getRefreshTokenCookie(request);
     if (!refreshToken) {
       throw new UnauthorizedException({
         code: ErrorCode.AUTH_REFRESH_TOKEN_INVALID,

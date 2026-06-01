@@ -11,10 +11,7 @@ import {
   round2,
   scoreFromMood,
 } from '../helpers/mood-scoring';
-import {
-  buildMoodCounts,
-  getTopMood,
-} from '../helpers/mood-distribution';
+import { buildMoodCounts, getTopMood } from '../helpers/mood-distribution';
 import {
   MoodDateRange,
   getCheckinDate,
@@ -56,8 +53,7 @@ export function resolveAnalyticsRange(
     [MoodAnalyticsPeriod.QUARTER]: 90,
     [MoodAnalyticsPeriod.YEAR]: 365,
   };
-  const days =
-    period === MoodAnalyticsPeriod.CUSTOM ? 7 : daysByPeriod[period];
+  const days = period === MoodAnalyticsPeriod.CUSTOM ? 7 : daysByPeriod[period];
   const to = getEndOfLocalDay(query.to ?? new Date(), timezoneContext);
   const from = new Date(to);
   from.setUTCDate(from.getUTCDate() - days + 1);
@@ -104,10 +100,8 @@ export function buildAnalyticsSummary(
   const averageIntensity =
     total > 0
       ? round2(
-          checkins.reduce(
-            (sum, checkin) => sum + (checkin.intensity ?? 0),
-            0,
-          ) / total,
+          checkins.reduce((sum, checkin) => sum + (checkin.intensity ?? 0), 0) /
+            total,
         )
       : null;
 
@@ -223,9 +217,7 @@ export function buildInsights(
   }
 
   if (delta.positiveRate > 0) {
-    insights.push(
-      `Mood tích cực tăng ${delta.positiveRate}% so với kỳ trước.`,
-    );
+    insights.push(`Mood tích cực tăng ${delta.positiveRate}% so với kỳ trước.`);
   }
 
   if (summary.activeDays > 0) {
