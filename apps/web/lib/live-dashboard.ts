@@ -426,9 +426,10 @@ function buildUserDashboardData(input: {
       },
       mood: {
         currentMood:
-          asString(currentMoodOption?.label) ??
+          toMoodLabel(asString(currentMoodOption?.mood) ?? asString(currentMoodOption?.type)) ??
           toMoodLabel(asString(currentMoodCheckin?.mood)) ??
           toMoodLabel(asString(moodDashboardSummary?.topMood)) ??
+          asString(currentMoodOption?.label) ??
           base.overview.mood.currentMood,
         prompt:
           asString(asRecord(moodDashboard?.companion)?.prompt) ??
@@ -649,8 +650,8 @@ function buildDistribution(
     const count = asNumber(item.count) ?? 0;
     return {
       mood:
-        asString(item.label) ??
         toMoodLabel(asString(item.mood)) ??
+        asString(item.label) ??
         'Unknown',
       count,
       percent:
@@ -672,9 +673,9 @@ function mapMoodOptions(items: Array<Record<string, unknown>> | undefined) {
     return {
       type: type ?? fallback?.type ?? 'NEUTRAL',
       label:
+        toMoodLabel(type) ??
         asString(item.label) ??
         fallback?.label ??
-        toMoodLabel(type) ??
         (activeLocale === 'vi' ? 'Bình thường' : 'Neutral'),
       icon: fallback?.icon ?? 'sparkles',
       value:
