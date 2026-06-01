@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -20,11 +20,17 @@ export default function GoogleCallbackPage() {
   const { t } = useTranslation();
   const [state, setState] = useState<CallbackState>('loading');
   const [message, setMessage] = useState('');
+  const handledRef = useRef(false);
 
   const fallbackHref = useMemo(() => authRoutes.login, []);
 
   useEffect(() => {
     async function finishGoogleLogin() {
+      if (handledRef.current) {
+        return;
+      }
+      handledRef.current = true;
+
       const hashParams = new URLSearchParams(window.location.hash.slice(1));
       const queryParams = new URLSearchParams(window.location.search);
       const error =
