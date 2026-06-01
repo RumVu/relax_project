@@ -7,7 +7,7 @@
  *   1. User picks file → local preview
  *   2. POST multipart to /v1/storage/me/avatar
  *   3. Backend uploads to Supabase using service role and returns publicUrl
- *   4. PATCH /v1/user-profiles/me/profile body `{avatar: publicUrl}`
+ *   4. Backend persists `users.avatar` in the same request
  *   5. Call `onUpdated(publicUrl)` so the parent settings page refreshes
  */
 
@@ -91,22 +91,16 @@ export function AvatarUploader({
           method: 'POST',
           body: formData,
         });
-        const publicUrl = `${uploaded.publicUrl}?v=${Date.now()}`;
+        const cacheBustedUrl = `${uploaded.publicUrl}?v=${Date.now()}`;
 
-        // 4. Save URL on user profile.
-        await apiFetch('/user-profiles/me/profile', {
-          method: 'PATCH',
-          body: JSON.stringify({ avatar: publicUrl }),
-        });
-
-        setPreview(publicUrl);
+        setPreview(cacheBustedUrl);
         URL.revokeObjectURL(localPreview);
         pushToast({
           tone: 'success',
           title: t('settings.profile.saved'),
           message: t('settings.avatar.updated'),
         });
-        onUpdated?.(publicUrl);
+        onUpdated?.(cacheBustedUrl);
       } catch (cause) {
         // Revert preview on failure.
         setPreview(currentAvatar ?? null);

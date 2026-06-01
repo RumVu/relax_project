@@ -70,7 +70,10 @@ export class RelaxActivitiesService {
   async getActivities() {
     const [sounds, podcasts, breathingExercises] = await Promise.all([
       this.prisma.ambientSound.findMany({
-        where: { isActive: true, category: { not: 'PODCAST' } },
+        where: {
+          isActive: true,
+          category: { notIn: ['PODCAST', 'MEDITATION', 'BUDDHA'] },
+        },
         orderBy: [{ category: 'asc' }, { title: 'asc' }],
       }),
       this.prisma.ambientSound.findMany({
@@ -84,6 +87,12 @@ export class RelaxActivitiesService {
       }),
     ]);
 
+    const meditationSounds = await this.prisma.ambientSound.findMany({
+      where: { isActive: true, category: { in: ['MEDITATION', 'BUDDHA'] } },
+      orderBy: [{ category: 'asc' }, { title: 'asc' }],
+      take: 8,
+    });
+
     return RELAX_ACTIVITY_OPTIONS.map((option) => ({
       ...option,
       resources:
@@ -93,6 +102,8 @@ export class RelaxActivitiesService {
             ? podcasts
           : option.type === RelaxActivityType.BREATHING
             ? breathingExercises
+          : option.type === RelaxActivityType.MEDITATION
+            ? meditationSounds
             : [],
     }));
   }

@@ -120,11 +120,7 @@ export class StorageController {
     @UploadedFile() file?: UploadedStorageFile,
   ) {
     const ext = extensionForMime(file?.mimetype) ?? 'png';
-    return this.storageService.uploadUserFile(user.id, file, `avatars/avatar.${ext}`, {
-      upsert: true,
-      isPublic: true,
-      metadata: { domain: 'profile-avatar' },
-    });
+    return this.storageService.uploadUserAvatar(user.id, file, `avatars/avatar.${ext}`);
   }
 
   @ApiOperation({ summary: 'Upload an admin/catalog file through the API' })

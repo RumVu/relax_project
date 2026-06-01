@@ -209,6 +209,25 @@ export class StorageService {
     );
   }
 
+  async uploadUserAvatar(
+    userId: string,
+    file: UploadedStorageFile | undefined,
+    path: string,
+  ) {
+    const uploaded = await this.uploadUserFile(userId, file, path, {
+      upsert: true,
+      isPublic: true,
+      metadata: { domain: 'profile-avatar' },
+    });
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { avatar: uploaded.publicUrl },
+    });
+
+    return uploaded;
+  }
+
   async uploadAdminFile(
     file: UploadedStorageFile | undefined,
     path: string,

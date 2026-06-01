@@ -43,6 +43,10 @@ type FieldConfig = {
 
 type CatalogItem = Record<string, unknown>;
 type Draft = Record<string, string | boolean>;
+type PendingUpload = {
+  file: File;
+  pathPrefix: string;
+};
 
 const moodOptions = [
   'HAPPY',
@@ -345,6 +349,7 @@ export function AdminCatalogPage({
   const [draft, setDraft] = useState<Draft>(() =>
     createDraft(config.fields, fixedCategory),
   );
+  const [pendingUploads, setPendingUploads] = useState<Record<string, PendingUpload>>({});
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const visibleFields = fixedCategory
     ? config.fields.filter((field) => field.key !== 'category')
@@ -422,12 +427,15 @@ export function AdminCatalogPage({
 
   async function saveItem() {
     setSaving(true);
+    let uploadedPaths: string[] = [];
 
     try {
+      const uploaded = await uploadPendingAssets(draft);
+      uploadedPaths = uploaded.paths;
       await apiFetch(editingId ? `${endpoint}/${editingId}` : endpoint, {
         method: editingId ? 'PATCH' : 'POST',
         body: JSON.stringify({
-          ...buildPayload(config.fields, draft),
+          ...buildPayload(config.fields, uploaded.draft),
           ...(fixedCategory ? { category: fixedCategory } : {}),
         }),
       });
@@ -439,11 +447,24 @@ export function AdminCatalogPage({
         title: editingId ? t('catalog.toast.updated') : t('catalog.toast.created'),
         message: title,
       });
-    } catch {
+    } catch (cause) {
+      if (uploadedPaths.length) {
+        void apiFetch('/storage/objects', {
+          method: 'DELETE',
+          body: JSON.stringify({ paths: uploadedPaths }),
+        }).catch(() => undefined);
+      }
+
       pushToast({
         tone: 'error',
-        title: t('catalog.toast.saveFailed'),
-        message: t('catalog.toast.dataHint'),
+        title:
+          cause instanceof ApiError
+            ? t('catalog.toast.uploadFailed')
+            : t('catalog.toast.saveFailed'),
+        message:
+          cause instanceof ApiError
+            ? formatAdminUploadError(cause)
+            : t('catalog.toast.dataHint'),
       });
     } finally {
       setSaving(false);
@@ -453,6 +474,7 @@ export function AdminCatalogPage({
   function resetDraft() {
     setEditingId(null);
     setDraft(createDraft(config.fields, fixedCategory));
+    setPendingUploads({});
   }
 
   function startEdit(item: CatalogItem) {
@@ -463,42 +485,71 @@ export function AdminCatalogPage({
 
     setEditingId(id);
     setDraft(draftFromItem(config.fields, item, fixedCategory));
+    setPendingUploads({});
   }
 
-  async function uploadAsset(field: FieldConfig, file: File) {
+  function stageAsset(field: FieldConfig, file: File) {
     const upload = uploadConfigForField(field, fixedCategory);
     if (!upload) return;
 
-    setUploadingField(field.key);
+    setPendingUploads((current) => ({
+      ...current,
+      [field.key]: { file, pathPrefix: upload.pathPrefix },
+    }));
+    setDraft((current) => ({ ...current, [field.key]: file.name }));
+    pushToast({
+      tone: 'success',
+      title: t('catalog.toast.staged'),
+      message: t('catalog.toast.stagedHint'),
+    });
+  }
+
+  function updateDraftValue(fieldKey: string, value: string | boolean) {
+    if (pendingUploads[fieldKey]) {
+      setPendingUploads((uploads) => {
+        const next = { ...uploads };
+        delete next[fieldKey];
+        return next;
+      });
+    }
+
+    setDraft((current) => ({ ...current, [fieldKey]: value }));
+  }
+
+  async function uploadPendingAssets(currentDraft: Draft) {
+    const nextDraft = { ...currentDraft };
+    const paths: string[] = [];
+
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('path', `${upload.pathPrefix}/${Date.now()}-${slugFileName(file.name)}`);
-      formData.append('upsert', 'true');
+      for (const [fieldKey, pending] of Object.entries(pendingUploads)) {
+        setUploadingField(fieldKey);
+        const formData = new FormData();
+        formData.append('file', pending.file);
+        formData.append(
+          'path',
+          `${pending.pathPrefix}/${Date.now()}-${slugFileName(pending.file.name)}`,
+        );
+        formData.append('upsert', 'true');
 
-      const uploaded = await apiFetch<{ publicUrl: string }>('/storage/admin/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      setDraft((current) => ({ ...current, [field.key]: uploaded.publicUrl }));
-      pushToast({
-        tone: 'success',
-        title: t('catalog.toast.uploaded'),
-        message: file.name,
-      });
-    } catch (cause) {
-      pushToast({
-        tone: 'error',
-        title: t('catalog.toast.uploadFailed'),
-        message:
-          cause instanceof ApiError
-            ? formatAdminUploadError(cause)
-            : t('catalog.toast.serverHint'),
-      });
+        const uploaded = await apiFetch<{ publicUrl: string; path?: string }>(
+          '/storage/admin/upload',
+          {
+            method: 'POST',
+            body: formData,
+          },
+        );
+        nextDraft[fieldKey] = uploaded.publicUrl;
+        if (uploaded.path) {
+          paths.push(uploaded.path);
+        }
+      }
     } finally {
       setUploadingField(null);
     }
+
+    setPendingUploads({});
+    setDraft(nextDraft);
+    return { draft: nextDraft, paths };
   }
 
   async function toggleItem(item: CatalogItem) {
@@ -655,10 +706,9 @@ export function AdminCatalogPage({
                 field={field}
                 key={field.key}
                 label={translateCatalogText(field.label, t)}
-                onChange={(value) =>
-                  setDraft((current) => ({ ...current, [field.key]: value }))
-                }
-                onUpload={(file) => void uploadAsset(field, file)}
+                onChange={(value) => updateDraftValue(field.key, value)}
+                onUpload={(file) => stageAsset(field, file)}
+                pendingFileName={pendingUploads[field.key]?.file.name}
                 upload={uploadConfigForField(field, fixedCategory)}
                 uploading={uploadingField === field.key}
                 value={draft[field.key]}
@@ -723,6 +773,7 @@ function CatalogField({
   upload,
   uploading,
   onUpload,
+  pendingFileName,
 }: {
   field: FieldConfig;
   label: string;
@@ -731,6 +782,7 @@ function CatalogField({
   upload?: { accept: string; pathPrefix: string };
   uploading?: boolean;
   onUpload?: (file: File) => void;
+  pendingFileName?: string;
 }) {
   const { t } = useTranslation();
 
@@ -816,6 +868,11 @@ function CatalogField({
           </span>
         ) : null}
       </div>
+      {pendingFileName ? (
+        <p className="mt-2 text-xs font-semibold text-[var(--app-muted,theme(colors.slate))]">
+          {t('catalog.upload.staged', { filename: pendingFileName })}
+        </p>
+      ) : null}
     </label>
   );
 }

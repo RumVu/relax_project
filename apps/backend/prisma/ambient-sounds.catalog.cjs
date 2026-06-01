@@ -29,6 +29,12 @@ const CATEGORY_IMAGES = {
     'https://images.unsplash.com/photo-1589903308904-1010c2294adc?w=600',
     'https://images.unsplash.com/photo-1559523161-0fc0d8b38a7a?w=600',
   ],
+  MEDITATION: [
+    'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600',
+    'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=600',
+    'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600',
+    'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=600',
+  ],
 };
 
 const TRACKS = {
@@ -131,14 +137,104 @@ const TRACKS = {
     ['sleepy-evening-note', 'Sleepy Evening Note', 723, 96],
     ['daily-kindness-prompt', 'Daily Kindness Prompt', 646, 136],
     ['quiet-confidence', 'Quiet Confidence', 183, 267],
-    ['chua-lanh', 'Podcast chữa lành', 441, 118],
-    ['dem-mua', 'Podcast đêm mưa', 444, 98],
-    ['don-phuong', 'Podcast đơn phương', 442, 108],
-    ['tinh-yeu', 'Podcast tình yêu', 480, 100],
-    ['vuc-day-ban-than', 'Podcast vực dậy bản thân', 662, 116],
-    ['nguoi-ke-ben', 'Podcast người kề bên', 723, 96],
+    ['chua-lanh', 'Podcast chữa lành', 'generated:podcast:base-01', 118],
+    ['dem-mua', 'Podcast đêm mưa', 'generated:podcast:base-02', 98],
+    ['don-phuong', 'Podcast đơn phương', 'generated:podcast:base-03', 108],
+    ['tinh-yeu', 'Podcast tình yêu', 'generated:podcast:base-04', 100],
+    ['vuc-day-ban-than', 'Podcast vực dậy bản thân', 'generated:podcast:base-05', 116],
+    ['nguoi-ke-ben', 'Podcast người kề bên', 'generated:podcast:base-06', 96],
+  ],
+  MEDITATION: [
+    ['buddha-dawn-bell', 'Buddha Dawn Bell', 'generated:buddha:01', 126],
+    ['lotus-breath', 'Lotus Breath', 'generated:buddha:02', 132],
+    ['temple-moon', 'Temple Moon', 'generated:buddha:03', 118],
+    ['soft-mantra-light', 'Soft Mantra Light', 'generated:buddha:04', 124],
+    ['inner-lotus-rain', 'Inner Lotus Rain', 'generated:buddha:05', 130],
+    ['quiet-singing-bowl', 'Quiet Singing Bowl', 'generated:buddha:06', 112],
+    ['gentle-karuna', 'Gentle Karuna', 'generated:buddha:07', 128],
+    ['still-water-prayer', 'Still Water Prayer', 'generated:buddha:08', 120],
   ],
 };
+
+TRACKS.LOFI.push(
+  ...[
+    'Moonlit Study Desk',
+    'Velvet Window Rain',
+    'Soft Vinyl Sunrise',
+    'Cozy Lamp Groove',
+    'Midnight Tea Beat',
+    'Quiet City Balcony',
+    'Warm Keys Loop',
+    'Cloud Pillow Lofi',
+    'Slow Walk Home',
+    'Lavender Tape Hiss',
+    'Gentle Notebook',
+    'Rainy Library Beat',
+    'Small Cafe Lights',
+    'Bedroom Jazz Sketch',
+    'After Class Drift',
+    'Calm Coding Night',
+    'Blue Hoodie Beat',
+    'Sleepy Tram Ride',
+    'Golden Hour Loop',
+    'Pastel Memory',
+    'Cup Noodles Midnight',
+    'Window Seat Lofi',
+    'Soft Focus Bloom',
+    'Low Light Study',
+    'Quiet Heart Beat',
+    'Moon Desk RnB',
+    'Lazy Sunday Keys',
+    'Dreamy Side Street',
+    'Warm Blanket Beat',
+    'Night Bus Home',
+  ].map((title, index) => [
+    `fresh-lofi-${String(index + 1).padStart(2, '0')}`,
+    title,
+    `generated:lofi:${String(index + 1).padStart(2, '0')}`,
+    96 + (index % 9) * 7,
+  ]),
+);
+
+TRACKS.PODCAST.push(
+  ...[
+    'Podcast chữa lành buổi tối',
+    'Podcast đêm mưa dịu lòng',
+    'Podcast đơn phương bình yên',
+    'Podcast tình yêu nhẹ nhàng',
+    'Podcast vực dậy bản thân phần 2',
+    'Podcast người kề bên phần 2',
+    'Một phút thở chậm',
+    'Đừng tự trách mình nữa',
+    'Ngày mai mình thử lại',
+    'Gỡ rối trong lòng',
+    'Nghỉ một chút cũng được',
+    'Tập trung lại nhẹ thôi',
+    'Khi lòng đang mệt',
+    'Chuyện nhỏ trước khi ngủ',
+    'Dành lại bình yên',
+    'Không cần hoàn hảo',
+    'Một góc an toàn',
+    'Đi qua ngày khó',
+    'Tự thương mình hơn',
+    'Giữ nhịp trong đêm',
+    'Check-in sau áp lực',
+    'Nói với mình tử tế',
+    'Cất bớt suy nghĩ',
+    'Lòng mềm lại một chút',
+    'Khoảng dừng cho tim',
+    'Bình yên rất gần',
+    'Tạm nghỉ khỏi ồn ào',
+    'Một câu dịu dàng',
+    'Đứng dậy chậm thôi',
+    'Kết thúc ngày nhẹ hơn',
+  ].map((title, index) => [
+    `fresh-podcast-${String(index + 1).padStart(2, '0')}`,
+    title,
+    `generated:podcast:${String(index + 1).padStart(2, '0')}`,
+    90 + (index % 10) * 9,
+  ]),
+);
 
 const CATEGORY_DESCRIPTIONS = {
   LOFI: 'Lofi/chill beat mềm, dùng cho phiên nghỉ hoặc tập trung nhẹ.',
@@ -146,16 +242,20 @@ const CATEGORY_DESCRIPTIONS = {
   VIOLIN: 'Violin/strings nhẹ, hợp cảm xúc buổi tối và mood sâu.',
   PIANO: 'Piano/classical nhẹ, hợp đọc, viết nhật ký hoặc thở chậm.',
   PODCAST: 'Podcast thư giãn ngắn với nền chill nhẹ, hợp check-in và nghỉ giữa giờ.',
+  MEDITATION: 'Buddha chill/thiền định dịu, nền rất nhẹ để thở chậm và hạ nhịp.',
 };
 
 const AMBIENT_SOUND_CATALOG = Object.entries(TRACKS).flatMap(
   ([category, tracks]) =>
-    tracks.map(([key, title, id, duration], index) => ({
+    tracks.map(([key, title, source, duration], index) => ({
       key: `${category.toLowerCase()}-${key}`,
       title,
       description: CATEGORY_DESCRIPTIONS[category],
       category,
-      sourceUrl: `https://assets.mixkit.co/music/${id}/${id}.mp3`,
+      sourceUrl:
+        typeof source === 'string' && source.startsWith('generated:')
+          ? source
+          : `https://assets.mixkit.co/music/${source}/${source}.mp3`,
       imageUrl: CATEGORY_IMAGES[category][index % CATEGORY_IMAGES[category].length],
       duration,
       isActive: true,

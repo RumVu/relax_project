@@ -68,7 +68,6 @@ export default function BreaksPage() {
   const ActiveIcon = activityIcons[active?.type as keyof typeof activityIcons] ?? Play;
   const sessionRunning = actionState === 'started' && Boolean(activeSessionId);
   const queue = active?.resources ?? [];
-  const queuePreviewCount = sessionRunning ? 8 : 4;
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playingResourceId, setPlayingResourceId] = useState<string | null>(null);
   const [playerProgress, setPlayerProgress] = useState(0);
@@ -278,8 +277,8 @@ export default function BreaksPage() {
                   : t('breaks.session.resources')}
               </p>
               {queue.length ? (
-                <div className="mt-3 space-y-2">
-                  {queue.slice(0, queuePreviewCount).map((resource, index) => {
+                <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+                  {queue.map((resource, index) => {
                     const rowPlaying = playingResourceId === resource.id;
 
                     return (
@@ -327,13 +326,6 @@ export default function BreaksPage() {
                     </div>
                     );
                   })}
-                  {queue.length > queuePreviewCount ? (
-                    <p className="text-xs font-semibold text-mist/60">
-                      {t('breaks.session.moreResources', {
-                        count: queue.length - queuePreviewCount,
-                      })}
-                    </p>
-                  ) : null}
                 </div>
               ) : (
                 <p className="mt-3 text-sm font-semibold text-mist/60">

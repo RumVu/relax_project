@@ -4,7 +4,10 @@
 // problem where the DB has Supabase-looking URLs but the bucket has no files.
 
 const path = require('node:path');
+const fs = require('node:fs');
+const os = require('node:os');
 const process = require('node:process');
+const { spawnSync } = require('node:child_process');
 const { config: loadEnv } = require('dotenv');
 const { PrismaClient } = require('@prisma/client');
 const { createClient } = require('@supabase/supabase-js');
@@ -158,19 +161,10 @@ async function listExistingPaths(supabase) {
 
 async function uploadSound(supabase, sound, objectPath) {
   process.stdout.write(`upload ${sound.category.padEnd(7)} ${sound.title} ... `);
-  const response = await fetch(sound.sourceUrl);
-  if (!response.ok) {
-    throw new Error(`Cannot download ${sound.sourceUrl}: HTTP ${response.status}`);
-  }
+  const { body, contentType } = sound.sourceUrl.startsWith('generated:')
+    ? generateAudio(sound)
+    : await downloadAudio(sound);
 
-  const contentType = response.headers.get('content-type') || 'audio/mpeg';
-  if (!contentType.startsWith('audio/')) {
-    throw new Error(
-      `Source is not audio for "${sound.title}": ${contentType}`,
-    );
-  }
-
-  const body = Buffer.from(await response.arrayBuffer());
   if (body.length < 1024) {
     throw new Error(`Downloaded file is too small for "${sound.title}"`);
   }
@@ -185,6 +179,92 @@ async function uploadSound(supabase, sound, objectPath) {
   }
 
   console.log(`${formatBytes(body.length)}`);
+}
+
+async function downloadAudio(sound) {
+  const response = await fetch(sound.sourceUrl);
+  if (!response.ok) {
+    throw new Error(`Cannot download ${sound.sourceUrl}: HTTP ${response.status}`);
+  }
+
+  const contentType = response.headers.get('content-type') || 'audio/mpeg';
+  if (!contentType.startsWith('audio/')) {
+    throw new Error(
+      `Source is not audio for "${sound.title}": ${contentType}`,
+    );
+  }
+
+  return {
+    body: Buffer.from(await response.arrayBuffer()),
+    contentType,
+  };
+}
+
+function generateAudio(sound) {
+  const [, flavor, rawIndex] = sound.sourceUrl.split(':');
+  const index = Number(String(rawIndex).match(/\d+$/)?.[0]) || 1;
+  const duration = Math.max(45, Math.min(Number(sound.duration) || 90, 150));
+  const base =
+    flavor === 'buddha'
+      ? 174 + (index % 5) * 13
+      : flavor === 'podcast'
+        ? 196 + (index % 6) * 11
+        : 220 + (index % 7) * 9;
+  const frequencies =
+    flavor === 'buddha'
+      ? [base, base * 1.5, base * 2]
+      : flavor === 'podcast'
+        ? [base, base * 1.25, base * 1.5]
+        : [base, base * 1.2, base * 1.5, base * 2];
+  const outputPath = path.join(
+    os.tmpdir(),
+    `relax-${sound.key}-${Date.now()}-${process.pid}.mp3`,
+  );
+  const inputs = frequencies.flatMap((frequency) => [
+    '-f',
+    'lavfi',
+    '-i',
+    `sine=frequency=${Math.round(frequency)}:sample_rate=44100:duration=${duration}`,
+  ]);
+  const volumeFilters = frequencies
+    .map((_, inputIndex) => `[${inputIndex}:a]volume=${inputIndex === 0 ? '0.045' : '0.028'}[a${inputIndex}]`)
+    .join(';');
+  const mixInputs = frequencies.map((_, inputIndex) => `[a${inputIndex}]`).join('');
+  const echo = flavor === 'lofi' ? ',aecho=0.6:0.35:420:0.18' : '';
+  const filter = `${volumeFilters};${mixInputs}amix=inputs=${frequencies.length}:duration=longest,lowpass=f=1800${echo},afade=t=in:st=0:d=2,afade=t=out:st=${Math.max(0, duration - 4)}:d=4`;
+  const result = spawnSync(
+    'ffmpeg',
+    [
+      '-y',
+      '-hide_banner',
+      '-loglevel',
+      'error',
+      ...inputs,
+      '-filter_complex',
+      filter,
+      '-codec:a',
+      'libmp3lame',
+      '-b:a',
+      '128k',
+      outputPath,
+    ],
+    { encoding: 'utf8' },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Cannot generate audio for "${sound.title}": ${result.stderr || 'ffmpeg failed'}`,
+    );
+  }
+
+  try {
+    return {
+      body: fs.readFileSync(outputPath),
+      contentType: 'audio/mpeg',
+    };
+  } finally {
+    fs.rmSync(outputPath, { force: true });
+  }
 }
 
 async function upsertAmbientSound(prisma, sound, publicUrl) {
