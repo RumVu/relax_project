@@ -1,244 +1,63 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Seed ambient sounds vào Supabase Storage + Postgres.
+# Seed curated ambient sounds into Postgres.
 #
-# 50 tracks procedural (ffmpeg) — mỗi track ~30s MP3 96 kbps (~350 KB),
-# loop ở client. Categories:
-#   RAIN (8) NATURE (8) ANIMAL (6) URBAN (6) MUSIC (6) FOCUS (6)
-#   MEDITATION (4) SLEEP (4) CRACKLE (2)
+# The old version generated procedural ffmpeg "music" clips. Those were useful
+# for demos, but too synthetic for product. This manifest uses direct Mixkit
+# audio URLs under the Mixkit Free License:
+#   https://mixkit.co/license/
 #
-# Khi a có asset thật → upload qua admin UI thay file ở Supabase, URL
-# vẫn giữ nên FE không cần đổi.
+# Important: do not put ordinary YouTube watch URLs in `soundUrl`.
+# - Browser <audio> cannot stream them as stable MP3 assets.
+# - Pulling audio from random YouTube videos is a copyright/TOS trap.
+# If a track from YouTube Audio Library is chosen later, download the licensed
+# file and upload it through the admin UI / storage flow first.
 #
 # Usage:
-#   SUPABASE_URL=... SUPABASE_SECRET_KEY=... bash scripts/seed-ambient-sounds.sh
-# Yêu cầu:
-#   - ffmpeg (brew install ffmpeg)
-#   - docker postgres `digital-cigarette-postgres` đang chạy
+#   bash scripts/seed-ambient-sounds.sh
+#
+# Requires Docker Postgres container `digital-cigarette-postgres`.
 # =============================================================================
 
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
-
-# ---- Resolve env -------------------------------------------------------------
-: "${SUPABASE_URL:=}"
-: "${SUPABASE_SECRET_KEY:=}"
-: "${SUPABASE_BUCKET:=public-assets}"
-
-if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_SECRET_KEY" ]]; then
-  if [ -f apps/backend/.env ]; then
-    set -a; . ./apps/backend/.env; set +a
-  fi
-fi
-if [[ -z "$SUPABASE_URL" || -z "$SUPABASE_SECRET_KEY" ]]; then
-  echo "✗ Cần SUPABASE_URL + SUPABASE_SECRET_KEY (env hoặc apps/backend/.env)" >&2
-  exit 1
-fi
-
-echo "→ Supabase: $SUPABASE_URL bucket=$SUPABASE_BUCKET"
-
-# ---- 50-track manifest --------------------------------------------------------
-# Format per row: name|category|title|description|imageUrl|src|post
-#   - src:  lavfi expression ('anoisesrc=...' OR 'sine=...')
-#   - post: -af filter chain (use 'anull' if no filter)
-# meditation/piano use MULTI_TRACKS (multi-input filter_complex).
-TRACKS=(
-  # RAIN (8)
-  "rain-soft|RAIN|Mưa rơi nhẹ|Âm mưa rơi đều, dịu nhẹ.|https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=600|anoisesrc=color=brown:duration=30:amplitude=0.6|lowpass=f=800,volume=1.4"
-  "rain-storm|RAIN|Mưa giông xa|Mưa lớn xa xa, hợp lúc nghỉ trưa.|https://images.unsplash.com/photo-1428592953211-077101b2021b?w=600|anoisesrc=color=brown:duration=30:amplitude=0.75|lowpass=f=500,volume=1.5"
-  "rain-window|RAIN|Mưa rơi trên cửa sổ|Tiếng mưa nhỏ tí tách lên kính.|https://images.unsplash.com/photo-1438449805896-28a666819a20?w=600|anoisesrc=color=pink:duration=30:amplitude=0.5|highpass=f=1500,lowpass=f=4000,volume=1.3"
-  "rain-roof|RAIN|Mưa mái tôn|Tiếng mưa đập mái tôn nhịp đều.|https://images.unsplash.com/photo-1493314894560-5c412a56c17c?w=600|anoisesrc=color=brown:duration=30:amplitude=0.55|highpass=f=300,lowpass=f=2500,vibrato=f=8:d=0.2"
-  "rain-bus|RAIN|Trong xe khi mưa|Cảm giác đang ngồi xe buýt mưa đêm.|https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=600|anoisesrc=color=brown:duration=30:amplitude=0.5|lowpass=f=600,chorus=0.6:0.9:50:0.4:0.25:2"
-  "rain-light|RAIN|Mưa rất nhẹ|Vài hạt mưa rơi rải rác.|https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=600|anoisesrc=color=pink:duration=30:amplitude=0.35|highpass=f=2000,lowpass=f=5000"
-  "rain-thunder|RAIN|Mưa kèm sấm xa|Sấm xa xa cùng tiếng mưa đều.|https://images.unsplash.com/photo-1605727216801-e27ce1d0cc28?w=600|anoisesrc=color=brown:duration=30:amplitude=0.7|lowpass=f=400,tremolo=f=0.1:d=0.5,volume=1.5"
-  "rain-drizzle|RAIN|Mưa lất phất|Mưa lất phất ngày mây mù.|https://images.unsplash.com/photo-1556485689-33e55ab56127?w=600|anoisesrc=color=pink:duration=30:amplitude=0.45|highpass=f=800,lowpass=f=3500,vibrato=f=3:d=0.15"
-
-  # NATURE (8)
-  "ocean-waves|NATURE|Sóng biển dịu êm|Tiếng sóng vỗ chậm rãi vào bờ.|https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=600|anoisesrc=color=pink:duration=30:amplitude=0.6|tremolo=f=0.15:d=0.8,lowpass=f=1500"
-  "ocean-deep|NATURE|Sóng biển đêm|Sóng sâu trầm dưới đêm trăng.|https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=600|anoisesrc=color=brown:duration=30:amplitude=0.7|tremolo=f=0.1:d=0.7,lowpass=f=900"
-  "forest-morning|NATURE|Rừng cây ban mai|Gió và chim hót lúc khởi đầu ngày.|https://images.unsplash.com/photo-1448375240586-882707db888b?w=600|anoisesrc=color=white:duration=30:amplitude=0.45|highpass=f=800,lowpass=f=4000,chorus=0.5:0.9:50:0.4:0.25:2"
-  "stream-creek|NATURE|Suối nhỏ chảy|Tiếng suối nhỏ róc rách qua đá.|https://images.unsplash.com/photo-1474440692490-2e83ae13ba29?w=600|anoisesrc=color=white:duration=30:amplitude=0.5|highpass=f=600,lowpass=f=3000,vibrato=f=6:d=0.2"
-  "waterfall|NATURE|Thác nước xa|Tiếng thác trầm vọng lại.|https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=600|anoisesrc=color=white:duration=30:amplitude=0.6|lowpass=f=2000,volume=1.3"
-  "wind-soft|NATURE|Gió nhẹ qua đồi|Gió nhẹ thổi qua đồng cỏ.|https://images.unsplash.com/photo-1505672678657-cc7037095e60?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|lowpass=f=1000,tremolo=f=0.2:d=0.4"
-  "birds-dawn|NATURE|Chim hót bình minh|Tiếng chim líu lo lúc rạng đông.|https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600|anoisesrc=color=white:duration=30:amplitude=0.3|highpass=f=2500,lowpass=f=8000,vibrato=f=12:d=0.3,volume=0.7"
-  "bamboo-rain|NATURE|Giọt nước trong vườn tre|Nước nhỏ giọt trong vườn tre.|https://images.unsplash.com/photo-1496857598081-d4b88b88ce6f?w=600|anoisesrc=color=pink:duration=30:amplitude=0.35|highpass=f=3000,vibrato=f=2:d=0.5,volume=0.8"
-
-  # ANIMAL (6)
-  "cat-purr|ANIMAL|Mèo rừ rừ|Tiếng mèo rừ rừ ấm áp, dỗ ngủ.|https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600|anoisesrc=color=brown:duration=30:amplitude=0.6|lowpass=f=300,tremolo=f=18:d=0.5,volume=1.2"
-  "cat-sleep|ANIMAL|Mèo ngủ thở đều|Tiếng mèo thở khi ngủ.|https://images.unsplash.com/photo-1573865526739-10659fec78a5?w=600|anoisesrc=color=brown:duration=30:amplitude=0.4|lowpass=f=400,tremolo=f=0.5:d=0.6"
-  "dog-breathing|ANIMAL|Chó nằm thở|Chó nằm cạnh, thở đều êm.|https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600|anoisesrc=color=brown:duration=30:amplitude=0.5|lowpass=f=500,tremolo=f=0.3:d=0.5"
-  "puppy-soft|ANIMAL|Cún con ngủ|Cún con thở nhẹ trong ổ.|https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=600|anoisesrc=color=pink:duration=30:amplitude=0.35|lowpass=f=600,tremolo=f=0.4:d=0.4"
-  "horse-pasture|ANIMAL|Đồng cỏ ngựa|Tiếng ngựa khe khẽ trên đồng.|https://images.unsplash.com/photo-1553284965-83fd3e82fa5a?w=600|anoisesrc=color=brown:duration=30:amplitude=0.55|lowpass=f=700,vibrato=f=1.5:d=0.3"
-  "frog-pond|ANIMAL|Ao ếch ban đêm|Tiếng ếch nhái trong ao đêm hè.|https://images.unsplash.com/photo-1572947650440-e8a97ef053b2?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|highpass=f=400,lowpass=f=2000,tremolo=f=4:d=0.6"
-
-  # URBAN / CAFE (6)
-  "cafe-warm|URBAN|Quán cà phê sáng|Tiếng máy pha cà phê và rì rầm.|https://images.unsplash.com/photo-1453614512568-c4024d13c247?w=600|anoisesrc=color=pink:duration=30:amplitude=0.5|lowpass=f=2500,chorus=0.5:0.9:50:0.4:0.25:2"
-  "cafe-midnight|URBAN|Cà phê đêm khuya|Tiếng rì rầm yên tĩnh quán đêm.|https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=600|anoisesrc=color=brown:duration=30:amplitude=0.45|lowpass=f=1500,tremolo=f=0.3:d=0.3"
-  "fireplace|URBAN|Lò sưởi củi nổ|Tiếng củi nổ lép bép, ấm áp.|https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600|anoisesrc=color=white:duration=30:amplitude=0.5|highpass=f=1000,lowpass=f=5000,vibrato=f=15:d=0.3"
-  "fan-room|URBAN|Quạt máy ngày hè|Tiếng quạt trần đều đều buổi trưa.|https://images.unsplash.com/photo-1626982126125-9b8d68330229?w=600|anoisesrc=color=white:duration=30:amplitude=0.45|lowpass=f=2000,vibrato=f=10:d=0.1"
-  "library|URBAN|Thư viện yên ắng|Tiếng trang giấy lật, không gian học.|https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600|anoisesrc=color=pink:duration=30:amplitude=0.3|highpass=f=2000,lowpass=f=4500"
-  "train-ride|URBAN|Trên chuyến tàu|Tiếng tàu chạy đều trên đường ray.|https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=600|anoisesrc=color=brown:duration=30:amplitude=0.55|lowpass=f=1200,tremolo=f=2:d=0.2"
-
-  # MUSIC / LOFI (6)
-  "lofi-chill|LOFI|Lo-fi thư thái|Nhạc nền nhẹ phong cách lo-fi.|https://images.unsplash.com/photo-1453738773917-9c3eff1db985?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|vibrato=f=4:d=0.3,lowpass=f=3000"
-  "lofi-cat|LOFI|Lo-fi cùng mèo|Beat lo-fi mềm cho lúc làm việc cùng mèo.|https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=600|anoisesrc=color=pink:duration=30:amplitude=0.45|vibrato=f=3:d=0.25,lowpass=f=2800,tremolo=f=1.2:d=0.3"
-  "lofi-rainy|LOFI|Lo-fi đêm mưa|Lo-fi cùng tiếng mưa đêm khuya.|https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=600|anoisesrc=color=pink:duration=30:amplitude=0.5|vibrato=f=2:d=0.3,lowpass=f=2500,volume=1.1"
-  "lofi-study|LOFI|Lo-fi học bài|Beat đều đặn để tập trung học.|https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|vibrato=f=5:d=0.2,lowpass=f=3000"
-  "lofi-sunset|LOFI|Lo-fi hoàng hôn|Lo-fi nhẹ lúc trời tắt nắng.|https://images.unsplash.com/photo-1495995083802-c39e3a35a45e?w=600|anoisesrc=color=pink:duration=30:amplitude=0.45|vibrato=f=3.5:d=0.25,lowpass=f=2700"
-  "lofi-jazz|LOFI|Lo-fi pha jazz|Lo-fi pha chút jazz cuối tuần.|https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|vibrato=f=6:d=0.2,lowpass=f=3200,chorus=0.5:0.9:50:0.4:0.25:2"
-
-  # FOCUS / DEEP NOISE (6)
-  "white-noise|FOCUS|Tiếng ồn trắng|Ồn trắng đều, chặn tạp âm xung quanh.|https://images.unsplash.com/photo-1532634922-8fe0b757fb13?w=600|anoisesrc=color=white:duration=30:amplitude=0.5|anull"
-  "brown-noise|FOCUS|Tiếng ồn nâu|Ồn nâu trầm ấm, dễ ngủ hơn ồn trắng.|https://images.unsplash.com/photo-1499728603263-13726abce5fd?w=600|anoisesrc=color=brown:duration=30:amplitude=0.7|anull"
-  "pink-noise|FOCUS|Tiếng ồn hồng|Ồn hồng cân bằng, dễ chịu cho tai.|https://images.unsplash.com/photo-1487611459768-bd414656ea10?w=600|anoisesrc=color=pink:duration=30:amplitude=0.55|anull"
-  "deep-hum|FOCUS|Hum nền sâu|Drone trầm để gom sự chú ý.|https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=600|sine=frequency=120:duration=30|volume=0.4,tremolo=f=0.3:d=0.2"
-  "keyboard-rain|FOCUS|Bàn phím và mưa|Tiếng phím gõ nhẹ trong mưa.|https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600|anoisesrc=color=pink:duration=30:amplitude=0.4|highpass=f=1500,lowpass=f=4500,vibrato=f=8:d=0.15"
-  "cosmic-drift|FOCUS|Trôi vũ trụ|Âm không gian, để chìm vào suy nghĩ.|https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=600|anoisesrc=color=pink:duration=30:amplitude=0.35|lowpass=f=1500,chorus=0.6:0.9:50:0.4:0.25:2,tremolo=f=0.2:d=0.4"
-
-  # SLEEP (4)
-  "sleep-soft|SLEEP|Giấc ngủ êm|Nền êm dịu nhất cho giấc ngủ.|https://images.unsplash.com/photo-1455657509395-c93b4f0e5ce8?w=600|anoisesrc=color=brown:duration=30:amplitude=0.5|lowpass=f=500,volume=0.9"
-  "sleep-rain-soft|SLEEP|Mưa nhỏ ngủ ngon|Mưa rất nhẹ cho lúc khó ngủ.|https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=600|anoisesrc=color=brown:duration=30:amplitude=0.4|lowpass=f=600,vibrato=f=2:d=0.2"
-  "sleep-fan|SLEEP|Quạt đêm|Tiếng quạt giúp dễ vào giấc.|https://images.unsplash.com/photo-1611073761665-da94f0aa6f17?w=600|anoisesrc=color=white:duration=30:amplitude=0.4|lowpass=f=1500,vibrato=f=8:d=0.1"
-  "sleep-night-air|SLEEP|Không khí đêm|Không gian yên tĩnh giữa đêm.|https://images.unsplash.com/photo-1532978879514-6cfa608be43c?w=600|anoisesrc=color=pink:duration=30:amplitude=0.3|lowpass=f=800,volume=0.7"
-
-  # CRACKLE (2)
-  "vinyl-crackle|CRACKLE|Tiếng đĩa than|Đĩa than xoay vòng, ấm áp.|https://images.unsplash.com/photo-1461360228754-6e81c478b882?w=600|anoisesrc=color=white:duration=30:amplitude=0.3|highpass=f=2000,lowpass=f=6000,vibrato=f=20:d=0.2"
-  "campfire|CRACKLE|Lửa trại|Tiếng lửa trại lép bép nhẹ.|https://images.unsplash.com/photo-1475139441338-693e7dbe20b6?w=600|anoisesrc=color=white:duration=30:amplitude=0.45|highpass=f=800,lowpass=f=4500,vibrato=f=12:d=0.4"
+SOUNDS=(
+  "serene-view|LOFI|Serene View|Chillout nhẹ, sạch tai cho lúc cần hạ nhịp.|https://images.unsplash.com/photo-1453738773917-9c3eff1db985?w=600|https://assets.mixkit.co/music/443/443.mp3|114"
+  "sleepy-cat|LOFI|Sleepy Cat|Nhạc chill mềm, hợp màn nghỉ ngắn buổi tối.|https://images.unsplash.com/photo-1518791841217-8f162f1e1131?w=600|https://assets.mixkit.co/music/135/135.mp3|119"
+  "curiosity|LOFI|Curiosity|Chillout sáng, đủ nhẹ để làm nền không gây mệt.|https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600|https://assets.mixkit.co/music/480/480.mp3|100"
+  "thinking-about-you|LOFI|Thinking About You|Nhạc nền chillout ấm, hợp viết nhật ký và thư giãn.|https://images.unsplash.com/photo-1495995083802-c39e3a35a45e?w=600|https://assets.mixkit.co/music/234/234.mp3|118"
+  "sweet-september|LOFI|Sweet September|Beat hip-hop/chill dịu, không gắt và không nhựa.|https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=600|https://assets.mixkit.co/music/282/282.mp3|99"
+  "smooth-jazz|LOFI|Smooth Jazz|Downtempo jazz nhẹ, lịch sự hơn bộ synth cũ.|https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600|https://assets.mixkit.co/music/640/640.mp3|142"
+  "light-rain-loop|RAIN|Light Rain Loop|Mưa nhẹ đều, ít chi tiết thừa để dễ loop.|https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=600|https://assets.mixkit.co/active_storage/sfx/2393/2393-preview.mp3|30"
+  "rain-long-loop|RAIN|Rain Long Loop|Mưa dài, nền ổn cho tập trung hoặc ngủ ngắn.|https://images.unsplash.com/photo-1438449805896-28a666819a20?w=600|https://assets.mixkit.co/active_storage/sfx/2394/2394-preview.mp3|30"
+  "light-rain-atmosphere|RAIN|Light Rain Atmosphere|Mưa mỏng và thoáng, không quá ồn.|https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?w=600|https://assets.mixkit.co/active_storage/sfx/2474/2474-preview.mp3|30"
+  "sea-waves-with-birds|NATURE|Sea Waves With Birds|Sóng biển và chim xa, hợp bài thở chậm.|https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=600|https://assets.mixkit.co/active_storage/sfx/1185/1185-preview.mp3|30"
+  "water-flowing-ambience|NATURE|Water Flowing Ambience|Suối nước sạch, nghe tự nhiên hơn tiếng synth.|https://images.unsplash.com/photo-1474440692490-2e83ae13ba29?w=600|https://assets.mixkit.co/active_storage/sfx/3126/3126-preview.mp3|30"
+  "river-forest-birds|NATURE|River In The Forest With Birds|Nước chảy và chim rừng, nhẹ nhàng để nghỉ mắt.|https://images.unsplash.com/photo-1448375240586-882707db888b?w=600|https://assets.mixkit.co/active_storage/sfx/1216/1216-preview.mp3|30"
+  "morning-birds|NATURE|Morning Birds|Chim sáng vừa đủ, không chói tai.|https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?w=600|https://assets.mixkit.co/active_storage/sfx/2472/2472-preview.mp3|30"
+  "wind-blowing-ambience|AMBIENT|Wind Blowing Ambience|Gió nền rộng, hợp thiền và kéo giãn.|https://images.unsplash.com/photo-1505672678657-cc7037095e60?w=600|https://assets.mixkit.co/active_storage/sfx/2658/2658-preview.mp3|30"
+  "campfire-night-wind|AMBIENT|Campfire Night Wind|Lửa trại và gió đêm, ấm nhưng không quá kịch.|https://images.unsplash.com/photo-1475139441338-693e7dbe20b6?w=600|https://assets.mixkit.co/active_storage/sfx/1736/1736-preview.mp3|30"
+  "campfire-crackles|AMBIENT|Campfire Crackles|Tiếng củi nổ nhỏ, hợp màn nghỉ cuối ngày.|https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=600|https://assets.mixkit.co/active_storage/sfx/1330/1330-preview.mp3|30"
+  "night-forest-insects|SLEEP|Night Forest With Insects|Không khí rừng đêm dịu, phù hợp thư giãn trước ngủ.|https://images.unsplash.com/photo-1532978879514-6cfa608be43c?w=600|https://assets.mixkit.co/active_storage/sfx/2414/2414-preview.mp3|30"
+  "summer-night-crickets|SLEEP|Summer Night Crickets|Dế đêm đều, ít biến động để dễ chìm vào giấc.|https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600|https://assets.mixkit.co/active_storage/sfx/1789/1789-preview.mp3|30"
+  "office-ambience|FOCUS|Office Ambience|Âm nền văn phòng nhẹ cho chế độ tập trung.|https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600|https://assets.mixkit.co/active_storage/sfx/447/447-preview.mp3|30"
+  "slow-typing-keyboard|FOCUS|Slow Typing On A Keyboard|Tiếng gõ phím chậm, dùng khi cần nền làm việc.|https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600|https://assets.mixkit.co/active_storage/sfx/2532/2532-preview.mp3|30"
 )
 
-# meditation + music tracks use multi-input filter_complex.
-#
-# Synthesised "instrument" timbres (since we don't ship real recordings):
-#   piano       sine + tremolo + lowpass    → bell-like sustain
-#   violin      sawtooth + vibrato + chorus → bowed reedy sustain
-#   saxophone   square+sawtooth mix + reso  → breathy reed
-#   lofi-music  pink-noise + soft chord pad → background bed
-MULTI_TRACKS=(
-  # MEDITATION (4)
-  "meditation-432|MEDITATION|Tần số thiền 432Hz|Dải tần ấm áp dùng trong thiền định.|https://images.unsplash.com/photo-1545205597-3d9d02c29597?w=600|MULTI:sine=frequency=432:duration=30;sine=frequency=648:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.3,tremolo=f=0.15:d=0.4"
-  "meditation-528|MEDITATION|Tần số chữa lành 528Hz|Tần số được cho là giúp thư thái.|https://images.unsplash.com/photo-1591291621164-2c6367723315?w=600|MULTI:sine=frequency=528:duration=30;sine=frequency=792:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.3,tremolo=f=0.18:d=0.4"
-  "meditation-low|MEDITATION|Drone trầm|Âm trầm cho thiền sâu.|https://images.unsplash.com/photo-1518609878373-06d740f60d8b?w=600|MULTI:sine=frequency=80:duration=30;sine=frequency=120:duration=30;[0:a][1:a]amix=inputs=2:duration=longest,volume=0.35,tremolo=f=0.12:d=0.3"
-  "meditation-bowl|MEDITATION|Chuông thiền|Âm chuông Tây Tạng kéo dài.|https://images.unsplash.com/photo-1591291621099-fd31fcc7b9f7?w=600|MULTI:sine=frequency=256:duration=30;sine=frequency=384:duration=30;sine=frequency=512:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.3,tremolo=f=0.2:d=0.5"
-
-  # PIANO (5) — Đô/La/Sol/Rê/Fa trưởng-thứ
-  "piano-c-major|PIANO|Hợp âm Đô trưởng (C)|Hợp âm Đô trưởng dịu nhẹ — cổ điển và sáng.|https://images.unsplash.com/photo-1520523839897-bd0b52f945a0?w=600|MULTI:sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;sine=frequency=392.00:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.5:d=0.2,lowpass=f=2500"
-  "piano-a-minor|PIANO|Hợp âm La thứ (Am)|Hợp âm La thứ man mác buồn nhẹ.|https://images.unsplash.com/photo-1466150036782-869a824aeb25?w=600|MULTI:sine=frequency=220.00:duration=30;sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.35,tremolo=f=0.4:d=0.25,lowpass=f=2300"
-  "piano-g-major|PIANO|Hợp âm Sol trưởng (G)|Sol trưởng ấm áp, hợp lúc trầm tư.|https://images.unsplash.com/photo-1571115332905-d8c5dcdaa9a4?w=600|MULTI:sine=frequency=196:duration=30;sine=frequency=246.94:duration=30;sine=frequency=293.66:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.32,tremolo=f=0.4:d=0.3,lowpass=f=2400"
-  "piano-d-minor|PIANO|Hợp âm Rê thứ (Dm)|Rê thứ sâu lắng — buổi tối yên tĩnh.|https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=600|MULTI:sine=frequency=293.66:duration=30;sine=frequency=349.23:duration=30;sine=frequency=440.00:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.33,tremolo=f=0.4:d=0.25,lowpass=f=2200"
-  "piano-f-major|PIANO|Hợp âm Fa trưởng (F)|Fa trưởng rộng mở, dịu dàng.|https://images.unsplash.com/photo-1552422535-c45813c61732?w=600|MULTI:sine=frequency=174.61:duration=30;sine=frequency=220.00:duration=30;sine=frequency=261.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,volume=0.34,tremolo=f=0.45:d=0.22,lowpass=f=2400"
-
-  # VIOLIN (4) — sawtooth + vibrato + lowpass → bowed string
-  "violin-andante|VIOLIN|Violin Andante|Violin nhẹ tempo chậm, giai điệu Rê trưởng.|https://images.unsplash.com/photo-1465821185615-20b3c2fbf41b?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*293.66*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*369.99*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5.5:d=0.4,lowpass=f=3500,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.7"
-  "violin-adagio|VIOLIN|Violin Adagio|Violin cực chậm, hợp khi cần sự dịu dàng.|https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*246.94*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*311.13*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4:d=0.5,lowpass=f=3200,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.65"
-  "violin-evening|VIOLIN|Violin buổi tối|Violin trầm ấm cho buổi tối nghỉ ngơi.|https://images.unsplash.com/photo-1519892300165-cb5542fb47c7?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*220*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*277.18*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.4,lowpass=f=3000,chorus=0.6:0.9:50:0.4:0.25:2,volume=0.7"
-  "violin-morning|VIOLIN|Violin ban mai|Violin sáng tươi, hợp lúc khởi đầu ngày.|https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?w=600|MULTI:aevalsrc=0.3*tan(sin(2*PI*329.63*t)):d=30;aevalsrc=0.3*tan(sin(2*PI*415.30*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=6:d=0.35,lowpass=f=4000,chorus=0.5:0.9:50:0.4:0.25:2,volume=0.65"
-
-  # SAXOPHONE (4) — square+sine mix + resonant filter → breathy reed
-  "sax-smooth|SAXOPHONE|Saxophone êm dịu|Sax êm buổi tối — phong cách jazz lounge.|https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*220*t)+0.5*sin(2*PI*440*t)+0.3*sin(2*PI*660*t)):d=30;aevalsrc=0.4*(sin(2*PI*261.63*t)+0.5*sin(2*PI*523.25*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.5,lowpass=f=2800,volume=0.55"
-  "sax-blue|SAXOPHONE|Saxophone blue|Sax giai điệu blue man mác.|https://images.unsplash.com/photo-1455368109333-ac6cc92f5d9c?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*246.94*t)+0.5*sin(2*PI*493.88*t)):d=30;aevalsrc=0.4*(sin(2*PI*311.13*t)+0.5*sin(2*PI*622.25*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4.5:d=0.55,lowpass=f=2600,volume=0.55"
-  "sax-bossa|SAXOPHONE|Saxophone bossa|Sax phong cách bossa nova chiều thu.|https://images.unsplash.com/photo-1453538179742-fc1c6a26c5b2?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*293.66*t)+0.5*sin(2*PI*587.33*t)):d=30;aevalsrc=0.4*(sin(2*PI*369.99*t)+0.5*sin(2*PI*739.99*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=5:d=0.5,lowpass=f=2700,volume=0.5"
-  "sax-late-night|SAXOPHONE|Saxophone đêm khuya|Sax sâu lắng, đêm muộn quán nhỏ.|https://images.unsplash.com/photo-1518972559570-7cc1309f3229?w=600|MULTI:aevalsrc=0.4*(sin(2*PI*196*t)+0.5*sin(2*PI*392*t)):d=30;aevalsrc=0.4*(sin(2*PI*246.94*t)+0.5*sin(2*PI*493.88*t)):d=30;[0:a][1:a]amix=inputs=2:duration=longest,vibrato=f=4:d=0.6,lowpass=f=2400,volume=0.55"
-
-  # LOFI MUSIC (4) — pink-noise bed + chord pad
-  "lofi-music-rain|LOFI|Lo-fi mưa đêm|Bài lo-fi nền cùng tiếng mưa nhẹ.|https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.35;sine=frequency=261.63:duration=30;sine=frequency=329.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3:d=0.3,lowpass=f=2500,volume=0.6"
-  "lofi-music-study|LOFI|Lo-fi học bài|Lo-fi đều đặn để tập trung học.|https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.3;sine=frequency=220:duration=30;sine=frequency=277.18:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=4:d=0.25,lowpass=f=2700,volume=0.55"
-  "lofi-music-cafe|LOFI|Lo-fi quán cà phê|Lo-fi pha không gian quán cà phê.|https://images.unsplash.com/photo-1559070169-a3077159ee16?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.4;sine=frequency=196:duration=30;sine=frequency=261.63:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3.5:d=0.3,lowpass=f=2400,volume=0.55"
-  "lofi-music-sunset|LOFI|Lo-fi hoàng hôn|Lo-fi nhẹ lúc trời tắt nắng.|https://images.unsplash.com/photo-1495995083802-c39e3a35a45e?w=600|MULTI:anoisesrc=color=pink:duration=30:amplitude=0.35;sine=frequency=174.61:duration=30;sine=frequency=220:duration=30;[0:a][1:a][2:a]amix=inputs=3:duration=longest,vibrato=f=3:d=0.3,lowpass=f=2300,volume=0.6"
-)
-
-# ---- Generate sounds with ffmpeg --------------------------------------------
-WORK="$(mktemp -d -t ambient-sounds.XXXXXX)"
-trap 'rm -rf "$WORK"' EXIT
-
-FFMPEG_BASE=(ffmpeg -hide_banner -loglevel error -y)
-FFMPEG_ENCODE=(-b:a 96k -ar 44100)
-
-gen_noise() {
-  local name="$1" src="$2" post="$3"
-  "${FFMPEG_BASE[@]}" -f lavfi -i "$src" -af "$post" "${FFMPEG_ENCODE[@]}" "$WORK/${name}.mp3"
-}
-
-gen_multi() {
-  local name="$1" spec="$2"
-  IFS=';' read -ra parts <<< "$spec"
-  local last=$((${#parts[@]} - 1))
-  local fc="${parts[$last]}"
-  local sources=("${parts[@]:0:$last}")
-  local args=()
-  for src in "${sources[@]}"; do
-    args+=(-f lavfi -i "$src")
-  done
-  "${FFMPEG_BASE[@]}" "${args[@]}" \
-    -filter_complex "${fc},aformat=channel_layouts=stereo[out]" \
-    -map "[out]" "${FFMPEG_ENCODE[@]}" "$WORK/${name}.mp3"
-}
-
-total=$(( ${#TRACKS[@]} + ${#MULTI_TRACKS[@]} ))
-echo "→ Generate $total ambient tracks in parallel"
-pids=()
-for row in "${TRACKS[@]}"; do
-  IFS='|' read -r name _cat _title _desc _img src post <<< "$row"
-  gen_noise "$name" "$src" "$post" &
-  pids+=($!)
-done
-for row in "${MULTI_TRACKS[@]}"; do
-  IFS='|' read -r name _cat _title _desc _img spec <<< "$row"
-  gen_multi "$name" "${spec#MULTI:}" &
-  pids+=($!)
-done
-for pid in "${pids[@]}"; do wait "$pid"; done
-echo "  ✓ All $total tracks generated"
-
-# ---- Upload to Supabase (parallel) ------------------------------------------
-# New `sb_secret_*` keys require `apikey` header (NOT Authorization: Bearer
-# which Supabase parses as JWT → "Invalid Compact JWS").
-upload() {
-  local local_file="$1" remote_path="$2"
-  local url="$SUPABASE_URL/storage/v1/object/$SUPABASE_BUCKET/$remote_path"
-  local status
-  status=$(curl -s -o /dev/null -w "%{http_code}" \
-    -X POST "$url" \
-    -H "apikey: $SUPABASE_SECRET_KEY" \
-    -H "Content-Type: audio/mpeg" \
-    -H "x-upsert: true" \
-    --data-binary "@$local_file")
-  if [[ ! "$status" =~ ^20 ]]; then
-    echo "  ✗ $remote_path → HTTP $status" >&2
-    return 1
-  fi
-}
-
-echo "→ Upload to Supabase bucket=$SUPABASE_BUCKET (parallel)"
-pids=()
-for row in "${TRACKS[@]}" "${MULTI_TRACKS[@]}"; do
-  IFS='|' read -r name _rest <<< "$row"
-  upload "$WORK/${name}.mp3" "ambient-sounds/${name}.mp3" &
-  pids+=($!)
-done
-for pid in "${pids[@]}"; do wait "$pid"; done
-echo "  ✓ $total uploads done"
-
-# ---- Build + execute SQL upsert ---------------------------------------------
-# Wipe ALL existing ambient_sounds first (clean slate). Re-running this
-# script is idempotent — seeded-{name} ids stay stable across runs.
-public_url() {
-  echo "$SUPABASE_URL/storage/v1/object/public/$SUPABASE_BUCKET/ambient-sounds/$1.mp3"
+quote_sql() {
+  local value="$1"
+  value="${value//\'/\'\'}"
+  printf "'%s'" "$value"
 }
 
 values=""
-for row in "${TRACKS[@]}" "${MULTI_TRACKS[@]}"; do
-  IFS='|' read -r name cat title desc img _rest <<< "$row"
-  title_sql="${title//\'/\'\'}"
-  desc_sql="${desc//\'/\'\'}"
-  url=$(public_url "$name")
+for row in "${SOUNDS[@]}"; do
+  IFS='|' read -r key category title description image_url sound_url duration <<< "$row"
   [[ -n "$values" ]] && values+=$',\n'
-  values+="('seeded-${name}', '${title_sql}', '${desc_sql}', '${cat}', '${url}', '${img}', 30, true, NOW(), NOW())"
+  values+="('curated-${key}', $(quote_sql "$title"), $(quote_sql "$description"), $(quote_sql "$category"), $(quote_sql "$sound_url"), $(quote_sql "$image_url"), ${duration}, true, NOW(), NOW())"
 done
 
 SQL=$(cat <<EOF
--- Clean slate: drop everything, re-seed canonical set.
 DELETE FROM sound_sessions WHERE "soundId" IN (SELECT id FROM ambient_sounds);
 DELETE FROM ambient_sounds;
 
@@ -248,11 +67,8 @@ ${values};
 EOF
 )
 
-echo ""
-echo "→ Wipe + upsert $total records into ambient_sounds"
+echo "→ Replacing ambient_sounds with ${#SOUNDS[@]} curated Mixkit tracks"
 docker exec -i digital-cigarette-postgres \
   psql -U postgres -d digital_cigarette_break -v ON_ERROR_STOP=1 -c "$SQL"
 
-echo ""
-echo "✓ Done — $total sounds in DB + Supabase."
-echo "  curl -s http://localhost:6823/v1/ambient-sounds | python3 -m json.tool | head"
+echo "✓ Done — curated ambient sound catalog is ready."
