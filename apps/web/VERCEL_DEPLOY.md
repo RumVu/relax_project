@@ -27,7 +27,7 @@ optionally **Preview**):
 | Key | Value | Notes |
 |---|---|---|
 | `NEXT_PUBLIC_API_URL` | `https://<random>.trycloudflare.com` | Public URL của backend. Lấy từ `make share-vercel` (in ra URL Cloudflare tunnel). Phải có `https://`, **không** trailing slash. Required. |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | `627379199532-…apps.googleusercontent.com` | Bật nút "Sign in with Google". Trùng với `GOOGLE_CLIENT_ID` ở backend. Client ID là PUBLIC nên commit/share thoải mái. |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | `884741112800-…apps.googleusercontent.com` | Bật nút "Sign in with Google". Trùng với `GOOGLE_CLIENT_ID` ở backend. Client ID là PUBLIC nên commit/share thoải mái. |
 | `NEXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | Optional. |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_…` | Optional. |
 
@@ -35,13 +35,16 @@ optionally **Preview**):
 > changing one of these you have to redeploy (Vercel re-builds
 > automatically when env vars change in the dashboard).
 
-### Backend storage variables
+### Backend API variables
 
-Avatar upload and all admin upload buttons run through the backend API.
-The backend environment that `NEXT_PUBLIC_API_URL` points to must have:
+Avatar upload, admin upload buttons, and Google OAuth code exchange run through
+the backend API. The backend environment that `NEXT_PUBLIC_API_URL` points to
+must have:
 
 | Key | Notes |
 |---|---|
+| `GOOGLE_CLIENT_ID` | Same OAuth client ID as `NEXT_PUBLIC_GOOGLE_CLIENT_ID`. |
+| `GOOGLE_CLIENT_SECRET` | OAuth client secret. Backend-only, never expose to web/mobile. |
 | `SUPABASE_URL` | Supabase project URL. |
 | `SUPABASE_PUBLISHABLE_KEY` | Public anon/publishable key. |
 | `SUPABASE_SECRET_KEY` | Service-role/secret key used only by backend uploads. |
@@ -59,7 +62,7 @@ start counting page views.
 
 ## 4. Google OAuth
 
-Google login uses a redirect callback instead of a popup:
+Google login uses a backend-owned authorization-code redirect callback:
 
 ```
 https://relax-project-web-dashboard.vercel.app/auth/google/callback

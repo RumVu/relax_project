@@ -33,6 +33,7 @@ import {
   throwInvalidCredentials,
 } from './helpers/auth.helpers';
 import {
+  exchangeGoogleAuthorizationCode,
   verifyGoogleAccessToken,
   verifyGoogleIdToken,
 } from './google/google-token-verifier';
@@ -140,11 +141,11 @@ export class AuthService {
   }
 
   /**
-   * Exchanges a Google Identity Services ID token for an app session.
+   * Exchanges a Google auth credential for an app session.
    *
    * Flow:
-   *   1. Verify the JWT signature against Google's public JWKs and check
-   *      that `aud` matches our GOOGLE_CLIENT_ID.
+   *   1. Prefer OAuth authorization-code flow: backend uses
+   *      GOOGLE_CLIENT_SECRET to exchange the code with Google.
    *   2. Find-or-create the user by email. LOCAL accounts get upgraded
    *      to GOOGLE so the next login skips straight through.
    *   3. Return the same auth response shape as /auth/login.
@@ -163,9 +164,7 @@ export class AuthService {
       });
     }
 
-    const payload = dto.idToken
-      ? await verifyGoogleIdToken(dto.idToken, clientId)
-      : await verifyGoogleAccessToken(dto.accessToken ?? '', clientId);
+    const payload = await this.resolveGooglePayload(dto, clientId);
     const email = payload.email?.toLowerCase();
     if (!email) {
       throw new UnauthorizedException({
@@ -235,6 +234,34 @@ export class AuthService {
       userAgent,
       ipAddress,
     );
+  }
+
+  private async resolveGooglePayload(dto: GoogleLoginDto, clientId: string) {
+    if (dto.authorizationCode) {
+      const clientSecret = this.configService.get<string>(
+        'app.googleClientSecret',
+      );
+      if (!clientSecret) {
+        throw new UnauthorizedException({
+          code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+          message:
+            'Google sign-in is not configured (missing GOOGLE_CLIENT_SECRET on backend).',
+        });
+      }
+
+      return exchangeGoogleAuthorizationCode(
+        dto.authorizationCode,
+        clientId,
+        clientSecret,
+        dto.redirectUri ?? '',
+      );
+    }
+
+    if (dto.idToken) {
+      return verifyGoogleIdToken(dto.idToken, clientId);
+    }
+
+    return verifyGoogleAccessToken(dto.accessToken ?? '', clientId);
   }
 
   async logout(refreshToken?: string) {

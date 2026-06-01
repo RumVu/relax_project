@@ -34,7 +34,7 @@ export function GoogleSignInButton({
     const params = new URLSearchParams({
       client_id: clientId,
       redirect_uri: `${window.location.origin}/auth/google/callback`,
-      response_type: 'token',
+      response_type: 'code',
       scope: 'openid email profile',
       prompt: 'select_account',
       state,

@@ -34,7 +34,8 @@ export default function GoogleCallbackPage() {
         queryParams.get('error');
       const returnedState = hashParams.get('state') ?? queryParams.get('state');
       const expectedState = window.sessionStorage.getItem(GOOGLE_OAUTH_STATE_KEY);
-      const accessToken = hashParams.get('access_token');
+      const authorizationCode = queryParams.get('code') ?? hashParams.get('code');
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
 
       window.history.replaceState(null, '', '/auth/google/callback');
       window.sessionStorage.removeItem(GOOGLE_OAUTH_STATE_KEY);
@@ -45,13 +46,13 @@ export default function GoogleCallbackPage() {
       if (!expectedState || returnedState !== expectedState) {
         throw new Error(t('auth.google.stateMismatch'));
       }
-      if (!accessToken) {
+      if (!authorizationCode) {
         throw new Error(t('auth.google.noToken'));
       }
 
       const auth = await apiFetch<AuthResponse>('/auth/google', {
         method: 'POST',
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify({ authorizationCode, redirectUri }),
       });
       persistAuthSession(auth);
       setState('success');

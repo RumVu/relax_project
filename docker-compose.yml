@@ -68,7 +68,7 @@ services:
       # Keep secrets out of this compose file; missing values make uploads fail
       # with an explicit STORAGE_NOT_CONFIGURED response.
       # Google Client ID PUBLIC (an toàn commit). Override bằng env nếu xài dự án khác.
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com}
       # CORS mặc định: localhost dev + Vercel production web.
       # `make share-vercel` sẽ override để bồi thêm tunnel + reaffirm Vercel URL.
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:3233,https://relax-project-web-dashboard.vercel.app}
@@ -151,14 +151,14 @@ services:
       dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6823}
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com}
     container_name: digital-cigarette-web
     restart: unless-stopped
     depends_on:
       - backend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6823}
-      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com}
       NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "${WEB_PORT:-3233}:3233"

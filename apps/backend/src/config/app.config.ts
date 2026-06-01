@@ -13,8 +13,8 @@ export default registerAs('app', () => ({
     process.env.AUTH_REFRESH_COOKIE_NAME ?? 'relax_refresh_token',
   authRefreshCookieSecure: process.env.AUTH_REFRESH_COOKIE_SECURE,
   authRefreshCookieSameSite: process.env.AUTH_REFRESH_COOKIE_SAME_SITE,
-  // Google Identity Services client ID (web). Same value must be set
-  // in NEXT_PUBLIC_GOOGLE_CLIENT_ID on the web so the ID token
-  // audience matches. Leaving this empty disables /auth/google.
+  // Google OAuth web client. Client secret is backend-only and is used
+  // for the authorization-code callback flow.
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
 }));

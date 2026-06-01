@@ -1,24 +1,32 @@
-import { IsString, MinLength, ValidateIf } from 'class-validator';
+import { IsOptional, IsString, MinLength, ValidateIf } from 'class-validator';
 
 export class GoogleLoginDto {
   /**
-   * Google ID token returned by Google Identity Services on the client
-   * (the `credential` field of the CredentialResponse). Backend will
-   * verify the signature against Google's public keys and check that
-   * `aud` matches GOOGLE_CLIENT_ID before trusting the email.
+   * Legacy GIS ID token. Kept for backwards compatibility.
    */
-  @ValidateIf((dto: GoogleLoginDto) => !dto.accessToken)
+  @ValidateIf((dto: GoogleLoginDto) => !dto.accessToken && !dto.authorizationCode)
   @IsString()
   @MinLength(10)
   idToken?: string;
 
   /**
-   * OAuth access token returned by GIS token client. Used by the custom
-   * web button so the UI can force Google's account chooser instead of
-   * rendering a personalized iframe button.
+   * Legacy OAuth access token. Kept for backwards compatibility.
    */
-  @ValidateIf((dto: GoogleLoginDto) => !dto.idToken)
+  @ValidateIf((dto: GoogleLoginDto) => !dto.idToken && !dto.authorizationCode)
   @IsString()
   @MinLength(10)
   accessToken?: string;
+
+  /**
+   * OAuth authorization code returned to /auth/google/callback.
+   * Backend exchanges this using GOOGLE_CLIENT_SECRET.
+   */
+  @ValidateIf((dto: GoogleLoginDto) => !dto.idToken && !dto.accessToken)
+  @IsString()
+  @MinLength(10)
+  authorizationCode?: string;
+
+  @IsOptional()
+  @IsString()
+  redirectUri?: string;
 }
