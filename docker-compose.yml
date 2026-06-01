@@ -40,6 +40,11 @@ services:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+      - path: apps/backend/.env
+        required: false
     container_name: digital-cigarette-backend
     restart: unless-stopped
     depends_on:
@@ -59,14 +64,9 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
       JWT_ISSUER: ${JWT_ISSUER:-digital-cigarette-break-api}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-digital-cigarette-break-app}
-      # Supabase Storage — chứa avatar, ảnh project, sound assets.
-      # Backend dùng SECRET_KEY (sb_secret_*) để issue signed-upload-url,
-      # frontend dùng PUBLISHABLE_KEY (sb_publishable_*) để read.
-      # Để rỗng → StorageService no-op (upload sẽ fail rõ ràng).
-      SUPABASE_URL: ${SUPABASE_URL:-}
-      SUPABASE_PUBLISHABLE_KEY: ${SUPABASE_PUBLISHABLE_KEY:-}
-      SUPABASE_SECRET_KEY: ${SUPABASE_SECRET_KEY:-}
-      SUPABASE_BUCKET: ${SUPABASE_BUCKET:-public-assets}
+      # Supabase Storage is loaded from .env / apps/backend/.env via env_file.
+      # Keep secrets out of this compose file; missing values make uploads fail
+      # with an explicit STORAGE_NOT_CONFIGURED response.
       # Google Client ID PUBLIC (an toàn commit). Override bằng env nếu xài dự án khác.
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com}
       # CORS mặc định: localhost dev + Vercel production web.

@@ -16,6 +16,7 @@
     "openapi:types": "mkdir -p lib/generated && npx --yes openapi-typescript ${NEXT_PUBLIC_API_URL:-http://localhost:6823}/docs-json -o lib/generated/openapi-types.ts"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",
     "next": "16.3.0-canary.23",

@@ -16,7 +16,7 @@ import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { DataTable, MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { apiFetch, extractList } from '@/lib/api';
+import { ApiError, apiFetch, extractList } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import type { TranslationKey } from '@/lib/i18n/dictionaries';
@@ -487,11 +487,14 @@ export function AdminCatalogPage({
         title: t('catalog.toast.uploaded'),
         message: file.name,
       });
-    } catch {
+    } catch (cause) {
       pushToast({
         tone: 'error',
         title: t('catalog.toast.uploadFailed'),
-        message: t('catalog.toast.serverHint'),
+        message:
+          cause instanceof ApiError
+            ? formatAdminUploadError(cause)
+            : t('catalog.toast.serverHint'),
       });
     } finally {
       setUploadingField(null);
@@ -862,6 +865,25 @@ function uploadConfigForField(field: FieldConfig, fixedCategory?: string) {
   }
 
   return undefined;
+}
+
+function formatAdminUploadError(error: ApiError) {
+  const details = error.details as
+    | { missingKeys?: string[]; invalidKeys?: string[] }
+    | undefined;
+  const missingKeys = details?.missingKeys ?? [];
+  const invalidKeys = details?.invalidKeys ?? [];
+
+  if (missingKeys.length || invalidKeys.length) {
+    const parts = [
+      missingKeys.length ? `Thiếu ${missingKeys.join(', ')}` : '',
+      invalidKeys.length ? `Sai ${invalidKeys.join(', ')}` : '',
+    ].filter(Boolean);
+
+    return `Supabase storage chưa sẵn sàng trên backend: ${parts.join('; ')}.`;
+  }
+
+  return error.message;
 }
 
 function slugFileName(name: string) {

@@ -35,12 +35,52 @@ optionally **Preview**):
 > changing one of these you have to redeploy (Vercel re-builds
 > automatically when env vars change in the dashboard).
 
-## 3. Custom domain (optional)
+### Backend storage variables
+
+Avatar upload and all admin upload buttons run through the backend API.
+The backend environment that `NEXT_PUBLIC_API_URL` points to must have:
+
+| Key | Notes |
+|---|---|
+| `SUPABASE_URL` | Supabase project URL. |
+| `SUPABASE_PUBLISHABLE_KEY` | Public anon/publishable key. |
+| `SUPABASE_SECRET_KEY` | Service-role/secret key used only by backend uploads. |
+| `SUPABASE_BUCKET` | Usually `public-assets`. |
+
+If any of these are missing, the UI will show
+`Supabase storage chưa sẵn sàng...` even for an ADMIN account because the
+server cannot upload without its storage key.
+
+## 3. Vercel Analytics
+
+The app includes `@vercel/analytics/next` in `app/layout.tsx`. After the
+next Vercel deployment and at least one real visit, Vercel Analytics should
+start counting page views.
+
+## 4. Google OAuth
+
+Google login uses a redirect callback instead of a popup:
+
+```
+https://relax-project-web-dashboard.vercel.app/auth/google/callback
+```
+
+In Google Cloud Console → OAuth Client:
+
+- Authorized JavaScript origins:
+  `https://relax-project-web-dashboard.vercel.app`
+- Authorized redirect URIs:
+  `https://relax-project-web-dashboard.vercel.app/auth/google/callback`
+
+The `/o/oauth2/v2/auth` URL shown in DevTools is Google's OAuth v2 endpoint,
+not this app's `/v1` API version.
+
+## 5. Custom domain (optional)
 
 Add it under **Settings → Domains**. Update `NEXT_PUBLIC_API_URL` if
 the backend domain depends on the web domain.
 
-## 4. Backend CORS
+## 6. Backend CORS
 
 Add the Vercel URL to the backend's `CORS_ORIGINS`:
 
@@ -51,16 +91,18 @@ CORS_ORIGINS=https://<your-vercel-url>.vercel.app,https://yourdomain.com
 Production CORS uses the explicit allow-list only — there is no LAN /
 trycloudflare auto-allow in `NODE_ENV=production`.
 
-## 5. Deploy
+## 7. Deploy
 
 Push to `main` → Vercel builds + deploys. The build runs the same
 `next build` that CI uses, so anything green in GitHub Actions ships.
 
-## 6. Troubleshooting
+## 8. Troubleshooting
 
 | Symptom | Fix |
 |---|---|
 | `Module not found: @/components/...` | Make sure **Root Directory** is `apps/web`, not the repo root. |
 | Login works but dashboard data calls fail with CORS error | Add the Vercel URL to backend `CORS_ORIGINS`. |
 | `Sign in with Google` button missing | Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` AND redeploy (env-only changes still need rebuild). |
+| Google login returns `redirect_uri_mismatch` | Add `/auth/google/callback` to Google OAuth Authorized redirect URIs. |
+| Upload says Supabase storage is not ready | Set the four backend `SUPABASE_*` variables on the API deployment/tunnel environment and restart it. |
 | Geolocation / Notification not prompting on the live URL | Vercel ships HTTPS by default — should work. If still blocked, check the in-app **Settings → Quyền truy cập** panel for a precise reason. |

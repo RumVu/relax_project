@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Manrope } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { ToastRegion } from '@/components/ui/toast-region';
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider />
           <ToastRegion />
           {children}
+          <Analytics />
         </I18nProvider>
       </body>
     </html>
