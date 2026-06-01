@@ -3,6 +3,7 @@ export class UserProfileResponseDto {
   userId!: string;
   displayName!: string | null;
   bio!: string | null;
+  avatar?: string | null;
   birthday!: Date | null;
   zodiacSign!: string | null;
   chineseZodiac!: string | null;

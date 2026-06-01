@@ -6,6 +6,10 @@ import { UsersService } from '../users/users.service';
 import { UpsertUserProfileDto } from './dto/upsert-user-profile.dto';
 import { getZodiacPersonalization } from './zodiac';
 
+type UserProfilePayload = NonNullable<
+  Awaited<ReturnType<PrismaService['userProfile']['findUnique']>>
+>;
+
 @Injectable()
 export class UserProfilesService {
   constructor(
@@ -26,7 +30,7 @@ export class UserProfilesService {
       );
     }
 
-    return profile;
+    return this.withUserAvatar(profile);
   }
 
   async upsert(userId: string, dto: UpsertUserProfileDto) {
@@ -55,10 +59,28 @@ export class UserProfilesService {
           }),
     };
 
-    return this.prisma.userProfile.upsert({
+    const profile = await this.prisma.userProfile.upsert({
       where: { userId },
       create: { userId, ...payload },
       update: payload,
     });
+
+    return this.withUserAvatar(profile, avatar);
+  }
+
+  private async withUserAvatar(
+    profile: UserProfilePayload,
+    avatarOverride?: string | null,
+  ) {
+    if (avatarOverride !== undefined) {
+      return { ...profile, avatar: avatarOverride };
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: profile.userId },
+      select: { avatar: true },
+    });
+
+    return { ...profile, avatar: user?.avatar ?? null };
   }
 }

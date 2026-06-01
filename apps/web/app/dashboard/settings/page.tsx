@@ -446,6 +446,9 @@ export default function SettingsPage() {
     displayName: string;
     birthday: string;
   } | null>(null);
+  const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(
+    undefined,
+  );
   const [reminderDraft, setReminderDraft] = useState<ReminderDraft>({
     title:
       locale === 'en'
@@ -489,6 +492,7 @@ export default function SettingsPage() {
   const displayName = profileDraft?.displayName ?? settings.profile.displayName;
   const birthday =
     profileDraft?.birthday ?? normalizeBirthdayValue(settings.profile.birthday);
+  const avatar = avatarOverride !== undefined ? avatarOverride : settings.profile.avatar;
 
   useEffect(() => {
     let cancelled = false;
@@ -699,9 +703,13 @@ export default function SettingsPage() {
           {/* Avatar uploader — direct Supabase upload via signed URL */}
           <div className="mt-5 rounded-lg border border-lilac/60 bg-white/60 p-4">
             <AvatarUploader
-              currentAvatar={settings.profile.avatar}
+              currentAvatar={avatar}
               displayName={displayName}
-              onUpdated={() => triggerRefresh()}
+              key={avatar ?? 'empty-avatar'}
+              onUpdated={(publicUrl) => {
+                setAvatarOverride(publicUrl || null);
+                triggerRefresh();
+              }}
             />
           </div>
           <div className="mt-5 grid gap-4">
