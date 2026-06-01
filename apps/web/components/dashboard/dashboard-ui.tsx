@@ -163,7 +163,7 @@ export function RealtimeStatusBadge({
       window.clearTimeout(connectingTimer);
       socket.disconnect();
     };
-  }, [onEvent]);
+  }, [onEvent, t]);
 
   const Icon = state === 'live' ? Wifi : state === 'connecting' ? RefreshCcw : WifiOff;
 
@@ -241,11 +241,13 @@ export function SectionTitle({
   copy?: string;
   action?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
         <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--app-muted,theme(colors.plum))]">
-          Khu vực
+          {t('section.eyebrow')}
         </p>
         <h3 className="mt-2 text-xl font-extrabold text-[var(--app-text,theme(colors.ink))]">{title}</h3>
         {copy ? <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">{copy}</p> : null}

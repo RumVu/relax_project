@@ -41,9 +41,21 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 function readInitialLocale(): Locale {
   if (typeof window === 'undefined') return DEFAULT_LOCALE;
   try {
+    const fromQuery = new URLSearchParams(window.location.search).get('locale')
+      ?? new URLSearchParams(window.location.search).get('lang');
+    if (fromQuery && (LOCALES as string[]).includes(fromQuery)) {
+      return fromQuery as Locale;
+    }
     const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY);
     if (stored && (LOCALES as string[]).includes(stored)) {
       return stored as Locale;
+    }
+    const fromCookie = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith(`${LOCALE_COOKIE_KEY}=`))
+      ?.split('=')[1];
+    if (fromCookie && (LOCALES as string[]).includes(fromCookie)) {
+      return fromCookie as Locale;
     }
     // Fall back to browser language if it starts with one of our locales.
     const nav = navigator.language?.slice(0, 2).toLowerCase();

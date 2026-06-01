@@ -77,7 +77,7 @@ export default function MoodPage() {
               setEditingId(item.id);
               setSelectedMood(item.moodType);
               setEditingIntensity(item.intensity || 3);
-              setNote(item.note === 'Không có ghi chú' ? '' : item.note);
+              setNote(item.note === t('mood.history.noNote') || item.note === 'Không có ghi chú' ? '' : item.note);
             }}
             variant="secondary"
           >

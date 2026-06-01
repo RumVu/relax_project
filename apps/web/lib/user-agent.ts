@@ -134,15 +134,25 @@ function trimVersion(v?: string): string {
  * Convenience helpers for the Sessions table — returns one compact
  * label per column so the column rendering stays trivial.
  */
-export function describeDevice(ua: string | null | undefined): string {
+export function describeDevice(
+  ua: string | null | undefined,
+  locale: 'vi' | 'en' = 'vi',
+): string {
   const parsed = parseUserAgent(ua);
+  const device =
+    locale === 'en'
+      ? parsed.device
+          .replace('Không rõ thiết bị', 'Unknown device')
+          .replace('Khác', 'Other')
+          .replace('Máy tính để bàn', 'Desktop')
+      : parsed.device;
   if (!parsed.os && !parsed.browser) {
-    return parsed.device;
+    return device;
   }
   if (parsed.os) {
-    return `${parsed.device} · ${parsed.os}`;
+    return `${device} · ${parsed.os}`;
   }
-  return parsed.device;
+  return device;
 }
 
 export function describeBrowser(ua: string | null | undefined): string {

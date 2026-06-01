@@ -7,7 +7,7 @@ export default function AdminThemesPage() {
   const { t } = useTranslation();
   return (
     <AdminCatalogPage
-      copy="Quản lý bảng màu, chế độ sáng/tối/theo hệ thống, giao diện mặc định và trạng thái xuất bản."
+      copy={t('admin.themes.copy')}
       endpoint="/app-themes"
       kind="themes"
       title={t('admin.themes.title')}

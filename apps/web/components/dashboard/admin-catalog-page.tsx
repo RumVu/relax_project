@@ -18,6 +18,7 @@ import { Card } from '@/components/ui/card';
 import { apiFetch, extractList } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import type { TranslationKey } from '@/lib/i18n/dictionaries';
 
 type Kind =
   | 'quotes'
@@ -77,6 +78,67 @@ const triggerOptions = [
   'MORNING',
   'AFTER_CHECKIN',
 ];
+
+const catalogTextKeys: Record<string, TranslationKey> = {
+  'Nội dung': 'catalog.field.content',
+  'Mood': 'catalog.field.mood',
+  'Tác giả': 'catalog.field.author',
+  'Trạng thái': 'catalog.col.status',
+  'Hành động': 'catalog.col.actions',
+  'Ảnh minh hoạ': 'catalog.field.coverImage',
+  'Đang publish': 'catalog.field.published',
+  'Không tác giả': 'catalog.field.unknownAuthor',
+  'Tên': 'catalog.field.name',
+  'Category': 'catalog.field.category',
+  'Âm thanh': 'catalog.field.soundCol',
+  'Tên âm thanh': 'catalog.field.soundName',
+  'Mô tả': 'catalog.field.description',
+  'Sound URL': 'catalog.field.soundUrl',
+  'Cover URL': 'catalog.field.coverUrl',
+  'Duration seconds': 'catalog.field.durationSeconds',
+  'Loại': 'catalog.field.kind',
+  'Nhịp thở': 'catalog.field.breath',
+  'Tên bài thở': 'catalog.field.exerciseName',
+  'Inhale': 'catalog.field.inhale',
+  'Hold': 'catalog.field.hold',
+  'Exhale': 'catalog.field.exhale',
+  'Cycles': 'catalog.field.cycles',
+  'Image URL': 'catalog.field.imageUrl',
+  'Tên theme': 'catalog.field.themeName',
+  'Mode': 'catalog.field.mode',
+  'Màu chính': 'catalog.field.primaryColor',
+  'Background': 'catalog.field.background',
+  'Surface': 'catalog.field.surface',
+  'Primary': 'catalog.field.primary',
+  'Secondary': 'catalog.field.secondary',
+  'Accent': 'catalog.field.accent',
+  'Text': 'catalog.field.text',
+  'Muted text': 'catalog.field.mutedText',
+  'Theme mặc định': 'catalog.field.defaultTheme',
+  'Tiêu đề': 'catalog.field.title',
+  'Subtitle': 'catalog.field.subtitle',
+  'Thứ tự': 'catalog.field.order',
+  'Animation URL': 'catalog.field.animationUrl',
+  'Tên linh thú': 'catalog.field.companionName',
+  'Preview URL': 'catalog.field.previewUrl',
+  'Sprite sheet URL': 'catalog.field.spriteSheetUrl',
+  'Idle animation URL': 'catalog.field.idleAnimationUrl',
+  'Sleep animation URL': 'catalog.field.sleepAnimationUrl',
+  'Walk animation URL': 'catalog.field.walkAnimationUrl',
+  'Primary color': 'catalog.field.primaryColor',
+  'Secondary color': 'catalog.field.secondaryColor',
+  'Accent color': 'catalog.field.accentColor',
+  'Linh thú mặc định': 'catalog.field.defaultCompanion',
+  'Tin nhắn': 'catalog.field.message',
+  'Trigger': 'catalog.field.trigger',
+  'Giờ': 'catalog.field.hour',
+  'Mood người dùng': 'catalog.field.userMood',
+  'Mood linh thú': 'catalog.field.companionMood',
+  'Từ giờ': 'catalog.field.hourFrom',
+  'Đến giờ': 'catalog.field.hourTo',
+  'Weight': 'catalog.field.weight',
+  'mọi lúc': 'catalog.field.hourAlways',
+};
 
 const catalogConfig: Record<
   Kind,
@@ -300,8 +362,8 @@ export function AdminCatalogPage({
     } catch {
       pushToast({
         tone: 'error',
-        title: `Không tải được ${title.toLowerCase()}`,
-        message: 'Kiểm tra token admin hoặc backend.',
+        title: t('catalog.toast.loadFailed', { title: title.toLowerCase() }),
+        message: t('catalog.toast.serverHint'),
       });
     } finally {
       setLoading(false);
@@ -324,8 +386,8 @@ export function AdminCatalogPage({
         if (!cancelled) {
           pushToast({
             tone: 'error',
-            title: `Không tải được ${title.toLowerCase()}`,
-            message: 'Kiểm tra token admin hoặc backend.',
+            title: t('catalog.toast.loadFailed', { title: title.toLowerCase() }),
+            message: t('catalog.toast.serverHint'),
           });
         }
       } finally {
@@ -340,7 +402,7 @@ export function AdminCatalogPage({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, pushToast, query, statusFilter, title, page, pageSize]);
+  }, [endpoint, pushToast, query, statusFilter, title, page, pageSize, t]);
 
   const rows = useMemo(
     () => items.map(config.buildRow),
@@ -362,14 +424,14 @@ export function AdminCatalogPage({
       await loadItems(false);
       pushToast({
         tone: 'success',
-        title: editingId ? 'Đã cập nhật nội dung' : 'Đã tạo nội dung mới',
-        message: `${title} đã được lưu vào backend.`,
+        title: editingId ? t('catalog.toast.updated') : t('catalog.toast.created'),
+        message: title,
       });
     } catch {
       pushToast({
         tone: 'error',
-        title: 'Lưu nội dung thất bại',
-        message: 'Kiểm tra dữ liệu nhập hoặc quyền admin.',
+        title: t('catalog.toast.saveFailed'),
+        message: t('catalog.toast.dataHint'),
       });
     } finally {
       setSaving(false);
@@ -407,12 +469,12 @@ export function AdminCatalogPage({
       await loadItems(false);
       pushToast({
         tone: 'success',
-        title: 'Đã đổi trạng thái publish',
+        title: t('catalog.toast.toggled'),
       });
     } catch {
       pushToast({
         tone: 'error',
-        title: 'Không đổi được trạng thái publish',
+        title: t('catalog.toast.toggleFailed'),
       });
     }
   }
@@ -428,12 +490,12 @@ export function AdminCatalogPage({
       await loadItems(false);
       pushToast({
         tone: 'success',
-        title: 'Đã xoá nội dung',
+        title: t('catalog.toast.removed'),
       });
     } catch {
       pushToast({
         tone: 'error',
-        title: 'Xoá nội dung thất bại',
+        title: t('catalog.toast.removeFailed'),
       });
     }
   }
@@ -486,12 +548,12 @@ export function AdminCatalogPage({
           />
           <div className="mt-5">
             <DataTable
-              columns={config.columns}
+              columns={config.columns.map((column) => translateCatalogText(column, t))}
               rows={rows.map((row) => [
                 row.name,
                 row.secondary,
-                row.config,
-                row.status,
+                translateCatalogText(row.config, t),
+                catalogStatusLabel(row.status, t),
                 <div className="flex flex-wrap gap-2" key={row.id}>
                   <Button
                     className="h-8 px-3 text-xs"
@@ -544,6 +606,7 @@ export function AdminCatalogPage({
               <CatalogField
                 field={field}
                 key={field.key}
+                label={translateCatalogText(field.label, t)}
                 onChange={(value) =>
                   setDraft((current) => ({ ...current, [field.key]: value }))
                 }
@@ -601,10 +664,12 @@ function extractTotal(payload: unknown, fallback: number): number {
 
 function CatalogField({
   field,
+  label,
   value,
   onChange,
 }: {
   field: FieldConfig;
+  label: string;
   value: string | boolean;
   onChange: (value: string | boolean) => void;
 }) {
@@ -617,7 +682,7 @@ function CatalogField({
         onClick={() => onChange(!value)}
         type="button"
       >
-        <p className="font-bold">{field.label}</p>
+        <p className="font-bold">{label}</p>
         <p className={`mt-1 text-xs font-semibold ${value ? 'text-white/70' : 'text-slate'}`}>
           {value ? 'Enabled' : 'Disabled'}
         </p>
@@ -628,7 +693,7 @@ function CatalogField({
   if (field.type === 'select') {
     return (
       <label className="block">
-        <span className="text-sm font-semibold text-slate">{field.label}</span>
+        <span className="text-sm font-semibold text-slate">{label}</span>
         <select
           className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
           onChange={(event) => onChange(event.target.value)}
@@ -637,7 +702,7 @@ function CatalogField({
         >
           {field.options?.map((option) => (
             <option key={option || 'none'} value={option}>
-              {option || 'Không chọn'}
+              {option || '—'}
             </option>
           ))}
         </select>
@@ -648,7 +713,7 @@ function CatalogField({
   if (field.type === 'textarea') {
     return (
       <label className="block">
-        <span className="text-sm font-semibold text-slate">{field.label}</span>
+        <span className="text-sm font-semibold text-slate">{label}</span>
         <textarea
           className="mt-2 min-h-[120px] w-full rounded-lg border border-lilac bg-white/85 px-3 py-3 text-sm font-semibold text-ink outline-none focus:border-violet"
           onChange={(event) => onChange(event.target.value)}
@@ -661,7 +726,7 @@ function CatalogField({
 
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-slate">{field.label}</span>
+      <span className="text-sm font-semibold text-slate">{label}</span>
       <input
         className="mt-2 h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
         onChange={(event) => onChange(event.target.value)}
@@ -727,6 +792,18 @@ function statusText(item: CatalogItem) {
   return isActive(item) ? 'active' : 'draft';
 }
 
+function translateCatalogText(value: string, t: (key: TranslationKey, params?: Record<string, string | number>) => string) {
+  const key = catalogTextKeys[value];
+  return key ? t(key) : value;
+}
+
+function catalogStatusLabel(value: string, t: (key: TranslationKey, params?: Record<string, string | number>) => string) {
+  if (value === 'active') return t('state.active');
+  if (value === 'draft') return t('state.inactive');
+  if (value === 'default') return t('catalog.status.default');
+  return translateCatalogText(value, t);
+}
+
 function hourRange(item: CatalogItem) {
   const minHour = asNumber(item.minHour);
   const maxHour = asNumber(item.maxHour);
@@ -776,6 +853,7 @@ function PaginationBar({
   setPageSize: (next: number) => void;
   total: number;
 }) {
+  const { t } = useTranslation();
   const pageSizes = [10, 20, 50];
   const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
   const showingFrom = total === 0 ? 0 : page * pageSize + 1;
@@ -789,9 +867,9 @@ function PaginationBar({
   return (
     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
       <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
-        <span>Hiển thị</span>
+        <span>{t('catalog.pagination.show')}</span>
         <select
-          aria-label="Số kết quả mỗi trang"
+          aria-label={t('catalog.pagination.perPage')}
           className="h-9 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-2 text-sm font-bold text-[var(--app-text)]"
           onChange={(event) => setPageSize(Number(event.target.value))}
           value={pageSize}
@@ -802,7 +880,7 @@ function PaginationBar({
             </option>
           ))}
         </select>
-        <span>kết quả / trang</span>
+        <span>{t('catalog.pagination.resultsPerPage')}</span>
       </div>
       <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
         <span className="text-[var(--app-muted,theme(colors.slate))]">
@@ -812,7 +890,7 @@ function PaginationBar({
         </span>
         <div className="flex items-center gap-1">
           <button
-            aria-label="Trang trước"
+            aria-label={t('catalog.pagination.prev')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
             disabled={page <= 0}
             onClick={() => setPage(Math.max(0, page - 1))}
@@ -824,7 +902,7 @@ function PaginationBar({
             {page + 1} / {Math.max(1, lastPage + 1)}
           </span>
           <button
-            aria-label="Trang sau"
+            aria-label={t('catalog.pagination.next')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
             disabled={page >= lastPage}
             onClick={() => setPage(Math.min(lastPage, page + 1))}

@@ -70,7 +70,7 @@ export default function JournalPage() {
       }),
     [journals.recent, moodFilter, query],
   );
-  const topMood = journals.byMood[0]?.mood ?? 'Chưa rõ';
+  const topMood = journals.byMood[0]?.mood ?? t('common.unknown');
   const moodOptions = useMemo(
     () => ['ALL', ...new Set(journals.byMood.map((item) => item.mood))],
     [journals.byMood],
@@ -90,22 +90,22 @@ export default function JournalPage() {
 
   return (
     <DashboardShell eyebrow={t('journal.eyebrow')} title={t('journal.title')}>
-      <DashboardFilterBar {...journalFilters} title="Bộ lọc journal" />
+      <DashboardFilterBar {...journalFilters} title={t('journal.filterTitle')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <MetricCard icon={BookOpenText} label="Tổng nhật ký" value={journals.total} />
-        <MetricCard icon={Star} label="Favorites" tone="sun" value={journals.favorites} />
+        <MetricCard icon={BookOpenText} label={t('journal.metric.entries')} value={journals.total} />
+        <MetricCard icon={Star} label={t('journal.metric.favorite')} tone="sun" value={journals.favorites} />
         <MetricCard
           icon={Heart}
-          label="Mood nổi bật"
-          note="xuất hiện nhiều nhất"
+          label={t('journal.metric.topMood')}
+          note={t('journal.metric.topMood.note')}
           tone="coral"
           value={topMood}
         />
         <MetricCard
           icon={BookHeart}
-          label="Recent entries"
-          note="bản ghi gần đây"
+          label={t('journal.metric.recent')}
+          note={t('journal.metric.recent.note')}
           tone="mint"
           value={journals.recent.length}
         />
@@ -114,8 +114,8 @@ export default function JournalPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <Card>
           <SectionTitle
-            title="Danh sách nhật ký"
-            copy="Tìm lại những entry gần đây theo cảm xúc, từ khóa và nhịp ghi chép của anh."
+            title={t('journal.list.title')}
+            copy={t('journal.list.copy')}
             action={
               <div className="flex flex-wrap gap-2">
                 <div className="flex h-10 items-center gap-2 rounded-lg border border-lilac bg-white px-3 text-sm">
@@ -123,7 +123,7 @@ export default function JournalPage() {
                   <input
                     className="w-40 bg-transparent outline-none"
                     onChange={(event) => setQuery(event.target.value)}
-                    placeholder="Tìm nhật ký"
+                    placeholder={t('journal.list.searchPlaceholder')}
                     value={query}
                   />
                 </div>
@@ -134,7 +134,7 @@ export default function JournalPage() {
                 >
                   {moodOptions.map((option) => (
                     <option key={option} value={option}>
-                      {option === 'ALL' ? 'All mood' : option}
+                      {option === 'ALL' ? t('journal.list.moodAll') : option}
                     </option>
                   ))}
                 </select>
@@ -177,7 +177,7 @@ export default function JournalPage() {
                     variant="secondary"
                   >
                     <Edit3 className="h-3.5 w-3.5" />
-                    Sửa
+                    {t('btn.edit')}
                   </Button>
                   <Button
                     className="h-8 px-3 text-xs"
@@ -191,17 +191,17 @@ export default function JournalPage() {
                         pushToast({
                           tone: 'success',
                           title: journal.favorite
-                            ? 'Đã bỏ yêu thích'
-                            : 'Đã đánh dấu yêu thích',
+                            ? t('journal.toast.unfavorited')
+                            : t('journal.toast.favorited'),
                         });
                       } catch {
-                        pushToast({ tone: 'error', title: 'Không đổi được favorite' });
+                        pushToast({ tone: 'error', title: t('journal.toast.favoriteFailed') });
                       }
                     }}
                     variant="secondary"
                   >
                     <Heart className="h-3.5 w-3.5" />
-                    {journal.favorite ? 'Bỏ favorite' : 'Favorite'}
+                    {journal.favorite ? t('journal.action.unmarkFavorite') : t('journal.action.markFavorite')}
                   </Button>
                   <Button
                     className="h-8 px-3 text-xs"
@@ -211,22 +211,22 @@ export default function JournalPage() {
                         triggerRefresh();
                         pushToast({
                           tone: 'success',
-                          title: 'Đã xoá nhật ký',
+                          title: t('journal.toast.deleted'),
                           message: journal.title,
                         });
                       } catch {
-                        pushToast({ tone: 'error', title: 'Không xoá được nhật ký' });
+                        pushToast({ tone: 'error', title: t('journal.toast.deleteFailed') });
                       }
                     }}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                    Xoá
+                    {t('btn.delete')}
                   </Button>
                 </div>
               </article>
             )) : (
               <div className="rounded-lg border border-dashed border-lilac bg-white/70 p-6 text-sm font-medium text-slate">
-                Chưa có entry nào khớp bộ lọc hiện tại. Thử bỏ bớt từ khóa hoặc đổi mood xem sao.
+                {t('journal.empty.filtered')}
               </div>
             )}
           </div>
@@ -234,14 +234,14 @@ export default function JournalPage() {
 
         <Card>
           <SectionTitle
-            title={editingId ? 'Chỉnh sửa nhật ký' : 'Viết nhanh'}
-            copy="Tạo mới, sửa nội dung, đổi mood/tag hoặc đánh dấu yêu thích đều ghi trực tiếp vào backend."
+            title={editingId ? t('journal.draft.editHeading') : t('journal.draft.heading')}
+            copy={t('journal.draft.copy')}
             action={<PenLine className="h-5 w-5 text-violet" />}
           />
           <input
             className="mt-5 h-11 w-full rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
             onChange={(event) => setDraftTitle(event.target.value)}
-            placeholder="Tiêu đề nhật ký"
+            placeholder={t('journal.draft.titlePlaceholder')}
             value={draftTitle}
           />
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -257,16 +257,16 @@ export default function JournalPage() {
               ))}
             </select>
             <input
-              className="h-11 rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
-              onChange={(event) => setDraftTags(event.target.value)}
-              placeholder="tag1, tag2"
-              value={draftTags}
-            />
+            className="h-11 rounded-lg border border-lilac bg-white/85 px-3 text-sm font-semibold text-ink outline-none focus:border-violet"
+            onChange={(event) => setDraftTags(event.target.value)}
+            placeholder={t('journal.draft.tagsPlaceholder')}
+            value={draftTags}
+          />
           </div>
           <textarea
             className="mt-3 min-h-[220px] w-full rounded-lg border border-lilac bg-white/85 p-3 text-sm outline-none focus:border-violet"
             onChange={(event) => setDraft(event.target.value)}
-            placeholder="Hôm nay điều gì làm anh nhẹ hơn?"
+            placeholder={t('journal.draft.contentPlaceholder')}
             value={draft}
           />
           <div className="mt-4 flex items-center justify-between gap-3">
@@ -313,20 +313,20 @@ export default function JournalPage() {
                   triggerRefresh();
                   pushToast({
                     tone: 'success',
-                    title: editingId ? 'Đã cập nhật nhật ký' : 'Đã lưu nhật ký',
-                    message: 'Danh sách recent entries đang được làm mới.',
+                    title: editingId ? t('journal.toast.updated') : t('journal.toast.saved'),
+                    message: t('journal.toast.savedMessage'),
                   });
                 } catch {
                   setSaveState('error');
                   pushToast({
                     tone: 'error',
-                    title: 'Không lưu được nhật ký',
+                    title: t('journal.toast.saveFailed'),
                   });
                 }
               }}
             >
               <PenLine className="h-4 w-4" />
-              {saveState === 'saving' ? 'Đang lưu' : editingId ? 'Cập nhật' : 'Lưu nhật ký'}
+              {saveState === 'saving' ? t('journal.draft.saving') : editingId ? t('journal.draft.update') : t('journal.draft.save')}
             </Button>
           </div>
           {editingId ? (
@@ -341,7 +341,7 @@ export default function JournalPage() {
               }}
               variant="secondary"
             >
-              Huỷ sửa
+              {t('journal.draft.cancelEdit')}
             </Button>
           ) : null}
           {saveState === 'saved' || saveState === 'error' ? (
@@ -351,8 +351,8 @@ export default function JournalPage() {
               }`}
             >
               {saveState === 'saved'
-                ? 'Đã lưu nhật ký qua API.'
-                : 'Lưu nhật ký thất bại. Không có draft giả nào được dùng thay thế.'}
+                ? t('journal.saveState.saved')
+                : t('journal.saveState.failed')}
             </p>
           ) : null}
           <div className="mt-6">
@@ -369,8 +369,8 @@ export default function JournalPage() {
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Card>
           <SectionTitle
-            title="Phân bố cảm xúc trong nhật ký"
-            copy="Tỉ trọng mood trong các entry hiện có để anh nhìn ra trạng thái nào lặp lại nhiều nhất."
+            title={t('journal.distribution.title')}
+            copy={t('journal.distribution.copy')}
           />
           <div className="mt-5">
             <ProgressList
@@ -385,29 +385,29 @@ export default function JournalPage() {
 
         <Card>
           <SectionTitle
-            title="Điểm nhấn gần đây"
-            copy="Tóm tắt nhanh từ những entry mới nhất để anh biết mình đang viết về điều gì nhiều nhất."
+            title={t('journal.insights.title')}
+            copy={t('journal.insights.copy')}
           />
           <div className="mt-5 space-y-4">
             <InsightRow
-              label="Tần suất yêu thích"
-              value={`${journals.favorites}/${journals.total || 0} entry được đánh dấu`}
+              label={t('journal.insight.favoriteRate')}
+              value={t('journal.insight.favoriteValue', { favorites: journals.favorites, total: journals.total || 0 })}
             />
             <InsightRow
-              label="Mood dẫn đầu"
-              value={`${topMood} đang xuất hiện nhiều nhất trong nhật ký`}
+              label={t('journal.insight.moodLead')}
+              value={t('journal.insight.moodLeadValue', { mood: topMood })}
             />
             <InsightRow
-              label="Tag nổi bật"
+              label={t('journal.insight.topTag')}
               value={
                 tagHighlights.length > 0
                   ? tagHighlights.map(([tag, count]) => `#${tag} (${count})`).join(' • ')
-                  : 'Chưa có tag nổi bật'
+                  : t('journal.insight.noTopTag')
               }
             />
             <InsightRow
-              label="Nhịp ghi gần đây"
-              value={`${journals.recent.length} entry mới đang hiển thị trên màn hình`}
+              label={t('journal.insight.recentPace')}
+              value={t('journal.insight.recentPaceValue', { count: journals.recent.length })}
             />
           </div>
         </Card>
