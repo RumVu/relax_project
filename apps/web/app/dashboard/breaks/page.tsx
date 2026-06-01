@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Headphones, Pause, PenLine, Play, Shuffle, Wind } from 'lucide-react';
+import { CheckCircle2, Headphones, Pause, PenLine, Play, Shuffle, Volume2, Wind } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   DataTable,
@@ -69,6 +69,92 @@ export default function BreaksPage() {
   const sessionRunning = actionState === 'started' && Boolean(activeSessionId);
   const queue = active?.resources ?? [];
   const queuePreviewCount = sessionRunning ? 8 : 4;
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playingResourceId, setPlayingResourceId] = useState<string | null>(null);
+  const [playerProgress, setPlayerProgress] = useState(0);
+  const [playerBusy, setPlayerBusy] = useState(false);
+  const [playerPaused, setPlayerPaused] = useState(true);
+  const [playerError, setPlayerError] = useState<string | null>(null);
+  const playingResource =
+    queue.find((resource) => resource.id === playingResourceId) ?? null;
+  const isPlaying = Boolean(playingResourceId && !playerPaused);
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, []);
+
+  async function handleResourcePlay(resource: (typeof queue)[number]) {
+    if (!resource.soundUrl) {
+      setPlayerError(t('breaks.session.noAudio'));
+      return;
+    }
+
+    if (playingResourceId === resource.id && audioRef.current) {
+      if (audioRef.current.paused) {
+        setPlayerBusy(true);
+        try {
+          await audioRef.current.play();
+          setPlayerPaused(false);
+          setPlayerError(null);
+        } catch {
+          setPlayerError(t('breaks.session.playFailed'));
+        } finally {
+          setPlayerBusy(false);
+        }
+      } else {
+        audioRef.current.pause();
+        setPlayerPaused(true);
+      }
+      return;
+    }
+
+    audioRef.current?.pause();
+    const audio = new Audio(resource.soundUrl);
+    audioRef.current = audio;
+    setPlayingResourceId(resource.id);
+    setPlayerProgress(0);
+    setPlayerPaused(true);
+    setPlayerBusy(true);
+    setPlayerError(null);
+
+    audio.addEventListener('timeupdate', () => {
+      if (!audio.duration || Number.isNaN(audio.duration)) return;
+      setPlayerProgress(Math.min(100, (audio.currentTime / audio.duration) * 100));
+    });
+    audio.addEventListener('play', () => setPlayerPaused(false));
+    audio.addEventListener('pause', () => setPlayerPaused(true));
+    audio.addEventListener('ended', () => {
+      setPlayerProgress(100);
+      setPlayingResourceId(null);
+      setPlayerPaused(true);
+    });
+    audio.addEventListener('error', () => {
+      setPlayerError(t('breaks.session.playFailed'));
+      setPlayingResourceId(null);
+      setPlayerPaused(true);
+    });
+
+    try {
+      await audio.play();
+    } catch {
+      setPlayerError(t('breaks.session.playFailed'));
+      setPlayingResourceId(null);
+    } finally {
+      setPlayerBusy(false);
+    }
+  }
+
+  function stopCurrentAudio() {
+    audioRef.current?.pause();
+    audioRef.current = null;
+    setPlayingResourceId(null);
+    setPlayerProgress(0);
+    setPlayerPaused(true);
+    setPlayerError(null);
+  }
 
   return (
     <DashboardShell eyebrow={t('breaks.eyebrow')} title={t('breaks.title')}>
@@ -129,7 +215,12 @@ export default function BreaksPage() {
                       : 'border-lilac/70 bg-white/75 hover:border-violet'
                   }`}
                   key={activity.id}
-                  onClick={() => setActiveActivity(activity.id)}
+                  onClick={() => {
+                    if (selectedActivityId !== activity.id) {
+                      stopCurrentAudio();
+                    }
+                    setActiveActivity(activity.id);
+                  }}
                   type="button"
                 >
                   <div className="flex items-start justify-between gap-3">
@@ -188,22 +279,44 @@ export default function BreaksPage() {
               </p>
               {queue.length ? (
                 <div className="mt-3 space-y-2">
-                  {queue.slice(0, queuePreviewCount).map((resource, index) => (
+                  {queue.slice(0, queuePreviewCount).map((resource, index) => {
+                    const rowPlaying = playingResourceId === resource.id;
+
+                    return (
                     <div
                       className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm ${
-                        sessionRunning && index === 0
+                        rowPlaying
                           ? 'bg-mint/20 ring-1 ring-mint/40'
                           : 'bg-white/10'
                       }`}
                       key={resource.id}
                     >
+                      <button
+                        aria-label={
+                          rowPlaying && isPlaying
+                            ? t('breaks.session.pauseTrack')
+                            : t('breaks.session.playTrack')
+                        }
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-45"
+                        disabled={!resource.soundUrl || playerBusy}
+                        onClick={() => void handleResourcePlay(resource)}
+                        type="button"
+                      >
+                        {rowPlaying && isPlaying ? (
+                          <Pause className="h-3.5 w-3.5" />
+                        ) : (
+                          <Play className="h-3.5 w-3.5" />
+                        )}
+                      </button>
                       <div className="min-w-0 flex-1">
                         <span className="block truncate font-semibold">
                           {resource.title}
                         </span>
-                        {sessionRunning && index === 0 ? (
+                        {rowPlaying || (sessionRunning && index === 0) ? (
                           <span className="mt-0.5 block text-[11px] font-bold text-mint">
-                            {t('breaks.session.nowPlaying')}
+                            {rowPlaying
+                              ? t('breaks.session.nowListening')
+                              : t('breaks.session.upNext')}
                           </span>
                         ) : null}
                       </div>
@@ -212,7 +325,8 @@ export default function BreaksPage() {
                         {resource.duration ? ` · ${formatTrackDuration(resource.duration)}` : ''}
                       </span>
                     </div>
-                  ))}
+                    );
+                  })}
                   {queue.length > queuePreviewCount ? (
                     <p className="text-xs font-semibold text-mist/60">
                       {t('breaks.session.moreResources', {
@@ -226,6 +340,30 @@ export default function BreaksPage() {
                   {t('breaks.session.noResources')}
                 </p>
               )}
+              <div className="mt-4 rounded-lg border border-white/10 bg-white/10 p-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet/80">
+                    <Volume2 className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-mist/60">
+                      {t('breaks.session.player')}
+                    </p>
+                    <p className="truncate text-sm font-extrabold">
+                      {playingResource?.title ?? t('breaks.session.pickToListen')}
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/15">
+                  <div
+                    className="h-full rounded-full bg-mint transition-all"
+                    style={{ width: `${playingResource ? playerProgress : 0}%` }}
+                  />
+                </div>
+                {playerError ? (
+                  <p className="mt-2 text-xs font-semibold text-coral">{playerError}</p>
+                ) : null}
+              </div>
             </div>
             <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
               <div

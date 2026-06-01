@@ -149,6 +149,8 @@ export type UserDashboardData = {
       title: string;
       category: string;
       duration?: number | null;
+      soundUrl?: string | null;
+      imageUrl?: string | null;
     }>;
   }>;
   settings: {

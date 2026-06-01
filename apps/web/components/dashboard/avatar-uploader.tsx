@@ -13,7 +13,7 @@
 
 import { useCallback, useRef, useState } from 'react';
 import { Camera, Loader2, X } from 'lucide-react';
-import { apiFetch } from '@/lib/api';
+import { ApiError, apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
@@ -24,6 +24,14 @@ const ACCEPTED_MIME = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 interface UploadedAvatar {
   publicUrl: string;
+}
+
+interface StorageHealth {
+  configured: boolean;
+  missingKeys?: string[];
+  invalidKeys?: string[];
+  bucket?: string;
+  urlValid?: boolean;
 }
 
 export function AvatarUploader({
@@ -75,6 +83,7 @@ export function AvatarUploader({
       setPreview(localPreview);
 
       try {
+        await assertStorageReady();
         const formData = new FormData();
         formData.append('file', file);
 
@@ -105,7 +114,12 @@ export function AvatarUploader({
         pushToast({
           tone: 'error',
           title: t('settings.avatar.uploadFailed'),
-          message: cause instanceof Error ? cause.message : t('common.unknown'),
+          message:
+            cause instanceof ApiError
+              ? formatStorageError(cause)
+              : cause instanceof Error
+                ? cause.message
+                : t('common.unknown'),
         });
       } finally {
         setBusy(false);
@@ -203,4 +217,41 @@ export function AvatarUploader({
       </div>
     </div>
   );
+}
+
+async function assertStorageReady() {
+  try {
+    const health = await apiFetch<StorageHealth>('/storage/me/health');
+    if (!health.configured) {
+      throw new Error(formatStorageHealth(health));
+    }
+  } catch (error) {
+    if (error instanceof ApiError && error.statusCode === 404) {
+      return;
+    }
+    throw error;
+  }
+}
+
+function formatStorageError(error: ApiError) {
+  const details = error.details as Partial<StorageHealth> | undefined;
+  if (details?.missingKeys?.length || details?.invalidKeys?.length) {
+    return formatStorageHealth(details);
+  }
+
+  return error.message;
+}
+
+function formatStorageHealth(health: Partial<StorageHealth>) {
+  const missing = health.missingKeys?.length
+    ? `Thiếu ${health.missingKeys.join(', ')}`
+    : '';
+  const invalid = health.invalidKeys?.length
+    ? `Sai ${health.invalidKeys.join(', ')}`
+    : '';
+  const parts = [missing, invalid].filter(Boolean);
+
+  return parts.length
+    ? `Supabase storage chưa sẵn sàng: ${parts.join('; ')}. Cần cấu hình trên backend deploy rồi restart.`
+    : 'Supabase storage chưa sẵn sàng trên backend deploy.';
 }

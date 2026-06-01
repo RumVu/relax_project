@@ -772,6 +772,8 @@ function mapRelaxActivities(
           title: asString(resource.title) ?? asString(resource.name) ?? titleize(type),
           category: asString(resource.category) ?? type,
           duration: asNumber(resource.duration),
+          soundUrl: asString(resource.soundUrl) ?? asString(resource.audioUrl),
+          imageUrl: asString(resource.imageUrl) ?? asString(resource.coverUrl),
         }),
       ),
       sessions: asNumber(matched?.count) ?? 0,

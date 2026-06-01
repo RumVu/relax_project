@@ -57,6 +57,16 @@ export class StorageController {
     return this.storageService.getStatus();
   }
 
+  @ApiOperation({ summary: 'Get upload storage readiness for current user' })
+  @ApiOkResponse({ description: 'Storage readiness payload safe for users.' })
+  @ApiBearerAuth('access-token')
+  @ApiUnauthorizedResponse({ description: 'Bearer token is required.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/health')
+  getMyStorageHealth() {
+    return this.storageService.getStatus();
+  }
+
   @ApiOperation({ summary: 'Get storage/CDN path and access strategy' })
   @ApiOkResponse({
     description:

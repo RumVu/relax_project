@@ -29,11 +29,14 @@ declare global {
     google?: {
       accounts?: {
         id?: {
+          disableAutoSelect?: () => void;
           initialize: (config: {
             client_id: string;
             callback: (response: GsiCredentialResponse) => void;
             auto_select?: boolean;
             cancel_on_tap_outside?: boolean;
+            context?: 'signin' | 'signup' | 'use';
+            ux_mode?: 'popup' | 'redirect';
           }) => void;
           renderButton: (
             parent: HTMLElement,
@@ -101,6 +104,7 @@ export function GoogleSignInButton({
         if (cancelled) return;
         const gsi = window.google?.accounts?.id;
         if (!gsi) return;
+        gsi.disableAutoSelect?.();
         gsi.initialize({
           client_id: clientId,
           callback: async (response) => {
@@ -108,13 +112,17 @@ export function GoogleSignInButton({
             await exchangeIdToken(response.credential);
           },
           auto_select: false,
-          cancel_on_tap_outside: true,
+          cancel_on_tap_outside: false,
+          context: mode === 'signup' ? 'signup' : 'signin',
+          ux_mode: 'popup',
         });
         parent.innerHTML = '';
-        // GIS width must be 200-400. We hard-code 320 (a safe middle
-        // value) instead of reading `parent.clientWidth` because the
-        // flex container can render 0 wide before children exist,
-        // which silently produced an invisible 0px button on prod.
+        // GIS width must be 200-400. Keep it inside the card so the
+        // personalized Google account button is not clipped on small widths.
+        const width = Math.max(
+          240,
+          Math.min(360, Math.floor(parent.getBoundingClientRect().width || 320)),
+        );
         gsi.renderButton(parent, {
           type: 'standard',
           theme: 'outline',
@@ -122,7 +130,7 @@ export function GoogleSignInButton({
           shape: 'rectangular',
           text: mode === 'signup' ? 'signup_with' : 'signin_with',
           logo_alignment: 'left',
-          width: 400,
+          width,
         });
       })
       .catch(() => undefined);
@@ -174,11 +182,10 @@ export function GoogleSignInButton({
 
   return (
     <div className="space-y-2">
-      {/* min-h ensures the row has measurable height even before GIS
-       *  injects its iframe — prevents the layout from flickering and
-       *  gives the user a "loading" affordance if the script is slow.
-       *  Inline-grid centring keeps the GIS iframe naturally sized. */}
-      <div className="grid min-h-[44px] w-full place-items-center overflow-hidden rounded-xl" ref={containerRef} />
+      <div
+        className="mx-auto flex min-h-[44px] w-full max-w-[360px] justify-center"
+        ref={containerRef}
+      />
       {busy ? (
         <p className="text-center text-xs font-semibold text-[var(--app-muted)]">
           {t('auth.signingIn')}
