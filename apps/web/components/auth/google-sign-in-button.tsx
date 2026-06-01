@@ -117,12 +117,12 @@ export function GoogleSignInButton({
         // which silently produced an invisible 0px button on prod.
         gsi.renderButton(parent, {
           type: 'standard',
-          theme: 'filled_blue',
+          theme: 'outline',
           size: 'large',
-          shape: 'pill',
-          text: mode === 'signup' ? 'signup_with' : 'continue_with',
+          shape: 'rectangular',
+          text: mode === 'signup' ? 'signup_with' : 'signin_with',
           logo_alignment: 'left',
-          width: 320,
+          width: 400,
         });
       })
       .catch(() => undefined);
@@ -178,10 +178,7 @@ export function GoogleSignInButton({
        *  injects its iframe — prevents the layout from flickering and
        *  gives the user a "loading" affordance if the script is slow.
        *  Inline-grid centring keeps the GIS iframe naturally sized. */}
-      <div
-        className="grid min-h-[44px] place-items-center"
-        ref={containerRef}
-      />
+      <div className="grid min-h-[44px] w-full place-items-center overflow-hidden rounded-xl" ref={containerRef} />
       {busy ? (
         <p className="text-center text-xs font-semibold text-[var(--app-muted)]">
           {t('auth.signingIn')}
