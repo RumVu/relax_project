@@ -14,6 +14,20 @@ export interface GoogleIdTokenPayload {
   sub?: string;
 }
 
+interface GoogleTokenInfoResponse {
+  aud?: string;
+  email?: string;
+  email_verified?: string | boolean;
+}
+
+interface GoogleUserInfoResponse {
+  email?: string;
+  email_verified?: boolean;
+  name?: string;
+  picture?: string;
+  sub?: string;
+}
+
 /**
  * Validates the JWT signature against Google's public JWKs and checks
  * that `aud` matches our `clientId` (prevents replay from other apps'
@@ -31,6 +45,59 @@ export async function verifyGoogleIdToken(
     throw new UnauthorizedException({
       code: ErrorCode.AUTH_INVALID_CREDENTIALS,
       message: 'Google ID token is invalid or expired.',
+    });
+  }
+}
+
+/**
+ * Validates a GIS OAuth access token, confirms it was issued to our
+ * Google client, then reads the user's profile from Google userinfo.
+ */
+export async function verifyGoogleAccessToken(
+  accessToken: string,
+  clientId: string,
+): Promise<GoogleIdTokenPayload> {
+  try {
+    const tokenInfoResponse = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(
+        accessToken,
+      )}`,
+    );
+    if (!tokenInfoResponse.ok) {
+      throw new Error('Token info request failed');
+    }
+
+    const tokenInfo =
+      (await tokenInfoResponse.json()) as GoogleTokenInfoResponse;
+    if (tokenInfo.aud !== clientId) {
+      throw new Error('Google token audience mismatch');
+    }
+
+    const userInfoResponse = await fetch(
+      'https://www.googleapis.com/oauth2/v3/userinfo',
+      { headers: { Authorization: `Bearer ${accessToken}` } },
+    );
+    if (!userInfoResponse.ok) {
+      throw new Error('User info request failed');
+    }
+
+    const userInfo =
+      (await userInfoResponse.json()) as GoogleUserInfoResponse;
+
+    return {
+      email: userInfo.email ?? tokenInfo.email,
+      email_verified:
+        userInfo.email_verified === true ||
+        tokenInfo.email_verified === true ||
+        tokenInfo.email_verified === 'true',
+      name: userInfo.name,
+      picture: userInfo.picture,
+      sub: userInfo.sub,
+    };
+  } catch {
+    throw new UnauthorizedException({
+      code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+      message: 'Google access token is invalid or expired.',
     });
   }
 }

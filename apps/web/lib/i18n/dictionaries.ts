@@ -144,8 +144,10 @@ const vi = {
   'auth.createOne': 'Tạo tài khoản',
   'auth.signIn': 'Đăng nhập tại đây',
   'auth.google.notConfigured': 'Đăng nhập bằng Google chưa được bật. Cần đặt {{key}} rồi xây dựng lại trang web.',
+  'auth.google.button': 'Đăng nhập bằng Google',
   'auth.google.success': 'Đã đăng nhập bằng Google',
   'auth.google.failed': 'Đăng nhập bằng Google không thành công',
+  'auth.google.popupFailed': 'Không mở được cửa sổ chọn tài khoản Google.',
   'auth.google.serverDenied': 'Máy chủ không chấp nhận mã thông báo của Google.',
   'auth.signingIn': 'Đang đăng nhập…',
 
@@ -1231,8 +1233,10 @@ const en: Record<keyof typeof vi, string> = {
   'auth.createOne': 'Create one',
   'auth.signIn': 'Sign in here',
   'auth.google.notConfigured': 'Google sign-in is disabled. Set {{key}} and rebuild the web app.',
+  'auth.google.button': 'Sign in with Google',
   'auth.google.success': 'Signed in with Google',
   'auth.google.failed': 'Google sign-in failed',
+  'auth.google.popupFailed': 'Could not open the Google account chooser.',
   'auth.google.serverDenied': 'Server did not accept the Google token.',
   'auth.signingIn': 'Signing in…',
 

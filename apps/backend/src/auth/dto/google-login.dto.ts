@@ -1,4 +1,4 @@
-import { IsString, MinLength } from 'class-validator';
+import { IsString, MinLength, ValidateIf } from 'class-validator';
 
 export class GoogleLoginDto {
   /**
@@ -7,7 +7,18 @@ export class GoogleLoginDto {
    * verify the signature against Google's public keys and check that
    * `aud` matches GOOGLE_CLIENT_ID before trusting the email.
    */
+  @ValidateIf((dto: GoogleLoginDto) => !dto.accessToken)
   @IsString()
   @MinLength(10)
-  idToken!: string;
+  idToken?: string;
+
+  /**
+   * OAuth access token returned by GIS token client. Used by the custom
+   * web button so the UI can force Google's account chooser instead of
+   * rendering a personalized iframe button.
+   */
+  @ValidateIf((dto: GoogleLoginDto) => !dto.idToken)
+  @IsString()
+  @MinLength(10)
+  accessToken?: string;
 }

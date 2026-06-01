@@ -32,7 +32,10 @@ import {
   summariseUserAgent,
   throwInvalidCredentials,
 } from './helpers/auth.helpers';
-import { verifyGoogleIdToken } from './google/google-token-verifier';
+import {
+  verifyGoogleAccessToken,
+  verifyGoogleIdToken,
+} from './google/google-token-verifier';
 import {
   buildEmailDelivery,
   getEmailVerificationTtlMs,
@@ -160,7 +163,9 @@ export class AuthService {
       });
     }
 
-    const payload = await verifyGoogleIdToken(dto.idToken, clientId);
+    const payload = dto.idToken
+      ? await verifyGoogleIdToken(dto.idToken, clientId)
+      : await verifyGoogleAccessToken(dto.accessToken ?? '', clientId);
     const email = payload.email?.toLowerCase();
     if (!email) {
       throw new UnauthorizedException({

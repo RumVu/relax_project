@@ -8,40 +8,33 @@ import {
   persistAuthSession,
 } from '@/lib/api';
 import { authRoutes } from '@/lib/auth';
+import { Button } from '@/components/ui/button';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
 
-type GsiCredentialResponse = { credential?: string };
-type GsiButtonOptions = {
-  type?: 'standard' | 'icon';
-  theme?: 'outline' | 'filled_blue' | 'filled_black';
-  size?: 'large' | 'medium' | 'small';
-  text?: 'signin_with' | 'signup_with' | 'continue_with' | 'signin';
-  shape?: 'rectangular' | 'pill' | 'circle' | 'square';
-  logo_alignment?: 'left' | 'center';
-  width?: number;
+type GsiTokenResponse = {
+  access_token?: string;
+  error?: string;
+  error_description?: string;
+};
+type GsiTokenClient = {
+  requestAccessToken: (overrideConfig?: { prompt?: string }) => void;
 };
 
 declare global {
   interface Window {
     google?: {
       accounts?: {
-        id?: {
-          disableAutoSelect?: () => void;
-          initialize: (config: {
+        oauth2?: {
+          initTokenClient: (config: {
             client_id: string;
-            callback: (response: GsiCredentialResponse) => void;
-            auto_select?: boolean;
-            cancel_on_tap_outside?: boolean;
-            context?: 'signin' | 'signup' | 'use';
-            ux_mode?: 'popup' | 'redirect';
-          }) => void;
-          renderButton: (
-            parent: HTMLElement,
-            options: GsiButtonOptions,
-          ) => void;
+            scope: string;
+            prompt?: string;
+            callback: (response: GsiTokenResponse) => void;
+            error_callback?: (error: { type?: string; message?: string }) => void;
+          }) => GsiTokenClient;
         };
       };
     };
@@ -49,34 +42,34 @@ declare global {
 }
 
 /**
- * "Sign in with Google" button. Loads Google Identity Services
- * (gsi/client) once per page, renders Google's official branded
- * button, and on success POSTs the ID token to /v1/auth/google.
+ * "Sign in with Google" button. We use the GIS OAuth popup instead
+ * of the pre-rendered iframe button so users always see a stable app
+ * button and Google is forced to open the account chooser.
  *
  * Requires NEXT_PUBLIC_GOOGLE_CLIENT_ID to be set at build time.
  * Falls back to a disabled hint when missing so the page still
  * renders + the operator gets a clear setup message.
  */
 export function GoogleSignInButton({
-  mode = 'signin',
+  mode: _mode = 'signin',
 }: {
   mode?: 'signin' | 'signup';
 }) {
   const router = useRouter();
   const pushToast = useUiStore((state) => state.pushToast);
   const { t } = useTranslation();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const tokenClientRef = useRef<GsiTokenClient | null>(null);
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
   useEffect(() => {
-    if (!clientId || !containerRef.current) return;
+    if (!clientId) return;
 
     let cancelled = false;
-    const parent = containerRef.current;
 
     async function ensureScript(): Promise<void> {
-      if (window.google?.accounts?.id) return;
+      if (window.google?.accounts?.oauth2) return;
       await new Promise<void>((resolve, reject) => {
         const existing = document.querySelector<HTMLScriptElement>(
           `script[src="${GIS_SRC}"]`,
@@ -86,7 +79,7 @@ export function GoogleSignInButton({
           existing.addEventListener('error', () =>
             reject(new Error('GIS load failed')),
           );
-          if (window.google?.accounts?.id) resolve();
+          if (window.google?.accounts?.oauth2) resolve();
           return;
         }
         const script = document.createElement('script');
@@ -102,45 +95,50 @@ export function GoogleSignInButton({
     ensureScript()
       .then(async () => {
         if (cancelled) return;
-        const gsi = window.google?.accounts?.id;
-        if (!gsi) return;
-        gsi.disableAutoSelect?.();
-        gsi.initialize({
+        const oauth2 = window.google?.accounts?.oauth2;
+        if (!oauth2) return;
+        tokenClientRef.current = oauth2.initTokenClient({
           client_id: clientId,
+          scope: 'openid email profile',
+          prompt: 'select_account',
           callback: async (response) => {
-            if (!response.credential) return;
-            await exchangeIdToken(response.credential);
+            if (response.error) {
+              pushToast({
+                tone: 'error',
+                title: t('auth.google.failed'),
+                message: response.error_description ?? response.error,
+              });
+              return;
+            }
+            if (!response.access_token) return;
+            await exchangeAccessToken(response.access_token);
           },
-          auto_select: false,
-          cancel_on_tap_outside: false,
-          context: mode === 'signup' ? 'signup' : 'signin',
-          ux_mode: 'popup',
+          error_callback: (error) => {
+            pushToast({
+              tone: 'error',
+              title: t('auth.google.failed'),
+              message: error.message ?? error.type ?? t('auth.google.popupFailed'),
+            });
+          },
         });
-        parent.innerHTML = '';
-        // GIS width must be 200-400. Keep it inside the card so the
-        // personalized Google account button is not clipped on small widths.
-        const width = Math.max(
-          240,
-          Math.min(360, Math.floor(parent.getBoundingClientRect().width || 320)),
-        );
-        gsi.renderButton(parent, {
-          type: 'standard',
-          theme: 'outline',
-          size: 'large',
-          shape: 'rectangular',
-          text: mode === 'signup' ? 'signup_with' : 'signin_with',
-          logo_alignment: 'left',
-          width,
-        });
+        setReady(true);
       })
-      .catch(() => undefined);
+      .catch(() => {
+        if (!cancelled) {
+          pushToast({
+            tone: 'error',
+            title: t('auth.google.failed'),
+            message: t('auth.google.popupFailed'),
+          });
+        }
+      });
 
-    async function exchangeIdToken(idToken: string) {
+    async function exchangeAccessToken(accessToken: string) {
       setBusy(true);
       try {
         const auth = await apiFetch<AuthResponse>('/auth/google', {
           method: 'POST',
-          body: JSON.stringify({ idToken }),
+          body: JSON.stringify({ accessToken }),
         });
         persistAuthSession(auth);
         pushToast({
@@ -170,7 +168,7 @@ export function GoogleSignInButton({
     return () => {
       cancelled = true;
     };
-  }, [clientId, mode, pushToast, router, t]);
+  }, [clientId, pushToast, router, t]);
 
   if (!clientId) {
     return (
@@ -182,10 +180,18 @@ export function GoogleSignInButton({
 
   return (
     <div className="space-y-2">
-      <div
-        className="mx-auto flex min-h-[44px] w-full max-w-[360px] justify-center"
-        ref={containerRef}
-      />
+      <Button
+        className="h-12 w-full bg-white text-slate-900 hover:bg-white/90"
+        disabled={busy || !ready}
+        onClick={() => tokenClientRef.current?.requestAccessToken({ prompt: 'select_account' })}
+        type="button"
+        variant="secondary"
+      >
+        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-lg font-extrabold text-blue-600">
+          G
+        </span>
+        {busy ? t('auth.signingIn') : t('auth.google.button')}
+      </Button>
       {busy ? (
         <p className="text-center text-xs font-semibold text-[var(--app-muted)]">
           {t('auth.signingIn')}
