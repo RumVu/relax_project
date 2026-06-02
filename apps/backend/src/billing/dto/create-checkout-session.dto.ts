@@ -23,10 +23,22 @@ export class CreateCheckoutSessionDto {
 
   @IsOptional()
   @IsString()
-  @IsIn(['STRIPE', 'APP_STORE', 'GOOGLE_PLAY', 'MANUAL'])
+  @IsIn(['STRIPE', 'APP_STORE', 'GOOGLE_PLAY', 'MANUAL', 'SEPAY'])
   provider?: string;
 
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  successUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  errorUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  cancelUrl?: string;
 }

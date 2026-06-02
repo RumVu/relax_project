@@ -39,6 +39,7 @@ import {
 import { apiFetch, extractList } from '@/lib/api';
 import { getReadableTextColor } from '@/lib/contrast';
 import { useUserDashboardData } from '@/lib/live-dashboard';
+import { isStrongPassword } from '@/lib/password';
 import { requestGeolocation } from '@/lib/permissions';
 import { describeBrowser, describeDevice } from '@/lib/user-agent';
 import {
@@ -86,6 +87,8 @@ type CheckoutResult = {
   checkout?: {
     status?: string;
     note?: string;
+    checkoutUrl?: string;
+    checkoutFormfields?: Record<string, string>;
   };
 };
 
@@ -505,6 +508,28 @@ export default function SettingsPage() {
     avatarOverride !== undefined
       ? avatarOverride
       : accountProfile?.avatar ?? settings.profile.avatar;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const paymentStatus = params.get('payment');
+      if (paymentStatus === 'success') {
+        pushToast({
+          tone: 'success',
+          title: 'Thanh toán thành công',
+          message: 'Cảm ơn anh! Gói cước của anh đang được hệ thống kích hoạt tự động.',
+        });
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (paymentStatus === 'error' || paymentStatus === 'cancel') {
+        pushToast({
+          tone: 'error',
+          title: 'Thanh toán không thành công',
+          message: 'Giao dịch thanh toán đã bị huỷ hoặc có lỗi xảy ra. Vui lòng thử lại.',
+        });
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+  }, [pushToast]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1181,7 +1206,7 @@ export default function SettingsPage() {
               });
               return;
             }
-            if (passwordDraft.newPassword.length < 10) {
+            if (!isStrongPassword(passwordDraft.newPassword)) {
               pushToast({
                 tone: 'error',
                 title: t('settings.toast.passwordTooShort'),
@@ -1251,6 +1276,9 @@ export default function SettingsPage() {
             type="password"
             value={passwordDraft.confirmPassword}
           />
+          <p className="text-xs font-semibold text-slate lg:col-span-3">
+            {t('settings.toast.passwordTooShort')}
+          </p>
           <div className="lg:col-span-3">
             <Button
               disabled={
@@ -2149,12 +2177,16 @@ export default function SettingsPage() {
             setBillingState(checkoutPlan.name);
             setCheckoutResult(null);
             try {
+              const redirectOrigin = window.location.origin;
               const result = (await apiFetch('/billing/me/checkout-session', {
                 method: 'POST',
                 body: JSON.stringify({
                   planName: checkoutPlan.name,
-                  provider: 'MANUAL',
+                  provider: 'SEPAY',
                   description: `Upgrade intent from dashboard to ${checkoutPlan.title}`,
+                  successUrl: `${redirectOrigin}/dashboard/settings?payment=success`,
+                  errorUrl: `${redirectOrigin}/dashboard/settings?payment=error`,
+                  cancelUrl: `${redirectOrigin}/dashboard/settings?payment=cancel`,
                 }),
               })) as CheckoutResult;
               setCheckoutResult(result);
@@ -2383,6 +2415,10 @@ function CheckoutModal({
   const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
   const creating = billingState === plan.name;
   const currentPlan = currentPlanName === plan.name;
+  const hasSepayCheckout =
+    result?.provider === 'SEPAY' &&
+    result?.checkout?.checkoutUrl &&
+    result?.checkout?.checkoutFormfields;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/55 p-4 backdrop-blur-sm sm:items-center">
@@ -2390,7 +2426,7 @@ function CheckoutModal({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
-              Checkout intent
+              {hasSepayCheckout ? '💳 SePay Payment' : 'Checkout intent'}
             </p>
             <h2 className="mt-2 text-2xl font-extrabold">{copy.checkoutTitle}</h2>
             <p className="mt-1 text-sm font-medium text-[var(--app-muted)]">
@@ -2407,6 +2443,7 @@ function CheckoutModal({
           </button>
         </div>
 
+        {/* Plan summary card */}
         <div className="mt-5 rounded-xl border border-[var(--field-border)] bg-[var(--panel-bg)] p-4">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -2433,26 +2470,88 @@ function CheckoutModal({
           ) : null}
         </div>
 
+        {/* Result panel — with enhanced SePay checkout */}
         {result ? (
-          <div className="mt-4 rounded-xl border border-mint/40 bg-mint/10 p-4">
-            <p className="font-extrabold text-mint">{copy.intentReady}</p>
-            <div className="mt-3 grid gap-2 text-sm font-semibold sm:grid-cols-2">
-              <span>Payment: {result.payment?.id ?? '-'}</span>
-              <span>Status: {result.payment?.status ?? '-'}</span>
-              <span>Provider: {result.provider ?? 'MANUAL'}</span>
-              <span>
-                Amount:{' '}
-                {formatPlanPrice(
-                  result.payment?.amount ?? plan.price,
-                  result.payment?.currency ?? plan.currency,
-                  locale,
-                )}
-              </span>
+          <div className="mt-4 space-y-4">
+            {/* Payment info summary */}
+            <div className="rounded-xl border border-mint/40 bg-mint/10 p-4">
+              <div className="flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-mint/20">
+                  <span className="text-sm">✓</span>
+                </div>
+                <p className="font-extrabold text-mint">{copy.intentReady}</p>
+              </div>
+              <div className="mt-3 grid gap-2 text-sm font-semibold sm:grid-cols-2">
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-mint/60" />
+                  Payment: <code className="text-xs">{result.payment?.id ? `${result.payment.id.slice(0, 12)}…` : '-'}</code>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className={`inline-block h-1.5 w-1.5 rounded-full ${result.payment?.status === 'COMPLETED' ? 'bg-emerald-500' : result.payment?.status === 'PENDING' ? 'bg-amber-400 animate-pulse' : 'bg-slate'}`} />
+                  Status: {result.payment?.status ?? '-'}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-violet/60" />
+                  Provider: {result.provider ?? 'MANUAL'}
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-violet/60" />
+                  Amount:{' '}
+                  {formatPlanPrice(
+                    result.payment?.amount ?? plan.price,
+                    result.payment?.currency ?? plan.currency,
+                    locale,
+                  )}
+                </span>
+              </div>
             </div>
-            <p className="mt-3 text-sm font-medium text-[var(--app-muted)]">
-              {result.checkout?.note ??
-                copy.paymentPendingNote}
-            </p>
+
+            {/* SePay checkout form — prominent payment button */}
+            {hasSepayCheckout ? (
+              <div className="rounded-xl border-2 border-violet/30 bg-gradient-to-br from-violet/5 via-transparent to-violet/10 p-5">
+                <div className="mb-4 text-center">
+                  <p className="text-sm font-bold text-violet uppercase tracking-wider">Thanh toán an toàn qua SePay</p>
+                  <p className="mt-2 text-3xl font-extrabold text-[var(--app-text)]">
+                    {formatPlanPrice(
+                      result.payment?.amount ?? plan.price,
+                      result.payment?.currency ?? plan.currency,
+                      locale,
+                    )}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-[var(--app-muted)]">
+                    Gói {plan.title} • Chuyển khoản ngân hàng
+                  </p>
+                </div>
+
+                <form action={result.checkout!.checkoutUrl!} method="POST">
+                  {Object.entries(result.checkout!.checkoutFormfields!).map(([key, value]) => (
+                    <input key={key} type="hidden" name={key} value={value} />
+                  ))}
+                  <button
+                    type="submit"
+                    className="group relative w-full overflow-hidden rounded-xl bg-gradient-to-r from-violet to-plum px-6 py-4 text-white font-bold text-base shadow-lg transition-all duration-300 hover:shadow-xl hover:shadow-violet/25 hover:scale-[1.01] active:scale-[0.99]"
+                  >
+                    <span className="absolute inset-0 bg-white/10 opacity-0 transition-opacity group-hover:opacity-100" />
+                    <span className="relative flex items-center justify-center gap-3">
+                      <CreditCard className="h-5 w-5" />
+                      <span>Thanh toán ngay qua SePay</span>
+                      <span className="text-xs opacity-75">→</span>
+                    </span>
+                  </button>
+                </form>
+
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-[var(--app-muted)]">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                  <span>Bảo mật bởi SePay Payment Gateway</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm font-medium text-[var(--app-muted)]">
+                {result.checkout?.note ?? copy.paymentPendingNote}
+              </p>
+            )}
           </div>
         ) : null}
 
@@ -2460,14 +2559,16 @@ function CheckoutModal({
           <Button onClick={onClose} type="button" variant="secondary">
             {t('common.close')}
           </Button>
-          <Button
-            disabled={creating || currentPlan}
-            onClick={onConfirm}
-            type="button"
-          >
-            <CreditCard className="h-4 w-4" />
-            {creating ? copy.creatingIntent : currentPlan ? copy.inUse : copy.createCheckout}
-          </Button>
+          {!hasSepayCheckout && (
+            <Button
+              disabled={creating || currentPlan}
+              onClick={onConfirm}
+              type="button"
+            >
+              <CreditCard className="h-4 w-4" />
+              {creating ? copy.creatingIntent : currentPlan ? copy.inUse : copy.createCheckout}
+            </Button>
+          )}
         </div>
       </div>
     </div>

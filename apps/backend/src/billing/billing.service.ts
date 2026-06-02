@@ -5,6 +5,7 @@ import {
   PaymentStatus,
   SubscriptionStatus,
 } from '@prisma/client';
+import { SePayPgClient } from 'sepay-pg-node';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
@@ -33,10 +34,14 @@ export class BillingService {
     const googlePlayConfigured = Boolean(
       this.configService.get<string>('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON'),
     );
+    const sepayConfigured =
+      Boolean(this.configService.get<string>('SEPAY_MERCHANT_ID')) &&
+      Boolean(this.configService.get<string>('SEPAY_SECRET_KEY')) &&
+      Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
 
     return {
       configured:
-        stripeConfigured || appStoreConfigured || googlePlayConfigured,
+        stripeConfigured || appStoreConfigured || googlePlayConfigured || sepayConfigured,
       providers: {
         STRIPE: {
           configured: stripeConfigured,
@@ -65,6 +70,14 @@ export class BillingService {
               'GOOGLE_PLAY_SERVICE_ACCOUNT_JSON',
               this.configService.get('GOOGLE_PLAY_SERVICE_ACCOUNT_JSON'),
             ],
+          ]),
+        },
+        SEPAY: {
+          configured: sepayConfigured,
+          missingKeys: this.missingKeys([
+            ['SEPAY_MERCHANT_ID', this.configService.get('SEPAY_MERCHANT_ID')],
+            ['SEPAY_SECRET_KEY', this.configService.get('SEPAY_SECRET_KEY')],
+            ['SEPAY_WEBHOOK_API_KEY', this.configService.get('SEPAY_WEBHOOK_API_KEY')],
           ]),
         },
       },
@@ -140,6 +153,69 @@ export class BillingService {
         description: dto.description ?? `Upgrade to ${plan.title}`,
       },
     });
+
+    if (provider === 'SEPAY') {
+      const merchantId = this.configService.get<string>('SEPAY_MERCHANT_ID');
+      const secretKey = this.configService.get<string>('SEPAY_SECRET_KEY');
+      const env = this.configService.get<string>('SEPAY_ENV') || 'sandbox';
+      const sepayConfigured =
+        Boolean(merchantId) &&
+        Boolean(secretKey) &&
+        Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
+
+      if (!sepayConfigured) {
+        throw new AppException(
+          ErrorCode.VALIDATION_FAILED,
+          'Cổng thanh toán SePay chưa được cấu hình đầy đủ trên hệ thống.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+
+      const client = new SePayPgClient({
+        env: env as 'sandbox' | 'production',
+        merchant_id: merchantId!,
+        secret_key: secretKey!,
+      });
+
+      const checkoutURL = client.checkout.initCheckoutUrl();
+      const amount = this.toPaymentAmount(plan.price);
+
+      const successUrl = dto.successUrl || 'http://localhost:3233/billing?status=success';
+      const errorUrl = dto.errorUrl || 'http://localhost:3233/billing?status=error';
+      const cancelUrl = dto.cancelUrl || 'http://localhost:3233/billing?status=cancel';
+
+      const checkoutFormfields = client.checkout.initOneTimePaymentFields({
+        payment_method: 'BANK_TRANSFER',
+        order_invoice_number: payment.id,
+        order_amount: amount,
+        currency: plan.currency || 'VND',
+        order_description: dto.description ?? `Thanh toan nang cap tai khoan ${plan.title}`,
+        success_url: successUrl,
+        error_url: errorUrl,
+        cancel_url: cancelUrl,
+      });
+
+      return {
+        configured: true,
+        provider,
+        tier: plan.tier,
+        plan: {
+          name: plan.name,
+          title: plan.title,
+          price: plan.price,
+          currency: plan.currency,
+          source: plan.source,
+        },
+        payment,
+        checkout: {
+          status: 'READY',
+          note: 'Hãy gửi POST request tới checkoutUrl với các thông tin trong checkoutFormfields để thực hiện thanh toán.',
+          checkoutUrl: checkoutURL,
+          checkoutFormfields,
+          amount,
+        },
+      };
+    }
 
     return {
       configured: providerStatus.configured,
@@ -315,6 +391,44 @@ export class BillingService {
     throw new AppException(
       ErrorCode.VALIDATION_FAILED,
       'Subscription plan is not available',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  async resolvePlanByAmount(amount: number) {
+    const tiers = await this.prisma.subscriptionTier.findMany({
+      where: { isActive: true },
+    });
+    const tier = tiers.find((t) => this.toPaymentAmount(t.price) === amount);
+    if (tier) {
+      return {
+        source: 'subscription_tier' as const,
+        tier,
+        name: tier.name,
+        title: this.toPlanTitle(tier.name),
+        price: tier.price,
+        currency: tier.currency,
+      };
+    }
+
+    const fallback = this.getFallbackPlans().find(
+      (plan) => this.toPaymentAmount(plan.price) === amount,
+    );
+
+    if (fallback) {
+      return {
+        source: 'fallback_catalog' as const,
+        tier: null,
+        name: fallback.name,
+        title: fallback.title,
+        price: fallback.price,
+        currency: fallback.currency,
+      };
+    }
+
+    throw new AppException(
+      ErrorCode.VALIDATION_FAILED,
+      `No active subscription plan found with price ${amount}`,
       HttpStatus.BAD_REQUEST,
     );
   }

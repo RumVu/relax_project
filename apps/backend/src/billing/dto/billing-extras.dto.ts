@@ -60,6 +60,14 @@ export class CheckoutResolvedPlanDto {
 export class CheckoutSessionStatusDto {
   status!: string;
   note!: string;
+  qrCodeUrl?: string;
+  transferContent?: string;
+  bankId?: string;
+  accountNo?: string;
+  accountName?: string;
+  amount?: number;
+  checkoutUrl?: string;
+  checkoutFormfields?: Record<string, string>;
 }
 
 export class CheckoutSessionResponseDto {

@@ -3,10 +3,12 @@ import { AuthCoreModule } from '../auth/auth-core.module';
 import { UsersModule } from '../users/users.module';
 import { BillingController } from './billing.controller';
 import { BillingService } from './billing.service';
+import { SepayController } from './sepay_billing/sepay_controller';
+import { SepayBillingService } from './sepay_billing/sepay_billing.service';
 
 @Module({
   imports: [AuthCoreModule, UsersModule],
-  controllers: [BillingController],
-  providers: [BillingService],
+  controllers: [BillingController, SepayController],
+  providers: [BillingService, SepayBillingService],
 })
 export class BillingModule {}
