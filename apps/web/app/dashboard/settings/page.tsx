@@ -7,6 +7,7 @@ import {
   ChevronRight,
   CreditCard,
   Globe2,
+  KeyRound,
   Laptop,
   type LucideIcon,
   MapPin,
@@ -448,6 +449,11 @@ export default function SettingsPage() {
     displayName: string;
     birthday: string;
   } | null>(null);
+  const [passwordDraft, setPasswordDraft] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
   const [avatarOverride, setAvatarOverride] = useState<string | null | undefined>(
     undefined,
   );
@@ -465,6 +471,7 @@ export default function SettingsPage() {
   });
   const [saveState, setSaveState] = useState<'idle' | 'saving'>('idle');
   const [profileState, setProfileState] = useState<'idle' | 'saving'>('idle');
+  const [passwordState, setPasswordState] = useState<'idle' | 'saving'>('idle');
   const [reminderState, setReminderState] = useState<'idle' | 'saving'>('idle');
   const [deviceState, setDeviceState] = useState<'idle' | 'saving'>('idle');
   const [billingState, setBillingState] = useState<string | null>(null);
@@ -798,6 +805,11 @@ export default function SettingsPage() {
                       ? new Date(`${birthday}T00:00:00.000Z`).toISOString()
                       : null,
                   }),
+                });
+                setAccountProfile({
+                  displayName,
+                  name: displayName,
+                  email: settings.profile.email,
                 });
                 setRefreshKey((current) => current + 1);
                 triggerRefresh();
@@ -1151,6 +1163,112 @@ export default function SettingsPage() {
           </div>
         </Card>
       </div>
+
+      <Card>
+        <SectionTitle
+          title={t('settings.section.security.title')}
+          copy={t('settings.section.security.copy')}
+          action={<KeyRound className="h-5 w-5 text-violet" />}
+        />
+        <form
+          className="mt-5 grid gap-4 lg:grid-cols-3"
+          onSubmit={async (event) => {
+            event.preventDefault();
+            if (passwordDraft.newPassword !== passwordDraft.confirmPassword) {
+              pushToast({
+                tone: 'error',
+                title: t('settings.toast.passwordMismatch'),
+              });
+              return;
+            }
+            if (passwordDraft.newPassword.length < 10) {
+              pushToast({
+                tone: 'error',
+                title: t('settings.toast.passwordTooShort'),
+              });
+              return;
+            }
+
+            setPasswordState('saving');
+            try {
+              await apiFetch('/auth/me/password', {
+                method: 'PATCH',
+                body: JSON.stringify({
+                  currentPassword: passwordDraft.currentPassword,
+                  newPassword: passwordDraft.newPassword,
+                }),
+              });
+              setPasswordDraft({
+                currentPassword: '',
+                newPassword: '',
+                confirmPassword: '',
+              });
+              pushToast({
+                tone: 'success',
+                title: t('settings.toast.passwordChanged'),
+              });
+            } catch {
+              pushToast({
+                tone: 'error',
+                title: t('settings.password.changeFailed'),
+                message: t('settings.toast.serverHint'),
+              });
+            } finally {
+              setPasswordState('idle');
+            }
+          }}
+        >
+          <Field
+            label={t('settings.field.currentPassword')}
+            onChange={(value) =>
+              setPasswordDraft((current) => ({
+                ...current,
+                currentPassword: value,
+              }))
+            }
+            type="password"
+            value={passwordDraft.currentPassword}
+          />
+          <Field
+            label={t('settings.field.newPassword')}
+            onChange={(value) =>
+              setPasswordDraft((current) => ({
+                ...current,
+                newPassword: value,
+              }))
+            }
+            type="password"
+            value={passwordDraft.newPassword}
+          />
+          <Field
+            label={t('settings.field.confirmPassword')}
+            onChange={(value) =>
+              setPasswordDraft((current) => ({
+                ...current,
+                confirmPassword: value,
+              }))
+            }
+            type="password"
+            value={passwordDraft.confirmPassword}
+          />
+          <div className="lg:col-span-3">
+            <Button
+              disabled={
+                passwordState === 'saving' ||
+                !passwordDraft.currentPassword ||
+                !passwordDraft.newPassword ||
+                !passwordDraft.confirmPassword
+              }
+              type="submit"
+            >
+              <KeyRound className="h-4 w-4" />
+              {passwordState === 'saving'
+                ? t('settings.btn.changingPassword')
+                : t('settings.btn.changePassword')}
+            </Button>
+          </div>
+        </form>
+      </Card>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         <Card>

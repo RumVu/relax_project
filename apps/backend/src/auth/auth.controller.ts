@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Headers,
+  Patch,
   Post,
   Req,
   Res,
@@ -27,6 +28,7 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import type { AuthUser } from './auth.types';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -214,6 +216,24 @@ export class AuthController {
   @Get('me')
   me(@CurrentUser() user: AuthUser) {
     return this.authService.me(user.id);
+  }
+
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Change the current local user password' })
+  @ApiOkResponse({
+    type: AuthActionResultDto,
+    description: 'Password has been changed.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Current password is missing or incorrect.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Patch('me/password')
+  changeMyPassword(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changeMinePassword(user.id, dto);
   }
 
   @ApiBearerAuth('access-token')

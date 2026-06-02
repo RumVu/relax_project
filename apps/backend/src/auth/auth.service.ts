@@ -18,6 +18,7 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { JwtPayload } from './auth.types';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { DeleteAccountDto, DeleteAccountMode } from './dto/delete-account.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { LoginDto } from './dto/login.dto';
@@ -286,6 +287,40 @@ export class AuthService {
 
   me(userId: string) {
     return this.usersService.findOne(userId);
+  }
+
+  async changeMinePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, password: true },
+    });
+
+    if (!user) {
+      throw AppException.notFound(ErrorCode.USER_NOT_FOUND, 'User not found');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException({
+        code: ErrorCode.AUTH_INVALID_CREDENTIALS,
+        message: 'This account does not have a local password yet',
+      });
+    }
+
+    const validPassword = await bcrypt.compare(
+      dto.currentPassword,
+      user.password,
+    );
+    if (!validPassword) {
+      throwInvalidCredentials();
+    }
+
+    const password = await bcrypt.hash(dto.newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password },
+    });
+
+    return { success: true };
   }
 
   // ============================================================
