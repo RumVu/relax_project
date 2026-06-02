@@ -429,7 +429,9 @@ const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
 export default function SettingsPage() {
   const { locale, t } = useTranslation();
   const copy = locale === 'en' ? EN_SETTINGS_COPY : VI_SETTINGS_COPY;
+  const accountProfile = useDashboardStore((state) => state.accountProfile);
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const setAccountProfile = useDashboardStore((state) => state.setAccountProfile);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const [refreshKey, setRefreshKey] = useState(0);
   const settings = useUserDashboardData({ refreshKey: refreshNonce + refreshKey }).settings;
@@ -492,7 +494,10 @@ export default function SettingsPage() {
   const displayName = profileDraft?.displayName ?? settings.profile.displayName;
   const birthday =
     profileDraft?.birthday ?? normalizeBirthdayValue(settings.profile.birthday);
-  const avatar = avatarOverride !== undefined ? avatarOverride : settings.profile.avatar;
+  const avatar =
+    avatarOverride !== undefined
+      ? avatarOverride
+      : accountProfile?.avatar ?? settings.profile.avatar;
 
   useEffect(() => {
     let cancelled = false;
@@ -707,7 +712,13 @@ export default function SettingsPage() {
               displayName={displayName}
               key={avatar ?? 'empty-avatar'}
               onUpdated={(publicUrl) => {
-                setAvatarOverride(publicUrl || null);
+                const nextAvatar = publicUrl || null;
+                setAvatarOverride(nextAvatar);
+                setAccountProfile({
+                  avatar: nextAvatar,
+                  displayName,
+                  email: settings.profile.email,
+                });
                 triggerRefresh();
               }}
             />

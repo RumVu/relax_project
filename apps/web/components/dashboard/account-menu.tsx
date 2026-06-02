@@ -66,7 +66,10 @@ export function AccountMenu() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const accountProfile = useDashboardStore((state) => state.accountProfile);
+  const clearAccountProfile = useDashboardStore((state) => state.clearAccountProfile);
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const setAccountProfile = useDashboardStore((state) => state.setAccountProfile);
   const role = getStoredRole();
 
   // Refetch when dashboard chrome refreshes so settings/avatar uploads are
@@ -75,9 +78,18 @@ export function AccountMenu() {
     void apiFetch<MeResponse>('/auth/me')
       .then((data) => {
         setMe(data ?? null);
+        const cachedAvatar = useDashboardStore.getState().accountProfile?.avatar ?? null;
+        setAccountProfile({
+          id: data?.id,
+          email: data?.email,
+          name: data?.name,
+          displayName: data?.profile?.displayName ?? data?.name ?? null,
+          avatar: data?.avatar ?? cachedAvatar,
+          role: data?.role,
+        });
       })
       .catch(() => undefined);
-  }, [refreshNonce]);
+  }, [refreshNonce, setAccountProfile]);
 
   // Close on outside click + Escape.
   useEffect(() => {
@@ -104,19 +116,27 @@ export function AccountMenu() {
     try {
       await apiFetch('/auth/logout', { method: 'POST' }).catch(() => undefined);
     } finally {
+      clearAccountProfile();
       clearAuthSession();
       pushToast({ tone: 'success', title: t('account.loggedOut') });
       router.push('/auth/login');
       router.refresh();
     }
-  }, [pushToast, router, t]);
+  }, [clearAccountProfile, pushToast, router, t]);
 
   const displayName =
-    me?.profile?.displayName || me?.name || me?.email || t('account.you');
-  const email = me?.email ?? '';
-  const isAdmin = (role ?? me?.role) === 'ADMIN';
-  const avatarSrc = me?.avatar
-    ? `${me.avatar}${me.avatar.includes('?') ? '&' : '?'}v=${refreshNonce}`
+    accountProfile?.displayName ||
+    accountProfile?.name ||
+    me?.profile?.displayName ||
+    me?.name ||
+    accountProfile?.email ||
+    me?.email ||
+    t('account.you');
+  const email = accountProfile?.email ?? me?.email ?? '';
+  const isAdmin = (role ?? accountProfile?.role ?? me?.role) === 'ADMIN';
+  const avatar = accountProfile?.avatar ?? me?.avatar ?? null;
+  const avatarSrc = avatar
+    ? `${avatar}${avatar.includes('?') ? '&' : '?'}v=${refreshNonce}`
     : null;
 
   return (
