@@ -2290,8 +2290,8 @@ export default function SettingsPage() {
                 method: 'POST',
                 body: JSON.stringify({
                   planName: checkoutPlan.name,
-                  provider: 'SEPAY',
-                  description: `Upgrade intent from dashboard to ${checkoutPlan.title}`,
+                  provider: checkoutPlan.name === 'FREE' ? 'MANUAL' : 'SEPAY',
+                  description: checkoutPlan.name === 'FREE' ? `Downgrade to ${checkoutPlan.title}` : `Upgrade intent from dashboard to ${checkoutPlan.title}`,
                   successUrl: `${redirectOrigin}/dashboard/settings?payment=success`,
                   errorUrl: `${redirectOrigin}/dashboard/settings?payment=error`,
                   cancelUrl: `${redirectOrigin}/dashboard/settings?payment=cancel`,
