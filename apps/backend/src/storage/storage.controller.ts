@@ -10,6 +10,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -120,7 +121,7 @@ export class StorageController {
     @UploadedFile() file?: UploadedStorageFile,
   ) {
     const ext = extensionForMime(file?.mimetype) ?? 'png';
-    return this.storageService.uploadUserAvatar(user.id, file, `avatars/avatar.${ext}`);
+    return this.storageService.uploadUserAvatar(user.id, file, avatarPath(ext));
   }
 
   @ApiOperation({ summary: 'Upload an admin/catalog file through the API' })
@@ -266,6 +267,10 @@ function extensionForMime(mimetype?: string) {
   if (mimetype === 'image/webp') return 'webp';
   if (mimetype === 'image/gif') return 'gif';
   return undefined;
+}
+
+function avatarPath(ext: string) {
+  return `avatars/avatar-${Date.now()}-${randomUUID()}.${ext}`;
 }
 
 function safeFileName(name = 'upload.bin') {
