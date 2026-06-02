@@ -31,3 +31,24 @@ export class SepayController {
     return this.sepayBillingService.processWebhook(payload);
   }
 }
+
+@ApiTags('Billing')
+@Controller('billing/webhooks/sepay')
+export class SepayLegacyController {
+  constructor(private readonly sepayBillingService: SepayBillingService) {}
+
+  @ApiOperation({ summary: 'SePay legacy webhook payment callback' })
+  @Post()
+  @HttpCode(HttpStatus.OK)
+  async handleWebhook(
+    @Headers('authorization') authHeader: string,
+    @Body() payload: SePayWebhookPayload,
+  ) {
+    const isValid = this.sepayBillingService.verifyWebhookToken(authHeader);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid SePay signature or token');
+    }
+
+    return this.sepayBillingService.processWebhook(payload);
+  }
+}
