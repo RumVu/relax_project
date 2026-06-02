@@ -6,7 +6,7 @@ import { ErrorCode } from '../../common/errors/error-code';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BillingService } from '../billing.service';
 
-interface SePayWebhookPayload {
+export interface SePayWebhookPayload {
   transferType?: string;
   transferAmount?: number | string;
   transactionContent?: string;
@@ -14,6 +14,7 @@ interface SePayWebhookPayload {
   id?: number | string;
   [key: string]: unknown;
 }
+
 
 @Injectable()
 export class SepayBillingService {

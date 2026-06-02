@@ -16,7 +16,15 @@ const WEAK_JWT_SECRET_PATTERNS = [
 ] as const;
 
 export function validateEnv(config: Env) {
-  const missing = requiredKeys.filter((key) => !config[key]);
+  // Prefer process.env values to allow overrides in tests and container environments
+  const mergedConfig = { ...config };
+  for (const key of Object.keys(process.env)) {
+    if (process.env[key] !== undefined) {
+      mergedConfig[key] = process.env[key];
+    }
+  }
+
+  const missing = requiredKeys.filter((key) => !mergedConfig[key]);
 
   if (missing.length > 0) {
     throw new Error(
@@ -24,76 +32,76 @@ export function validateEnv(config: Env) {
     );
   }
 
-  if (config.JWT_SECRET && config.JWT_SECRET.length < MIN_JWT_SECRET_LENGTH) {
+  if (mergedConfig.JWT_SECRET && mergedConfig.JWT_SECRET.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(
       `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: JWT_SECRET must be at least ${MIN_JWT_SECRET_LENGTH} characters`,
     );
   }
 
-  if (config.JWT_SECRET && isWeakJwtSecret(config.JWT_SECRET)) {
+  if (mergedConfig.JWT_SECRET && isWeakJwtSecret(mergedConfig.JWT_SECRET)) {
     throw new Error(
       `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: JWT_SECRET must be random and must not use placeholder text`,
     );
   }
 
-  if (!config.JWT_EXPIRES_IN) {
-    config.JWT_EXPIRES_IN = '15m';
+  if (!mergedConfig.JWT_EXPIRES_IN) {
+    mergedConfig.JWT_EXPIRES_IN = '15m';
   }
 
-  if (!config.JWT_ISSUER) {
-    config.JWT_ISSUER = 'digital-cigarette-break-api';
+  if (!mergedConfig.JWT_ISSUER) {
+    mergedConfig.JWT_ISSUER = 'digital-cigarette-break-api';
   }
 
-  if (!config.JWT_AUDIENCE) {
-    config.JWT_AUDIENCE = 'digital-cigarette-break-app';
+  if (!mergedConfig.JWT_AUDIENCE) {
+    mergedConfig.JWT_AUDIENCE = 'digital-cigarette-break-app';
   }
 
-  if (!config.CORS_ORIGINS) {
-    config.CORS_ORIGINS =
+  if (!mergedConfig.CORS_ORIGINS) {
+    mergedConfig.CORS_ORIGINS =
       'http://localhost:3000,http://localhost:5300,http://localhost:6823';
   }
 
-  if (!config.TRUST_PROXY) {
-    config.TRUST_PROXY = 'loopback';
+  if (!mergedConfig.TRUST_PROXY) {
+    mergedConfig.TRUST_PROXY = 'loopback';
   }
 
-  if (!config.PORT) {
-    config.PORT = '6823';
+  if (!mergedConfig.PORT) {
+    mergedConfig.PORT = '6823';
   }
 
-  if (!config.REDIS_URL) {
-    config.REDIS_URL = 'redis://localhost:6379';
+  if (!mergedConfig.REDIS_URL) {
+    mergedConfig.REDIS_URL = 'redis://localhost:6379';
   }
 
-  if (!config.REDIS_KEY_PREFIX) {
-    config.REDIS_KEY_PREFIX = 'dcb:';
+  if (!mergedConfig.REDIS_KEY_PREFIX) {
+    mergedConfig.REDIS_KEY_PREFIX = 'dcb:';
   }
 
-  if (!config.REDIS_DEFAULT_TTL_SECONDS) {
-    config.REDIS_DEFAULT_TTL_SECONDS = '300';
+  if (!mergedConfig.REDIS_DEFAULT_TTL_SECONDS) {
+    mergedConfig.REDIS_DEFAULT_TTL_SECONDS = '300';
   }
 
-  if (!config.QUEUE_PREFIX) {
-    config.QUEUE_PREFIX = 'dcb';
+  if (!mergedConfig.QUEUE_PREFIX) {
+    mergedConfig.QUEUE_PREFIX = 'dcb';
   }
 
-  if (!config.QUEUE_DEFAULT_ATTEMPTS) {
-    config.QUEUE_DEFAULT_ATTEMPTS = '3';
+  if (!mergedConfig.QUEUE_DEFAULT_ATTEMPTS) {
+    mergedConfig.QUEUE_DEFAULT_ATTEMPTS = '3';
   }
 
-  if (!config.QUEUE_BACKOFF_DELAY_MS) {
-    config.QUEUE_BACKOFF_DELAY_MS = '1000';
+  if (!mergedConfig.QUEUE_BACKOFF_DELAY_MS) {
+    mergedConfig.QUEUE_BACKOFF_DELAY_MS = '1000';
   }
 
-  if (!config.WEEKLY_STATS_QUEUE_WORKER_ENABLED) {
-    config.WEEKLY_STATS_QUEUE_WORKER_ENABLED = 'false';
+  if (!mergedConfig.WEEKLY_STATS_QUEUE_WORKER_ENABLED) {
+    mergedConfig.WEEKLY_STATS_QUEUE_WORKER_ENABLED = 'false';
   }
 
-  if (!config.WEEKLY_STATS_QUEUE_WORKER_CONCURRENCY) {
-    config.WEEKLY_STATS_QUEUE_WORKER_CONCURRENCY = '2';
+  if (!mergedConfig.WEEKLY_STATS_QUEUE_WORKER_CONCURRENCY) {
+    mergedConfig.WEEKLY_STATS_QUEUE_WORKER_CONCURRENCY = '2';
   }
 
-  return config;
+  return mergedConfig;
 }
 
 function isWeakJwtSecret(value: string) {

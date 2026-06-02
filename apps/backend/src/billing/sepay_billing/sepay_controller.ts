@@ -9,9 +9,10 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SepayBillingService } from './sepay_billing.service';
+import type { SePayWebhookPayload } from './sepay_billing.service';
 
 @ApiTags('Billing')
-@Controller('billing/webhooks/sepay')
+@Controller('billing/sepay/webhook')
 export class SepayController {
   constructor(private readonly sepayBillingService: SepayBillingService) {}
 
@@ -20,7 +21,7 @@ export class SepayController {
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
     @Headers('authorization') authHeader: string,
-    @Body() payload: any,
+    @Body() payload: SePayWebhookPayload,
   ) {
     const isValid = this.sepayBillingService.verifyWebhookToken(authHeader);
     if (!isValid) {

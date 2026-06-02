@@ -6,12 +6,13 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     // Lấy URL Backend từ biến môi trường của Next.js
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823/v1';
+    const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823';
+    const backendUrl = apiBaseUrl.endsWith('/v1') ? apiBaseUrl : `${apiBaseUrl}/v1`;
     
-    console.log(`[Next.js Gateway] forwarding SePay IPN webhook to: ${backendUrl}/billing/webhooks/sepay`);
+    console.log(`[Next.js Gateway] forwarding SePay IPN webhook to: ${backendUrl}/billing/sepay/webhook`);
 
     // Chuyển tiếp request sang NestJS backend
-    const response = await fetch(`${backendUrl}/billing/webhooks/sepay`, {
+    const response = await fetch(`${backendUrl}/billing/sepay/webhook`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
