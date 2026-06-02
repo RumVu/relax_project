@@ -483,6 +483,14 @@ export class BillingService {
       .join(' ');
   }
 
+  async getMyPayments(userId: string) {
+    await this.usersService.findOne(userId);
+    return this.prisma.payment.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   private toPaymentAmount(value: number) {
     return Math.round(value);
   }

@@ -274,7 +274,7 @@ function setupSwaggerProtection(
   app: INestApplication,
   configService: ConfigService,
 ) {
-  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'development';
+  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'production';
   const isProduction = nodeEnv === 'production';
   const publicSwagger =
     configService.get<string>('app.swaggerPublic') === 'true';
@@ -312,10 +312,10 @@ function setupSwaggerProtection(
 }
 
 function shouldEnableSwagger(configService: ConfigService) {
-  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'development';
+  const nodeEnv = configService.get<string>('app.nodeEnv') ?? 'production';
   const configured = configService.get<string>('app.swaggerEnabled');
 
-  if (configured === 'false') {
+  if (configured !== 'true') {
     return false;
   }
 

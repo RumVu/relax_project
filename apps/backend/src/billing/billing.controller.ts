@@ -91,4 +91,11 @@ export class BillingController {
   ) {
     return this.billingService.confirmPayment(user.id, id, dto);
   }
+
+  @ApiOperation({ summary: 'Get current user payment history' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/payments')
+  getMyPayments(@CurrentUser() user: AuthUser) {
+    return this.billingService.getMyPayments(user.id);
+  }
 }

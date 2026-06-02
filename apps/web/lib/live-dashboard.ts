@@ -125,6 +125,7 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
         relaxActivitiesResult,
         relaxStatsResult,
         relaxSessionsResult,
+        paymentsResult,
       ] = await Promise.allSettled([
         apiFetch('/analytics/me/overview', undefined, {
           query: stableOptions.overviewQuery,
@@ -183,6 +184,7 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
         apiFetch('/relax-activities/me/sessions', undefined, {
           query: relaxQuery,
         }),
+        apiFetch('/billing/me/payments'),
       ]);
 
       if (cancelled) {
@@ -212,6 +214,7 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
       const relaxActivities = getSettledValue<Array<Record<string, unknown>> | PageResponse<Record<string, unknown>>>(relaxActivitiesResult);
       const relaxStats = getSettledValue<Record<string, unknown>>(relaxStatsResult);
       const relaxSessions = getSettledValue<PageResponse<Record<string, unknown>> | Array<Record<string, unknown>>>(relaxSessionsResult);
+      const payments = getSettledValue<Array<Record<string, unknown>>>(paymentsResult);
 
       const nextData = buildUserDashboardData({
         locale,
@@ -239,6 +242,7 @@ export function useUserDashboardData(options: UserDashboardRequestOptions = {}) 
         relaxActivities,
         relaxStats,
         relaxSessions,
+        payments,
       });
 
       setData(nextData);
@@ -323,6 +327,7 @@ function buildUserDashboardData(input: {
   relaxActivities?: Array<Record<string, unknown>> | PageResponse<Record<string, unknown>>;
   relaxStats?: Record<string, unknown>;
   relaxSessions?: PageResponse<Record<string, unknown>> | Array<Record<string, unknown>>;
+  payments?: Array<Record<string, unknown>>;
 }) {
   const {
     base,
@@ -349,6 +354,7 @@ function buildUserDashboardData(input: {
     relaxActivities,
     relaxStats,
     relaxSessions,
+    payments,
   } = input;
   activeLocale = input.locale ?? 'vi';
 
@@ -603,6 +609,8 @@ function buildUserDashboardData(input: {
         mapReminderTable(reminderItems) ?? base.settings.reminders,
       billing:
         mapBilling(asRecord(billing?.subscription)) ?? base.settings.billing,
+      payments:
+        mapPayments(payments) ?? base.settings.payments,
     },
   };
 }
@@ -953,6 +961,24 @@ function mapBilling(subscription?: Record<string, unknown>) {
     status: asString(subscription.status)?.toLowerCase() ?? 'active',
     renewal: formatDate(asString(subscription.endDate)) ?? '-',
   };
+}
+
+function mapPayments(items: Array<Record<string, unknown>> | undefined) {
+  if (!items?.length) {
+    return [];
+  }
+
+  return items.map((item) => ({
+    id: asString(item.id) ?? '',
+    amount: asNumber(item.amount) ?? 0,
+    currency: asString(item.currency) ?? 'VND',
+    status: asString(item.status) ?? 'PENDING',
+    provider: asString(item.provider) ?? 'MANUAL',
+    method: asString(item.method) ?? null,
+    externalPaymentId: asString(item.externalPaymentId) ?? null,
+    description: asString(item.description) ?? null,
+    createdAt: formatDateTime(asString(item.createdAt)) ?? '--',
+  }));
 }
 
 function mapCompanionInteractions(
@@ -1569,6 +1595,7 @@ function createEmptyUserDashboardData(): UserDashboardData {
         status: 'inactive',
         renewal: '—',
       },
+      payments: [],
     },
   };
 }

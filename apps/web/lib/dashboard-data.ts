@@ -199,6 +199,17 @@ export type UserDashboardData = {
       status: string;
       renewal: string;
     };
+    payments: Array<{
+      id: string;
+      amount: number;
+      currency: string;
+      status: string;
+      provider: string;
+      method: string | null;
+      externalPaymentId: string | null;
+      description: string | null;
+      createdAt: string;
+    }>;
   };
 };
 
@@ -349,6 +360,7 @@ export const userDashboardData: UserDashboardData = {
       status: '',
       renewal: '',
     },
+    payments: [],
   },
 };
 

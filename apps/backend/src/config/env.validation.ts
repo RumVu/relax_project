@@ -101,6 +101,35 @@ export function validateEnv(config: Env) {
     mergedConfig.WEEKLY_STATS_QUEUE_WORKER_CONCURRENCY = '2';
   }
 
+  const isProduction =
+    mergedConfig.NODE_ENV === 'production' ||
+    process.env.NODE_ENV === 'production';
+
+  if (isProduction) {
+    const dbUrl = mergedConfig.DATABASE_URL ?? '';
+    if (
+      dbUrl.includes('localhost:5555') ||
+      dbUrl.includes('127.0.0.1:5555') ||
+      dbUrl.includes('postgres:123456@localhost')
+    ) {
+      throw new Error(
+        `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: DATABASE_URL must not point to the local development database (localhost:5555) in production.`,
+      );
+    }
+    if (dbUrl.includes('<strong-postgres-password>')) {
+      throw new Error(
+        `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: DATABASE_URL contains placeholder '<strong-postgres-password>'. Please replace it with actual production credentials.`,
+      );
+    }
+
+    const jwtSecret = mergedConfig.JWT_SECRET ?? '';
+    if (jwtSecret.includes('<openssl-rand-base64-48>')) {
+      throw new Error(
+        `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: JWT_SECRET contains placeholder '<openssl-rand-base64-48>'. Please replace it with a random secret key.`,
+      );
+    }
+  }
+
   return mergedConfig;
 }
 
