@@ -2420,6 +2420,8 @@ function CheckoutModal({
     result?.checkout?.checkoutUrl &&
     result?.checkout?.checkoutFormfields;
 
+  const isDowngradeToFree = currentPlanName !== 'FREE' && plan.name === 'FREE';
+
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/55 p-4 backdrop-blur-sm sm:items-center">
       <div className="w-full max-w-xl rounded-2xl border border-[var(--panel-border)] bg-[var(--panel-strong)] p-5 text-[var(--app-text)] shadow-2xl">
@@ -2469,6 +2471,25 @@ function CheckoutModal({
             </div>
           ) : null}
         </div>
+
+        {/* Downgrade warning */}
+        {isDowngradeToFree && !result ? (
+          <div className="mt-4 rounded-xl border border-coral/40 bg-coral/10 p-4">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-coral/20">
+                <span className="text-sm font-bold text-coral">⚠</span>
+              </div>
+              <p className="font-extrabold text-coral">
+                {locale === 'en' ? 'Downgrade Plan Warning' : 'Cảnh báo hạ cấp gói cước'}
+              </p>
+            </div>
+            <p className="mt-2 text-xs font-semibold leading-relaxed">
+              {locale === 'en'
+                ? 'Your account will be downgraded from your current paid plan to the Free plan. Advanced features (such as advanced analytics, custom companion, smart reminders) will be locked after downgrading.'
+                : 'Tài khoản của anh sẽ bị hạ từ gói cước có trả phí hiện tại xuống gói Miễn phí. Các tính năng nâng cao (thống kê nâng cao, tùy chỉnh linh thú, reminder thông minh...) sẽ bị khóa sau khi hạ cấp.'}
+            </p>
+          </div>
+        ) : null}
 
         {/* Result panel — with enhanced SePay checkout */}
         {result ? (
@@ -2562,11 +2583,28 @@ function CheckoutModal({
           {!hasSepayCheckout && (
             <Button
               disabled={creating || currentPlan}
-              onClick={onConfirm}
+              onClick={async () => {
+                if (isDowngradeToFree) {
+                  const msg = locale === 'en'
+                    ? 'Are you sure you want to downgrade to the Free plan?'
+                    : 'Anh có chắc chắn đồng ý hạ xuống gói cước Miễn phí không?';
+                  const confirmed = window.confirm(msg);
+                  if (!confirmed) {
+                    return;
+                  }
+                }
+                await onConfirm();
+              }}
               type="button"
             >
               <CreditCard className="h-4 w-4" />
-              {creating ? copy.creatingIntent : currentPlan ? copy.inUse : copy.createCheckout}
+              {creating
+                ? copy.creatingIntent
+                : currentPlan
+                  ? copy.inUse
+                  : isDowngradeToFree
+                    ? (locale === 'en' ? 'Confirm Downgrade' : 'Xác nhận hạ cấp')
+                    : copy.createCheckout}
             </Button>
           )}
         </div>
