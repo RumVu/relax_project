@@ -2304,7 +2304,7 @@ export default function SettingsPage() {
               // actually activate the subscription instead of leaving it
               // PENDING forever.
               const paymentId = result.payment?.id;
-              if (!result.configured && paymentId) {
+              if ((!result.configured || checkoutPlan.name === 'FREE') && paymentId) {
                 const activated = (await apiFetch(
                   `/billing/me/payments/${paymentId}/confirm`,
                   {
