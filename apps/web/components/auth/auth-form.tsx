@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch, type AuthResponse, persistAuthSession } from '@/lib/api';
 import { authRoutes } from '@/lib/auth';
 import { Button } from '@/components/ui/button';
+import { PASSWORD_REQUIREMENT, isStrongPassword } from '@/lib/password';
 
 type AuthFormMode = 'login' | 'register';
 
@@ -24,6 +25,12 @@ export function AuthForm({ mode }: AuthFormProps) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (isRegister && !isStrongPassword(password)) {
+      setError(PASSWORD_REQUIREMENT);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -77,13 +84,19 @@ export function AuthForm({ mode }: AuthFormProps) {
       <input
         autoComplete={isRegister ? 'new-password' : 'current-password'}
         className="w-full rounded-2xl border bg-white/70 px-4 py-3"
-        minLength={8}
+        maxLength={isRegister ? 72 : undefined}
+        minLength={isRegister ? 10 : undefined}
         onChange={(event) => setPassword(event.target.value)}
         placeholder="Password"
         required
         type="password"
         value={password}
       />
+      {isRegister ? (
+        <p className="text-xs font-semibold text-slate-600">
+          {PASSWORD_REQUIREMENT}
+        </p>
+      ) : null}
       {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
       <Button className="w-full" disabled={loading} type="submit">
         {loading ? 'Please wait...' : isRegister ? 'Register' : 'Login'}

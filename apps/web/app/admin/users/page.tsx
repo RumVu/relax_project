@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useAdminDashboardData } from '@/lib/live-dashboard';
+import { isStrongPassword } from '@/lib/password';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
@@ -296,6 +297,14 @@ function CreateUserModal({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.email || !form.password) return;
+    if (!isStrongPassword(form.password)) {
+      pushToast({
+        tone: 'error',
+        title: t('admin.users.create.failed'),
+        message: t('admin.users.create.passwordRequirement'),
+      });
+      return;
+    }
     setBusy(true);
     try {
       await apiFetch('/users', {
@@ -406,7 +415,8 @@ function CreateUserModal({
             <input
               autoComplete="off"
               className="h-11 rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] px-3 text-sm font-semibold"
-              minLength={8}
+              maxLength={72}
+              minLength={10}
               onChange={(e) =>
                 setForm((f) => ({ ...f, password: e.target.value }))
               }
@@ -467,7 +477,10 @@ function CreateUserModal({
           <Button onClick={onClose} type="button" variant="secondary">
             {t('common.cancel')}
           </Button>
-          <Button disabled={busy || !form.email || !form.password} type="submit">
+          <Button
+            disabled={busy || !form.email || !isStrongPassword(form.password)}
+            type="submit"
+          >
             <UserPlus className="h-4 w-4" />
             {busy ? t('admin.users.create.creating') : t('admin.users.create.submit')}
           </Button>

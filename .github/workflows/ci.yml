@@ -108,6 +108,9 @@ jobs:
       - name: Install root deps
         run: npm ci
 
+      - name: Check generated OpenAPI types
+        run: test -s apps/web/lib/generated/openapi-types.ts && grep -q '"/v1/auth/login"' apps/web/lib/generated/openapi-types.ts
+
       - name: Build web
         working-directory: apps/web
         env:
@@ -133,12 +136,11 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # Lint (non-blocking — projects may still be tightening rules)
+  # Lint (blocking)
   # ---------------------------------------------------------------------------
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
       - uses: actions/checkout@v4

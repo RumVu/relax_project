@@ -1,8 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Playwright smoke tests for the web app. Scoped to public routes so the
- * suite does not require a running backend; CI just needs `npm run build`.
+ * Playwright smoke tests for the web app. Public routes run against the built
+ * app directly; authenticated dashboard/admin routes mock HTTP API responses
+ * in-browser so CI can cover route guards and chrome without a backend.
  */
 const PORT = 3233;
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${PORT}`;

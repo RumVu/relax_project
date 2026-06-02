@@ -81,8 +81,7 @@ export async function verifyGoogleAccessToken(
       throw new Error('User info request failed');
     }
 
-    const userInfo =
-      (await userInfoResponse.json()) as GoogleUserInfoResponse;
+    const userInfo = (await userInfoResponse.json()) as GoogleUserInfoResponse;
 
     return {
       email: userInfo.email ?? tokenInfo.email,

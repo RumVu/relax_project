@@ -6,6 +6,15 @@ import { ErrorCode } from '../../common/errors/error-code';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BillingService } from '../billing.service';
 
+interface SePayWebhookPayload {
+  transferType?: string;
+  transferAmount?: number | string;
+  transactionContent?: string;
+  code?: string;
+  id?: number | string;
+  [key: string]: unknown;
+}
+
 @Injectable()
 export class SepayBillingService {
   constructor(
@@ -21,12 +30,14 @@ export class SepayBillingService {
     // SePay sends: Authorization: Apikey your_api_key
     const match = authHeader.match(/^Apikey\s+(.+)$/i);
     const apiKey = match ? match[1] : authHeader;
-    const configuredKey = this.configService.get<string>('SEPAY_WEBHOOK_API_KEY');
-    
+    const configuredKey = this.configService.get<string>(
+      'SEPAY_WEBHOOK_API_KEY',
+    );
+
     return Boolean(configuredKey && apiKey === configuredKey);
   }
 
-  async processWebhook(payload: any) {
+  async processWebhook(payload: SePayWebhookPayload) {
     const {
       transferType,
       transferAmount,
@@ -43,7 +54,7 @@ export class SepayBillingService {
     // Try to find the payment ID inside the transaction content
     let paymentId = '';
     const content = transactionContent || '';
-    
+
     // 1. Try to extract from the 'code' field if SePay parsed it
     if (code && typeof code === 'string' && code.trim().length > 0) {
       paymentId = code.replace(/RELAX/i, '').trim();
@@ -107,13 +118,9 @@ export class SepayBillingService {
     const plan = await this.billingService.resolvePlanByAmount(payment.amount);
 
     // Confirm the payment
-    await this.billingService.confirmPayment(
-      payment.userId,
-      payment.id,
-      {
-        planName: plan.name,
-      },
-    );
+    await this.billingService.confirmPayment(payment.userId, payment.id, {
+      planName: plan.name,
+    });
 
     // Save SePay transaction ID for auditing/traceability
     await this.prisma.payment.update({

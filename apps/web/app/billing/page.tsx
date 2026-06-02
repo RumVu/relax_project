@@ -1,40 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense } from 'react';
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, CreditCard } from 'lucide-react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 type PaymentStatus = 'success' | 'error' | 'cancel' | 'loading' | null;
 
-export default function BillingCallbackPage() {
-  const [status, setStatus] = useState<PaymentStatus>('loading');
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const paymentParam = params.get('status') || params.get('payment');
-
-    if (paymentParam === 'success') {
-      setStatus('success');
-    } else if (paymentParam === 'error') {
-      setStatus('error');
-    } else if (paymentParam === 'cancel') {
-      setStatus('cancel');
-    } else {
-      setStatus(null);
-    }
-  }, []);
+function BillingStatus() {
+  const searchParams = useSearchParams();
+  const paymentParam = searchParams?.get('status') || searchParams?.get('payment');
+  
+  let status: PaymentStatus = null;
+  if (paymentParam === 'success') status = 'success';
+  else if (paymentParam === 'error') status = 'error';
+  else if (paymentParam === 'cancel') status = 'cancel';
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-mist via-cloud to-mist px-4 py-16">
       <div className="w-full max-w-md text-center">
         {/* Animated icon */}
         <div className="mx-auto mb-8">
-          {status === 'loading' && (
-            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-violet/10">
-              <Loader2 className="h-10 w-10 animate-spin text-violet" />
-            </div>
-          )}
           {status === 'success' && (
             <div className="mx-auto flex h-20 w-20 animate-bounce items-center justify-center rounded-2xl bg-mint/15">
               <CheckCircle2 className="h-10 w-10 text-mint" />
@@ -54,14 +40,6 @@ export default function BillingCallbackPage() {
 
         {/* Card */}
         <div className="rounded-2xl border border-lilac/60 bg-white/80 p-8 shadow-panel backdrop-blur-sm">
-          {status === 'loading' && (
-            <>
-              <h1 className="text-2xl font-extrabold text-ink">Đang xử lý...</h1>
-              <p className="mt-3 text-sm font-medium text-slate">
-                Vui lòng đợi trong khi hệ thống xử lý giao dịch của anh.
-              </p>
-            </>
-          )}
 
           {status === 'success' && (
             <>
@@ -141,5 +119,17 @@ export default function BillingCallbackPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function BillingCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-violet" />
+      </div>
+    }>
+      <BillingStatus />
+    </Suspense>
   );
 }

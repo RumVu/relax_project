@@ -100,11 +100,11 @@ export class RelaxActivitiesService {
           ? sounds
           : option.type === RelaxActivityType.PODCAST
             ? podcasts
-          : option.type === RelaxActivityType.BREATHING
-            ? breathingExercises
-          : option.type === RelaxActivityType.MEDITATION
-            ? meditationSounds
-            : [],
+            : option.type === RelaxActivityType.BREATHING
+              ? breathingExercises
+              : option.type === RelaxActivityType.MEDITATION
+                ? meditationSounds
+                : [],
     }));
   }
 

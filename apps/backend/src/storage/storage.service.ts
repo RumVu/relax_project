@@ -197,16 +197,16 @@ export class StorageService {
     userId: string,
     file: UploadedStorageFile | undefined,
     path: string,
-    options: { upsert?: boolean; isPublic?: boolean; metadata?: Record<string, unknown> } = {},
+    options: {
+      upsert?: boolean;
+      isPublic?: boolean;
+      metadata?: Record<string, unknown>;
+    } = {},
   ) {
-    return this.uploadFile(
-      this.normalizeUserUploadPath(userId, path),
-      file,
-      {
-        ...options,
-        userId,
-      },
-    );
+    return this.uploadFile(this.normalizeUserUploadPath(userId, path), file, {
+      ...options,
+      userId,
+    });
   }
 
   async uploadUserAvatar(
@@ -231,7 +231,11 @@ export class StorageService {
   async uploadAdminFile(
     file: UploadedStorageFile | undefined,
     path: string,
-    options: { upsert?: boolean; isPublic?: boolean; metadata?: Record<string, unknown> } = {},
+    options: {
+      upsert?: boolean;
+      isPublic?: boolean;
+      metadata?: Record<string, unknown>;
+    } = {},
   ) {
     return this.uploadFile(this.normalizePath(path), file, options);
   }

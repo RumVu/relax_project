@@ -41,8 +41,8 @@ export function GoogleSignInButton({
       include_granted_scopes: 'true',
     });
 
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.href = `${GOOGLE_AUTH_URL}?${params.toString()}`;
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- external Google OAuth redirect
+    window.location.assign(`${GOOGLE_AUTH_URL}?${params.toString()}`);
   }
 
   if (!clientId) {

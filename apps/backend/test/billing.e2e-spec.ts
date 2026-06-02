@@ -18,6 +18,11 @@ describe('Billing checkout and activation (e2e)', () => {
   let otherToken: string;
 
   beforeAll(async () => {
+    process.env.SEPAY_WEBHOOK_API_KEY = 'test-sepay-key';
+    process.env.SEPAY_MERCHANT_ID = 'SP-TEST-VN95276B';
+    process.env.SEPAY_SECRET_KEY = 'spsk_test_PGD3VPwwsGfAiTKSCiEDEE3LapHHiQPE';
+    process.env.SEPAY_ENV = 'sandbox';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -174,5 +179,122 @@ describe('Billing checkout and activation (e2e)', () => {
       .post('/billing/me/payments/some-id/confirm')
       .send({ planName: 'CHILL_PLUS' })
       .expect(401);
+  });
+
+  describe('SePay webhook integration', () => {
+    it('creates a checkout session with SEPAY provider', async () => {
+      const checkout = await request(app.getHttpServer())
+        .post('/billing/me/checkout-session')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ planName: 'CHILL_PLUS', provider: 'SEPAY' })
+        .expect(201);
+
+      expect(checkout.body.provider).toBe('SEPAY');
+      expect(checkout.body.checkout.status).toBe('READY');
+      expect(checkout.body.checkout.checkoutUrl).toBe(
+        'https://pay-sandbox.sepay.vn/v1/checkout/init',
+      );
+      expect(checkout.body.checkout.checkoutFormfields).toBeDefined();
+      expect(checkout.body.checkout.checkoutFormfields.merchant).toBe(
+        'SP-TEST-VN95276B',
+      );
+      expect(
+        checkout.body.checkout.checkoutFormfields.order_invoice_number,
+      ).toBe(checkout.body.payment.id);
+      expect(checkout.body.checkout.checkoutFormfields.order_amount).toBe(
+        49000,
+      );
+    });
+
+    it('rejects webhook requests with invalid api key', async () => {
+      await request(app.getHttpServer())
+        .post('/billing/sepay/webhook')
+        .set('Authorization', 'Apikey wrong-key')
+        .send({
+          transferType: 'in',
+          transferAmount: 49000,
+          transactionContent: 'RELAXsomepayment',
+        })
+        .expect(401);
+    });
+
+    it('completes the pending payment and activates subscription when webhook is valid', async () => {
+      // 1. Create a pending payment
+      const checkout = await request(app.getHttpServer())
+        .post('/billing/me/checkout-session')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ planName: 'CHILL_PLUS', provider: 'SEPAY' })
+        .expect(201);
+
+      const paymentId = checkout.body.payment.id;
+
+      // 2. Call the webhook
+      await request(app.getHttpServer())
+        .post('/billing/sepay/webhook')
+        .set('Authorization', 'Apikey test-sepay-key')
+        .send({
+          id: 999999,
+          gateway: 'MB',
+          transferType: 'in',
+          transferAmount: 49000,
+          transactionContent: `RELAX${paymentId} CHUYEN KHOAN`,
+          code: `RELAX${paymentId}`,
+        })
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.success).toBe(true);
+          expect(body.paymentId).toBe(paymentId);
+        });
+
+      // 3. Verify status
+      await request(app.getHttpServer())
+        .get('/billing/me')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.subscription.status).toBe('ACTIVE');
+          expect(body.subscription.planName).toBe('CHILL_PLUS');
+        });
+    });
+
+    it('ignores webhook requests with transferType !== in', async () => {
+      const response = await request(app.getHttpServer())
+        .post('/billing/sepay/webhook')
+        .set('Authorization', 'Apikey test-sepay-key')
+        .send({
+          transferType: 'out',
+          transferAmount: 49000,
+          transactionContent: 'RELAXtest-out-trans',
+        })
+        .expect(200);
+
+      expect(response.body.message).toContain('Ignored');
+    });
+
+    it('rejects webhook requests with amount less than payment amount', async () => {
+      const checkout = await request(app.getHttpServer())
+        .post('/billing/me/checkout-session')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ planName: 'CHILL_PLUS', provider: 'SEPAY' })
+        .expect(201);
+
+      const paymentId = checkout.body.payment.id;
+
+      await request(app.getHttpServer())
+        .post('/billing/sepay/webhook')
+        .set('Authorization', 'Apikey test-sepay-key')
+        .send({
+          id: 999998,
+          gateway: 'MB',
+          transferType: 'in',
+          transferAmount: 10000, // less than 49000
+          transactionContent: `RELAX${paymentId}`,
+          code: `RELAX${paymentId}`,
+        })
+        .expect(400)
+        .expect(({ body }) => {
+          expect(body.code).toBe(ErrorCode.PAYMENT_PLAN_MISMATCH);
+        });
+    });
   });
 });

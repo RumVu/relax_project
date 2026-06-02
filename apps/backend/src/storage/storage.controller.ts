@@ -137,7 +137,8 @@ export class StorageController {
     @Body('path') path: string,
     @Body('upsert') upsert?: string,
   ) {
-    const resolvedPath = path || `uploads/${Date.now()}-${safeFileName(file?.originalname)}`;
+    const resolvedPath =
+      path || `uploads/${Date.now()}-${safeFileName(file?.originalname)}`;
     return this.storageService.uploadAdminFile(file, resolvedPath, {
       upsert: upsert !== 'false',
       isPublic: true,
@@ -274,9 +275,11 @@ function avatarPath(ext: string) {
 }
 
 function safeFileName(name = 'upload.bin') {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9.]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 100) || 'upload.bin';
+  return (
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9.]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 100) || 'upload.bin'
+  );
 }

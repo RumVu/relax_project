@@ -4,7 +4,9 @@ export class GoogleLoginDto {
   /**
    * Legacy GIS ID token. Kept for backwards compatibility.
    */
-  @ValidateIf((dto: GoogleLoginDto) => !dto.accessToken && !dto.authorizationCode)
+  @ValidateIf(
+    (dto: GoogleLoginDto) => !dto.accessToken && !dto.authorizationCode,
+  )
   @IsString()
   @MinLength(10)
   idToken?: string;

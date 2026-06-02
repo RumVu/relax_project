@@ -21,6 +21,8 @@ jobs:
           cache: npm
           cache-dependency-path: package-lock.json
       - run: npm ci
+      - name: Check generated OpenAPI types
+        run: test -s apps/web/lib/generated/openapi-types.ts && grep -q '"/v1/auth/login"' apps/web/lib/generated/openapi-types.ts
       - run: npm --workspace apps/web run lint
       - run: npm --workspace apps/web run build
       - name: Install Playwright browsers

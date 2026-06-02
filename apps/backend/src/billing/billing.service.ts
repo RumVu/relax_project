@@ -41,7 +41,10 @@ export class BillingService {
 
     return {
       configured:
-        stripeConfigured || appStoreConfigured || googlePlayConfigured || sepayConfigured,
+        stripeConfigured ||
+        appStoreConfigured ||
+        googlePlayConfigured ||
+        sepayConfigured,
       providers: {
         STRIPE: {
           configured: stripeConfigured,
@@ -77,7 +80,10 @@ export class BillingService {
           missingKeys: this.missingKeys([
             ['SEPAY_MERCHANT_ID', this.configService.get('SEPAY_MERCHANT_ID')],
             ['SEPAY_SECRET_KEY', this.configService.get('SEPAY_SECRET_KEY')],
-            ['SEPAY_WEBHOOK_API_KEY', this.configService.get('SEPAY_WEBHOOK_API_KEY')],
+            [
+              'SEPAY_WEBHOOK_API_KEY',
+              this.configService.get('SEPAY_WEBHOOK_API_KEY'),
+            ],
           ]),
         },
       },
@@ -180,16 +186,20 @@ export class BillingService {
       const checkoutURL = client.checkout.initCheckoutUrl();
       const amount = this.toPaymentAmount(plan.price);
 
-      const successUrl = dto.successUrl || 'http://localhost:3233/billing?status=success';
-      const errorUrl = dto.errorUrl || 'http://localhost:3233/billing?status=error';
-      const cancelUrl = dto.cancelUrl || 'http://localhost:3233/billing?status=cancel';
+      const successUrl =
+        dto.successUrl || 'http://localhost:3233/billing?status=success';
+      const errorUrl =
+        dto.errorUrl || 'http://localhost:3233/billing?status=error';
+      const cancelUrl =
+        dto.cancelUrl || 'http://localhost:3233/billing?status=cancel';
 
       const checkoutFormfields = client.checkout.initOneTimePaymentFields({
         payment_method: 'BANK_TRANSFER',
         order_invoice_number: payment.id,
         order_amount: amount,
         currency: plan.currency || 'VND',
-        order_description: dto.description ?? `Thanh toan nang cap tai khoan ${plan.title}`,
+        order_description:
+          dto.description ?? `Thanh toan nang cap tai khoan ${plan.title}`,
         success_url: successUrl,
         error_url: errorUrl,
         cancel_url: cancelUrl,
