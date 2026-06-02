@@ -41,7 +41,7 @@ const nextConfig = {
         headers: [
           {
             key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            value: 'DENY',
           },
           {
             key: 'X-Content-Type-Options',
@@ -73,13 +73,13 @@ const nextConfig = {
             // có form email/password.
             value:
               "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com; " +
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com; " +
               "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
               "img-src 'self' data: blob: https:; " +
               "media-src 'self' data: blob: https:; " +
-              "connect-src 'self' http: https: ws: wss: https://accounts.google.com; " +
+              "connect-src 'self' http: https: ws: wss: https://accounts.google.com https://www.google-analytics.com; " +
               "frame-src 'self' https://accounts.google.com; " +
-              "frame-ancestors 'self'; base-uri 'self'; form-action 'self'",
+              "frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
           },
           {
             key: 'Permissions-Policy',

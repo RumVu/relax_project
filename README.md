@@ -19,7 +19,7 @@ Monorepo for the Digital Cigarette Break product suite.
 1. Install dependencies in the apps you want to run.
 2. Make sure `apps/backend/.env` exists with the local database values below.
 3. Start infrastructure with `docker compose up -d`.
-4. Apply backend migrations with `npm run prisma:migrate:deploy`.
+4. Apply backend migrations with `npm run prisma:migrate:deploy`. Production Docker can also run this automatically when `RUN_MIGRATIONS_ON_START=true`.
 5. Seed sample data with `npm run prisma:seed`.
 6. Start backend with `npm run dev:backend`.
 
@@ -66,3 +66,5 @@ error/pagination shapes) is documented in `docs/11-mobile-integration.md`.
 - `npm run prisma:generate`
 - `npm run prisma:migrate:deploy`
 - `npm run prisma:seed`
+
+For production containers, keep `RUN_MIGRATIONS_ON_START=true` in the backend environment so each new image applies pending Prisma migrations before NestJS starts. If your platform runs a dedicated release/migration job, set it to `false` and run `npm --workspace apps/backend run prisma:migrate:deploy` as that job.

@@ -50,6 +50,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/backend/node_modules ./apps/backend/node_modules
 COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
 COPY --from=builder /app/apps/backend/prisma ./apps/backend/prisma
+COPY --from=builder /app/apps/backend/scripts ./apps/backend/scripts
 COPY --from=builder /app/apps/backend/package.json ./apps/backend/
 COPY --from=builder /app/package.json ./
 
@@ -60,4 +61,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
 
 # tini handles signals so SIGTERM cleanly stops Nest + Prisma.
 ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["node", "apps/backend/dist/main.js"]
+CMD ["node", "apps/backend/scripts/start-prod.cjs"]
