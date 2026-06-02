@@ -36,6 +36,7 @@ import {
   type Locale,
 } from '@/lib/i18n/dictionaries';
 import { DeviceSessionsModal } from './device-sessions-modal';
+import { useDashboardStore } from '@/stores/use-dashboard-store';
 
 interface MeResponse {
   id?: string;
@@ -65,17 +66,18 @@ export function AccountMenu() {
   const [languageOpen, setLanguageOpen] = useState(false);
   const [me, setMe] = useState<MeResponse | null>(null);
   const [loggingOut, setLoggingOut] = useState(false);
+  const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const role = getStoredRole();
 
-  // Fetch profile once on mount; harmless if /auth/me fails (we fall back
-  // to email-only label using nothing — initials become "?").
+  // Refetch when dashboard chrome refreshes so settings/avatar uploads are
+  // reflected in the navbar immediately.
   useEffect(() => {
     void apiFetch<MeResponse>('/auth/me')
       .then((data) => {
         setMe(data ?? null);
       })
       .catch(() => undefined);
-  }, []);
+  }, [refreshNonce]);
 
   // Close on outside click + Escape.
   useEffect(() => {
@@ -113,6 +115,9 @@ export function AccountMenu() {
     me?.profile?.displayName || me?.name || me?.email || t('account.you');
   const email = me?.email ?? '';
   const isAdmin = (role ?? me?.role) === 'ADMIN';
+  const avatarSrc = me?.avatar
+    ? `${me.avatar}${me.avatar.includes('?') ? '&' : '?'}v=${refreshNonce}`
+    : null;
 
   return (
     <>
@@ -128,12 +133,12 @@ export function AccountMenu() {
           onClick={() => setOpen((current) => !current)}
           type="button"
         >
-          <span
-            aria-hidden="true"
-            className="flex h-7 w-7 items-center justify-center rounded-md bg-violet text-[11px] font-extrabold tracking-wide text-white"
-          >
-            {initialsOf(displayName, email)}
-          </span>
+          <AvatarMark
+            avatarSrc={avatarSrc}
+            email={email}
+            name={displayName}
+            size="sm"
+          />
           <span className="hidden max-w-[140px] truncate text-left sm:inline-flex sm:flex-col sm:leading-tight">
             <span className="truncate text-[13px] font-bold text-ink">
               {displayName}
@@ -160,9 +165,12 @@ export function AccountMenu() {
           >
             <div className="border-b border-cloud bg-[image:var(--hero-bg)] px-4 py-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet text-sm font-extrabold text-white">
-                  {initialsOf(displayName, email)}
-                </div>
+                <AvatarMark
+                  avatarSrc={avatarSrc}
+                  email={email}
+                  name={displayName}
+                  size="md"
+                />
                 <div className="flex-1 min-w-0">
                   <p className="truncate text-sm font-extrabold text-ink">
                     {displayName}
@@ -280,6 +288,44 @@ export function AccountMenu() {
         onClose={() => setSessionsOpen(false)}
       />
     </>
+  );
+}
+
+function AvatarMark({
+  avatarSrc,
+  name,
+  email,
+  size,
+}: {
+  avatarSrc?: string | null;
+  name?: string | null;
+  email?: string | null;
+  size: 'sm' | 'md';
+}) {
+  const dimension =
+    size === 'sm'
+      ? 'h-7 w-7 rounded-md text-[11px]'
+      : 'h-10 w-10 rounded-lg text-sm';
+
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        'flex shrink-0 items-center justify-center overflow-hidden bg-violet font-extrabold tracking-wide text-white',
+        dimension,
+      )}
+    >
+      {avatarSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          alt=""
+          className="h-full w-full object-cover"
+          src={avatarSrc}
+        />
+      ) : (
+        initialsOf(name, email)
+      )}
+    </span>
   );
 }
 
