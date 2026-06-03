@@ -96,11 +96,31 @@ model User {
   pushDevices           PushDevice[]
   rateLimitCounters     RateLimitCounter[]
   adminLogs             AdminLog[]               @relation("AdminActorLogs")
+  quests                UserQuest[]
 
   @@index([email])
   @@index([role])
   @@index([deletedAt])
   @@map("users")
+}
+
+// Daily / rolling mini-missions assigned to a user. Templates are kept in
+// code (apps/backend/src/quests/quest-templates.ts); only the assignment
+// + completion timestamp live in the DB. Users see N at a time, can
+// reroll any single one for a fresh template, and rows complete
+// automatically when the user does the matching action.
+model UserQuest {
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  templateCode String
+  assignedAt   DateTime  @default(now())
+  completedAt  DateTime?
+
+  @@index([userId])
+  @@index([templateCode])
+  @@map("user_quests")
 }
 
 model UserProfile {

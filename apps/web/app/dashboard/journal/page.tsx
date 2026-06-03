@@ -18,6 +18,7 @@ import {
   SectionTitle,
 } from '@/components/dashboard/dashboard-ui';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
+import { QuestPanel } from '@/components/dashboard/quest-panel';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
@@ -76,18 +77,6 @@ export default function JournalPage() {
     () => ['ALL', ...new Set(journals.byMood.map((item) => item.mood))],
     [journals.byMood],
   );
-  const tagHighlights = useMemo(() => {
-    const counts = new Map<string, number>();
-    for (const journal of journals.recent) {
-      for (const tag of journal.tags) {
-        counts.set(tag, (counts.get(tag) ?? 0) + 1);
-      }
-    }
-
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 4);
-  }, [journals.recent]);
 
   return (
     <DashboardShell eyebrow={t('journal.eyebrow')} title={t('journal.title')}>
@@ -402,44 +391,8 @@ export default function JournalPage() {
           </div>
         </Card>
 
-        <Card>
-          <SectionTitle
-            title={t('journal.insights.title')}
-            copy={t('journal.insights.copy')}
-          />
-          <div className="mt-5 space-y-4">
-            <InsightRow
-              label={t('journal.insight.favoriteRate')}
-              value={t('journal.insight.favoriteValue', { favorites: journals.favorites, total: journals.total || 0 })}
-            />
-            <InsightRow
-              label={t('journal.insight.moodLead')}
-              value={t('journal.insight.moodLeadValue', { mood: topMood })}
-            />
-            <InsightRow
-              label={t('journal.insight.topTag')}
-              value={
-                tagHighlights.length > 0
-                  ? tagHighlights.map(([tag, count]) => `#${tag} (${count})`).join(' • ')
-                  : t('journal.insight.noTopTag')
-              }
-            />
-            <InsightRow
-              label={t('journal.insight.recentPace')}
-              value={t('journal.insight.recentPaceValue', { count: journals.recent.length })}
-            />
-          </div>
-        </Card>
+        <QuestPanel />
       </div>
     </DashboardShell>
-  );
-}
-
-function InsightRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-lilac/70 bg-white/75 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-ink">{value}</p>
-    </div>
   );
 }

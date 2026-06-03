@@ -19,6 +19,7 @@ import { RedisModule } from './redis/redis.module';
 import { EmailModule } from './email/email.module';
 import { AiInsightsModule } from './ai-insights/ai-insights.module';
 import { AdminPricingModule } from './admin-pricing/admin-pricing.module';
+import { QuestsModule } from './quests/quests.module';
 import { RedisService } from './redis/redis.service';
 import { QueuesModule } from './queues/queues.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -135,6 +136,7 @@ import { AdminLogsModule } from './admin-logs/admin-logs.module';
     JobsModule,
     BillingModule,
     AdminPricingModule,
+    QuestsModule,
     AdminDashboardModule,
     AdminLogsModule,
     AppThemesModule,

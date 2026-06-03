@@ -24,6 +24,7 @@ import {
   WeeklyStatsChart,
 } from '@/components/dashboard/dashboard-ui';
 import { CozyQuoteCard } from '@/components/dashboard/cozy-quote-card';
+import { QuestPanel } from '@/components/dashboard/quest-panel';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -159,6 +160,8 @@ export default function DashboardPage() {
         <RelaxActivityChart data={data.relaxActivities} />
         <WeeklyStatsChart data={data.weeklyStats} />
       </div>
+
+      <QuestPanel />
 
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
         <WeatherCard weather={data.overview.weather} />
