@@ -53,6 +53,7 @@ export default function BreaksPage() {
   const [actionState, setActionState] = useState<
     'idle' | 'starting' | 'started' | 'finishing' | 'finished' | 'error'
   >('idle');
+  const [errorReason, setErrorReason] = useState<string | null>(null);
   const [sessionModal, setSessionModal] = useState<{
     open: boolean;
     phase: 'started' | 'finished';
@@ -376,11 +377,20 @@ export default function BreaksPage() {
             <Button
               disabled={actionState === 'starting' || !hasActivities || Boolean(activeSessionId)}
               onClick={async () => {
+                if (!active) {
+                  // Guard ngay tại UI để báo lỗi cụ thể thay vì throw chung chung.
+                  pushToast({
+                    tone: 'error',
+                    title: t('breaks.toast.startFailed'),
+                    message: t('breaks.toast.noActivity'),
+                  });
+                  setActionState('error');
+                  setErrorReason(t('breaks.toast.noActivity'));
+                  return;
+                }
                 setActionState('starting');
+                setErrorReason(null);
                 try {
-                  if (!active) {
-                    throw new Error('No active activity');
-                  }
                   const session = await apiFetch<{ id?: string }>(
                     '/relax-activities/sessions/start',
                     {
@@ -401,11 +411,14 @@ export default function BreaksPage() {
                     title: t('breaks.session.start'),
                     message: active.title,
                   });
-                } catch {
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
                   setActionState('error');
+                  setErrorReason(message);
                   pushToast({
                     tone: 'error',
-                    title: t('breaks.session.start'),
+                    title: t('breaks.toast.startFailed'),
+                    message,
                   });
                 }
               }}
@@ -416,11 +429,20 @@ export default function BreaksPage() {
             <Button
               disabled={actionState === 'finishing' || !activeSessionId}
               onClick={async () => {
+                if (!activeSessionId) {
+                  // Người dùng bấm "Kết thúc phiên" khi chưa có phiên nào — báo rõ ràng.
+                  pushToast({
+                    tone: 'error',
+                    title: t('breaks.toast.finishFailed'),
+                    message: t('breaks.toast.noActiveSession'),
+                  });
+                  setActionState('error');
+                  setErrorReason(t('breaks.toast.noActiveSession'));
+                  return;
+                }
                 setActionState('finishing');
+                setErrorReason(null);
                 try {
-                  if (!activeSessionId) {
-                    throw new Error('No active session');
-                  }
                   await apiFetch(`/relax-activities/sessions/${activeSessionId}/finish`, {
                     method: 'POST',
                     body: JSON.stringify({
@@ -436,13 +458,16 @@ export default function BreaksPage() {
                   pushToast({
                     tone: 'success',
                     title: t('breaks.session.finish'),
-                    message: t('mood.toast.savedMessage'),
+                    message: t('breaks.modal.sessionFinished'),
                   });
-                } catch {
+                } catch (err) {
+                  const message = err instanceof Error ? err.message : String(err);
                   setActionState('error');
+                  setErrorReason(message);
                   pushToast({
                     tone: 'error',
-                    title: t('breaks.session.finish'),
+                    title: t('breaks.toast.finishFailed'),
+                    message,
                   });
                 }
               }}
@@ -459,7 +484,7 @@ export default function BreaksPage() {
               }`}
             >
               {actionState === 'error'
-                ? t('mood.toast.saveFailed')
+                ? (errorReason ?? t('breaks.toast.actionFailed'))
                 : actionState === 'started'
                   ? t('breaks.modal.sessionStarted')
                   : t('breaks.modal.sessionFinished')}
