@@ -96,7 +96,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]" data-tour="mood-hero">
         <Card className="overflow-hidden bg-night p-0 text-white">
           <div className="grid min-h-[420px] gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="flex flex-col justify-between gap-8">
@@ -158,14 +158,16 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2" data-tour="relax-activities">
         <RelaxActivityChart data={data.relaxActivities} />
         <WeeklyStatsChart data={data.weeklyStats} />
       </div>
 
-      <QuestPanel />
+      <div data-tour="quests">
+        <QuestPanel />
+      </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
+      <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]" data-tour="recent-moments">
         <WeatherCard weather={data.overview.weather} />
         <Card>
           <SectionTitle

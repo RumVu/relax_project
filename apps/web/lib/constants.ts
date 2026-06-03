@@ -23,4 +23,5 @@ export const adminNav: NavItem[] = [
   { label: 'Onboarding', href: '/admin/onboarding' },
   { label: 'Companion Assets', href: '/admin/companion-assets' },
   { label: 'Companion Messages', href: '/admin/companion-messages' },
+  { label: 'Pricing & sale', href: '/admin/pricing' },
 ];
