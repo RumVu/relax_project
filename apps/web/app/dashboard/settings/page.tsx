@@ -51,6 +51,7 @@ import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { AvatarUploader } from '@/components/dashboard/avatar-uploader';
+import { BirthdayInput } from '@/components/ui/birthday-input';
 
 type ThemeMode = 'SYSTEM' | 'LIGHT' | 'DARK';
 
@@ -793,9 +794,8 @@ export default function SettingsPage() {
                 }))
               }
             />
-            <Field
+            <BirthdayInput
               label={t('settings.field.birthday')}
-              type="date"
               value={birthday}
               onChange={(value) =>
                 setProfileDraft((current) => ({

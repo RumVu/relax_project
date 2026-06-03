@@ -1496,23 +1496,30 @@ function formatForecastDay(value: string | undefined) {
 }
 
 function createEmptyUserDashboardData(): UserDashboardData {
+  // Cố ý đọc `activeLocale` ở thời điểm gọi để initial-render hiển thị
+  // đúng ngôn ngữ user đang chọn, thay vì luôn Vi rồi mới replace.
+  const isVi = activeLocale === 'vi';
+  const noData = isVi ? 'Chưa có dữ liệu' : 'No data yet';
+  const minutesUnit = isVi ? '0 phút' : '0 min';
   return {
     overview: {
       period: '',
       timezone: '',
       summaryCards: {
         currentStreak: 0,
-        totalRelaxTime: '0 phút',
+        totalRelaxTime: minutesUnit,
         totalJournals: 0,
         companionAffection: 0,
         stressReduction: 0,
       },
       mood: {
-        currentMood: 'Chưa có dữ liệu',
-        prompt: 'Kết nối tài khoản rồi bắt đầu check-in để hệ thống hiểu tâm trạng của anh.',
+        currentMood: noData,
+        prompt: isVi
+          ? 'Kết nối tài khoản rồi bắt đầu check-in để hệ thống hiểu tâm trạng của anh.'
+          : 'Sign in and start checking in so we can learn your mood pattern.',
         summary: {
           total: 0,
-          topMood: 'Chưa có dữ liệu',
+          topMood: noData,
           currentStreak: 0,
           longestStreak: 0,
           averageIntensity: 0,
@@ -1528,7 +1535,7 @@ function createEmptyUserDashboardData(): UserDashboardData {
       relax: {
         totalSessions: 0,
         totalDurationSeconds: 0,
-        totalDurationLabel: '0 phút',
+        totalDurationLabel: minutesUnit,
         streak: 0,
         relief: 0,
         favoriteActivities: [],
@@ -1546,7 +1553,7 @@ function createEmptyUserDashboardData(): UserDashboardData {
       },
       weather: {
         greeting: {
-          title: 'Chưa có dữ liệu thời tiết',
+          title: isVi ? 'Chưa có dữ liệu thời tiết' : 'No weather data yet',
           subtitle: '',
           iconKey: 'weather-day',
         },
@@ -1562,7 +1569,12 @@ function createEmptyUserDashboardData(): UserDashboardData {
         list: [],
       },
     },
-    moodOptions: userDashboardData.moodOptions,
+    moodOptions: userDashboardData.moodOptions.map((option) => ({
+      ...option,
+      label:
+        (isVi ? moodLabelByType : moodLabelEnByType).get(option.type) ??
+        option.label,
+    })),
     moodHistory: [],
     timeline: [],
     distribution: [],
@@ -1591,7 +1603,7 @@ function createEmptyUserDashboardData(): UserDashboardData {
       pushDevices: [],
       reminders: [],
       billing: {
-        planName: 'Chưa có gói',
+        planName: isVi ? 'Chưa có gói' : 'No plan yet',
         status: 'inactive',
         renewal: '—',
       },
