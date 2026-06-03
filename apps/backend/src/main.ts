@@ -378,7 +378,6 @@ async function bootstrap() {
       { path: 'api', method: RequestMethod.GET },
       { path: 'health', method: RequestMethod.GET },
       { path: 'ready', method: RequestMethod.GET },
-      { path: 'billing/sepay/webhook', method: RequestMethod.POST },
       { path: 'billing/webhooks/sepay', method: RequestMethod.POST },
     ],
   });
