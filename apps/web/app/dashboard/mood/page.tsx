@@ -23,6 +23,7 @@ import {
   SectionTitle,
 } from '@/components/dashboard/dashboard-ui';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { ActionModal } from '@/components/ui/action-modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -47,6 +48,7 @@ export default function MoodPage() {
   const { t } = useTranslation();
   const moodFilters = useDashboardFilters('/mood-checkins/me', 'mood');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const pushToast = useUiStore((state) => state.pushToast);
   const data = useUserDashboardData({
@@ -317,10 +319,15 @@ export default function MoodPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
-        <MoodAreaDashboardChart data={data.timeline} />
-        <DistributionChart data={data.distribution} />
-      </div>
+      <PremiumGate
+        planName={data.settings.billing.planName}
+        role={accountRole}
+      >
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+          <MoodAreaDashboardChart data={data.timeline} />
+          <DistributionChart data={data.distribution} />
+        </div>
+      </PremiumGate>
 
       <Card>
         <SectionTitle

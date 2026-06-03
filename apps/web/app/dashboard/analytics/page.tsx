@@ -13,6 +13,7 @@ import {
 } from '@/components/dashboard/dashboard-ui';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { AiInsightsCard } from '@/components/dashboard/ai-insights-card';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUserDashboardData } from '@/lib/live-dashboard';
@@ -24,6 +25,7 @@ export default function AnalyticsPage() {
   const { t } = useTranslation();
   const analyticsFilters = useDashboardFilters('/mood-checkins/me/analytics', 'analytics');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const pushToast = useUiStore((state) => state.pushToast);
   const data = useUserDashboardData({
@@ -42,6 +44,9 @@ export default function AnalyticsPage() {
   return (
     <DashboardShell eyebrow={t('analytics.eyebrow')} title={t('analytics.title')}>
       <DashboardFilterBar {...analyticsFilters} title={t('analytics.filterTitle')} />
+
+      <PremiumGate planName={data.settings.billing.planName} role={accountRole}>
+        <div className="flex flex-col gap-4">
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
@@ -123,6 +128,8 @@ export default function AnalyticsPage() {
           </div>
         </Card>
       </div>
+        </div>
+      </PremiumGate>
     </DashboardShell>
   );
 }

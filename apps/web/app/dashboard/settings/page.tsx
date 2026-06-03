@@ -517,6 +517,8 @@ export default function SettingsPage() {
   const [sessionsPage, setSessionsPage] = useState(0);
   const [sessionsPageSize, setSessionsPageSize] = useState(10);
   const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
+  const [paymentsPage, setPaymentsPage] = useState(0);
+  const [paymentsPageSize, setPaymentsPageSize] = useState<10 | 20 | 50>(10);
   const weatherEnabled =
     draftPreferences?.weatherEnabled ?? settings.preferences.weatherEnabled;
   const pushEnabled = draftPreferences?.pushEnabled ?? settings.preferences.pushEnabled;
@@ -2243,6 +2245,7 @@ export default function SettingsPage() {
           />
           <div className="mt-5">
             {settings.payments && settings.payments.length > 0 ? (
+              <>
               <DataTable
                 columns={[
                   copy.colPlan,
@@ -2253,7 +2256,12 @@ export default function SettingsPage() {
                   copy.colDate,
                   copy.colStatus,
                 ]}
-                rows={settings.payments.map((payment) => {
+                rows={settings.payments
+                  .slice(
+                    paymentsPage * paymentsPageSize,
+                    (paymentsPage + 1) * paymentsPageSize,
+                  )
+                  .map((payment) => {
                   let planTitle = payment.description || 'N/A';
                   if (planTitle.includes('Upgrade intent from dashboard to')) {
                     planTitle = planTitle.replace('Upgrade intent from dashboard to', '').trim();
@@ -2309,6 +2317,17 @@ export default function SettingsPage() {
                   ];
                 })}
               />
+              <PaymentsPagination
+                page={paymentsPage}
+                pageSize={paymentsPageSize}
+                setPage={setPaymentsPage}
+                setPageSize={(size) => {
+                  setPaymentsPageSize(size);
+                  setPaymentsPage(0);
+                }}
+                total={settings.payments.length}
+              />
+              </>
             ) : (
               <div className="rounded-lg border border-dashed border-lilac bg-white/70 p-5 text-sm font-medium text-slate">
                 {locale === 'en' ? 'No transactions found.' : 'Chưa có giao dịch nào được thực hiện.'}
@@ -2467,6 +2486,79 @@ function SessionsPagination({
           </span>
           <button
             aria-label={copy.nextPage}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page >= lastPage}
+            onClick={() => setPage(Math.min(lastPage, page + 1))}
+            type="button"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentsPagination({
+  page,
+  pageSize,
+  setPage,
+  setPageSize,
+  total,
+}: {
+  page: number;
+  pageSize: 10 | 20 | 50;
+  setPage: (next: number) => void;
+  setPageSize: (next: 10 | 20 | 50) => void;
+  total: number;
+}) {
+  const { t } = useTranslation();
+  const pageSizes: Array<10 | 20 | 50> = [10, 20, 50];
+  const lastPage = Math.max(0, Math.ceil(total / pageSize) - 1);
+  const showingFrom = total === 0 ? 0 : page * pageSize + 1;
+  const showingTo = Math.min((page + 1) * pageSize, total);
+  // Hide controls entirely when there's nothing to paginate.
+  if (total <= pageSizes[0]) return null;
+  return (
+    <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-3">
+      <div className="flex items-center gap-2 text-sm font-semibold text-[var(--app-muted,theme(colors.slate))]">
+        {pageSizes.map((s) => (
+          <button
+            className={`h-8 rounded-lg px-3 text-xs font-bold transition ${
+              pageSize === s
+                ? 'bg-violet text-white'
+                : 'border border-[var(--field-border)] bg-[var(--field-bg)] text-[var(--app-text)] hover:border-violet/40'
+            }`}
+            key={s}
+            onClick={() => setPageSize(s)}
+            type="button"
+          >
+            {t('payments.pagination.pageSize', { count: s })}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-3 text-sm font-semibold text-[var(--app-text)]">
+        <span className="text-[var(--app-muted,theme(colors.slate))]">
+          {showingFrom}–{showingTo} / {total}
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            aria-label={t('payments.pagination.prev')}
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
+            disabled={page <= 0}
+            onClick={() => setPage(Math.max(0, page - 1))}
+            type="button"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <span className="px-2 text-xs font-bold">
+            {t('payments.pagination.page', {
+              current: page + 1,
+              total: Math.max(1, lastPage + 1),
+            })}
+          </span>
+          <button
+            aria-label={t('payments.pagination.next')}
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--field-border)] bg-[var(--field-bg)] disabled:opacity-40"
             disabled={page >= lastPage}
             onClick={() => setPage(Math.min(lastPage, page + 1))}

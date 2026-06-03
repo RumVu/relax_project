@@ -21,6 +21,7 @@ import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { AmbientSoundPlayer } from '@/components/dashboard/ambient-sound-player';
 import { AnimatedBreathingCircle } from '@/components/dashboard/animated-breathing-circle';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 
 const activityIcons = {
   MUSIC: Headphones,
@@ -43,6 +44,7 @@ export default function BreaksPage() {
   const { t } = useTranslation();
   const relaxFilters = useDashboardFilters('/relax-activities/me/stats', 'relax');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
   const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
   const pushToast = useUiStore((state) => state.pushToast);
   const data = useUserDashboardData({
@@ -503,7 +505,12 @@ export default function BreaksPage() {
         </Card>
       </div>
 
-      <RelaxActivityChart data={data.relaxActivities} />
+      <PremiumGate
+        planName={data.settings.billing.planName}
+        role={accountRole}
+      >
+        <RelaxActivityChart data={data.relaxActivities} />
+      </PremiumGate>
 
       <Card>
         <SectionTitle title={t('breaks.history.title')} copy={t('breaks.history.copy')} />
