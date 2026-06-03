@@ -52,6 +52,7 @@ import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { AvatarUploader } from '@/components/dashboard/avatar-uploader';
 import { BirthdayInput } from '@/components/ui/birthday-input';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 
 type ThemeMode = 'SYSTEM' | 'LIGHT' | 'DARK';
 
@@ -193,6 +194,9 @@ const VI_SETTINGS_COPY = {
   customLibrary: 'Kho linh thú tự chọn',
   customLibraryCopy:
     'Đây là chỗ anh tự nạp linh thú cho profile hiện tại thay vì bị ràng theo cung hay con giáp.',
+  companionPremiumTitle: 'Mode dành cho hội viên',
+  companionPremiumBody:
+    'Đổi linh thú theo cung hoàng đạo, 12 con giáp hoặc tự chọn dành cho gói hội viên tháng trở lên. Gói miễn phí vẫn dùng được linh thú mặc định.',
   loadedAsset: (name: string) => `Đã nạp linh thú ${name}`,
   loadAssetFailed: 'Không nạp được linh thú custom',
   assetFallbackDescription: 'Linh thú đồng hành',
@@ -344,6 +348,9 @@ const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
   customLibrary: 'Custom companion library',
   customLibraryCopy:
     'Pick a custom companion for this profile instead of binding it to zodiac or Chinese zodiac.',
+  companionPremiumTitle: 'Members-only mode',
+  companionPremiumBody:
+    'Picking by zodiac, Chinese zodiac or a custom asset is reserved for monthly subscribers and above. The default companion stays available on the free plan.',
   loadedAsset: (name: string) => `Loaded companion ${name}`,
   loadAssetFailed: 'Could not load custom companion',
   assetFallbackDescription: 'Companion buddy',
@@ -519,6 +526,7 @@ export default function SettingsPage() {
   const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
   const [paymentsPage, setPaymentsPage] = useState(0);
   const [paymentsPageSize, setPaymentsPageSize] = useState<10 | 20 | 50>(10);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
   const weatherEnabled =
     draftPreferences?.weatherEnabled ?? settings.preferences.weatherEnabled;
   const pushEnabled = draftPreferences?.pushEnabled ?? settings.preferences.pushEnabled;
@@ -1465,11 +1473,16 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-3">
-                {companionOptions.map((option) => (
-                  <div
-                    className="rounded-xl border border-lilac/70 bg-white/75 p-4"
-                    key={option.mode}
-                  >
+                {companionOptions.map((option) => {
+                  // FREE plan giữ được mode DEFAULT để vẫn nuôi linh thú; các
+                  // mode còn lại (ZODIAC / CHINESE_ZODIAC / CUSTOM) ẩn sau
+                  // PremiumGate. PremiumGate tự bypass khi role=ADMIN hoặc
+                  // plan là paid prefix, nên không cần điều kiện ở đây.
+                  const card = (
+                    <div
+                      className="rounded-xl border border-lilac/70 bg-white/75 p-4"
+                      key={option.mode}
+                    >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="text-lg font-extrabold text-ink">
@@ -1567,10 +1580,32 @@ export default function SettingsPage() {
                         ))}
                       </div>
                     ) : null}
-                  </div>
-                ))}
+                    </div>
+                  );
+                  // FREE plan vẫn dùng được DEFAULT; ZODIAC / CHINESE_ZODIAC /
+                  // CUSTOM bị PremiumGate khoá lại. PremiumGate tự bỏ qua khi
+                  // role=ADMIN hoặc plan là gói trả phí.
+                  if (option.mode === 'DEFAULT') return card;
+                  return (
+                    <PremiumGate
+                      key={option.mode}
+                      planName={settings.billing.planName}
+                      role={accountRole}
+                      title={copy.companionPremiumTitle}
+                      body={copy.companionPremiumBody}
+                    >
+                      {card}
+                    </PremiumGate>
+                  );
+                })}
               </div>
 
+              <PremiumGate
+                planName={settings.billing.planName}
+                role={accountRole}
+                title={copy.companionPremiumTitle}
+                body={copy.companionPremiumBody}
+              >
               <div className="rounded-xl border border-lilac/70 bg-white/75 p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
@@ -1620,6 +1655,7 @@ export default function SettingsPage() {
                   ))}
                 </div>
               </div>
+              </PremiumGate>
             </div>
           ) : (
             <div className="mt-5 rounded-xl border border-dashed border-lilac bg-white/70 p-6 text-sm font-medium text-slate">
