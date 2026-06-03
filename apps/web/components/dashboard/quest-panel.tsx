@@ -94,8 +94,7 @@ export function QuestPanel({ heading }: { heading?: string }) {
   // Initial load + refetch whenever the shared refreshNonce is bumped or the
   // locale changes — so progress stays honest without the user clicking.
   useEffect(() => {
-    const timer = setTimeout(() => { void load(); }, 0);
-    return () => clearTimeout(timer);
+    void load();
   }, [load, refreshNonce]);
 
   const reroll = useCallback(
