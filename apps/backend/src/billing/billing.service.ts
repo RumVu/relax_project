@@ -16,6 +16,12 @@ import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 const MONTHLY_PERIOD_DAYS = 30;
 const ANNUAL_PERIOD_DAYS = 365;
 
+// Một pending payment được coi là "đang chờ chuyển khoản" trong 30 phút —
+// đủ thời gian để user quét QR, mở app ngân hàng, xác thực OTP. Sau ngưỡng
+// này nó bị đánh FAILED để (a) dọn rác lịch sử thanh toán, (b) tránh
+// amount-fallback của webhook SePay bị ambiguous.
+const PENDING_PAYMENT_TTL_MS = 30 * 60 * 1000;
+
 @Injectable()
 export class BillingService {
   constructor(
@@ -149,16 +155,45 @@ export class BillingService {
     const provider = dto.provider ?? 'MANUAL';
     const providerStatus = this.getProviderStatus();
     const plan = await this.resolvePlan(dto.planName);
-    const payment = await this.prisma.payment.create({
-      data: {
+    const planAmount = this.toPaymentAmount(plan.price);
+
+    // 1) Đánh FAILED mọi pending payment quá hạn của user — dọn rác lịch sử
+    //    và tránh amount-fallback webhook bị ambiguous.
+    const ttlCutoff = new Date(Date.now() - PENDING_PAYMENT_TTL_MS);
+    await this.prisma.payment.updateMany({
+      where: {
         userId,
-        amount: this.toPaymentAmount(plan.price),
-        currency: plan.currency,
+        status: PaymentStatus.PENDING,
+        createdAt: { lt: ttlCutoff },
+      },
+      data: { status: PaymentStatus.FAILED },
+    });
+
+    // 2) Reuse pending payment còn hạn cùng user/plan/provider — tránh tạo
+    //    duplicate khi user double-click hoặc reload trang checkout.
+    const reusable = await this.prisma.payment.findFirst({
+      where: {
+        userId,
         status: PaymentStatus.PENDING,
         provider,
-        description: dto.description ?? `Upgrade to ${plan.title}`,
+        amount: planAmount,
+        createdAt: { gte: ttlCutoff },
       },
+      orderBy: { createdAt: 'desc' },
     });
+
+    const payment =
+      reusable ??
+      (await this.prisma.payment.create({
+        data: {
+          userId,
+          amount: planAmount,
+          currency: plan.currency,
+          status: PaymentStatus.PENDING,
+          provider,
+          description: dto.description ?? `Upgrade to ${plan.title}`,
+        },
+      }));
 
     if (provider === 'SEPAY') {
       const merchantId = this.configService.get<string>('SEPAY_MERCHANT_ID');
@@ -184,7 +219,7 @@ export class BillingService {
       });
 
       const checkoutURL = client.checkout.initCheckoutUrl();
-      const amount = this.toPaymentAmount(plan.price);
+      const amount = planAmount;
 
       const successUrl =
         dto.successUrl || 'http://localhost:3233/billing?status=success';
