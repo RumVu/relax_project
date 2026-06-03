@@ -57,6 +57,7 @@ export default function JournalPage() {
   const [draftTags, setDraftTags] = useState('web-dashboard');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveError, setSaveError] = useState<string | null>(null);
   const filtered = useMemo(
     () =>
       journals.recent.filter((journal) => {
@@ -194,8 +195,13 @@ export default function JournalPage() {
                             ? t('journal.toast.unfavorited')
                             : t('journal.toast.favorited'),
                         });
-                      } catch {
-                        pushToast({ tone: 'error', title: t('journal.toast.favoriteFailed') });
+                      } catch (err) {
+                        pushToast({
+                          tone: 'error',
+                          title: t('journal.toast.favoriteFailed'),
+                          message:
+                            err instanceof Error ? err.message : String(err),
+                        });
                       }
                     }}
                     variant="secondary"
@@ -214,8 +220,13 @@ export default function JournalPage() {
                           title: t('journal.toast.deleted'),
                           message: journal.title,
                         });
-                      } catch {
-                        pushToast({ tone: 'error', title: t('journal.toast.deleteFailed') });
+                      } catch (err) {
+                        pushToast({
+                          tone: 'error',
+                          title: t('journal.toast.deleteFailed'),
+                          message:
+                            err instanceof Error ? err.message : String(err),
+                        });
                       }
                     }}
                   >
@@ -275,6 +286,7 @@ export default function JournalPage() {
               disabled={saveState === 'saving' || draft.trim().length === 0}
               onClick={async () => {
                 setSaveState('saving');
+                setSaveError(null);
                 try {
                   const payload = {
                     title:
@@ -316,11 +328,18 @@ export default function JournalPage() {
                     title: editingId ? t('journal.toast.updated') : t('journal.toast.saved'),
                     message: t('journal.toast.savedMessage'),
                   });
-                } catch {
+                } catch (err) {
+                  // Trước đây catch im lặng nên toast chỉ hiện "Save failed"
+                  // mà không có lý do — bài này lưu được trên backend, lỗi
+                  // thật là client (token hết hạn / mất mạng / CORS) bị giấu.
+                  const message =
+                    err instanceof Error ? err.message : String(err);
                   setSaveState('error');
+                  setSaveError(message);
                   pushToast({
                     tone: 'error',
                     title: t('journal.toast.saveFailed'),
+                    message,
                   });
                 }
               }}
@@ -352,7 +371,7 @@ export default function JournalPage() {
             >
               {saveState === 'saved'
                 ? t('journal.saveState.saved')
-                : t('journal.saveState.failed')}
+                : (saveError ?? t('journal.saveState.failed'))}
             </p>
           ) : null}
           <div className="mt-6">
