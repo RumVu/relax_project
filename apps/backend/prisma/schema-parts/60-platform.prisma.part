@@ -37,8 +37,16 @@ model SubscriptionTier {
   id String @id @default(cuid())
 
   name          String       @unique
+  title         String?      // display title — falls back to name when null
   description   String?
   price         Float
+  // Sale window — when salePrice is set and now is between saleStartsAt
+  // and saleEndsAt, effective price is salePrice. Lets admin run
+  // limited-time promos without overwriting price.
+  salePrice     Float?
+  saleLabel     String?
+  saleStartsAt  DateTime?
+  saleEndsAt    DateTime?
   currency      String       @default("VND")
   billingCycle  BillingCycle
   displayOrder  Int          @default(0)

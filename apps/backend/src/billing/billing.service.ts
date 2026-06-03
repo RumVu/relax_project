@@ -107,26 +107,55 @@ export class BillingService {
     });
 
     if (tiers.length > 0) {
-      return tiers.map((tier) => ({
-        id: tier.id,
-        name: tier.name,
-        title: this.toPlanTitle(tier.name),
-        description: tier.description,
-        price: tier.price,
-        currency: tier.currency,
-        billingCycle: tier.billingCycle,
-        features: tier.features
-          .filter((feature) => feature.included)
-          .map((feature) => feature.description ?? feature.name),
-        limits: tier.limits.map((limit) => ({
-          name: limit.name,
-          value: limit.value,
-          unit: limit.unit,
-        })),
-      }));
+      const now = new Date();
+      return tiers.map((tier) => {
+        const onSale = this.isOnSale(tier, now);
+        const effectivePrice = onSale && tier.salePrice != null ? tier.salePrice : tier.price;
+        return {
+          id: tier.id,
+          name: tier.name,
+          title: tier.title ?? this.toPlanTitle(tier.name),
+          description: tier.description,
+          price: tier.price,
+          /** Discounted price when active; same as price otherwise. UI should bind this. */
+          effectivePrice,
+          sale: onSale
+            ? {
+                price: tier.salePrice,
+                label: tier.saleLabel,
+                startsAt: tier.saleStartsAt,
+                endsAt: tier.saleEndsAt,
+                percentOff:
+                  tier.price > 0 && tier.salePrice != null
+                    ? Math.round(((tier.price - tier.salePrice) / tier.price) * 100)
+                    : 0,
+              }
+            : null,
+          currency: tier.currency,
+          billingCycle: tier.billingCycle,
+          features: tier.features
+            .filter((feature) => feature.included)
+            .map((feature) => feature.description ?? feature.name),
+          limits: tier.limits.map((limit) => ({
+            name: limit.name,
+            value: limit.value,
+            unit: limit.unit,
+          })),
+        };
+      });
     }
 
     return this.getFallbackPlans();
+  }
+
+  /** True when `now` is inside [saleStartsAt, saleEndsAt] and salePrice is set. */
+  private isOnSale(
+    tier: { salePrice: number | null; saleStartsAt: Date | null; saleEndsAt: Date | null },
+    now: Date,
+  ): boolean {
+    if (tier.salePrice == null) return false;
+    if (!tier.saleStartsAt || !tier.saleEndsAt) return false;
+    return now >= tier.saleStartsAt && now <= tier.saleEndsAt;
   }
 
   async getMine(userId: string) {
@@ -405,12 +434,18 @@ export class BillingService {
   private async resolvePlan(planName: string) {
     const tier = await this.findTierByPlanName(planName);
     if (tier) {
+      // Apply sale price if currently in the sale window — so checkout
+      // shows the discounted total and the webhook matches that amount.
+      const now = new Date();
+      const onSale = this.isOnSale(tier, now);
+      const effectivePrice =
+        onSale && tier.salePrice != null ? tier.salePrice : tier.price;
       return {
         source: 'subscription_tier' as const,
         tier,
         name: tier.name,
-        title: this.toPlanTitle(tier.name),
-        price: tier.price,
+        title: tier.title ?? this.toPlanTitle(tier.name),
+        price: effectivePrice,
         currency: tier.currency,
       };
     }
@@ -444,14 +479,23 @@ export class BillingService {
     const tiers = await this.prisma.subscriptionTier.findMany({
       where: { isActive: true },
     });
-    const tier = tiers.find((t) => this.toPaymentAmount(t.price) === amount);
+    const now = new Date();
+    // Match against sale price when active, else list price.
+    const tier = tiers.find((t) => {
+      const onSale = this.isOnSale(t, now);
+      const effective = onSale && t.salePrice != null ? t.salePrice : t.price;
+      return this.toPaymentAmount(effective) === amount;
+    });
     if (tier) {
+      const onSale = this.isOnSale(tier, now);
+      const effectivePrice =
+        onSale && tier.salePrice != null ? tier.salePrice : tier.price;
       return {
         source: 'subscription_tier' as const,
         tier,
         name: tier.name,
-        title: this.toPlanTitle(tier.name),
-        price: tier.price,
+        title: tier.title ?? this.toPlanTitle(tier.name),
+        price: effectivePrice,
         currency: tier.currency,
       };
     }

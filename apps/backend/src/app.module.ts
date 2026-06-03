@@ -16,6 +16,9 @@ import storageConfig from './config/storage.config';
 import { RedisThrottlerStorage } from './common/rate-limit/redis-throttler-storage';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
+import { EmailModule } from './email/email.module';
+import { AiInsightsModule } from './ai-insights/ai-insights.module';
+import { AdminPricingModule } from './admin-pricing/admin-pricing.module';
 import { RedisService } from './redis/redis.service';
 import { QueuesModule } from './queues/queues.module';
 import { RealtimeModule } from './realtime/realtime.module';
@@ -92,6 +95,7 @@ import { AdminLogsModule } from './admin-logs/admin-logs.module';
     }),
     PrismaModule,
     RedisModule,
+    EmailModule,
     ThrottlerModule.forRootAsync({
       imports: [RedisModule],
       inject: [RedisService, ConfigService],
@@ -119,6 +123,7 @@ import { AdminLogsModule } from './admin-logs/admin-logs.module';
     UserPreferencesModule,
     SessionsModule,
     MoodCheckinsModule,
+    AiInsightsModule,
     RelaxActivitiesModule,
     RelaxSessionsModule,
     JournalsModule,
@@ -129,6 +134,7 @@ import { AdminLogsModule } from './admin-logs/admin-logs.module';
     RemindersModule,
     JobsModule,
     BillingModule,
+    AdminPricingModule,
     AdminDashboardModule,
     AdminLogsModule,
     AppThemesModule,
