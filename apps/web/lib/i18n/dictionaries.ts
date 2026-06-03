@@ -365,6 +365,9 @@ const vi = {
   'breaks.history.empty': 'Chưa có phiên nào.',
   'breaks.activity.meditation': 'Thiền định',
   'breaks.activity.breathing': 'Hít thở',
+  'breaks.breathing.inhale': 'Hít vào',
+  'breaks.breathing.hold': 'Giữ hơi',
+  'breaks.breathing.exhale': 'Thở ra',
   'breaks.activity.journal': 'Viết nhật ký',
   'breaks.activity.music': 'Nghe nhạc',
 
@@ -1551,6 +1554,9 @@ const en: Record<keyof typeof vi, string> = {
   'breaks.history.empty': 'No sessions yet.',
   'breaks.activity.meditation': 'Meditation',
   'breaks.activity.breathing': 'Breathing',
+  'breaks.breathing.inhale': 'Inhale',
+  'breaks.breathing.hold': 'Hold',
+  'breaks.breathing.exhale': 'Exhale',
   'breaks.activity.journal': 'Journaling',
   'breaks.activity.music': 'Music',
 

@@ -1,12 +1,13 @@
 /**
  * Email delivery descriptor for email-verification / password-reset.
  *
- * We don't actually ship an email yet — when no provider is configured
- * we return the plain token in `devToken` so dev can copy it from the
- * response. In production with a provider configured the token is
- * suppressed and the response says `queued: true`.
+ * When a real provider is wired (EmailService.isConfigured()), the token
+ * is suppressed and we report `queued: true`. When only the log provider
+ * is active (dev/local), we surface the token in `devToken` so it can
+ * be copy-pasted into the verify/reset flows.
  */
 import { ConfigService } from '@nestjs/config';
+import type { EmailService } from '../../email/email.service';
 
 export interface EmailDeliveryDescriptor {
   channel: 'email';
@@ -18,19 +19,23 @@ export interface EmailDeliveryDescriptor {
 }
 
 /**
- * Build the descriptor from a ConfigService. Lives outside the
- * AuthService so any new flow (e.g. magic-link login) can reuse it.
+ * Build the descriptor. Pass `emailService` to read the actually-selected
+ * provider name; without it we report `provider: 'unknown'` (legacy callers).
  */
 export function buildEmailDelivery(
   configService: ConfigService,
   purpose: string,
   plainToken?: string,
+  emailService?: EmailService,
 ): EmailDeliveryDescriptor {
-  const provider = configService.get<string>('EMAIL_PROVIDER') ?? 'none';
-  const configured =
-    Boolean(configService.get<string>('RESEND_API_KEY')) ||
-    Boolean(configService.get<string>('SENDGRID_API_KEY')) ||
-    Boolean(configService.get<string>('SMTP_URL'));
+  const provider = emailService?.providerName()
+    ?? configService.get<string>('EMAIL_PROVIDER')
+    ?? 'unknown';
+  const configured = emailService
+    ? emailService.isConfigured()
+    : Boolean(configService.get<string>('RESEND_API_KEY')) ||
+      Boolean(configService.get<string>('SENDGRID_API_KEY')) ||
+      Boolean(configService.get<string>('SMTP_URL'));
   const nodeEnv =
     configService.get<string>('app.nodeEnv') ??
     process.env.NODE_ENV ??

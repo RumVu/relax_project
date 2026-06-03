@@ -45,6 +45,7 @@ import {
 } from './email/email-delivery.helper';
 import { AccountTokensService } from './tokens/account-tokens.service';
 import { UserExportService } from './export/user-export.service';
+import { EmailService } from '../email/email.service';
 
 /**
  * AuthService — orchestrator for register / login / refresh / Google
@@ -67,6 +68,7 @@ export class AuthService {
     private readonly notifications: NotificationsService,
     private readonly accountTokens: AccountTokensService,
     private readonly userExport: UserExportService,
+    private readonly emailService: EmailService,
   ) {}
 
   // ============================================================
@@ -393,16 +395,36 @@ export class AuthService {
       return {
         success: true,
         alreadyVerified: true,
-        delivery: buildEmailDelivery(this.configService, 'EMAIL_VERIFICATION'),
+        delivery: buildEmailDelivery(
+          this.configService,
+          'EMAIL_VERIFICATION',
+          undefined,
+          this.emailService,
+        ),
       };
     }
 
+    const ttlMs = getEmailVerificationTtlMs(this.configService);
     const token = await this.accountTokens.create(
       user.id,
       AccountTokenType.EMAIL_VERIFICATION,
-      getEmailVerificationTtlMs(this.configService),
+      ttlMs,
       { email: user.email },
     );
+
+    // Fire-and-await so the failure surfaces in logs, but never block the
+    // HTTP response on a slow provider — clients only need the descriptor.
+    await this.emailService
+      .sendVerifyEmail({
+        to: user.email,
+        displayName: (user as { name?: string | null }).name ?? null,
+        token: token.plainToken,
+        ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
+      })
+      .catch((err) =>
+        // Provider already logs internally — swallow so the API stays 200.
+        ({ provider: 'unknown', delivered: false, error: err?.message }),
+      );
 
     return {
       success: true,
@@ -412,6 +434,7 @@ export class AuthService {
         this.configService,
         'EMAIL_VERIFICATION',
         token.plainToken,
+        this.emailService,
       ),
     };
   }
@@ -439,16 +462,35 @@ export class AuthService {
     if (!user || !user.isActive || user.authProvider !== AuthProvider.LOCAL) {
       return {
         success: true,
-        delivery: buildEmailDelivery(this.configService, 'PASSWORD_RESET'),
+        delivery: buildEmailDelivery(
+          this.configService,
+          'PASSWORD_RESET',
+          undefined,
+          this.emailService,
+        ),
       };
     }
 
+    const ttlMs = getPasswordResetTtlMs(this.configService);
     const token = await this.accountTokens.create(
       user.id,
       AccountTokenType.PASSWORD_RESET,
-      getPasswordResetTtlMs(this.configService),
+      ttlMs,
       { email: user.email },
     );
+
+    await this.emailService
+      .sendPasswordReset({
+        to: user.email,
+        displayName: (user as { name?: string | null }).name ?? null,
+        token: token.plainToken,
+        ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
+      })
+      .catch((err) => ({
+        provider: 'unknown',
+        delivered: false,
+        error: err?.message,
+      }));
 
     return {
       success: true,
@@ -456,6 +498,7 @@ export class AuthService {
         this.configService,
         'PASSWORD_RESET',
         token.plainToken,
+        this.emailService,
       ),
     };
   }

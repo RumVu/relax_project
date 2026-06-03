@@ -20,6 +20,7 @@ import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { AmbientSoundPlayer } from '@/components/dashboard/ambient-sound-player';
+import { AnimatedBreathingCircle } from '@/components/dashboard/animated-breathing-circle';
 
 const activityIcons = {
   MUSIC: Headphones,
@@ -271,6 +272,11 @@ export default function BreaksPage() {
             <p className="mt-2 text-sm text-mist/70">
               {active?.subtitle ?? t('common.loading')}
             </p>
+            {active?.type === 'BREATHING' && sessionRunning ? (
+              <div className="mt-5">
+                <AnimatedBreathingCircle />
+              </div>
+            ) : (
             <div className="mt-5 rounded-lg border border-white/10 bg-night/30 p-3">
               <p className="text-xs font-bold uppercase tracking-[0.18em] text-mist/60">
                 {sessionRunning
@@ -358,6 +364,7 @@ export default function BreaksPage() {
                 ) : null}
               </div>
             </div>
+            )}
             <div className="mt-6 h-3 overflow-hidden rounded-full bg-white/15">
               <div
                 className={`h-full rounded-full bg-mint transition-all ${

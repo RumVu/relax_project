@@ -38,7 +38,6 @@ export default function AnalyticsPage() {
     streakDays: 0,
     dominantMood: t('ui.empty'),
   };
-  const insights = buildInsights(data, t);
 
   return (
     <DashboardShell eyebrow={t('analytics.eyebrow')} title={t('analytics.title')}>
@@ -78,34 +77,6 @@ export default function AnalyticsPage() {
         <MoodAreaDashboardChart data={data.timeline} />
         <AiInsightsCard />
       </div>
-
-      <Card>
-        <SectionTitle
-          title={t('analytics.section.insights')}
-          copy={t('analytics.section.insights.copy')}
-          action={
-            <Button
-              onClick={() => {
-                triggerRefresh();
-                pushToast({
-                  tone: 'info',
-                  title: t('analytics.toast.refreshed'),
-                  message: t('analytics.toast.refreshedMessage'),
-                });
-              }}
-              variant="secondary"
-            >
-              <RefreshCcw className="h-4 w-4" />
-              {t('analytics.action.refreshInsights')}
-            </Button>
-          }
-        />
-        <div className="mt-5 grid gap-3 sm:grid-cols-2">
-          {insights.map((insight) => (
-            <Insight key={insight} text={insight} />
-          ))}
-        </div>
-      </Card>
 
       <div className="grid gap-4 xl:grid-cols-2">
         <WeeklyStatsChart data={data.weeklyStats} />
@@ -154,54 +125,4 @@ export default function AnalyticsPage() {
       </div>
     </DashboardShell>
   );
-}
-
-function Insight({ text }: { text: string }) {
-  return (
-    <div className="rounded-lg border border-lilac/70 bg-white/75 p-4 text-sm font-medium text-ink">
-      {text}
-    </div>
-  );
-}
-
-function buildInsights(
-  data: ReturnType<typeof useUserDashboardData>,
-  t: ReturnType<typeof useTranslation>['t'],
-) {
-  const latestWeek = data.weeklyStats[data.weeklyStats.length - 1] ?? {
-    avgScore: 0,
-    stressReducePct: 0,
-  };
-  const bestActivity = data.relaxActivities[0] ?? {
-    title: t('analytics.fallback.relaxActivity'),
-    relief: 0,
-  };
-  const strongestMood = data.distribution[0] ?? {
-    mood: t('common.unknown'),
-    percent: 0,
-  };
-  const lowestStressDay = data.timeline[0] ?? { label: '--', stressScore: 0 };
-  const highestRelaxDay = data.timeline[0] ?? { label: '--', relaxMinutes: 0 };
-
-  for (const activity of data.relaxActivities) {
-    if (activity.relief > bestActivity.relief) {
-      Object.assign(bestActivity, activity);
-    }
-  }
-
-  for (const item of data.timeline) {
-    if (item.stressScore < lowestStressDay.stressScore) {
-      Object.assign(lowestStressDay, item);
-    }
-    if (item.relaxMinutes > highestRelaxDay.relaxMinutes) {
-      Object.assign(highestRelaxDay, item);
-    }
-  }
-
-  return [
-    t('analytics.insight.bestActivity', { activity: bestActivity.title, relief: bestActivity.relief }),
-    t('analytics.insight.latestWeek', { score: latestWeek.avgScore, reduction: latestWeek.stressReducePct }),
-    t('analytics.insight.strongestMood', { mood: strongestMood.mood, percent: strongestMood.percent }),
-    t('analytics.insight.bestDays', { lowDay: lowestStressDay.label, relaxDay: highestRelaxDay.label }),
-  ];
 }
