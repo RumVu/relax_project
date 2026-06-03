@@ -12,6 +12,7 @@ import {
   WeeklyStatsChart,
 } from '@/components/dashboard/dashboard-ui';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
+import { AiInsightsCard } from '@/components/dashboard/ai-insights-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUserDashboardData } from '@/lib/live-dashboard';
@@ -75,34 +76,36 @@ export default function AnalyticsPage() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
         <MoodAreaDashboardChart data={data.timeline} />
-        <Card>
-          <SectionTitle
-            title={t('analytics.section.insights')}
-            copy={t('analytics.section.insights.copy')}
-            action={
-              <Button
-                onClick={() => {
-                  triggerRefresh();
-                  pushToast({
-                    tone: 'info',
-                    title: t('analytics.toast.refreshed'),
-                    message: t('analytics.toast.refreshedMessage'),
-                  });
-                }}
-                variant="secondary"
-              >
-                <RefreshCcw className="h-4 w-4" />
-                {t('analytics.action.refreshInsights')}
-              </Button>
-            }
-          />
-          <div className="mt-5 space-y-3">
-            {insights.map((insight) => (
-              <Insight key={insight} text={insight} />
-            ))}
-          </div>
-        </Card>
+        <AiInsightsCard />
       </div>
+
+      <Card>
+        <SectionTitle
+          title={t('analytics.section.insights')}
+          copy={t('analytics.section.insights.copy')}
+          action={
+            <Button
+              onClick={() => {
+                triggerRefresh();
+                pushToast({
+                  tone: 'info',
+                  title: t('analytics.toast.refreshed'),
+                  message: t('analytics.toast.refreshedMessage'),
+                });
+              }}
+              variant="secondary"
+            >
+              <RefreshCcw className="h-4 w-4" />
+              {t('analytics.action.refreshInsights')}
+            </Button>
+          }
+        />
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {insights.map((insight) => (
+            <Insight key={insight} text={insight} />
+          ))}
+        </div>
+      </Card>
 
       <div className="grid gap-4 xl:grid-cols-2">
         <WeeklyStatsChart data={data.weeklyStats} />

@@ -23,6 +23,7 @@ import {
   WeatherCard,
   WeeklyStatsChart,
 } from '@/components/dashboard/dashboard-ui';
+import { CozyQuoteCard } from '@/components/dashboard/cozy-quote-card';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell eyebrow={t('dashboard.eyebrow')} title={title}>
+      <CozyQuoteCard currentMood={data.overview.mood.currentMood} />
       <DashboardFilterBar {...overviewFilters} title={t('dashboard.filters.title')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">

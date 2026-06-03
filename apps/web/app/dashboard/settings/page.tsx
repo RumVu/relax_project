@@ -515,6 +515,7 @@ export default function SettingsPage() {
   const [activeThemeId, setActiveThemeId] = useState<string | null>(null);
   const [sessionsPage, setSessionsPage] = useState(0);
   const [sessionsPageSize, setSessionsPageSize] = useState(10);
+  const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
   const weatherEnabled =
     draftPreferences?.weatherEnabled ?? settings.preferences.weatherEnabled;
   const pushEnabled = draftPreferences?.pushEnabled ?? settings.preferences.pushEnabled;
@@ -1783,6 +1784,7 @@ export default function SettingsPage() {
                 t('sessions.field.loginTime'),
                 t('sessions.field.expires'),
                 t('catalog.col.status'),
+                t('sessions.col.action'),
               ]}
               rows={settings.sessions
                 .slice(
@@ -1812,6 +1814,49 @@ export default function SettingsPage() {
                   session.createdAt,
                   session.expiresAt,
                   session.current ? copy.currentSession : copy.savedSession,
+                  session.current ? (
+                    <span
+                      className="text-xs italic text-slate"
+                      key={`${session.id}-action`}
+                    >
+                      —
+                    </span>
+                  ) : (
+                    <Button
+                      className="h-8 px-3 text-xs"
+                      disabled={revokingSessionId === session.id}
+                      key={`${session.id}-action`}
+                      onClick={async () => {
+                        setRevokingSessionId(session.id);
+                        try {
+                          await apiFetch(`/sessions/${session.id}`, {
+                            method: 'DELETE',
+                          });
+                          triggerRefresh();
+                          pushToast({
+                            tone: 'success',
+                            title: t('sessions.toast.revokedTitle'),
+                            message: t('sessions.toast.revokedMessage'),
+                          });
+                        } catch (err) {
+                          const message =
+                            err instanceof Error ? err.message : String(err);
+                          pushToast({
+                            tone: 'error',
+                            title: t('sessions.toast.revokeFailedTitle'),
+                            message,
+                          });
+                        } finally {
+                          setRevokingSessionId(null);
+                        }
+                      }}
+                      variant="ghost"
+                    >
+                      {revokingSessionId === session.id
+                        ? t('sessions.action.revoking')
+                        : t('sessions.action.revoke')}
+                    </Button>
+                  ),
                 ])}
             />
             <SessionsPagination
