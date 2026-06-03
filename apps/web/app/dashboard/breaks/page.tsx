@@ -272,7 +272,10 @@ export default function BreaksPage() {
             <p className="mt-2 text-sm text-mist/70">
               {active?.subtitle ?? t('common.loading')}
             </p>
-            {active?.type === 'BREATHING' && sessionRunning ? (
+            {/* Hiện vòng tròn ngay khi user chọn hoạt động "Hít thở" — không cần phải
+                "Bắt đầu phiên" mới được tập. Khi đang chạy phiên, vẫn giữ vòng tròn
+                để user vừa nghe nhạc nền vừa theo nhịp thở. */}
+            {active?.type === 'BREATHING' ? (
               <div className="mt-5">
                 <AnimatedBreathingCircle />
               </div>
