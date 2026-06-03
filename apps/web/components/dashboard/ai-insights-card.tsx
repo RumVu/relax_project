@@ -163,10 +163,10 @@ export function AiInsightsCard() {
           data.insights.map((insight) => (
             <article
               key={insight.id}
-              className="rounded-lg border border-lilac/40 bg-white/80 p-4 shadow-sm"
+              className="rounded-lg border border-[var(--field-border)] bg-[var(--panel-strong)] p-4 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3">
-                <h4 className="text-base font-bold text-ink">{insight.title}</h4>
+                <h4 className="text-base font-bold text-[var(--app-text)]">{insight.title}</h4>
                 <Badge
                   className={
                     insight.type === 'risk-flag'
@@ -179,7 +179,7 @@ export function AiInsightsCard() {
                   {translateInsightType(t, insight.type)}
                 </Badge>
               </div>
-              <p className="mt-2 text-sm text-ink/80">{insight.content}</p>
+              <p className="mt-2 text-sm text-[var(--app-text)] opacity-85">{insight.content}</p>
               <div className="mt-3 flex items-center gap-2 text-xs">
                 <button
                   className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 transition ${
@@ -226,7 +226,7 @@ export function AiInsightsCard() {
                 key={rec.id}
                 className="flex items-center justify-between gap-3 rounded-lg border border-mint/30 bg-mint/5 p-3"
               >
-                <p className="text-sm text-ink/85">{rec.reason}</p>
+                <p className="text-sm text-[var(--app-text)] opacity-90">{rec.reason}</p>
                 <Badge className="bg-mint/15 text-mint">
                   {Math.round(rec.score * 100)}%
                 </Badge>

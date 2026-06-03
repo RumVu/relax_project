@@ -1,7 +1,8 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
+  CreditCard,
   Search,
   ShieldCheck,
   ShieldX,
@@ -46,6 +47,17 @@ export default function AdminUsersPage() {
   const [filterVerified, setFilterVerified] = useState<'ALL' | 'VERIFIED' | 'UNVERIFIED'>('ALL');
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const [planModalUser, setPlanModalUser] = useState<AdminUserRow | null>(null);
+  // Cache the tier catalogue once so the change-plan modal can list options
+  // without a round-trip every time it opens.
+  const [tierCatalog, setTierCatalog] = useState<
+    Array<{ name: string; title: string | null; price: number; currency: string; isActive: boolean }>
+  >([]);
+  useEffect(() => {
+    apiFetch<typeof tierCatalog>('/admin/billing/tiers')
+      .then(setTierCatalog)
+      .catch(() => setTierCatalog([]));
+  }, []);
   const users = useAdminDashboardData({
     refreshKey,
     usersQuery: {
@@ -252,6 +264,14 @@ export default function AdminUsersPage() {
                 >
                   {t('admin.users.action.revokeSessions')}
                 </Button>
+                <Button
+                  className="h-8 px-3 text-xs"
+                  onClick={() => setPlanModalUser(user)}
+                  variant="ghost"
+                >
+                  <CreditCard className="h-3.5 w-3.5" />
+                  {t('admin.users.action.changePlan')}
+                </Button>
               </div>,
             ])}
           />
@@ -271,7 +291,159 @@ export default function AdminUsersPage() {
           }}
         />
       ) : null}
+      {planModalUser ? (
+        <ChangePlanModal
+          onChanged={() => {
+            setPlanModalUser(null);
+            setRefreshKey((current) => current + 1);
+          }}
+          onClose={() => setPlanModalUser(null)}
+          tiers={tierCatalog}
+          user={planModalUser}
+        />
+      ) : null}
     </DashboardShell>
+  );
+}
+
+function ChangePlanModal({
+  onChanged,
+  onClose,
+  tiers,
+  user,
+}: {
+  onChanged: () => void;
+  onClose: () => void;
+  tiers: Array<{ name: string; title: string | null; price: number; currency: string; isActive: boolean }>;
+  user: AdminUserRow;
+}) {
+  const { t } = useTranslation();
+  const pushToast = useUiStore((state) => state.pushToast);
+  // Default to the user's current plan so it's clear what's selected; if their
+  // current plan was deactivated, fall back to the first active tier.
+  const initial =
+    tiers.find((tier) => tier.name === user.plan?.split(' ·')[0]) ??
+    tiers.find((tier) => tier.isActive) ??
+    tiers[0];
+  const [selected, setSelected] = useState(initial?.name ?? 'FREE');
+  const [busy, setBusy] = useState(false);
+
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/70 p-4 backdrop-blur"
+      onClick={onClose}
+      role="dialog"
+    >
+      <Card className="w-full max-w-md">
+        <div onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet">
+                {t('admin.users.changePlan.eyebrow')}
+              </p>
+              <h3 className="mt-1 text-lg font-extrabold text-[var(--app-text)]">
+                {user.name}
+              </h3>
+              <p className="text-xs text-[var(--app-muted,#94a3b8)]">{user.email}</p>
+            </div>
+            <button
+              aria-label={t('common.close')}
+              className="rounded-full p-1 text-slate transition hover:bg-white/10 hover:text-coral"
+              onClick={onClose}
+              type="button"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <p className="mt-4 text-xs text-[var(--app-muted,#94a3b8)]">
+            {t('admin.users.changePlan.hint')}
+          </p>
+
+          <div className="mt-4 space-y-2">
+            {tiers.length === 0 ? (
+              <p className="text-sm text-slate">{t('common.loading')}</p>
+            ) : (
+              tiers
+                .filter((tier) => tier.isActive || tier.name === selected)
+                .map((tier) => (
+                  <label
+                    className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition ${
+                      selected === tier.name
+                        ? 'border-violet bg-violet/10'
+                        : 'border-[var(--field-border)] bg-[var(--field-bg)] hover:border-violet/40'
+                    }`}
+                    key={tier.name}
+                  >
+                    <div className="flex items-center gap-3">
+                      <input
+                        checked={selected === tier.name}
+                        className="h-4 w-4"
+                        name="plan"
+                        onChange={() => setSelected(tier.name)}
+                        type="radio"
+                        value={tier.name}
+                      />
+                      <div>
+                        <p className="text-sm font-bold text-[var(--app-text)]">
+                          {tier.title || tier.name}
+                        </p>
+                        <p className="text-xs text-slate">{tier.name}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm font-bold text-[var(--app-text)]">
+                      {new Intl.NumberFormat('vi-VN').format(tier.price)}{' '}
+                      <span className="text-xs font-medium text-slate">
+                        {tier.currency}
+                      </span>
+                    </p>
+                  </label>
+                ))
+            )}
+          </div>
+
+          <div className="mt-5 flex justify-end gap-2">
+            <Button disabled={busy} onClick={onClose} variant="ghost">
+              {t('common.cancel')}
+            </Button>
+            <Button
+              disabled={busy || !selected}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  await apiFetch(`/admin/users/${user.id}/plan`, {
+                    method: 'POST',
+                    body: JSON.stringify({ planName: selected }),
+                  });
+                  pushToast({
+                    tone: 'success',
+                    title: t('admin.users.changePlan.successTitle'),
+                    message: t('admin.users.changePlan.successMessage', {
+                      email: user.email,
+                      plan: selected,
+                    }),
+                  });
+                  onChanged();
+                } catch (err) {
+                  const message =
+                    err instanceof Error ? err.message : String(err);
+                  pushToast({
+                    tone: 'error',
+                    title: t('admin.users.changePlan.failedTitle'),
+                    message,
+                  });
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              {busy ? t('common.loading') : t('admin.users.changePlan.confirm')}
+            </Button>
+          </div>
+        </div>
+      </Card>
+    </div>
   );
 }
 
