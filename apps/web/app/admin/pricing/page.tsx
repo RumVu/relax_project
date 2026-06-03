@@ -112,7 +112,8 @@ export default function AdminPricingPage() {
   }, [pushToast, t]);
 
   useEffect(() => {
-    void load();
+    const timer = setTimeout(() => { void load(); }, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   const formatter = useMemo(
