@@ -361,7 +361,7 @@ export function MoodAreaDashboardChart({
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
           <XAxis dataKey="label" tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis domain={[0, 100]} tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Area dataKey="moodScore" name="Mood score" type="monotone" stroke="#7357f6" strokeWidth={3} fill="url(#moodDashboardFill)" />
           <Area dataKey="stressScore" name="Stress score" type="monotone" stroke="#ef767a" strokeWidth={3} fill="url(#stressDashboardFill)" />
         </AreaChart>
@@ -392,7 +392,7 @@ export function DistributionChart({
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
           <XAxis dataKey="mood" tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Bar dataKey="count" radius={[8, 8, 0, 0]}>
             {data.map((entry, index) => (
               <Cell fill={colors[index % colors.length]} key={entry.mood} />
@@ -423,7 +423,7 @@ export function WeeklyStatsChart({
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
           <XAxis dataKey="weekStart" tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Bar dataKey="avgScore" fill="#7357f6" radius={[8, 8, 0, 0]} />
           <Line dataKey="stressReducePct" stroke="#40c9a2" strokeWidth={3} type="monotone" />
         </ComposedChart>
@@ -455,7 +455,7 @@ export function RelaxActivityChart({
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
           <XAxis dataKey="title" tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Bar dataKey="sessions" fill="#7357f6" radius={[8, 8, 0, 0]} />
           <Line dataKey="relief" stroke="#ef767a" strokeWidth={3} type="monotone" />
         </ComposedChart>
@@ -480,7 +480,7 @@ export function AdminGrowthChart({
           <CartesianGrid stroke="#e7e4f5" strokeDasharray="4 4" />
           <XAxis dataKey="label" tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
           <YAxis tick={{ fill: '#536071', fontSize: 12 }} tickLine={false} axisLine={false} />
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Bar dataKey="users" fill="#40c9a2" radius={[8, 8, 0, 0]} />
           <Line dataKey="active" stroke="#7357f6" strokeWidth={3} type="monotone" />
           <Line dataKey="revenue" stroke="#ef767a" strokeWidth={3} type="monotone" />
@@ -503,7 +503,7 @@ export function DonutChart({
       <SectionTitle title={t('chart.contentEngagement.title')} copy={t('chart.contentEngagement.copy')} />
       <ChartFrame mounted={mounted}>
         <PieChart>
-          <Tooltip contentStyle={tooltipStyle} />
+          <Tooltip contentStyle={tooltipStyle} labelStyle={tooltipLabelStyle} itemStyle={tooltipItemStyle} />
           <Pie data={data} dataKey="value" innerRadius={68} outerRadius={110} paddingAngle={4}>
             {data.map((entry, index) => (
               <Cell fill={colors[index % colors.length]} key={entry.name} />
@@ -683,8 +683,26 @@ export function EndpointRow({
   );
 }
 
-const tooltipStyle = {
-  border: '1px solid #dcd6ff',
-  borderRadius: 8,
-  boxShadow: '0 16px 40px rgba(23, 19, 52, 0.12)',
+// Tooltip dùng CSS vars để cả light + dark đều có nền/chữ/viền hợp lý.
+// `color` ép tên trục (label) hiển thị rõ trên dark mode — trước đây mặc định
+// xám rất nhạt nên gần như chìm vào ô trắng.
+const tooltipStyle: React.CSSProperties = {
+  background: 'var(--panel-strong, #ffffff)',
+  border: '1px solid var(--field-border, #dcd6ff)',
+  borderRadius: 10,
+  color: 'var(--app-text, #1f1736)',
+  fontSize: 12,
+  fontWeight: 600,
+  padding: '8px 12px',
+  boxShadow: '0 16px 40px rgba(23, 19, 52, 0.18)',
+};
+
+const tooltipLabelStyle: React.CSSProperties = {
+  color: 'var(--app-text, #1f1736)',
+  fontWeight: 700,
+  marginBottom: 4,
+};
+
+const tooltipItemStyle: React.CSSProperties = {
+  color: 'var(--app-text, #1f1736)',
 };
