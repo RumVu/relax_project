@@ -241,7 +241,7 @@ export function DashboardShell({
       {/* Mobile topbar (< lg). The desktop hero already houses the
        *  realtime badge / notification button, so the topbar only needs
        *  the brand mark + the hamburger menu. */}
-      <div className="mx-auto mb-3 flex w-full max-w-[1440px] items-center justify-between gap-3 rounded-lg border border-[var(--panel-border)] bg-[var(--panel-strong)] p-3 shadow-panel lg:hidden">
+      <div className="mx-auto mb-3 flex w-full max-w-[1800px] items-center justify-between gap-3 rounded-lg border border-[var(--panel-border)] bg-[var(--panel-strong)] p-3 shadow-panel lg:hidden">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet text-white">
             <Leaf className="h-4 w-4" />
@@ -277,7 +277,7 @@ export function DashboardShell({
         />
       ) : null}
 
-      <div className="mx-auto grid w-full max-w-[1440px] min-w-0 gap-4 lg:grid-cols-[248px_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-[1800px] min-w-0 gap-4 lg:grid-cols-[248px_minmax(0,1fr)]">
         <aside
           className={cn(
             // Mobile: off-canvas drawer (translate-x); desktop: in-grid sticky.
