@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentStatus } from '@prisma/client';
+import { SePayPgClient } from 'sepay-pg-node';
 import { AppException } from '../../common/errors/app.exception';
 import { ErrorCode } from '../../common/errors/error-code';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -86,9 +87,39 @@ export class SepayBillingService {
     }
 
     // Find the pending payment
-    const payment = await this.prisma.payment.findUnique({
+    let payment = await this.prisma.payment.findUnique({
       where: { id: paymentId },
     });
+
+    // If not found in our database, it might be a SePay order ID (starts with PAY... or similar).
+    // Let's try to retrieve the order from SePay's API to find our order_invoice_number.
+    if (!payment) {
+      try {
+        const merchantId = this.configService.get<string>('SEPAY_MERCHANT_ID');
+        const secretKey = this.configService.get<string>('SEPAY_SECRET_KEY');
+        const env = this.configService.get<string>('SEPAY_ENV') || 'sandbox';
+
+        if (merchantId && secretKey) {
+          const client = new SePayPgClient({
+            env: env as 'sandbox' | 'production',
+            merchant_id: merchantId,
+            secret_key: secretKey,
+          });
+
+          const orderRes = await client.order.retrieve(paymentId);
+          const orderData = orderRes.data?.data;
+          
+          if (orderData && orderData.order_invoice_number) {
+            const actualPaymentId = orderData.order_invoice_number;
+            payment = await this.prisma.payment.findUnique({
+              where: { id: actualPaymentId },
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to retrieve order from SePay API:', err);
+      }
+    }
 
     if (!payment) {
       throw new AppException(
