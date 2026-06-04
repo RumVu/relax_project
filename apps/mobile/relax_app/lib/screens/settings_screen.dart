@@ -525,14 +525,26 @@ class _ProfileHero extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    GestureDetector(
+                      onTap: () => _editName(context, name),
+                      child: const Icon(Icons.edit_outlined,
+                          color: Colors.white70, size: 16),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -567,6 +579,40 @@ class _ProfileHero extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _editName(BuildContext context, String current) async {
+    final ctrl = TextEditingController(text: current);
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Đổi tên hiển thị'),
+        content: TextField(
+          controller: ctrl,
+          autofocus: true,
+          maxLength: 50,
+          decoration: const InputDecoration(hintText: 'Tên hiển thị'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: const Text('Lưu'),
+          ),
+        ],
+      ),
+    );
+    if (newName == null || newName.isEmpty || newName == current) return;
+    if (!context.mounted) return;
+    final ok = await context.read<AuthState>().updateDisplayName(newName);
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      backgroundColor: ok ? RelaxColors.mint : RelaxColors.coral,
+      content: Text(ok ? 'Đã đổi tên hiển thị' : 'Không đổi được tên'),
+    ));
   }
 }
 

@@ -36,6 +36,7 @@ class AuthState extends ChangeNotifier {
       final res = await RelaxApi.instance.get('/users/me');
       if (res.statusCode == 200 && res.data is Map) {
         _user = Map<String, dynamic>.from(res.data as Map);
+        await _mergeProfileName();
       } else {
         await RelaxApi.instance.clearTokens();
       }
@@ -45,6 +46,41 @@ class AuthState extends ChangeNotifier {
       _checking = false;
       notifyListeners();
     }
+  }
+
+  /// displayName nằm trên UserProfile, không phải User.name — ưu tiên dùng
+  /// displayName cho lời chào nếu có, để khi user đổi tên hồ sơ thì app
+  /// hiển thị đúng.
+  Future<void> _mergeProfileName() async {
+    try {
+      final p = await RelaxApi.instance.get('/user-profiles/me/profile');
+      final dn = p.data is Map ? p.data['displayName'] as String? : null;
+      if (dn != null && dn.trim().isNotEmpty && _user != null) {
+        _user!['name'] = dn.trim();
+      }
+    } catch (_) {
+      // profile chưa có — bỏ qua, dùng User.name.
+    }
+  }
+
+  /// Cập nhật tên hiển thị qua PATCH /user-profiles/me/profile.
+  Future<bool> updateDisplayName(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) return false;
+    try {
+      final res = await RelaxApi.instance.patch(
+        '/user-profiles/me/profile',
+        body: {'displayName': trimmed},
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (_user != null) _user!['name'] = trimmed;
+        notifyListeners();
+        return true;
+      }
+    } catch (_) {
+      // nuốt — caller hiển thị lỗi
+    }
+    return false;
   }
 
   Future<bool> login(String email, String password) async {
