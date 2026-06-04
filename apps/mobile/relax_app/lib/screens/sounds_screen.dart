@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
+import '../core/audio_controller.dart';
 import '../core/theme.dart';
 
-/// Trình phát âm thanh nền / podcast — dựng theo mockup "Đang nghe nhạc".
-/// Lấy danh sách từ /ambient-sounds, phát soundUrl bằng just_audio, có
-/// thanh tiến trình + nút trước/phát-dừng/sau.
+/// Trình phát âm thanh nền / podcast. Phát qua AudioController dùng chung
+/// nên nhạc tiếp tục khi user thoát màn (mini-player toàn cục hiện ở shell).
 class SoundsScreen extends StatefulWidget {
   const SoundsScreen({super.key, this.category});
 
@@ -18,22 +18,14 @@ class SoundsScreen extends StatefulWidget {
 }
 
 class _SoundsScreenState extends State<SoundsScreen> {
-  final _player = AudioPlayer();
   bool _loading = true;
   String? _error;
   List<Map<String, dynamic>> _tracks = [];
-  int _current = -1;
 
   @override
   void initState() {
     super.initState();
     _load();
-  }
-
-  @override
-  void dispose() {
-    _player.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -57,6 +49,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
         list = list.where((e) => e['category'] == widget.category).toList();
       }
       _tracks = list;
+      // Nạp queue vào controller dùng chung.
+      if (mounted) context.read<AudioController>().setQueue(_tracks);
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -64,39 +58,9 @@ class _SoundsScreenState extends State<SoundsScreen> {
     }
   }
 
-  Future<void> _playIndex(int i) async {
-    if (i < 0 || i >= _tracks.length) return;
-    final url = _tracks[i]['soundUrl'] as String?;
-    if (url == null) return;
-    setState(() => _current = i);
-    try {
-      await _player.setUrl(url);
-      await _player.play();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text('Không phát được: $e'),
-        ));
-      }
-    }
-  }
-
-  void _togglePlay() {
-    if (_player.playing) {
-      _player.pause();
-    } else {
-      if (_current < 0 && _tracks.isNotEmpty) {
-        _playIndex(0);
-      } else {
-        _player.play();
-      }
-    }
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
+    final audio = context.watch<AudioController>();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -133,12 +97,14 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                 ),
                               )
                             : ListView.builder(
-                                padding: const EdgeInsets.fromLTRB(
-                                    16, 8, 16, 8),
+                                padding:
+                                    const EdgeInsets.fromLTRB(16, 8, 16, 8),
                                 itemCount: _tracks.length,
                                 itemBuilder: (context, i) {
                                   final t = _tracks[i];
-                                  final playing = _current == i;
+                                  final playing = identical(
+                                      audio.current, _tracks[i]) ||
+                                      audio.current?['id'] == t['id'];
                                   return Container(
                                     margin: const EdgeInsets.only(bottom: 8),
                                     decoration: BoxDecoration(
@@ -154,12 +120,12 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                       ),
                                     ),
                                     child: ListTile(
-                                      onTap: () => _playIndex(i),
+                                      onTap: () => audio.playAt(i),
                                       leading: CircleAvatar(
                                         backgroundColor: RelaxColors.violet
                                             .withValues(alpha: 0.15),
                                         child: Icon(
-                                          playing && _player.playing
+                                          playing && audio.playing
                                               ? Icons.graphic_eq
                                               : Icons.music_note,
                                           color: RelaxColors.violet,
@@ -191,15 +157,15 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                 },
                               ),
                       ),
-                      if (_current >= 0) _nowPlayingBar(context),
+                      if (audio.hasTrack) _nowPlayingBar(context, audio),
                     ],
                   ),
       ),
     );
   }
 
-  Widget _nowPlayingBar(BuildContext context) {
-    final t = _tracks[_current];
+  Widget _nowPlayingBar(BuildContext context, AudioController audio) {
+    final t = audio.current!;
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       padding: const EdgeInsets.all(16),
@@ -250,12 +216,11 @@ class _SoundsScreenState extends State<SoundsScreen> {
             ],
           ),
           const SizedBox(height: 10),
-          // Thanh tiến trình thật từ player position/duration.
           StreamBuilder<Duration>(
-            stream: _player.positionStream,
+            stream: audio.positionStream,
             builder: (context, snap) {
               final pos = snap.data ?? Duration.zero;
-              final dur = _player.duration ?? Duration.zero;
+              final dur = audio.duration;
               final value = dur.inMilliseconds == 0
                   ? 0.0
                   : pos.inMilliseconds / dur.inMilliseconds;
@@ -292,12 +257,12 @@ class _SoundsScreenState extends State<SoundsScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: _current > 0 ? () => _playIndex(_current - 1) : null,
+                onPressed: audio.hasPrev ? audio.prev : null,
                 icon: const Icon(Icons.skip_previous, color: Colors.white),
               ),
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: _togglePlay,
+                onTap: audio.toggle,
                 child: Container(
                   height: 56,
                   width: 56,
@@ -306,7 +271,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    _player.playing ? Icons.pause : Icons.play_arrow,
+                    audio.playing ? Icons.pause : Icons.play_arrow,
                     color: RelaxColors.violet,
                     size: 30,
                   ),
@@ -314,9 +279,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                onPressed: _current < _tracks.length - 1
-                    ? () => _playIndex(_current + 1)
-                    : null,
+                onPressed: audio.hasNext ? audio.next : null,
                 icon: const Icon(Icons.skip_next, color: Colors.white),
               ),
             ],

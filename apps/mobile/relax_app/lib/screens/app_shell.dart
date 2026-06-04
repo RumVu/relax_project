@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../core/audio_controller.dart';
 import '../core/theme.dart';
 import 'home_screen.dart';
 import 'relax_screen.dart';
@@ -36,9 +39,16 @@ class _AppShellState extends State<AppShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: List.generate(3, _screen),
+      body: Column(
+        children: [
+          Expanded(
+            child: IndexedStack(
+              index: _index,
+              children: List.generate(3, _screen),
+            ),
+          ),
+          const _MiniPlayer(),
+        ],
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -62,6 +72,65 @@ class _AppShellState extends State<AppShell> {
             label: 'Setup',
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Thanh phát nhạc thu gọn — hiện phía trên bottom nav khi đang có bài phát.
+/// Bấm vào mở lại màn nhạc; nút phát/dừng + đóng.
+class _MiniPlayer extends StatelessWidget {
+  const _MiniPlayer();
+
+  @override
+  Widget build(BuildContext context) {
+    final audio = context.watch<AudioController>();
+    if (!audio.hasTrack) return const SizedBox.shrink();
+    final t = audio.current!;
+    return GestureDetector(
+      onTap: () => context.push('/sounds'),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 0, 12, 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [RelaxColors.violet, RelaxColors.plum],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.music_note, color: Colors.white, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                (t['title'] as String?) ?? 'Đang phát',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: audio.toggle,
+              icon: Icon(
+                audio.playing ? Icons.pause : Icons.play_arrow,
+                color: Colors.white,
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: audio.stop,
+              icon: const Icon(Icons.close, color: Colors.white70, size: 20),
+            ),
+          ],
+        ),
       ),
     );
   }

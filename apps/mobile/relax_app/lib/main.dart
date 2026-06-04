@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
@@ -29,6 +30,7 @@ class RelaxApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthState()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
+        ChangeNotifierProvider(create: (_) => AudioController()),
       ],
       child: Builder(builder: (context) {
         final auth = context.watch<AuthState>();
