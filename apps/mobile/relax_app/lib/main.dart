@@ -5,9 +5,11 @@ import 'package:provider/provider.dart';
 import 'core/auth_state.dart';
 import 'core/theme.dart';
 import 'screens/app_shell.dart';
+import 'screens/companion_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/weather_screen.dart';
 
 void main() {
   runApp(const RelaxApp());
@@ -60,6 +62,14 @@ GoRouter _buildRouter(AuthState auth) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/weather',
+        builder: (context, state) => const WeatherScreen(),
+      ),
+      GoRoute(
+        path: '/companion',
+        builder: (context, state) => const CompanionScreen(),
       ),
     ],
   );

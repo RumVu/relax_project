@@ -86,6 +86,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       else ...[
                         _QuoteCard(quote: _quote),
                         const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _QuickAction(
+                                icon: Icons.cloud_outlined,
+                                label: 'Thời tiết',
+                                onTap: () => context.push('/weather'),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _QuickAction(
+                                icon: Icons.pets_outlined,
+                                label: 'Linh thú',
+                                onTap: () => context.push('/companion'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
                         _SectionTitle(
                           title: 'Nhiệm vụ hôm nay',
                           trailing:
@@ -345,6 +365,55 @@ class _QuoteCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: RelaxColors.lilac),
+        ),
+        child: Column(
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                color: RelaxColors.violet.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: RelaxColors.violet),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                color: RelaxColors.ink,
+                fontSize: 13,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
