@@ -13,6 +13,7 @@ import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/sounds_screen.dart';
 import 'screens/weather_screen.dart';
 
 void main() {
@@ -107,6 +108,14 @@ GoRouter _buildRouter(AuthState auth) {
           title: 'Nhật ký',
           child: JournalScreen(),
         ),
+      ),
+      GoRoute(
+        path: '/sounds',
+        builder: (context, state) => const SoundsScreen(),
+      ),
+      GoRoute(
+        path: '/podcast',
+        builder: (context, state) => const SoundsScreen(category: 'PODCAST'),
       ),
     ],
   );

@@ -19,14 +19,14 @@ class RelaxScreen extends StatelessWidget {
       title: 'Nhạc',
       desc: 'Những giai điệu nhẹ nhàng giúp tâm trí bạn thư giãn.',
       icon: Icons.headphones,
-      route: '/companion',
+      route: '/sounds',
     ),
     _Activity(
       no: '02',
       title: 'Podcast',
       desc: 'Lắng nghe những câu chuyện truyền cảm hứng mỗi ngày.',
       icon: Icons.mic_none,
-      route: '/companion',
+      route: '/podcast',
     ),
     _Activity(
       no: '03',
@@ -112,7 +112,7 @@ class _ActivityCard extends StatelessWidget {
   void _play(BuildContext context) {
     var route = activity.route;
     if (route == '__random__') {
-      const pool = ['/companion', '/journal', '/breathing'];
+      const pool = ['/sounds', '/journal', '/breathing'];
       route = pool[Random().nextInt(pool.length)];
     }
     context.push(route);

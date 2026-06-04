@@ -383,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ('Thiền định', Icons.self_improvement, '/breathing'),
       ('Hít thở', Icons.air, '/breathing'),
       ('Viết nhật ký', Icons.edit_note, '/journal'),
-      ('Nghe nhạc', Icons.headphones, '/companion'),
+      ('Nghe nhạc', Icons.headphones, '/sounds'),
     ];
     return Container(
       padding: const EdgeInsets.all(16),
