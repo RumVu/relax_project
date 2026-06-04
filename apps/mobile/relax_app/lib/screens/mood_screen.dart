@@ -113,11 +113,7 @@ class _MoodScreenState extends State<MoodScreen> {
           children: [
             const Text(
               'Hôm nay bạn thấy thế nào?',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: RelaxColors.ink,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -204,9 +200,9 @@ class _MoodScreenState extends State<MoodScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RelaxColors.lilac),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Row(
         children: [
@@ -227,9 +223,9 @@ class _MoodScreenState extends State<MoodScreen> {
               children: [
                 Text(
                   (opt['label'] as String?) ?? '',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: RelaxColors.ink,
+                    color: context.appText,
                   ),
                 ),
                 if (note.isNotEmpty)
@@ -282,17 +278,17 @@ class _MoodGrid extends StatelessWidget {
             duration: const Duration(milliseconds: 150),
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: isSel ? RelaxColors.violet : Colors.white,
+              color: isSel ? RelaxColors.violet : context.surface,
               borderRadius: BorderRadius.circular(14),
               border: Border.all(
-                color: isSel ? RelaxColors.violet : RelaxColors.lilac,
+                color: isSel ? RelaxColors.violet : context.fieldBorder,
                 width: isSel ? 2 : 1,
               ),
             ),
             child: Text(
               label,
               style: TextStyle(
-                color: isSel ? Colors.white : RelaxColors.ink,
+                color: isSel ? Colors.white : context.appText,
                 fontWeight: FontWeight.w700,
                 fontSize: 14,
               ),
@@ -317,11 +313,11 @@ class _IntensitySlider extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               'Cường độ',
               style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: RelaxColors.ink,
+                color: context.appText,
               ),
             ),
             Text(

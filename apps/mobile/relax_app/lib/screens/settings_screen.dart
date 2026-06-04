@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../core/theme_controller.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -22,13 +23,13 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: RelaxColors.ink),
+          icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Cài đặt',
           style: TextStyle(
-            color: RelaxColors.ink,
+            color: context.appText,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -84,15 +85,11 @@ class SettingsScreen extends StatelessWidget {
                   subtitle: 'Quản lý nhắc nhở hàng ngày',
                   onTap: () => _showNotImplemented(context),
                 ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.palette_outlined,
-                  title: 'Giao diện',
-                  subtitle: 'Sáng',
-                  onTap: () => _showNotImplemented(context),
-                ),
               ],
             ),
+            const SizedBox(height: 24),
+            const _SectionLabel('Giao diện'),
+            const _ThemeToggleCard(),
             const SizedBox(height: 24),
             const _SectionLabel('Hỗ trợ'),
             _Card(
@@ -265,11 +262,72 @@ class _Card extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: RelaxColors.lilac),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Column(children: children),
+    );
+  }
+}
+
+/// Bộ chọn giao diện Sáng / Tối / Hệ thống — lưu ngay qua ThemeController.
+class _ThemeToggleCard extends StatelessWidget {
+  const _ThemeToggleCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = context.watch<ThemeController>();
+    final mode = controller.mode;
+    Widget option(ThemeMode m, IconData icon, String label) {
+      final selected = mode == m;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => controller.setMode(m),
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              color: selected ? RelaxColors.violet : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  icon,
+                  color: selected ? Colors.white : context.mutedText,
+                  size: 20,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected ? Colors.white : context.mutedText,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(6),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.fieldBorder),
+      ),
+      child: Row(
+        children: [
+          option(ThemeMode.light, Icons.light_mode_outlined, 'Sáng'),
+          option(ThemeMode.dark, Icons.dark_mode_outlined, 'Tối'),
+          option(ThemeMode.system, Icons.brightness_auto_outlined, 'Hệ thống'),
+        ],
+      ),
     );
   }
 }
@@ -314,16 +372,16 @@ class _Row extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: RelaxColors.ink,
+                      color: context.appText,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: const TextStyle(
-                      color: RelaxColors.slate,
+                    style: TextStyle(
+                      color: context.mutedText,
                       fontSize: 12,
                     ),
                   ),
@@ -332,7 +390,7 @@ class _Row extends StatelessWidget {
             ),
             trailing ??
                 (onTap != null
-                    ? const Icon(Icons.chevron_right, color: RelaxColors.slate)
+                    ? Icon(Icons.chevron_right, color: context.mutedText)
                     : const SizedBox.shrink()),
           ],
         ),
@@ -345,9 +403,9 @@ class _Divider extends StatelessWidget {
   const _Divider();
   @override
   Widget build(BuildContext context) {
-    return const Divider(
+    return Divider(
       height: 0,
-      color: RelaxColors.lilac,
+      color: context.fieldBorder,
       indent: 64,
       endIndent: 14,
     );

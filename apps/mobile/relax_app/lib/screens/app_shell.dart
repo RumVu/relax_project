@@ -48,8 +48,8 @@ class _AppShellState extends State<AppShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (i) => setState(() => _index = i),
-        backgroundColor: Colors.white,
-        indicatorColor: RelaxColors.violet.withValues(alpha: 0.15),
+        backgroundColor: context.surface,
+        indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

@@ -223,11 +223,7 @@ class _BreathingScreenState extends State<BreathingScreen>
               alignment: Alignment.centerLeft,
               child: Text(
                 'Hít thở cùng nhau',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800,
-                  color: RelaxColors.ink,
-                ),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 4),
@@ -254,16 +250,16 @@ class _BreathingScreenState extends State<BreathingScreen>
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                     decoration: BoxDecoration(
-                      color: sel ? RelaxColors.violet : Colors.white,
+                      color: sel ? RelaxColors.violet : context.surface,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: sel ? RelaxColors.violet : RelaxColors.lilac,
+                        color: sel ? RelaxColors.violet : context.fieldBorder,
                       ),
                     ),
                     child: Text(
                       _patterns[i].label,
                       style: TextStyle(
-                        color: sel ? Colors.white : RelaxColors.ink,
+                        color: sel ? Colors.white : context.appText,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),

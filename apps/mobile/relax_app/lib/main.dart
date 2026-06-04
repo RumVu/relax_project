@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/auth_state.dart';
 import 'core/theme.dart';
+import 'core/theme_controller.dart';
 import 'screens/app_shell.dart';
 import 'screens/companion_screen.dart';
 import 'screens/login_screen.dart';
@@ -20,15 +21,21 @@ class RelaxApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthState()),
+        ChangeNotifierProvider(create: (_) => ThemeController()),
+      ],
       child: Builder(builder: (context) {
         final auth = context.watch<AuthState>();
+        final themeMode = context.watch<ThemeController>().mode;
         final router = _buildRouter(auth);
         return MaterialApp.router(
           title: 'Relax',
           debugShowCheckedModeBanner: false,
           theme: buildRelaxTheme(),
+          darkTheme: buildRelaxDarkTheme(),
+          themeMode: themeMode,
           routerConfig: router,
         );
       }),

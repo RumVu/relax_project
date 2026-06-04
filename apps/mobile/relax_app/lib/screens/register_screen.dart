@@ -58,7 +58,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: RelaxColors.ink),
+          icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () => context.go('/login'),
         ),
       ),
@@ -75,11 +75,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     const Text(
                       'Tạo tài khoản mới',
-                      style: TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w800,
-                        color: RelaxColors.ink,
-                      ),
+                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 6),
                     const Text(

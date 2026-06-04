@@ -165,11 +165,7 @@ class _JournalScreenState extends State<JournalScreen> {
           children: [
             const Text(
               'Nhật ký của bạn',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: RelaxColors.ink,
-              ),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -181,9 +177,9 @@ class _JournalScreenState extends State<JournalScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.surface,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: RelaxColors.lilac),
+                border: Border.all(color: context.fieldBorder),
               ),
               child: Column(
                 children: [
@@ -239,11 +235,7 @@ class _JournalScreenState extends State<JournalScreen> {
             const SizedBox(height: 24),
             const Text(
               'Gần đây',
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                color: RelaxColors.ink,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
             const SizedBox(height: 12),
             if (_loading)
@@ -291,9 +283,9 @@ class _JournalScreenState extends State<JournalScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: RelaxColors.lilac),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,9 +293,9 @@ class _JournalScreenState extends State<JournalScreen> {
           if (title.isNotEmpty)
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w800,
-                color: RelaxColors.ink,
+                color: context.appText,
                 fontSize: 15,
               ),
             ),

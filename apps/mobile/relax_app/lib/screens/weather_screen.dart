@@ -65,12 +65,12 @@ class _WeatherScreenState extends State<WeatherScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: RelaxColors.ink),
+          icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Thời tiết',
-          style: TextStyle(color: RelaxColors.ink, fontWeight: FontWeight.w800),
+          style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
@@ -169,11 +169,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     const SizedBox(height: 24),
                     const Text(
                       'Dự báo 7 ngày',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: RelaxColors.ink,
-                      ),
+                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
                     if (_forecast.isEmpty)
@@ -203,9 +199,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RelaxColors.lilac),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Row(
         children: [
@@ -214,9 +210,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
             children: [
               Text(
                 date,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w700,
-                  color: RelaxColors.ink,
+                  color: context.appText,
                 ),
               ),
               if (title.isNotEmpty)
@@ -243,9 +239,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
           ],
           Text(
             '${min ?? '—'}° / ${max ?? '—'}°',
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: RelaxColors.ink,
+              color: context.appText,
             ),
           ),
         ],
@@ -269,9 +265,9 @@ class _MiniStat extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: RelaxColors.lilac),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -285,10 +281,10 @@ class _MiniStat extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,
-              color: RelaxColors.ink,
+              color: context.appText,
             ),
           ),
         ],

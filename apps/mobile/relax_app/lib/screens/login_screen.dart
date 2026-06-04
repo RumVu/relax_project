@@ -87,11 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Center(
                       child: Text(
                         'Chào mừng tới Relax',
-                        style: TextStyle(
-                          fontSize: 26,
-                          fontWeight: FontWeight.w800,
-                          color: RelaxColors.ink,
-                        ),
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                       ),
                     ),
                     const SizedBox(height: 8),

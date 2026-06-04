@@ -99,12 +99,12 @@ class _CompanionScreenState extends State<CompanionScreen>
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: RelaxColors.ink),
+          icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () => context.pop(),
         ),
-        title: const Text(
+        title: Text(
           'Linh thú của bạn',
-          style: TextStyle(color: RelaxColors.ink, fontWeight: FontWeight.w800),
+          style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
@@ -195,7 +195,6 @@ class _CompanionScreenState extends State<CompanionScreen>
                           style: TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
-                            color: RelaxColors.ink,
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -263,9 +262,9 @@ class _StatBar extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: RelaxColors.ink,
+                color: context.appText,
               ),
             ),
             const Spacer(),
@@ -308,9 +307,9 @@ class _ActionButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: RelaxColors.lilac),
+          border: Border.all(color: context.fieldBorder),
         ),
         child: Column(
           children: [
@@ -318,10 +317,10 @@ class _ActionButton extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 13,
-                color: RelaxColors.ink,
+                color: context.appText,
               ),
             ),
           ],

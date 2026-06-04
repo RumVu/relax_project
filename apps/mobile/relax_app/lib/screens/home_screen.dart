@@ -139,10 +139,12 @@ class _HomeScreenState extends State<HomeScreen> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: completed ? RelaxColors.mint.withValues(alpha: 0.10) : Colors.white,
+        color: completed
+            ? RelaxColors.mint.withValues(alpha: 0.10)
+            : context.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: completed ? RelaxColors.mint : RelaxColors.lilac,
+          color: completed ? RelaxColors.mint : context.fieldBorder,
         ),
       ),
       child: Row(
@@ -172,7 +174,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   (q['title'] as String?) ?? '',
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: completed ? RelaxColors.mint : RelaxColors.ink,
+                    color: completed ? RelaxColors.mint : context.appText,
                     decoration: completed ? TextDecoration.lineThrough : null,
                   ),
                 ),
@@ -280,8 +282,8 @@ class _Header extends StatelessWidget {
               ),
               Text(
                 name,
-                style: const TextStyle(
-                  color: RelaxColors.ink,
+                style: TextStyle(
+                  color: context.appText,
                   fontWeight: FontWeight.w800,
                   fontSize: 18,
                 ),
@@ -293,7 +295,7 @@ class _Header extends StatelessWidget {
         IconButton(
           onPressed: onSettings,
           icon: const Icon(Icons.settings_outlined),
-          color: RelaxColors.ink,
+          color: context.appText,
         ),
       ],
     );
@@ -388,9 +390,9 @@ class _QuickAction extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: RelaxColors.lilac),
+          border: Border.all(color: context.fieldBorder),
         ),
         child: Column(
           children: [
@@ -406,9 +408,9 @@ class _QuickAction extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w700,
-                color: RelaxColors.ink,
+                color: context.appText,
                 fontSize: 13,
               ),
             ),
@@ -431,10 +433,10 @@ class _SectionTitle extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 18,
-            color: RelaxColors.ink,
+            color: context.appText,
           ),
         ),
         Container(
