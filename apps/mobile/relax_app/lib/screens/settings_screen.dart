@@ -22,12 +22,9 @@ class SettingsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.appText),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
-          'Cài đặt',
+          'Setup',
           style: TextStyle(
             color: context.appText,
             fontWeight: FontWeight.w800,

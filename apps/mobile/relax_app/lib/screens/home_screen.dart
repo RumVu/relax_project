@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../widgets/cat_mascot.dart';
 
+/// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
+/// thoại, lưới cảm xúc, thanh theo dõi cảm xúc, và các phương thức phù hợp.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -15,9 +18,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _loading = true;
-  Map<String, dynamic>? _quote;
-  List<Map<String, dynamic>> _quests = [];
   String? _error;
+  Map<String, dynamic>? _greeting;
+  Map<String, dynamic>? _quote;
+  List<Map<String, dynamic>> _moodOptions = [];
+  Map<String, int> _moodCounts = {};
+  int _moodTotal = 0;
+  String? _savingMood;
 
   @override
   void initState() {
@@ -32,18 +39,38 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     try {
       final results = await Future.wait([
+        RelaxApi.instance.get('/weather/me/current'),
         RelaxApi.instance.get('/cozy-quotes/random'),
-        RelaxApi.instance.get('/quests/me', query: {'locale': 'vi'}),
+        RelaxApi.instance.get('/mood-checkins/options'),
+        RelaxApi.instance.get('/mood-checkins/me', query: {'limit': 60}),
       ]);
-      final quoteData = results[0].data;
-      final questsData = results[1].data;
-      _quote = quoteData is Map ? Map<String, dynamic>.from(quoteData) : null;
-      _quests = (questsData is List)
-          ? questsData
+      final w = results[0].data;
+      _greeting = (w is Map && w['greeting'] is Map)
+          ? Map<String, dynamic>.from(w['greeting'])
+          : null;
+      _quote = results[1].data is Map
+          ? Map<String, dynamic>.from(results[1].data)
+          : null;
+      final opts = results[2].data;
+      _moodOptions = (opts is List)
+          ? opts
               .whereType<Map>()
               .map((e) => Map<String, dynamic>.from(e))
+              .take(6)
               .toList()
           : [];
+      final hist = results[3].data;
+      final items = hist is Map ? hist['items'] : hist;
+      _moodCounts = {};
+      _moodTotal = 0;
+      if (items is List) {
+        for (final it in items.whereType<Map>()) {
+          final m = it['mood'] as String?;
+          if (m == null) continue;
+          _moodCounts[m] = (_moodCounts[m] ?? 0) + 1;
+          _moodTotal++;
+        }
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -51,491 +78,409 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _logMood(String mood, String label) async {
+    setState(() => _savingMood = mood);
+    try {
+      final res = await RelaxApi.instance.post('/mood-checkins/me', body: {
+        'mood': mood,
+        'intensity': 3,
+        'tags': ['home'],
+      });
+      if (!mounted) return;
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          backgroundColor: RelaxColors.mint,
+          content: Text('Đã ghi cảm xúc: $label'),
+        ));
+        await _loadAll();
+      }
+    } catch (_) {
+      // ignore — snackbar đủ
+    } finally {
+      if (mounted) setState(() => _savingMood = null);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = context.watch<AuthState>().user;
-    final displayName = (user?['name'] as String?) ??
+    final name = (user?['name'] as String?) ??
         (user?['email'] as String?)?.split('@').first ??
         'bạn';
-    // Trả về body-only (không Scaffold) vì AppShell đã bọc Scaffold + bottom
-    // nav rồi.
-    return SafeArea(
-        child: RefreshIndicator(
-          color: RelaxColors.violet,
-          onRefresh: _loadAll,
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                sliver: SliverToBoxAdapter(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _Header(
-                        name: displayName,
-                        avatarUrl: user?['avatar'] as String?,
-                        onSettings: () => context.push('/settings'),
-                      ),
-                      const SizedBox(height: 20),
-                      if (_loading) ...[
-                        const _Skeleton(),
-                        const SizedBox(height: 16),
-                        const _Skeleton(height: 200),
-                      ] else if (_error != null)
-                        _ErrorBanner(message: _error!, onRetry: _loadAll)
-                      else ...[
-                        _QuoteCard(quote: _quote),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _QuickAction(
-                                icon: Icons.cloud_outlined,
-                                label: 'Thời tiết',
-                                onTap: () => context.push('/weather'),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: _QuickAction(
-                                icon: Icons.pets_outlined,
-                                label: 'Linh thú',
-                                onTap: () => context.push('/companion'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        _SectionTitle(
-                          title: 'Nhiệm vụ hôm nay',
-                          trailing:
-                              '${_quests.where((q) => q['completed'] == true).length}/${_quests.length}',
-                        ),
-                        const SizedBox(height: 12),
-                        if (_quests.isEmpty)
-                          const _EmptyHint(
-                            text: 'Chưa có nhiệm vụ. Kéo xuống để làm mới.',
-                          )
-                        else
-                          ..._quests.map(_buildQuestCard),
-                      ],
-                      const SizedBox(height: 32),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-  }
 
-  Widget _buildQuestCard(Map<String, dynamic> q) {
-    final completed = q['completed'] == true;
-    final progress = (q['progress'] as num?)?.toDouble() ?? 0;
-    final target = (q['target'] as num?)?.toDouble() ?? 1;
-    final pct = (progress / target).clamp(0.0, 1.0);
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: completed
-            ? RelaxColors.mint.withValues(alpha: 0.10)
-            : context.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: completed ? RelaxColors.mint : context.fieldBorder,
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: completed
-                  ? RelaxColors.mint.withValues(alpha: 0.2)
-                  : RelaxColors.violet.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            alignment: Alignment.center,
-            child: Icon(
-              completed ? Icons.check_circle : _iconForCategory(q['category']),
-              color: completed ? RelaxColors.mint : RelaxColors.violet,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  (q['title'] as String?) ?? '',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    color: completed ? RelaxColors.mint : context.appText,
-                    decoration: completed ? TextDecoration.lineThrough : null,
-                  ),
+    return SafeArea(
+      child: RefreshIndicator(
+        color: RelaxColors.violet,
+        onRefresh: _loadAll,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          children: [
+            _header(context, name),
+            const SizedBox(height: 16),
+            _speechBubble(context, name),
+            const SizedBox(height: 20),
+            if (_loading)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(30),
+                  child: CircularProgressIndicator(color: RelaxColors.violet),
                 ),
-                const SizedBox(height: 4),
+              )
+            else ...[
+              _sectionTitle('Hôm nay $name đang cảm thấy:'),
+              const SizedBox(height: 12),
+              _moodGrid(),
+              const SizedBox(height: 24),
+              _trackingCard(context, name),
+              const SizedBox(height: 24),
+              _methodsCard(context, name),
+              if (_error != null) ...[
+                const SizedBox(height: 16),
                 Text(
-                  (q['description'] as String?) ?? '',
-                  style: const TextStyle(color: RelaxColors.slate, fontSize: 12),
-                ),
-                const SizedBox(height: 8),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    minHeight: 6,
-                    backgroundColor: RelaxColors.lilac,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      completed ? RelaxColors.mint : RelaxColors.violet,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${progress.toInt()} / ${target.toInt()}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: RelaxColors.slate,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  _error!,
+                  style: const TextStyle(color: RelaxColors.coral, fontSize: 12),
                 ),
               ],
-            ),
-          ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }
 
-  IconData _iconForCategory(dynamic c) {
-    switch (c) {
-      case 'journal':
-        return Icons.book_outlined;
-      case 'mood':
-        return Icons.favorite_outline;
-      case 'breathing':
-        return Icons.air;
-      case 'sound':
-        return Icons.music_note_outlined;
-      case 'companion':
-        return Icons.pets_outlined;
-      default:
-        return Icons.auto_awesome_outlined;
-    }
-  }
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.name,
-    required this.onSettings,
-    this.avatarUrl,
-  });
-
-  final String name;
-  final String? avatarUrl;
-  final VoidCallback onSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final hour = DateTime.now().hour;
-    final greet = hour < 11
-        ? 'Chào buổi sáng'
-        : hour < 17
-            ? 'Chào buổi trưa'
-            : hour < 21
-                ? 'Chào buổi tối'
-                : 'Khuya rồi nè';
+  Widget _header(BuildContext context, String name) {
+    final title = (_greeting?['title'] as String?) ?? 'Đã trở lại rồi nè ~';
+    final subtitle = (_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.';
     return Row(
       children: [
-        CircleAvatar(
-          radius: 26,
-          backgroundColor: RelaxColors.lilac,
-          foregroundImage:
-              avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-          child: Text(
-            name.isNotEmpty ? name[0].toUpperCase() : '?',
-            style: const TextStyle(
-              color: RelaxColors.violet,
-              fontWeight: FontWeight.w800,
-              fontSize: 22,
-            ),
-          ),
-        ),
-        const SizedBox(width: 14),
+        const Icon(Icons.wb_sunny_outlined, color: RelaxColors.sun, size: 30),
+        const SizedBox(width: 12),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                greet,
-                style: const TextStyle(
-                  color: RelaxColors.slate,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 17,
+                  color: context.appText,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
               Text(
-                name,
-                style: TextStyle(
-                  color: context.appText,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
+                subtitle,
+                style: TextStyle(color: context.mutedText, fontSize: 12),
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
-        IconButton(
-          onPressed: onSettings,
-          icon: const Icon(Icons.settings_outlined),
-          color: context.appText,
+        Stack(
+          children: [
+            IconButton(
+              onPressed: () => context.push('/weather'),
+              icon: Icon(Icons.notifications_outlined, color: context.appText),
+            ),
+            const Positioned(
+              right: 10,
+              top: 10,
+              child: CircleAvatar(radius: 4, backgroundColor: RelaxColors.coral),
+            ),
+          ],
         ),
       ],
     );
   }
-}
 
-class _QuoteCard extends StatelessWidget {
-  const _QuoteCard({this.quote});
-  final Map<String, dynamic>? quote;
-
-  @override
-  Widget build(BuildContext context) {
-    final content = (quote?['content'] as String?) ??
-        'Hôm nay không cần phải hoàn hảo. Bạn đang ở đây là đủ rồi.';
-    final author = quote?['author'] as String?;
+  Widget _speechBubble(BuildContext context, String name) {
+    final line = (_quote?['content'] as String?) ??
+        'Stress quá mới tìm đến toi hở? $name nói cho toi nghe đi nè!';
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [RelaxColors.violet, RelaxColors.plum],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: context.surface,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: RelaxColors.violet.withValues(alpha: 0.3),
-            blurRadius: 28,
-            offset: const Offset(0, 14),
+        border: Border.all(color: context.fieldBorder),
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: RelaxColors.violet.withValues(alpha: context.isDark ? 0.16 : 0.08),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              line,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.appText,
+                fontWeight: FontWeight.w600,
+                height: 1.4,
+              ),
+            ),
           ),
+          const SizedBox(height: 14),
+          const CatMascot(size: 130, emoji: '😺'),
         ],
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String text) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('✦ ', style: TextStyle(color: RelaxColors.violet)),
+        Text(
+          text,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            fontSize: 15,
+            color: context.appText,
+          ),
+        ),
+        const Text(' ✦', style: TextStyle(color: RelaxColors.violet)),
+      ],
+    );
+  }
+
+  Widget _moodGrid() {
+    return GridView.count(
+      crossAxisCount: 3,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: 10,
+      crossAxisSpacing: 10,
+      childAspectRatio: 0.95,
+      children: _moodOptions.map((o) {
+        final mood = o['mood'] as String;
+        final label = (o['shortLabel'] as String?) ?? (o['label'] as String?) ?? mood;
+        final saving = _savingMood == mood;
+        return GestureDetector(
+          onTap: saving ? null : () => _logMood(mood, label),
+          child: Container(
+            decoration: BoxDecoration(
+              color: context.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.fieldBorder),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(_moodEmoji(mood), style: const TextStyle(fontSize: 30)),
+                const SizedBox(height: 6),
+                saving
+                    ? const SizedBox(
+                        height: 14,
+                        width: 14,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: RelaxColors.violet),
+                      )
+                    : Text(
+                        label,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                          color: context.appText,
+                        ),
+                      ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _trackingCard(BuildContext context, String name) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.format_quote, color: Colors.white70),
-              const SizedBox(width: 8),
-              Text(
-                'LỜI NHẮN HÔM NAY',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.85),
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
-                  fontSize: 11,
+              Expanded(
+                child: Text(
+                  'Theo dõi cảm xúc của $name',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    color: context.appText,
+                  ),
                 ),
               ),
+              const Icon(Icons.bar_chart, color: RelaxColors.violet, size: 20),
             ],
           ),
           const SizedBox(height: 14),
-          Text(
-            '“$content”',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              height: 1.4,
-            ),
-          ),
-          if (author != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              '— $author',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.75),
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
+          if (_moodOptions.isEmpty)
+            Text('Chưa có dữ liệu cảm xúc.',
+                style: TextStyle(color: context.mutedText, fontSize: 12))
+          else
+            ..._moodOptions.map((o) {
+              final mood = o['mood'] as String;
+              final label = (o['label'] as String?) ?? mood;
+              final pct = _moodTotal == 0
+                  ? 0.0
+                  : (_moodCounts[mood] ?? 0) / _moodTotal;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: 90,
+                      child: Text(
+                        label,
+                        style: TextStyle(fontSize: 12, color: context.appText),
+                      ),
+                    ),
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: LinearProgressIndicator(
+                          value: pct,
+                          minHeight: 8,
+                          backgroundColor: context.surfaceAlt,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            _moodColor(mood),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 38,
+                      child: Text(
+                        '${(pct * 100).round()}%',
+                        textAlign: TextAlign.right,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: context.appText,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
         ],
       ),
     );
   }
-}
 
-class _QuickAction extends StatelessWidget {
-  const _QuickAction({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: context.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.fieldBorder),
-        ),
-        child: Column(
-          children: [
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: RelaxColors.violet.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: RelaxColors.violet),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: context.appText,
-                fontSize: 13,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.trailing});
-  final String title;
-  final String trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-            color: context.appText,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: RelaxColors.violet.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            trailing,
-            style: const TextStyle(
-              color: RelaxColors.violet,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Skeleton extends StatelessWidget {
-  const _Skeleton({this.height = 100});
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: RelaxColors.mist,
-        borderRadius: BorderRadius.circular(16),
-      ),
-    );
-  }
-}
-
-class _EmptyHint extends StatelessWidget {
-  const _EmptyHint({required this.text});
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _methodsCard(BuildContext context, String name) {
+    final methods = [
+      ('Thiền định', Icons.self_improvement, '/breathing'),
+      ('Hít thở', Icons.air, '/breathing'),
+      ('Viết nhật ký', Icons.edit_note, '/journal'),
+      ('Nghe nhạc', Icons.headphones, '/companion'),
+    ];
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: RelaxColors.lilac,
-          style: BorderStyle.solid,
-        ),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: RelaxColors.slate),
-        textAlign: TextAlign.center,
-      ),
-    );
-  }
-}
-
-class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: RelaxColors.coral.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: RelaxColors.coral),
+        color: context.surface,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: context.fieldBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Không tải được dữ liệu',
+          Text(
+            'Phương thức phù hợp cho $name',
             style: TextStyle(
               fontWeight: FontWeight.w800,
-              color: RelaxColors.coral,
+              color: context.appText,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            message,
-            style: const TextStyle(color: RelaxColors.coral, fontSize: 12),
-          ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: onRetry,
-            icon: const Icon(Icons.refresh),
-            label: const Text('Thử lại'),
+          const SizedBox(height: 14),
+          Row(
+            children: methods.map((m) {
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => context.push(m.$3),
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      color: context.surfaceAlt,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: context.fieldBorder),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(m.$2, color: RelaxColors.violet),
+                        const SizedBox(height: 6),
+                        Text(
+                          m.$1,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: context.appText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
           ),
         ],
       ),
     );
+  }
+
+  String _moodEmoji(String mood) {
+    switch (mood) {
+      case 'HAPPY':
+        return '😺';
+      case 'SAD':
+        return '😿';
+      case 'STRESSED':
+        return '🙀';
+      case 'TIRED':
+        return '😾';
+      case 'ANXIOUS':
+        return '😼';
+      case 'NEUTRAL':
+        return '😐';
+      case 'CALM':
+        return '😌';
+      case 'EXCITED':
+        return '😸';
+      case 'LONELY':
+        return '🐱';
+      case 'GRATEFUL':
+        return '😻';
+      default:
+        return '🐱';
+    }
+  }
+
+  Color _moodColor(String mood) {
+    switch (mood) {
+      case 'HAPPY':
+      case 'GRATEFUL':
+        return RelaxColors.sun;
+      case 'STRESSED':
+      case 'ANXIOUS':
+        return RelaxColors.coral;
+      case 'CALM':
+      case 'EXCITED':
+        return RelaxColors.mint;
+      default:
+        return RelaxColors.violet;
+    }
   }
 }

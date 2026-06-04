@@ -6,8 +6,11 @@ import 'core/auth_state.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'screens/app_shell.dart';
+import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
+import 'screens/journal_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/onboarding_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/weather_screen.dart';
@@ -54,12 +57,25 @@ GoRouter _buildRouter(AuthState auth) {
       final loggedIn = auth.isLoggedIn;
       final path = state.matchedLocation;
       final atAuthScreen = path == '/login' || path == '/register';
-      if (!loggedIn && !atAuthScreen && path != '/') return '/login';
-      if (loggedIn && (atAuthScreen || path == '/')) return '/home';
+      final atOnboarding = path == '/onboarding';
+      // Chưa đăng nhập + chưa xem onboarding → vào onboarding trước.
+      if (!loggedIn && !auth.onboardingSeen && !atOnboarding) {
+        return '/onboarding';
+      }
+      if (!loggedIn && !atAuthScreen && !atOnboarding && path != '/') {
+        return '/login';
+      }
+      if (loggedIn && (atAuthScreen || atOnboarding || path == '/')) {
+        return '/home';
+      }
       return null;
     },
     routes: [
       GoRoute(path: '/', builder: (context, state) => const _Splash()),
+      GoRoute(
+        path: '/onboarding',
+        builder: (context, state) => const OnboardingScreen(),
+      ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/register',
@@ -78,8 +94,49 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/companion',
         builder: (context, state) => const CompanionScreen(),
       ),
+      GoRoute(
+        path: '/breathing',
+        builder: (context, state) => const _PushedScreen(
+          title: 'Hít thở',
+          child: BreathingScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/journal',
+        builder: (context, state) => const _PushedScreen(
+          title: 'Nhật ký',
+          child: JournalScreen(),
+        ),
+      ),
     ],
   );
+}
+
+/// Bọc một tab-screen (vốn trả body-only) trong Scaffold + AppBar khi mở
+/// dạng route push, để nút back hoạt động.
+class _PushedScreen extends StatelessWidget {
+  const _PushedScreen({required this.title, required this.child});
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: context.appText),
+          onPressed: () => context.pop(),
+        ),
+        title: Text(
+          title,
+          style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
+        ),
+      ),
+      body: child,
+    );
+  }
 }
 
 class _Splash extends StatelessWidget {

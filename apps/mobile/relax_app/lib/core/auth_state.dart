@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'api_client.dart';
 
 /// State giữ thông tin user đăng nhập + giúp các màn hình
@@ -10,14 +11,21 @@ class AuthState extends ChangeNotifier {
 
   Map<String, dynamic>? _user;
   bool _checking = true;
+  bool _onboardingSeen = true;
   String? _error;
 
   Map<String, dynamic>? get user => _user;
   bool get checking => _checking;
   bool get isLoggedIn => _user != null;
+  bool get onboardingSeen => _onboardingSeen;
   String? get error => _error;
 
   Future<void> _bootstrap() async {
+    // Đọc cờ đã xem onboarding chưa (key trùng với OnboardingScreen.seenKey).
+    const storage = FlutterSecureStorage();
+    _onboardingSeen =
+        (await storage.read(key: 'relax_onboarding_done')) == '1';
+
     final token = await RelaxApi.instance.accessToken;
     if (token == null || token.isEmpty) {
       _checking = false;

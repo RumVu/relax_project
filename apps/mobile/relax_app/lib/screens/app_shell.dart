@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
-import 'breathing_screen.dart';
 import 'home_screen.dart';
-import 'journal_screen.dart';
-import 'mood_screen.dart';
+import 'relax_screen.dart';
+import 'settings_screen.dart';
 
-/// Khung chính sau khi đăng nhập: 4 tab (Tổng quan / Cảm xúc / Hít thở /
-/// Nhật ký) chuyển qua IndexedStack để giữ state mỗi tab khi đổi. Settings
-/// mở dạng route push riêng nên không nằm trong tab bar.
+/// Khung chính sau khi đăng nhập. 3 tab theo mockup: Trang chủ / Khu thư
+/// giãn / Setup. IndexedStack giữ state mỗi tab, lazy build để tránh gọi
+/// API thừa.
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -18,8 +17,6 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
-
-  // Lazy: chỉ build screen khi tab được mở lần đầu để tránh gọi API thừa.
   final _built = <int, Widget>{};
 
   Widget _screen(int i) {
@@ -28,12 +25,10 @@ class _AppShellState extends State<AppShell> {
         case 0:
           return const HomeScreen();
         case 1:
-          return const MoodScreen();
+          return const RelaxScreen();
         case 2:
-          return const BreathingScreen();
-        case 3:
         default:
-          return const JournalScreen();
+          return const SettingsScreen();
       }
     });
   }
@@ -43,7 +38,7 @@ class _AppShellState extends State<AppShell> {
     return Scaffold(
       body: IndexedStack(
         index: _index,
-        children: List.generate(4, _screen),
+        children: List.generate(3, _screen),
       ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
@@ -54,22 +49,17 @@ class _AppShellState extends State<AppShell> {
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home, color: RelaxColors.violet),
-            label: 'Tổng quan',
+            label: 'Trang chủ',
           ),
           NavigationDestination(
-            icon: Icon(Icons.favorite_outline),
-            selectedIcon: Icon(Icons.favorite, color: RelaxColors.violet),
-            label: 'Cảm xúc',
+            icon: Icon(Icons.spa_outlined),
+            selectedIcon: Icon(Icons.spa, color: RelaxColors.violet),
+            label: 'Khu thư giãn',
           ),
           NavigationDestination(
-            icon: Icon(Icons.air),
-            selectedIcon: Icon(Icons.air, color: RelaxColors.violet),
-            label: 'Hít thở',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book_outlined),
-            selectedIcon: Icon(Icons.book, color: RelaxColors.violet),
-            label: 'Nhật ký',
+            icon: Icon(Icons.settings_outlined),
+            selectedIcon: Icon(Icons.settings, color: RelaxColors.violet),
+            label: 'Setup',
           ),
         ],
       ),
