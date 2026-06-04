@@ -56,14 +56,40 @@ class SettingsScreen extends StatelessWidget {
             const _SectionLabel('Thông báo'),
             const _NotificationCard(),
             const SizedBox(height: 24),
+            const _SectionLabel('Khám phá'),
+            _Card(
+              children: [
+                _Row(
+                  icon: Icons.insights_outlined,
+                  title: 'Phân tích cảm xúc',
+                  subtitle: 'Biểu đồ & phân bố cảm xúc của bạn',
+                  onTap: () => context.push('/analytics'),
+                ),
+                const _Divider(),
+                _Row(
+                  icon: Icons.cloud_outlined,
+                  title: 'Thời tiết',
+                  subtitle: 'Theo dõi thời tiết & dự báo',
+                  onTap: () => context.push('/weather'),
+                ),
+                const _Divider(),
+                _Row(
+                  icon: Icons.pets_outlined,
+                  title: 'Linh thú',
+                  subtitle: 'Nuôi và tương tác với bạn đồng hành',
+                  onTap: () => context.push('/companion'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             const _SectionLabel('Quy định & sử dụng'),
             _Card(
               children: [
                 _Row(
                   icon: Icons.description_outlined,
-                  title: 'Điều khoản, chính sách & giấy phép',
+                  title: 'Điều khoản, bản quyền & giấy phép',
                   subtitle: 'Đọc trước khi sử dụng',
-                  onTap: () => _showNotImplemented(context),
+                  onTap: () => context.push('/legal'),
                 ),
                 const _Divider(),
                 _Row(

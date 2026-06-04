@@ -380,7 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _methodsCard(BuildContext context, String name) {
     final methods = [
-      ('Thiền định', Icons.self_improvement, '/breathing'),
+      ('Thiền định', Icons.self_improvement, '/meditation'),
       ('Hít thở', Icons.air, '/breathing'),
       ('Viết nhật ký', Icons.edit_note, '/journal'),
       ('Nghe nhạc', Icons.headphones, '/sounds'),

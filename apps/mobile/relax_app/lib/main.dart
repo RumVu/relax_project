@@ -6,10 +6,12 @@ import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
+import 'screens/analytics_screen.dart';
 import 'screens/app_shell.dart';
 import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
 import 'screens/journal_screen.dart';
+import 'screens/legal_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/register_screen.dart';
@@ -118,6 +120,19 @@ GoRouter _buildRouter(AuthState auth) {
       GoRoute(
         path: '/podcast',
         builder: (context, state) => const SoundsScreen(category: 'PODCAST'),
+      ),
+      GoRoute(
+        path: '/meditation',
+        builder: (context, state) =>
+            const SoundsScreen(category: 'MEDITATION'),
+      ),
+      GoRoute(
+        path: '/analytics',
+        builder: (context, state) => const AnalyticsScreen(),
+      ),
+      GoRoute(
+        path: '/legal',
+        builder: (context, state) => const LegalScreen(),
       ),
     ],
   );
