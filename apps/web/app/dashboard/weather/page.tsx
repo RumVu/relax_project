@@ -119,12 +119,22 @@ export default function WeatherPage() {
       ]);
       if (cur.status === 'fulfilled') {
         setCurrent(cur.value);
+        // Diagnostic: nếu backend trả 200 nhưng không có data thì log shape
+        // ra để dễ chẩn đoán (vd configured=false vì lat/lng chưa có).
+        if (!cur.value?.current?.temperature && cur.value?.configured !== false) {
+          // eslint-disable-next-line no-console
+          console.warn('Weather /current returned without temperature:', cur.value);
+        }
       } else {
         // eslint-disable-next-line no-console
         console.error('Weather /current failed:', cur.reason);
       }
       if (fc.status === 'fulfilled') {
         setForecast(fc.value);
+        if (!fc.value?.forecast?.length && fc.value?.configured !== false) {
+          // eslint-disable-next-line no-console
+          console.warn('Weather /forecast returned empty list:', fc.value);
+        }
       } else {
         // eslint-disable-next-line no-console
         console.error('Weather /forecast failed:', fc.reason);
