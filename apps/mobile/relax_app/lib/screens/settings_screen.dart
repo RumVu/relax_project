@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../core/theme_controller.dart';
+import '../widgets/cat_mascot.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -24,7 +25,7 @@ class SettingsScreen extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
-          'Setup',
+          'Setup ✨',
           style: TextStyle(
             color: context.appText,
             fontWeight: FontWeight.w800,
@@ -33,68 +34,33 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           children: [
+            // Header có mascot như mockup.
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Tùy chỉnh không gian của $name ~',
+                    style: TextStyle(color: context.mutedText, fontSize: 13),
+                  ),
+                ),
+                const CatMascot(size: 56, emoji: '😺', glow: false),
+              ],
+            ),
+            const SizedBox(height: 16),
             _ProfileHero(name: name, email: email, avatar: avatar, role: role),
             const SizedBox(height: 24),
-            const _SectionLabel('Tài khoản'),
+            const _SectionLabel('Thông báo'),
+            const _NotificationCard(),
+            const SizedBox(height: 24),
+            const _SectionLabel('Quy định & sử dụng'),
             _Card(
               children: [
                 _Row(
-                  icon: Icons.email_outlined,
-                  title: 'Email',
-                  subtitle: email,
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.shield_outlined,
-                  title: 'Vai trò',
-                  subtitle: role,
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.verified_outlined,
-                  title: 'Xác thực email',
-                  subtitle: (user?['emailVerified'] == true)
-                      ? 'Đã xác thực'
-                      : 'Chưa xác thực',
-                  trailing: (user?['emailVerified'] == true)
-                      ? const Icon(Icons.check_circle, color: RelaxColors.mint)
-                      : const Icon(Icons.warning_amber_rounded,
-                          color: RelaxColors.coral),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const _SectionLabel('Tùy chỉnh'),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.language_outlined,
-                  title: 'Ngôn ngữ',
-                  subtitle: 'Tiếng Việt',
-                  onTap: () => _showNotImplemented(context),
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.notifications_outlined,
-                  title: 'Thông báo',
-                  subtitle: 'Quản lý nhắc nhở hàng ngày',
-                  onTap: () => _showNotImplemented(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            const _SectionLabel('Giao diện'),
-            const _ThemeToggleCard(),
-            const SizedBox(height: 24),
-            const _SectionLabel('Hỗ trợ'),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.help_outline,
-                  title: 'Trung tâm trợ giúp',
-                  subtitle: 'Câu hỏi thường gặp',
+                  icon: Icons.description_outlined,
+                  title: 'Điều khoản, chính sách & giấy phép',
+                  subtitle: 'Đọc trước khi sử dụng',
                   onTap: () => _showNotImplemented(context),
                 ),
                 const _Divider(),
@@ -106,7 +72,52 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
+            const _SectionLabel('Giao diện'),
+            const _ThemeToggleCard(),
+            const SizedBox(height: 24),
+            const _SectionLabel('Nạp thẻ / Nâng cấp'),
+            _Card(
+              children: [
+                _Row(
+                  icon: Icons.workspace_premium_outlined,
+                  title: 'Mở khóa tính năng nâng cao',
+                  subtitle: 'Phân tích sâu, companion theo cung & con giáp',
+                  trailing: Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: RelaxColors.violet,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Text(
+                      'Nạp ngay',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                  onTap: () => _showNotImplemented(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            const _SectionLabel('Tài khoản'),
+            _Card(
+              children: [
+                _Row(
+                  icon: Icons.delete_outline,
+                  title: 'Xóa tài khoản',
+                  subtitle: 'Xóa vĩnh viễn toàn bộ dữ liệu của bạn',
+                  trailing: const Icon(Icons.chevron_right,
+                      color: RelaxColors.coral),
+                  onTap: () => _confirmDelete(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
             _LogoutButton(),
             const SizedBox(height: 24),
           ],
@@ -129,6 +140,152 @@ class SettingsScreen extends StatelessWidget {
       applicationVersion: '1.0.0',
       applicationLegalese:
           'Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.',
+    );
+  }
+
+  Future<void> _confirmDelete(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Xóa tài khoản?'),
+        content: const Text(
+          'Bạn chắc chứ…? Mọi dữ liệu sẽ biến mất và sẽ không quay lại được đâu.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy bỏ'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Xóa vĩnh viễn'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true && context.mounted) {
+      // Backend chưa mở endpoint self-delete cho mobile — báo rõ thay vì
+      // giả vờ xóa.
+      _showNotImplemented(context);
+    }
+  }
+}
+
+/// Khung giờ nhận nhắc nhở — chip 17:00 / 19:00 / 21:00 + "Mở rộng" + âm báo,
+/// dựng theo mockup. Lựa chọn hiện lưu tại chỗ (chưa đẩy backend reminder).
+class _NotificationCard extends StatefulWidget {
+  const _NotificationCard();
+
+  @override
+  State<_NotificationCard> createState() => _NotificationCardState();
+}
+
+class _NotificationCardState extends State<_NotificationCard> {
+  final _times = ['17:00', '19:00', '21:00'];
+  String _selected = '21:00';
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.fieldBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Chọn khung giờ muốn nhận thông báo nhé ~',
+            style: TextStyle(color: context.mutedText, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              ..._times.map((t) {
+                final sel = _selected == t;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selected = t),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: sel ? RelaxColors.violet : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: sel ? RelaxColors.violet : context.fieldBorder,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          Text(
+                            t,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: sel ? Colors.white : context.appText,
+                            ),
+                          ),
+                          if (sel)
+                            const Icon(Icons.check_circle,
+                                size: 14, color: Colors.white),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: context.fieldBorder),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.add, color: context.mutedText, size: 18),
+                      Text(
+                        'Mở rộng',
+                        style:
+                            TextStyle(fontSize: 11, color: context.mutedText),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            decoration: BoxDecoration(
+              color: context.surfaceAlt,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.volume_up_outlined,
+                    color: RelaxColors.violet, size: 20),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    'Âm báo: Tiếng mèo con kêu 🐱',
+                    style: TextStyle(
+                      color: context.appText,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+                Icon(Icons.chevron_right, color: context.mutedText),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
