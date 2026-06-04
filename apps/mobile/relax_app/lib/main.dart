@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/auth_state.dart';
 import 'core/theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/app_shell.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/settings_screen.dart';
@@ -56,7 +56,7 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const HomeScreen()),
+      GoRoute(path: '/home', builder: (context, state) => const AppShell()),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),

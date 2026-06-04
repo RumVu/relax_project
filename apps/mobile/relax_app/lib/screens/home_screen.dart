@@ -57,8 +57,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final displayName = (user?['name'] as String?) ??
         (user?['email'] as String?)?.split('@').first ??
         'bạn';
-    return Scaffold(
-      body: SafeArea(
+    // Trả về body-only (không Scaffold) vì AppShell đã bọc Scaffold + bottom
+    // nav rồi.
+    return SafeArea(
         child: RefreshIndicator(
           color: RelaxColors.violet,
           onRefresh: _loadAll,
@@ -73,7 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       _Header(
                         name: displayName,
                         avatarUrl: user?['avatar'] as String?,
-                        onSettings: () => context.go('/settings'),
+                        onSettings: () => context.push('/settings'),
                       ),
                       const SizedBox(height: 20),
                       if (_loading) ...[
@@ -106,8 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildQuestCard(Map<String, dynamic> q) {
