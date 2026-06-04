@@ -106,8 +106,10 @@ export default function WeatherPage() {
     setMounted(true);
   }, []);
 
+  const [loadError, setLoadError] = useState<string | null>(null);
   const reload = useCallback(async () => {
     setLoading(true);
+    setLoadError(null);
     try {
       const [cur, fc] = await Promise.allSettled([
         apiFetch<WeatherCurrent>('/weather/me/current'),
@@ -115,14 +117,46 @@ export default function WeatherPage() {
           query: { forecastDays: 7 },
         }),
       ]);
-      if (cur.status === 'fulfilled') setCurrent(cur.value);
-      if (fc.status === 'fulfilled') setForecast(fc.value);
-    } catch {
-      // surfaced via the UI state below
+      if (cur.status === 'fulfilled') {
+        setCurrent(cur.value);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Weather /current failed:', cur.reason);
+      }
+      if (fc.status === 'fulfilled') {
+        setForecast(fc.value);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Weather /forecast failed:', fc.reason);
+      }
+      // Nếu cả hai cùng chết, đẩy lỗi lên UI thay vì im lặng để các MetricCard
+      // hiển thị "—" và user không hiểu vì sao.
+      if (cur.status === 'rejected' && fc.status === 'rejected') {
+        const message =
+          cur.reason instanceof Error
+            ? cur.reason.message
+            : String(cur.reason);
+        setLoadError(message);
+        pushToast({
+          tone: 'error',
+          title: t('weather.loadFailed.title'),
+          message,
+        });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      // eslint-disable-next-line no-console
+      console.error('Weather reload threw:', err);
+      setLoadError(message);
+      pushToast({
+        tone: 'error',
+        title: t('weather.loadFailed.title'),
+        message,
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [pushToast, t]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -208,6 +242,19 @@ export default function WeatherPage() {
               {t('weather.insecure.https')}
             </li>
           </ul>
+        </Card>
+      ) : null}
+      {loadError ? (
+        <Card className="border-coral/40 bg-coral/10">
+          <p className="text-lg font-extrabold text-[var(--app-text,theme(colors.ink))]">
+            {t('weather.loadFailed.title')}
+          </p>
+          <p className="mt-1 text-sm text-[var(--app-muted,theme(colors.slate))]">
+            {loadError}
+          </p>
+          <p className="mt-2 text-xs text-[var(--app-muted,theme(colors.slate))]">
+            {t('weather.loadFailed.hint')}
+          </p>
         </Card>
       ) : null}
       {locationMissing ? (
