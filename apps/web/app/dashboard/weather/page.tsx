@@ -139,18 +139,25 @@ export default function WeatherPage() {
         // eslint-disable-next-line no-console
         console.error('Weather /forecast failed:', fc.reason);
       }
-      // Nếu cả hai cùng chết, đẩy lỗi lên UI thay vì im lặng để các MetricCard
-      // hiển thị "—" và user không hiểu vì sao.
-      if (cur.status === 'rejected' && fc.status === 'rejected') {
-        const message =
-          cur.reason instanceof Error
-            ? cur.reason.message
-            : String(cur.reason);
-        setLoadError(message);
+      // Đẩy lỗi lên UI nếu BẤT KỲ endpoint nào chết (trước đây chỉ báo khi
+      // cả 2 cùng fail, làm a thấy "Mưa hôm nay" và "Dự báo 7 ngày" trống
+      // mà không có cảnh báo gì).
+      const failed = [
+        cur.status === 'rejected' ? { name: 'current', reason: cur.reason } : null,
+        fc.status === 'rejected' ? { name: 'forecast', reason: fc.reason } : null,
+      ].filter(Boolean) as Array<{ name: string; reason: unknown }>;
+      if (failed.length > 0) {
+        const reasons = failed
+          .map(
+            (f) =>
+              `${f.name}: ${f.reason instanceof Error ? f.reason.message : String(f.reason)}`,
+          )
+          .join(' · ');
+        setLoadError(reasons);
         pushToast({
           tone: 'error',
           title: t('weather.loadFailed.title'),
-          message,
+          message: reasons,
         });
       }
     } catch (err) {
