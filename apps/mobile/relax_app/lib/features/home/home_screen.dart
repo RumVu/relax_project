@@ -25,6 +25,7 @@ class HomeScreen extends StatefulWidget {
     required this.onRefreshContent,
     this.session,
     this.moodService,
+    this.onGoToRelax,
   });
 
   final MobileContentSnapshot content;
@@ -37,6 +38,9 @@ class HomeScreen extends StatefulWidget {
 
   /// Dịch vụ POST mood — DI để test dễ.
   final MoodService? moodService;
+
+  /// Callback để navigate sang tab Khu thư giãn.
+  final VoidCallback? onGoToRelax;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -56,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final session = widget.session;
     if (code == null) return;
     if (session == null || !session.isLoggedIn) {
-      _toast('Hãy đăng nhập để Thi Ái nhớ cảm xúc của bạn nha 💜');
+      _toast('Hãy đăng nhập để mình ghi nhớ cảm xúc của bạn nha 💜');
       return;
     }
     setState(() => _pendingMoodCode = code);
@@ -146,29 +150,32 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icons.auto_awesome_rounded,
           ),
           const SizedBox(height: 10),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: visibleMoods.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: .96,
+          // Dùng Column+Row thay GridView để tránh semantics assertion crash
+          // khi nest GridView shrinkWrap bên trong SingleChildScrollView.
+          for (int row = 0; row < (visibleMoods.length + 2) ~/ 3; row++) ...[
+            if (row > 0) const SizedBox(height: 10),
+            Row(
+              children: List.generate(3, (col) {
+                final i = row * 3 + col;
+                if (i >= visibleMoods.length) return const Expanded(child: SizedBox());
+                final mood = visibleMoods[i];
+                final code = mood.code;
+                final isActive = code != null && code == _activeMoodCode;
+                final isBusy = code != null && code == _pendingMoodCode;
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(left: col > 0 ? 10 : 0),
+                    child: MoodTile(
+                      mood: mood,
+                      selected: isActive || (_activeMoodCode == null && i == 0),
+                      busy: isBusy,
+                      onTap: code == null ? null : () => _logMood(mood),
+                    ),
+                  ),
+                );
+              }),
             ),
-            itemBuilder: (context, index) {
-              final mood = visibleMoods[index];
-              final code = mood.code;
-              final isActive = code != null && code == _activeMoodCode;
-              final isBusy = code != null && code == _pendingMoodCode;
-              return MoodTile(
-                mood: mood,
-                selected: isActive || (_activeMoodCode == null && index == 0),
-                busy: isBusy,
-                onTap: code == null ? null : () => _logMood(mood),
-              );
-            },
-          ),
+          ],
           const SizedBox(height: 14),
           PixelPanel(
             child: Column(
@@ -193,18 +200,53 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.favorite_border_rounded,
                 ),
                 const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: visibleMethods.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1.2,
-                  ),
-                  itemBuilder: (context, index) =>
-                      MethodChip(method: visibleMethods[index]),
+                // 2x2 grid dùng Column+Row tránh nested scroll semantics
+                Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: MethodChip(
+                            method: visibleMethods[0],
+                            onTap: widget.onGoToRelax,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        if (visibleMethods.length > 1)
+                          Expanded(
+                            child: MethodChip(
+                              method: visibleMethods[1],
+                              onTap: widget.onGoToRelax,
+                            ),
+                          )
+                        else
+                          const Expanded(child: SizedBox()),
+                      ],
+                    ),
+                    if (visibleMethods.length > 2) ...[
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: MethodChip(
+                              method: visibleMethods[2],
+                              onTap: widget.onGoToRelax,
+                            ),
+                          ),
+                          const SizedBox(width: 10),
+                          if (visibleMethods.length > 3)
+                            Expanded(
+                              child: MethodChip(
+                                method: visibleMethods[3],
+                                onTap: widget.onGoToRelax,
+                              ),
+                            )
+                          else
+                            const Expanded(child: SizedBox()),
+                        ],
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),

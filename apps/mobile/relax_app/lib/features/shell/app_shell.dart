@@ -111,6 +111,8 @@ class _RelaxShellState extends State<RelaxShell> {
         contentError: _contentError,
         onRefreshContent: _refreshBackendData,
         session: session,
+        // Bấm method chip → chuyển qua tab Khu thư giãn (index 1)
+        onGoToRelax: () => setState(() => _tab = 1),
       ),
       RelaxScreen(
         backendActivities: _backendActivities,

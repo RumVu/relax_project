@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import '../../../../core/session.dart';
-import '../../data/models/app_models.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
 import '../../core/session.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/relax_catalog_service.dart';
+import '../../data/models/app_models.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
 import '../shell/app_shell.dart';
 import 'register_screen.dart';
 
-/// Form đăng nhập đơn giản — pixel style, có nút Đăng kí ở dưới đổi qua
-/// [RegisterScreen]. Sau khi login thành công, đẩy thẳng [RelaxShell].
+// Google Sign-In v7 dùng singleton instance
+final _gsi = GoogleSignIn.instance;
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
@@ -40,6 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordCtrl = TextEditingController();
   bool _obscure = true;
   bool _submitting = false;
+  bool _googleSubmitting = false;
   String? _error;
 
   @override
@@ -49,12 +52,28 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  void _navigateToShell() {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (_, animation, __) => RelaxShell(
+          themeMode: widget.themeMode,
+          onThemeChanged: widget.onThemeChanged,
+          onLanguageChanged: widget.onLanguageChanged,
+          catalogRepository: widget.catalogRepository,
+          contentRepository: widget.contentRepository,
+        ),
+        transitionsBuilder: (_, animation, __, child) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() {
-      _submitting = true;
-      _error = null;
-    });
+    setState(() { _submitting = true; _error = null; });
     try {
       final auth = AuthService();
       final result = await auth.login(
@@ -69,22 +88,50 @@ class _LoginScreenState extends State<LoginScreen> {
         user: result.user,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => RelaxShell(
-            themeMode: widget.themeMode,
-            onThemeChanged: widget.onThemeChanged,
-            onLanguageChanged: widget.onLanguageChanged,
-            catalogRepository: widget.catalogRepository,
-            contentRepository: widget.contentRepository,
-          ),
-        ),
-      );
+      _navigateToShell();
     } catch (e) {
       if (!mounted) return;
       setState(() => _error = e.toString());
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  Future<void> _signInWithGoogle() async {
+    setState(() { _googleSubmitting = true; _error = null; });
+    try {
+      // v7 API: initialize then authenticate
+      await _gsi.initialize(
+        clientId: const String.fromEnvironment(
+          'GOOGLE_CLIENT_ID',
+          defaultValue: '', // Cần set khi build thật
+        ),
+      );
+      final account = await _gsi.authenticate();
+      final idToken = account.authentication.idToken;
+      if (idToken == null) throw Exception('Không lấy được Google ID token');
+
+      // Gửi ID token lên backend → lấy JWT
+      final auth = AuthService();
+      final result = await auth.googleLogin(idToken: idToken);
+      if (!mounted) return;
+      final session = context.session;
+      await session.apply(
+        access: result.accessToken,
+        refresh: result.refreshToken,
+        user: result.user,
+      );
+      if (!mounted) return;
+      _navigateToShell();
+    } catch (e) {
+      if (!mounted) return;
+      final msg = e.toString();
+      // Người dùng tự cancel thì không show lỗi
+      if (!msg.contains('cancel') && !msg.contains('Cancel')) {
+        setState(() => _error = 'Google Sign-In thất bại: $msg');
+      }
+    } finally {
+      if (mounted) setState(() => _googleSubmitting = false);
     }
   }
 
@@ -104,6 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final busy = _submitting || _googleSubmitting;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -126,12 +174,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Đăng nhập để Thi Ái nhớ cảm xúc của bạn nha 💜',
+                  'Đăng nhập để mình nâng niu trút bỏ nỗi buồn của bạn 💜',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
-                const Center(
-                  child: PixelCatScene(scene: CatScene.wave, height: 150),
+                Center(
+                  child: AspectRatio(
+                    aspectRatio: 4 / 3,
+                    child: const PixelCatScene(scene: CatScene.wave),
+                  ),
                 ),
                 const SizedBox(height: 18),
                 TextFormField(
@@ -159,9 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscure
-                            ? Icons.visibility_rounded
-                            : Icons.visibility_off_rounded,
+                        _obscure ? Icons.visibility_rounded : Icons.visibility_off_rounded,
                       ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
@@ -187,44 +236,99 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: Icons.login_rounded,
                   label: _submitting ? 'Đang vào…' : 'Đăng nhập',
                   filled: true,
-                  onPressed: _submitting ? () {} : () => _submit(),
+                  onPressed: busy ? () {} : () => _submit(),
                 ),
-                const SizedBox(height: 12),
-                InkWell(
-                  onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Google Sign-In sẽ được thêm vào batch tiếp theo nha 💜'),
+                const SizedBox(height: 10),
+                // Divider với text
+                Row(
+                  children: [
+                    Expanded(child: Divider(color: context.relax.border)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text(
+                        'hoặc',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: context.relax.muted,
+                        ),
                       ),
-                    );
-                  },
+                    ),
+                    Expanded(child: Divider(color: context.relax.border)),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                // Google Sign-In button
+                InkWell(
+                  onTap: busy ? null : _signInWithGoogle,
+                  borderRadius: BorderRadius.circular(10),
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     decoration: BoxDecoration(
-                      border: Border.all(color: context.relax.border),
-                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: busy
+                            ? context.relax.border
+                            : RelaxTheme.purple.withValues(alpha: .4),
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                      color: RelaxTheme.purple.withValues(alpha: .06),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.g_mobiledata, color: context.relax.muted),
-                        const SizedBox(width: 8),
+                        if (_googleSubmitting)
+                          const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        else
+                          const _GoogleIcon(),
+                        const SizedBox(width: 10),
                         Text(
-                          'Đăng nhập với Google',
-                          style: Theme.of(context).textTheme.labelLarge,
+                          _googleSubmitting
+                              ? 'Đang kết nối Google...'
+                              : 'Đăng nhập với Google',
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: busy ? context.relax.muted : null,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 PixelButton(
                   icon: Icons.person_add_alt_1_outlined,
                   label: 'Tạo tài khoản mới',
-                  onPressed: _submitting ? () {} : _goRegister,
+                  onPressed: busy ? () {} : _goRegister,
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Google "G" icon bằng Text vì không có package icon
+class _GoogleIcon extends StatelessWidget {
+  const _GoogleIcon();
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const Center(
+        child: Text(
+          'G',
+          style: TextStyle(
+            color: Color(0xFF4285F4),
+            fontWeight: FontWeight.w900,
+            fontSize: 14,
           ),
         ),
       ),

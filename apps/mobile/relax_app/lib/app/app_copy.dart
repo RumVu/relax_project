@@ -20,9 +20,14 @@ class AppCopyScope extends InheritedWidget {
 }
 
 class AppCopy {
-  const AppCopy(this.language);
+  const AppCopy(this.language, {this.userName = ''});
 
   final AppLanguage language;
+
+  /// Tên hiển thị của user — nếu trống thì fallback về "bạn".
+  final String userName;
+
+  String get _name => userName.trim().isEmpty ? 'bạn' : userName.trim();
 
   bool get en => language == AppLanguage.en;
 
@@ -77,20 +82,20 @@ class AppCopy {
         ];
 
   String get homeTitle =>
-      en ? 'You are back, Thi Ai ~' : 'Đã trở lại rồi nè, Thi Ái ~';
+      en ? 'Welcome back, $_name ~' : 'Chào mừng trở lại, $_name ~';
   String get homeDaySubtitle =>
       en ? 'Such a bright sunny day!' : 'Trời nắng đẹp ghê!';
   String get homeNightSubtitle =>
       en ? 'Do not stay up too late, okay ~' : 'Đừng thức khuya quá đó nha ~';
   String get homeSpeech => en
-      ? 'Feeling stressed and found me?\nTell Thi Ai what is going on.'
-      : 'Stress quá mới tìm đến tôi hở?\nThì Ái nói cho tôi nghe đi nè!';
+      ? 'Feeling stressed? I am here for you, $_name.'
+      : 'Stress quá rồi hả $_name?\nNói cho tôi nghe đi nè!';
   String get moodPrompt =>
-      en ? 'How is Thi Ai feeling today?' : 'Hôm nay Thi Ái đang cảm thấy:';
+      en ? 'How are you feeling today, $_name?' : '$_name đang cảm thấy thế nào?';
   String get moodChartTitle =>
-      en ? "Thi Ai's mood tracker" : 'Theo dõi cảm xúc của Thi Ái';
+      en ? 'Mood tracker' : 'Theo dõi cảm xúc';
   String get methodTitle =>
-      en ? 'Methods that fit Thi Ai' : 'Phương thức phù hợp cho Thi Ái';
+      en ? 'Methods that fit you' : 'Phương thức phù hợp cho $_name';
 
   List<MoodOption> get moods => en
       ? const [

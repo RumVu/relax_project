@@ -152,10 +152,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                             ),
                                           ],
                                         ),
+                                        // AspectRatio 4:3 để cat scene không bị lùn/mập
                                         Center(
-                                          child: PixelCatScene(
-                                            scene: slide.scene,
-                                            height: compact ? 140 : 190,
+                                          child: AspectRatio(
+                                            aspectRatio: 4 / 3,
+                                            child: PixelCatScene(
+                                              scene: slide.scene,
+                                              height: compact ? 140 : 190,
+                                            ),
                                           ),
                                         ),
                                         Column(

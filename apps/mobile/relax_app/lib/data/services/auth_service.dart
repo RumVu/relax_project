@@ -58,6 +58,15 @@ class AuthService {
     return AuthResult.fromJson(_asMap(body));
   }
 
+  /// Đăng nhập qua Google — gửi idToken lên backend /auth/google
+  /// Backend verify với Google và trả về JWT access/refresh token.
+  Future<AuthResult> googleLogin({required String idToken}) async {
+    final body = await _client.postJson('/auth/google', {
+      'idToken': idToken,
+    });
+    return AuthResult.fromJson(_asMap(body));
+  }
+
   Future<Map<String, dynamic>> fetchMe(String accessToken) async {
     final body = await _client.getJson('/users/me', accessToken: accessToken);
     return _asMap(body);
