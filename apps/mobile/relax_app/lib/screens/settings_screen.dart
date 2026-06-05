@@ -125,6 +125,8 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             const _SectionLabel('Giao diện'),
             const _ThemeToggleCard(),
+            const SizedBox(height: 12),
+            const _AccentPickerCard(),
             const SizedBox(height: 24),
             const _SectionLabel('Nạp thẻ / Nâng cấp'),
             _Card(
@@ -883,6 +885,86 @@ class _LogoutButton extends StatelessWidget {
         icon: const Icon(Icons.logout),
         label: const Text('Đăng xuất',
             style: TextStyle(fontWeight: FontWeight.w700)),
+      ),
+    );
+  }
+}
+
+
+/// Chip màu để user đổi accent color cho toàn app — màu nhấn của nút, biểu
+/// đồ, focus ring. Lưu vào ThemeController + secure storage, đổi ngay tức
+/// thì nhờ MaterialApp.theme rebuild.
+class _AccentPickerCard extends StatelessWidget {
+  const _AccentPickerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final t = context.watch<ThemeController>();
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.fieldBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Màu nhấn',
+            style: TextStyle(
+              color: context.appText,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Chọn tông gần với cảm xúc bạn đang muốn nuôi dưỡng',
+            style: TextStyle(color: context.mutedText, fontSize: 12),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 12,
+            runSpacing: 12,
+            children: [
+              for (final p in ThemeController.palette)
+                GestureDetector(
+                  // ignore: deprecated_member_use
+                  onTap: () => context.read<ThemeController>().setAccent(p.color),
+                  child: Tooltip(
+                    message: p.name,
+                    child: Container(
+                      // ignore: deprecated_member_use
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: p.color,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          // ignore: deprecated_member_use
+                          color: t.accent.value == p.color.value
+                              ? context.appText
+                              : Colors.transparent,
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: p.color.withValues(alpha: 0.4),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      // ignore: deprecated_member_use
+                      child: t.accent.value == p.color.value
+                          ? const Icon(Icons.check,
+                              color: Colors.white, size: 20)
+                          : null,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

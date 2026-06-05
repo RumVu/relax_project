@@ -60,14 +60,14 @@ ButtonStyle _outlinedStyle() => OutlinedButton.styleFrom(
     );
 
 /// Theme sáng.
-ThemeData buildRelaxTheme() {
+ThemeData buildRelaxTheme({Color accent = RelaxColors.violet}) {
   final base = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: RelaxColors.violet,
+      seedColor: accent,
       brightness: Brightness.light,
-      primary: RelaxColors.violet,
+      primary: accent,
       secondary: RelaxColors.mint,
       surface: Colors.white,
     ),
@@ -93,14 +93,14 @@ ThemeData buildRelaxTheme() {
 }
 
 /// Theme tối — navy sâu khớp mockup dark mode.
-ThemeData buildRelaxDarkTheme() {
+ThemeData buildRelaxDarkTheme({Color accent = RelaxColors.violet}) {
   final base = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: RelaxColors.violet,
+      seedColor: accent,
       brightness: Brightness.dark,
-      primary: RelaxColors.violet,
+      primary: accent,
       secondary: RelaxColors.mint,
       surface: RelaxColors.surfaceDark,
     ),

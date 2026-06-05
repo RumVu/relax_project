@@ -6,6 +6,7 @@ import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
+import '../widgets/mood_background.dart';
 
 /// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
 /// thoại, lưới cảm xúc, thanh theo dõi cảm xúc, và các phương thức phù hợp.
@@ -108,7 +109,31 @@ class _HomeScreenState extends State<HomeScreen> {
         (user?['email'] as String?)?.split('@').first ??
         'bạn';
 
-    return SafeArea(
+    // Mood chủ đạo = mood được log nhiều nhất gần đây, fallback 'calm'.
+    String dominant = 'calm';
+    if (_moodCounts.isNotEmpty) {
+      final top = _moodCounts.entries
+          .reduce((a, b) => a.value >= b.value ? a : b)
+          .key
+          .toLowerCase();
+      const map = {
+        'happy': 'happy',
+        'joyful': 'happy',
+        'sad': 'sad',
+        'down': 'sad',
+        'angry': 'energetic',
+        'anxious': 'energetic',
+        'stressed': 'energetic',
+        'calm': 'calm',
+        'relaxed': 'calm',
+        'neutral': 'neutral',
+        'okay': 'neutral',
+      };
+      dominant = map[top] ?? 'calm';
+    }
+    return MoodBackground(
+      mood: dominant,
+      child: SafeArea(
       child: RefreshIndicator(
         color: RelaxColors.violet,
         onRefresh: _loadAll,
@@ -144,6 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ],
         ),
+      ),
       ),
     );
   }

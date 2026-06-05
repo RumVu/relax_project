@@ -39,14 +39,14 @@ class RelaxApp extends StatelessWidget {
       ],
       child: Builder(builder: (context) {
         final auth = context.watch<AuthState>();
-        final themeMode = context.watch<ThemeController>().mode;
+        final theme = context.watch<ThemeController>();
         final router = _buildRouter(auth);
         return MaterialApp.router(
           title: 'Relax',
           debugShowCheckedModeBanner: false,
-          theme: buildRelaxTheme(),
-          darkTheme: buildRelaxDarkTheme(),
-          themeMode: themeMode,
+          theme: buildRelaxTheme(accent: theme.accent),
+          darkTheme: buildRelaxDarkTheme(accent: theme.accent),
+          themeMode: theme.mode,
           routerConfig: router,
         );
       }),
