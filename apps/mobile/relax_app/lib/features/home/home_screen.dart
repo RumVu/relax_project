@@ -282,50 +282,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.favorite_border_rounded,
                 ),
                 const SizedBox(height: 12),
-                // 2x2 grid dùng Column+Row tránh nested scroll semantics
-                Column(
+                // 4 chips 1 hàng — khớp mockup hình 1
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: MethodChip(
-                            method: visibleMethods[0],
-                            onTap: widget.onGoToRelax,
-                          ),
+                    for (var i = 0; i < visibleMethods.length; i++) ...[
+                      if (i > 0) const SizedBox(width: 8),
+                      Expanded(
+                        child: MethodChip(
+                          method: visibleMethods[i],
+                          onTap: widget.onGoToRelax,
                         ),
-                        const SizedBox(width: 10),
-                        if (visibleMethods.length > 1)
-                          Expanded(
-                            child: MethodChip(
-                              method: visibleMethods[1],
-                              onTap: widget.onGoToRelax,
-                            ),
-                          )
-                        else
-                          const Expanded(child: SizedBox()),
-                      ],
-                    ),
-                    if (visibleMethods.length > 2) ...[
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: MethodChip(
-                              method: visibleMethods[2],
-                              onTap: widget.onGoToRelax,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          if (visibleMethods.length > 3)
-                            Expanded(
-                              child: MethodChip(
-                                method: visibleMethods[3],
-                                onTap: widget.onGoToRelax,
-                              ),
-                            )
-                          else
-                            const Expanded(child: SizedBox()),
-                        ],
                       ),
                     ],
                   ],

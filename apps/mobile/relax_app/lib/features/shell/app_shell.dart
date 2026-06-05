@@ -148,6 +148,7 @@ class _RelaxShellState extends State<RelaxShell> {
         loadingContent: _contentLoading,
         contentError: _contentError,
         onRefreshContent: _refresh,
+        moodHistory: _moodHistory,
       ),
     ];
 
