@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:just_audio/just_audio.dart';
 
 part 'app/relax_app.dart';
+part 'config/env.dart';
 part 'core/api_client.dart';
+part 'core/session.dart';
 part 'core/theme.dart';
 part 'core/app_copy.dart';
+part 'services/auth_service.dart';
+part 'services/mood_service.dart';
+part 'services/relax_session_service.dart';
+part 'services/supabase_storage_service.dart';
 part 'models/backend_models.dart';
 part 'services/relax_catalog_service.dart';
 part 'services/mobile_content_service.dart';
