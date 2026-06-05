@@ -15,9 +15,14 @@ class RelaxApp extends StatefulWidget {
 
 class _RelaxAppState extends State<RelaxApp> {
   ThemeMode _themeMode = ThemeMode.dark;
+  AppLanguage _language = AppLanguage.vi;
 
   void _setThemeMode(ThemeMode mode) {
     setState(() => _themeMode = mode);
+  }
+
+  void _setLanguage(AppLanguage language) {
+    setState(() => _language = language);
   }
 
   @override
@@ -29,19 +34,25 @@ class _RelaxAppState extends State<RelaxApp> {
       theme: RelaxTheme.light(),
       darkTheme: RelaxTheme.dark(),
       builder: (context, child) {
-        return ColoredBox(
-          color: Theme.of(context).scaffoldBackgroundColor,
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 430),
-              child: child ?? const SizedBox.shrink(),
+        return AppCopyScope(
+          copy: AppCopy(_language),
+          child: ColoredBox(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 430),
+                child: child ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );
       },
-      home: OnboardingScreen(
-        themeMode: _themeMode,
-        onThemeChanged: _setThemeMode,
+      home: SplashGate(
+        child: OnboardingScreen(
+          themeMode: _themeMode,
+          onThemeChanged: _setThemeMode,
+          onLanguageChanged: _setLanguage,
+        ),
       ),
     );
   }
@@ -197,6 +208,232 @@ class RelaxColors extends ThemeExtension<RelaxColors> {
 extension RelaxContext on BuildContext {
   RelaxColors get relax => Theme.of(this).extension<RelaxColors>()!;
   bool get dark => Theme.of(this).brightness == Brightness.dark;
+  AppCopy get copy => AppCopyScope.of(this);
+}
+
+enum AppLanguage { vi, en }
+
+class AppCopyScope extends InheritedWidget {
+  const AppCopyScope({super.key, required this.copy, required super.child});
+
+  final AppCopy copy;
+
+  static AppCopy of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<AppCopyScope>();
+    return scope?.copy ?? const AppCopy(AppLanguage.vi);
+  }
+
+  @override
+  bool updateShouldNotify(AppCopyScope oldWidget) {
+    return oldWidget.copy.language != copy.language;
+  }
+}
+
+class AppCopy {
+  const AppCopy(this.language);
+
+  final AppLanguage language;
+
+  bool get en => language == AppLanguage.en;
+
+  String get splashTitle => 'Thi Ai Chill';
+  String get splashSubtitle => en
+      ? 'A soft pause before the world gets loud.'
+      : 'Một nhịp nghỉ mềm trước khi ngày trở nên ồn ào.';
+  String get homeBadge => 'HomePage';
+  String get onboardingWelcome =>
+      en ? 'welcome back, \${user_name}' : 'chào mừng trở lại, \${user_name}';
+  String get signIn => en ? 'Login' : 'Đăng nhập';
+  String get signUp => en ? 'Register' : 'Đăng kí';
+  String get lightMode => en ? 'LIGHT MODE' : 'SÁNG';
+  String get darkMode => en ? 'DARK MODE' : 'TỐI';
+  String get languageVi => 'VI';
+  String get languageEn => 'EN';
+
+  List<OnboardingSlide> get onboardingSlides => en
+      ? const [
+          OnboardingSlide(
+            title: 'A chill corner made for you',
+            body: 'Relax, breathe and enjoy a few peaceful moments.',
+            scene: CatScene.window,
+          ),
+          OnboardingSlide(
+            title: 'Your daily companion',
+            body: 'Get reminders, encouragement and helpful tiny suggestions.',
+            scene: CatScene.laptop,
+          ),
+          OnboardingSlide(
+            title: 'Simple and easy to use',
+            body: 'A cute, minimal interface for everyday self-care.',
+            scene: CatScene.sleep,
+          ),
+        ]
+      : const [
+          OnboardingSlide(
+            title: 'Không gian chill dành cho bạn',
+            body: 'Thư giãn, hít thở và tận hưởng những khoảnh khắc bình yên.',
+            scene: CatScene.window,
+          ),
+          OnboardingSlide(
+            title: 'Đồng hành mỗi ngày',
+            body: 'Nhận lời nhắc, động viên và những gợi ý hữu ích cho bạn.',
+            scene: CatScene.laptop,
+          ),
+          OnboardingSlide(
+            title: 'Đơn giản và dễ dùng',
+            body: 'Giao diện dễ thương, tối giản để bạn sử dụng mỗi ngày.',
+            scene: CatScene.sleep,
+          ),
+        ];
+
+  String get homeTitle =>
+      en ? 'You are back, Thi Ai ~' : 'Đã trở lại rồi nè, Thi Ái ~';
+  String get homeDaySubtitle =>
+      en ? 'Such a bright sunny day!' : 'Trời nắng đẹp ghê!';
+  String get homeNightSubtitle =>
+      en ? 'Do not stay up too late, okay ~' : 'Đừng thức khuya quá đó nha ~';
+  String get homeSpeech => en
+      ? 'Feeling stressed and found me?\nTell Thi Ai what is going on.'
+      : 'Stress quá mới tìm đến tôi hở?\nThì Ái nói cho tôi nghe đi nè!';
+  String get moodPrompt =>
+      en ? 'How is Thi Ai feeling today?' : 'Hôm nay Thi Ái đang cảm thấy:';
+  String get moodChartTitle =>
+      en ? "Thi Ai's mood tracker" : 'Theo dõi cảm xúc của Thi Ái';
+  String get methodTitle =>
+      en ? 'Methods that fit Thi Ai' : 'Phương thức phù hợp cho Thi Ái';
+
+  List<MoodOption> get moods => en
+      ? const [
+          MoodOption('Happy', Icons.sentiment_very_satisfied_rounded, 70),
+          MoodOption('Sad', Icons.sentiment_dissatisfied_rounded, 25),
+          MoodOption('Stress', Icons.psychology_alt_rounded, 65),
+          MoodOption('Bored', Icons.cloudy_snowing, 40),
+          MoodOption('Unmotivated', Icons.battery_1_bar_rounded, 30),
+          MoodOption('Normal', Icons.sentiment_neutral_rounded, 50),
+        ]
+      : const [
+          MoodOption('Vui vẻ', Icons.sentiment_very_satisfied_rounded, 70),
+          MoodOption('Buồn', Icons.sentiment_dissatisfied_rounded, 25),
+          MoodOption('Stress', Icons.psychology_alt_rounded, 65),
+          MoodOption('Chán nản', Icons.cloudy_snowing, 40),
+          MoodOption('Mất động lực', Icons.battery_1_bar_rounded, 30),
+          MoodOption('Bình thường', Icons.sentiment_neutral_rounded, 50),
+        ];
+
+  List<MethodOption> get methods => en
+      ? const [
+          MethodOption('Meditate', Icons.self_improvement_rounded),
+          MethodOption('Breathe', Icons.cloud_queue_rounded),
+          MethodOption('Journal', Icons.edit_note_rounded),
+          MethodOption('Music', Icons.headphones_rounded),
+        ]
+      : const [
+          MethodOption('Thiền định', Icons.self_improvement_rounded),
+          MethodOption('Hít thở', Icons.cloud_queue_rounded),
+          MethodOption('Viết nhật kí', Icons.edit_note_rounded),
+          MethodOption('Nghe nhạc', Icons.headphones_rounded),
+        ];
+
+  List<NavItem> get navItems => en
+      ? const [
+          NavItem('Home', Icons.home_rounded),
+          NavItem('Relax', Icons.spa_rounded),
+          NavItem('Challenge', Icons.emoji_events_outlined),
+          NavItem('Setup', Icons.settings_outlined),
+        ]
+      : const [
+          NavItem('Trang chủ', Icons.home_rounded),
+          NavItem('Khu thư giãn', Icons.spa_rounded),
+          NavItem('Challenger', Icons.emoji_events_outlined),
+          NavItem('Setup', Icons.settings_outlined),
+        ];
+}
+
+class SplashGate extends StatefulWidget {
+  const SplashGate({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  State<SplashGate> createState() => _SplashGateState();
+}
+
+class _SplashGateState extends State<SplashGate> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    Future<void>.delayed(const Duration(milliseconds: 1250), () {
+      if (mounted) setState(() => _showSplash = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 420),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      child: _showSplash ? const SplashScreen() : widget.child,
+    );
+  }
+}
+
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = context.copy;
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(22),
+          child: Center(
+            child: TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: 1),
+              duration: const Duration(milliseconds: 900),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) {
+                return Opacity(
+                  opacity: value.clamp(0.0, 1.0).toDouble(),
+                  child: Transform.scale(
+                    scale: .86 + value * .14,
+                    child: child,
+                  ),
+                );
+              },
+              child: PixelPanel(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const PixelCatScene(scene: CatScene.sleep, height: 190),
+                    const SizedBox(height: 10),
+                    Text(
+                      copy.splashTitle,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      copy.splashSubtitle,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    const SizedBox(
+                      width: 120,
+                      child: LinearProgressIndicator(minHeight: 6),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class OnboardingScreen extends StatefulWidget {
@@ -204,10 +441,12 @@ class OnboardingScreen extends StatefulWidget {
     super.key,
     required this.themeMode,
     required this.onThemeChanged,
+    required this.onLanguageChanged,
   });
 
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<AppLanguage> onLanguageChanged;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -217,30 +456,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const slides = [
-    OnboardingSlide(
-      title: 'Không gian chill dành cho bạn',
-      body: 'Thư giãn, hít thở và tận hưởng những khoảnh khắc bình yên.',
-      scene: CatScene.window,
-    ),
-    OnboardingSlide(
-      title: 'Đồng hành mỗi ngày',
-      body: 'Nhận lời nhắc, động viên và những gợi ý hữu ích cho bạn.',
-      scene: CatScene.laptop,
-    ),
-    OnboardingSlide(
-      title: 'Đơn giản và dễ dùng',
-      body: 'Giao diện dễ thương, tối giản để bạn sử dụng mỗi ngày.',
-      scene: CatScene.sleep,
-    ),
-  ];
-
   void _enterApp() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => RelaxShell(
           themeMode: widget.themeMode,
           onThemeChanged: widget.onThemeChanged,
+          onLanguageChanged: widget.onLanguageChanged,
         ),
       ),
     );
@@ -254,15 +476,28 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final copy = context.copy;
+    final slides = copy.onboardingSlides;
     return Scaffold(
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
           child: Column(
             children: [
-              ThemePill(
-                themeMode: widget.themeMode,
-                onChanged: widget.onThemeChanged,
+              Wrap(
+                alignment: WrapAlignment.center,
+                runSpacing: 8,
+                spacing: 8,
+                children: [
+                  ThemePill(
+                    themeMode: widget.themeMode,
+                    onChanged: widget.onThemeChanged,
+                  ),
+                  LanguagePill(
+                    language: copy.language,
+                    onChanged: widget.onLanguageChanged,
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Expanded(
@@ -286,10 +521,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const PixelBadge(label: 'HomePage'),
+                                  PixelBadge(label: copy.homeBadge),
                                   SizedBox(height: compact ? 20 : 42),
                                   Text(
-                                    'welcome back, \${user_name}',
+                                    copy.onboardingWelcome,
                                     style: Theme.of(
                                       context,
                                     ).textTheme.titleLarge,
@@ -324,14 +559,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   SizedBox(height: compact ? 16 : 24),
                                   PixelButton(
                                     icon: Icons.person_outline_rounded,
-                                    label: 'Đăng nhập',
+                                    label: copy.signIn,
                                     filled: true,
                                     onPressed: _enterApp,
                                   ),
                                   const SizedBox(height: 10),
                                   PixelButton(
                                     icon: Icons.person_add_alt_1_outlined,
-                                    label: 'Đăng kí',
+                                    label: copy.signUp,
                                     onPressed: _enterApp,
                                   ),
                                 ],
@@ -357,10 +592,12 @@ class RelaxShell extends StatefulWidget {
     super.key,
     required this.themeMode,
     required this.onThemeChanged,
+    required this.onLanguageChanged,
   });
 
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<AppLanguage> onLanguageChanged;
 
   @override
   State<RelaxShell> createState() => _RelaxShellState();
@@ -378,6 +615,7 @@ class _RelaxShellState extends State<RelaxShell> {
       SetupScreen(
         themeMode: widget.themeMode,
         onThemeChanged: widget.onThemeChanged,
+        onLanguageChanged: widget.onLanguageChanged,
       ),
     ];
 
@@ -396,44 +634,28 @@ class _RelaxShellState extends State<RelaxShell> {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const moods = [
-    MoodOption('Vui vẻ', Icons.sentiment_very_satisfied_rounded, 70),
-    MoodOption('Buồn', Icons.sentiment_dissatisfied_rounded, 25),
-    MoodOption('Stress', Icons.psychology_alt_rounded, 65),
-    MoodOption('Chán nản', Icons.cloudy_snowing, 40),
-    MoodOption('Mất động lực', Icons.battery_1_bar_rounded, 30),
-    MoodOption('Bình thường', Icons.sentiment_neutral_rounded, 50),
-  ];
-
-  static const methods = [
-    MethodOption('Thiền định', Icons.self_improvement_rounded),
-    MethodOption('Hít thở', Icons.cloud_queue_rounded),
-    MethodOption('Viết nhật kí', Icons.edit_note_rounded),
-    MethodOption('Nghe nhạc', Icons.headphones_rounded),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final copy = context.copy;
+    final moods = copy.moods;
+    final methods = copy.methods;
     return AppScroll(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           HeaderBar(
             icon: Icons.wb_sunny_outlined,
-            title: 'Đã trở lại rồi nè, Thi Ái ~',
+            title: copy.homeTitle,
             subtitle: context.dark
-                ? 'Đừng thức khuya quá đó nha ~'
-                : 'Trời nắng đẹp ghê!',
+                ? copy.homeNightSubtitle
+                : copy.homeDaySubtitle,
           ),
           const SizedBox(height: 14),
           PixelPanel(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                SpeechBubble(
-                  text:
-                      'Stress quá mới tìm đến tôi hở?\nThì Ái nói cho tôi nghe đi nè!',
-                ),
+                SpeechBubble(text: copy.homeSpeech),
                 const SizedBox(height: 12),
                 const PixelCatScene(scene: CatScene.wave, height: 188),
               ],
@@ -441,7 +663,7 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           SectionTitle(
-            title: 'Hôm nay Thi Ái đang cảm thấy:',
+            title: copy.moodPrompt,
             icon: Icons.auto_awesome_rounded,
           ),
           const SizedBox(height: 10),
@@ -466,7 +688,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SectionTitle(
-                  title: 'Theo dõi cảm xúc của Thi Ái',
+                  title: copy.moodChartTitle,
                   icon: Icons.bar_chart_rounded,
                 ),
                 const SizedBox(height: 12),
@@ -480,7 +702,7 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SectionTitle(
-                  title: 'Phương thức phù hợp cho Thi Ái',
+                  title: copy.methodTitle,
                   icon: Icons.favorite_border_rounded,
                 ),
                 const SizedBox(height: 12),
@@ -688,13 +910,16 @@ class SetupScreen extends StatelessWidget {
     super.key,
     required this.themeMode,
     required this.onThemeChanged,
+    required this.onLanguageChanged,
   });
 
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<AppLanguage> onLanguageChanged;
 
   @override
   Widget build(BuildContext context) {
+    final copy = context.copy;
     return AppScroll(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,6 +1022,11 @@ class SetupScreen extends StatelessWidget {
                 ThemeSegmentedControl(
                   themeMode: themeMode,
                   onChanged: onThemeChanged,
+                ),
+                const SizedBox(height: 10),
+                LanguageSegmentedControl(
+                  language: copy.language,
+                  onChanged: onLanguageChanged,
                 ),
               ],
             ),
@@ -935,15 +1165,9 @@ class PixelBottomNav extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  static const items = [
-    _NavItem('Trang chủ', Icons.home_rounded),
-    _NavItem('Khu thư giãn', Icons.spa_rounded),
-    _NavItem('Challenger', Icons.emoji_events_outlined),
-    _NavItem('Setup', Icons.settings_outlined),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final items = context.copy.navItems;
     return SafeArea(
       top: false,
       child: Padding(
@@ -1347,6 +1571,7 @@ class ThemePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final copy = context.copy;
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
@@ -1359,15 +1584,56 @@ class ThemePill extends StatelessWidget {
         children: [
           PillOption(
             icon: Icons.light_mode_rounded,
-            label: 'LIGHT MODE',
+            label: copy.lightMode,
             selected: themeMode != ThemeMode.dark,
             onTap: () => onChanged(ThemeMode.light),
           ),
           PillOption(
             icon: Icons.dark_mode_rounded,
-            label: 'DARK MODE',
+            label: copy.darkMode,
             selected: themeMode == ThemeMode.dark,
             onTap: () => onChanged(ThemeMode.dark),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class LanguagePill extends StatelessWidget {
+  const LanguagePill({
+    super.key,
+    required this.language,
+    required this.onChanged,
+  });
+
+  final AppLanguage language;
+  final ValueChanged<AppLanguage> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = context.copy;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: context.relax.surfaceSoft,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: context.relax.border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PillOption(
+            icon: Icons.translate_rounded,
+            label: copy.languageVi,
+            selected: language == AppLanguage.vi,
+            onTap: () => onChanged(AppLanguage.vi),
+          ),
+          PillOption(
+            icon: Icons.language_rounded,
+            label: copy.languageEn,
+            selected: language == AppLanguage.en,
+            onTap: () => onChanged(AppLanguage.en),
           ),
         ],
       ),
@@ -1413,6 +1679,43 @@ class ThemeSegmentedControl extends StatelessWidget {
             label: 'Custom',
             selected: false,
             onTap: () => onChanged(themeMode),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class LanguageSegmentedControl extends StatelessWidget {
+  const LanguageSegmentedControl({
+    super.key,
+    required this.language,
+    required this.onChanged,
+  });
+
+  final AppLanguage language;
+  final ValueChanged<AppLanguage> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = context.copy;
+    return Row(
+      children: [
+        Expanded(
+          child: PillOption(
+            icon: Icons.translate_rounded,
+            label: copy.languageVi,
+            selected: language == AppLanguage.vi,
+            onTap: () => onChanged(AppLanguage.vi),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: PillOption(
+            icon: Icons.language_rounded,
+            label: copy.languageEn,
+            selected: language == AppLanguage.en,
+            onTap: () => onChanged(AppLanguage.en),
           ),
         ),
       ],
@@ -2607,8 +2910,8 @@ class MethodOption {
   final IconData icon;
 }
 
-class _NavItem {
-  const _NavItem(this.label, this.icon);
+class NavItem {
+  const NavItem(this.label, this.icon);
 
   final String label;
   final IconData icon;
