@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../../../../app/theme.dart';
 import '../../../../app/theme.dart';
 import '../../../data/models/app_models.dart';
 import '../../painters/pixel_scene_painter.dart';

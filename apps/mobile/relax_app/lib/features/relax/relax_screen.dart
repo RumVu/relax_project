@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/session.dart';
 import '../../data/models/app_models.dart';
 import '../../app/theme.dart';
-import '../../data/models/app_models.dart';
 import '../../data/models/backend_models.dart';
 import '../../shared/widgets/activity/activity_card.dart';
 import '../../shared/widgets/layout/app_scroll.dart';

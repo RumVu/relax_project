@@ -4,7 +4,6 @@ import '../../data/models/app_models.dart';
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
 import '../../core/session.dart';
-import '../../data/models/app_models.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/relax_catalog_service.dart';

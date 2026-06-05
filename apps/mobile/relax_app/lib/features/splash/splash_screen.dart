@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/session.dart';
 import '../../data/models/app_models.dart';
 import '../../app/theme.dart';
-import '../../data/models/app_models.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_panel.dart';
 
