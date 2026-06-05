@@ -9,6 +9,7 @@ import '../../shared/widgets/common/section_title.dart';
 import '../../shared/widgets/common/speech_bubble.dart';
 import '../../shared/widgets/layout/app_scroll.dart';
 import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/charts/mood_line_chart.dart';
 import '../../shared/widgets/mood/method_chip.dart';
 import '../../shared/widgets/mood/mood_progress.dart';
 import '../../shared/widgets/mood/mood_tile.dart';
@@ -26,6 +27,8 @@ class HomeScreen extends StatefulWidget {
     this.session,
     this.moodService,
     this.onGoToRelax,
+    this.moodHistory = const [],
+    this.moodHistoryLoading = false,
   });
 
   final MobileContentSnapshot content;
@@ -33,14 +36,15 @@ class HomeScreen extends StatefulWidget {
   final String? contentError;
   final VoidCallback onRefreshContent;
 
-  /// Phiên đăng nhập — null khi chưa wire (test / preview).
   final SessionState? session;
-
-  /// Dịch vụ POST mood — DI để test dễ.
   final MoodService? moodService;
-
-  /// Callback để navigate sang tab Khu thư giãn.
   final VoidCallback? onGoToRelax;
+
+  /// Lịch sử mood check-in từ API — dùng để tính % và chart 7 ngày.
+  final List<MoodCheckin> moodHistory;
+
+  /// true khi đang fetch history lần đầu.
+  final bool moodHistoryLoading;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -54,6 +58,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Code mood đang POST — chỉ để hiện loader trên đúng ô.
   String? _pendingMoodCode;
+
+  // ── Real data helpers ────────────────────────────────────────────────────
+
+  /// Tính % xuất hiện của mỗi mood code trong lịch sử thật.
+  /// Key = mood code (HAPPY, SAD...), value = % (0-100).
+  Map<String, int> _realPercents(List<MoodCheckin> history) {
+    if (history.isEmpty) return {};
+    final counts = <String, int>{};
+    for (final c in history) {
+      counts[c.mood] = (counts[c.mood] ?? 0) + 1;
+    }
+    final total = history.length;
+    return counts.map((k, v) => MapEntry(k, (v / total * 100).round()));
+  }
+
+  /// Tạo list 7 giá trị [0,1] cho biểu đồ từ lịch sử 7 ngày qua.
+  /// Index 0 = cách đây 6 ngày, index 6 = hôm nay.
+  List<double> _chartData(List<MoodCheckin> history) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final counts = List<int>.filled(7, 0);
+    for (final c in history) {
+      final day = DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day);
+      final diff = today.difference(day).inDays;
+      if (diff >= 0 && diff < 7) counts[6 - diff]++;
+    }
+    final max = counts.reduce((a, b) => a > b ? a : b);
+    if (max == 0) return List.filled(7, 0.0);
+    return counts.map((c) => c / max).toList();
+  }
 
   Future<void> _logMood(MoodOption mood) async {
     final code = mood.code;
@@ -92,6 +126,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final copy = context.copy;
+    final history = widget.moodHistory;
+    final histLoading = widget.moodHistoryLoading;
+    final session = widget.session;
+    final isLoggedIn = session?.isLoggedIn == true;
+
+    // Real % từ history — null khi đang load (chưa login thì luôn null)
+    final percents = (!isLoggedIn || histLoading) ? null : _realPercents(history);
+    // Real 7-day chart data — null khi load, [] khi empty
+    final chartData = !isLoggedIn
+        ? <double>[]
+        : histLoading
+            ? null
+            : _chartData(history);
+
     final backendMoods = widget.content.moodOptions;
     final moods = backendMoods.isEmpty
         ? copy.moods
@@ -185,8 +233,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: copy.moodChartTitle,
                   icon: Icons.bar_chart_rounded,
                 ),
+                const SizedBox(height: 8),
+                MoodLineChart(
+                  compact: true,
+                  data: chartData,
+                ),
                 const SizedBox(height: 12),
-                ...visibleMoods.map((mood) => MoodProgress(mood: mood)),
+                ...visibleMoods.map((mood) => MoodProgress(
+                      mood: mood,
+                      realPercent: percents == null
+                          ? null  // loading
+                          : percents[mood.code ?? ''] ?? 0,
+                    )),
               ],
             ),
           ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../../core/session.dart';
 import '../../../app/theme.dart';
 import '../../../core/session.dart';
+import '../../../data/services/mood_service.dart';
 import '../../../data/services/relax_session_service.dart';
+import '../../../shared/widgets/charts/mood_line_chart.dart';
 import '../../../shared/widgets/common/section_title.dart';
 import '../../../shared/widgets/pixel/pixel_panel.dart';
 
@@ -54,13 +55,16 @@ class _StatsSheetState extends State<_StatsSheet> {
       if (mounted) setState(() => _loading = false);
       return;
     }
+    final token = session.accessToken!;
     try {
-      final svc = RelaxSessionService();
-      final sessions = await svc.recent(
-        accessToken: session.accessToken!,
-        limit: 60,
-      );
-      _compute(sessions);
+      // Chạy song song cả 2 API
+      final results = await Future.wait([
+        RelaxSessionService().recent(accessToken: token, limit: 60),
+        MoodService().history(accessToken: token, limit: 90),
+      ]);
+      final sessions = results[0] as List<RelaxSession>;
+      final checkins = results[1] as List<MoodCheckin>;
+      _compute(sessions, checkins);
     } catch (_) {
       // Network error — show empty state, không fallback demo data.
     } finally {
@@ -68,9 +72,23 @@ class _StatsSheetState extends State<_StatsSheet> {
     }
   }
 
-  void _compute(List<RelaxSession> sessions) {
+  void _compute(List<RelaxSession> sessions, List<MoodCheckin> checkins) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
+
+    // ── Mood chart: 7 ngày từ checkin history ────────────────────────────
+    final dayCounts = List<int>.filled(7, 0);
+    for (final c in checkins) {
+      final day = DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day);
+      final diff = today.difference(day).inDays;
+      if (diff >= 0 && diff < 7) dayCounts[6 - diff]++;
+    }
+    final maxDay = dayCounts.reduce((a, b) => a > b ? a : b);
+    _moodChart
+      ..clear()
+      ..addAll(maxDay == 0
+          ? List.filled(7, 0.0)
+          : dayCounts.map((c) => c / maxDay).toList());
 
     Duration total = Duration.zero;
     Duration todaySpent = Duration.zero;
@@ -245,7 +263,7 @@ class _StatsSheetState extends State<_StatsSheet> {
                           icon: '⏱',
                           label: 'Tổng thời gian',
                           value: _formatDur(_totalTime),
-                          unit: 'Thư giãn cùng Thi Ái',
+                          unit: 'Tổng thời gian thư giãn',
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -268,18 +286,11 @@ class _StatsSheetState extends State<_StatsSheet> {
                           title: 'Biểu đồ cảm xúc (7 ngày qua)',
                           icon: Icons.show_chart_rounded,
                         ),
-                        const SizedBox(height: 10),
-                        SizedBox(
-                          height: 110,
-                          child: CustomPaint(
-                            painter: _MoodChartPainter(
-                              points: _moodChart,
-                              line: RelaxTheme.lavender,
-                              dot: RelaxTheme.purple,
-                              grid: context.relax.surfaceSoft,
-                            ),
-                            size: Size.infinite,
-                          ),
+                        const SizedBox(height: 8),
+                        // Dùng MoodLineChart — data thật từ /mood-checkins/me
+                        MoodLineChart(
+                          compact: true,
+                          data: _moodChart.any((v) => v > 0) ? _moodChart : [],
                         ),
                         const SizedBox(height: 6),
                         Row(

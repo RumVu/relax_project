@@ -1,31 +1,103 @@
 import 'package:flutter/material.dart';
 import '../../../../app/theme.dart';
 
+/// Biểu đồ đường cảm xúc 7 ngày — KHÔNG còn hardcode bất kỳ giá trị nào.
+///
+/// [data] — list double [0,1], index 0 = ngày xa nhất (T2), index 6 = hôm nay.
+///   • null  → skeleton (đang load)
+///   • [] / all-zero → empty state "Chưa có dữ liệu"
+///   • [v1..v7] → vẽ đường thật từ API
 class MoodLineChart extends StatelessWidget {
-  const MoodLineChart({super.key, this.compact = false});
+  const MoodLineChart({
+    super.key,
+    this.compact = false,
+    this.data,
+    this.dayLabels = const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+  });
 
   final bool compact;
+  final List<double>? data;
+  final List<String> dayLabels;
+
+  bool get _hasData =>
+      data != null && data!.isNotEmpty && data!.any((v) => v > 0);
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: compact ? 118 : 178,
-      child: CustomPaint(
-        painter: MoodLinePainter(
-          dark: context.dark,
-          border: context.relax.border,
+    final chartH = compact ? 118.0 : 178.0;
+
+    if (data == null) {
+      return SizedBox(
+        height: chartH,
+        child: Center(
+          child: SizedBox(
+            width: 26,
+            height: 26,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: RelaxTheme.lavender.withValues(alpha: .5),
+            ),
+          ),
         ),
-        child: const SizedBox.expand(),
-      ),
+      );
+    }
+
+    if (!_hasData) {
+      return SizedBox(
+        height: compact ? 72 : 100,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.show_chart_rounded,
+                color: context.relax.muted.withValues(alpha: .4), size: 26),
+            const SizedBox(height: 6),
+            Text(
+              'Chưa có dữ liệu — bắt đầu check-in cảm xúc nhé ✦',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: context.relax.muted, fontSize: 11),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        SizedBox(
+          height: chartH,
+          child: CustomPaint(
+            painter: MoodLinePainter(
+              dark: context.dark,
+              border: context.relax.border,
+              values: data!,
+            ),
+            child: const SizedBox.expand(),
+          ),
+        ),
+        if (compact && dayLabels.length == 7) ...[
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: dayLabels
+                .map((l) => Text(l,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 10, color: context.relax.muted)))
+                .toList(),
+          ),
+        ],
+      ],
     );
   }
 }
 
 class MoodLinePainter extends CustomPainter {
-  const MoodLinePainter({required this.dark, required this.border});
+  const MoodLinePainter(
+      {required this.dark, required this.border, required this.values});
 
   final bool dark;
   final Color border;
+  final List<double> values;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -36,26 +108,24 @@ class MoodLinePainter extends CustomPainter {
       final y = size.height * (i / 4);
       canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
     }
+    if (values.isEmpty) return;
 
-    const values = [.22, .32, .58, .38, .30, .62, .84];
-    final points = <Offset>[];
-    for (var i = 0; i < values.length; i++) {
-      points.add(
+    final n = values.length;
+    final pts = <Offset>[
+      for (var i = 0; i < n; i++)
         Offset(
-          size.width * i / (values.length - 1),
-          size.height * (1 - values[i]),
+          n == 1 ? size.width / 2 : size.width * i / (n - 1),
+          size.height * (1 - values[i].clamp(0.0, 1.0)),
         ),
-      );
-    }
+    ];
 
-    final fillPath = Path()..moveTo(points.first.dx, size.height);
-    for (final point in points) {
-      fillPath.lineTo(point.dx, point.dy);
-    }
-    fillPath.lineTo(points.last.dx, size.height);
-    fillPath.close();
+    // gradient fill
+    final fill = Path()..moveTo(pts.first.dx, size.height);
+    for (final p in pts) fill.lineTo(p.dx, p.dy);
+    fill.lineTo(pts.last.dx, size.height);
+    fill.close();
     canvas.drawPath(
-      fillPath,
+      fill,
       Paint()
         ..shader = LinearGradient(
           begin: Alignment.topCenter,
@@ -67,20 +137,16 @@ class MoodLinePainter extends CustomPainter {
         ).createShader(Offset.zero & size),
     );
 
-    final path = Path()..moveTo(points.first.dx, points.first.dy);
-    for (var i = 1; i < points.length; i++) {
-      final previous = points[i - 1];
-      final current = points[i];
-      final middle = Offset(
-        (previous.dx + current.dx) / 2,
-        (previous.dy + current.dy) / 2,
-      );
-      path.quadraticBezierTo(previous.dx, previous.dy, middle.dx, middle.dy);
+    // bezier line
+    final line = Path()..moveTo(pts.first.dx, pts.first.dy);
+    for (var i = 1; i < pts.length; i++) {
+      final mid = Offset(
+          (pts[i - 1].dx + pts[i].dx) / 2, (pts[i - 1].dy + pts[i].dy) / 2);
+      line.quadraticBezierTo(pts[i - 1].dx, pts[i - 1].dy, mid.dx, mid.dy);
     }
-    path.lineTo(points.last.dx, points.last.dy);
-
+    line.lineTo(pts.last.dx, pts.last.dy);
     canvas.drawPath(
-      path,
+      line,
       Paint()
         ..color = RelaxTheme.lavender
         ..strokeWidth = 3
@@ -88,23 +154,22 @@ class MoodLinePainter extends CustomPainter {
         ..strokeCap = StrokeCap.round,
     );
 
-    final dot = Paint()
+    // dots
+    final dotFill = Paint()
       ..color = dark ? const Color(0xFFEFE9FF) : RelaxTheme.purple;
-    for (final point in points) {
-      canvas.drawCircle(point, 4, dot);
-      canvas.drawCircle(
-        point,
-        6,
-        Paint()
-          ..color = RelaxTheme.purple
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 1.4,
-      );
+    final dotRing = Paint()
+      ..color = RelaxTheme.purple
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    for (final p in pts) {
+      canvas.drawCircle(p, 4, dotFill);
+      canvas.drawCircle(p, 6, dotRing);
     }
   }
 
   @override
-  bool shouldRepaint(covariant MoodLinePainter oldDelegate) {
-    return oldDelegate.dark != dark || oldDelegate.border != border;
-  }
+  bool shouldRepaint(covariant MoodLinePainter old) =>
+      old.dark != dark ||
+      old.values.length != values.length ||
+      old.values.toString() != values.toString();
 }

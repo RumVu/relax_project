@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/session.dart';
 import '../../app/app_copy.dart';
 import '../../core/session.dart';
 import '../../data/models/backend_models.dart';
 import '../../data/services/mobile_content_service.dart';
+import '../../data/services/mood_service.dart';
 import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
 import '../challenge/challenge_screen.dart';
@@ -33,109 +33,126 @@ class RelaxShell extends StatefulWidget {
 
 class _RelaxShellState extends State<RelaxShell> {
   int _tab = 0;
-  late final RelaxCatalogRepository _catalogRepository =
+
+  late final RelaxCatalogRepository _catalogRepo =
       widget.catalogRepository ?? RelaxCatalogService();
-  late final MobileContentRepository _contentRepository =
+  late final MobileContentRepository _contentRepo =
       widget.contentRepository ?? MobileContentService();
-  List<BackendRelaxActivity> _backendActivities = const [];
-  MobileContentSnapshot _contentSnapshot = const MobileContentSnapshot();
+  final _moodSvc = MoodService();
+
+  // ── Catalog ──────────────────────────────────────────────────────────────
+  List<BackendRelaxActivity> _activities = const [];
   bool _catalogLoading = true;
-  bool _contentLoading = true;
   String? _catalogError;
+
+  // ── Content ───────────────────────────────────────────────────────────────
+  MobileContentSnapshot _content = const MobileContentSnapshot();
+  bool _contentLoading = true;
   String? _contentError;
+
+  // ── Mood history (real API, auth-gated) ──────────────────────────────────
+  List<MoodCheckin> _moodHistory = const [];
+  bool _moodHistoryLoading = false; // false until we know logged-in
 
   @override
   void initState() {
     super.initState();
     _loadCatalog();
     _loadContent();
+    // Mood history needs token — defer until after first frame so session is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMoodHistory());
   }
 
-  Future<void> _loadCatalog() async {
-    setState(() {
-      _catalogLoading = true;
-      _catalogError = null;
-    });
+  // ── Loaders ───────────────────────────────────────────────────────────────
 
+  Future<void> _loadCatalog() async {
+    setState(() { _catalogLoading = true; _catalogError = null; });
     try {
-      final activities = await _catalogRepository.fetchActivities();
+      final acts = await _catalogRepo.fetchActivities();
       if (!mounted) return;
-      setState(() {
-        _backendActivities = activities;
-        _catalogLoading = false;
-      });
-    } catch (error) {
+      setState(() { _activities = acts; _catalogLoading = false; });
+    } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _catalogLoading = false;
-        _catalogError = error.toString();
-      });
+      setState(() { _catalogLoading = false; _catalogError = e.toString(); });
     }
   }
 
   Future<void> _loadContent() async {
-    setState(() {
-      _contentLoading = true;
-      _contentError = null;
-    });
-
+    setState(() { _contentLoading = true; _contentError = null; });
     try {
-      final snapshot = await _contentRepository.fetchSnapshot();
+      final snap = await _contentRepo.fetchSnapshot();
       if (!mounted) return;
       setState(() {
-        _contentSnapshot = snapshot;
+        _content = snap;
         _contentLoading = false;
-        _contentError = snapshot.hasData ? null : 'Backend chưa trả dữ liệu.';
+        _contentError = snap.hasData ? null : 'Backend chưa trả dữ liệu.';
       });
-    } catch (error) {
+    } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _contentLoading = false;
-        _contentError = error.toString();
-      });
+      setState(() { _contentLoading = false; _contentError = e.toString(); });
     }
   }
 
-  void _refreshBackendData() {
+  Future<void> _loadMoodHistory() async {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) return; // không auth → bỏ qua
+    setState(() => _moodHistoryLoading = true);
+    try {
+      final history = await _moodSvc.history(
+        accessToken: session.accessToken!,
+        limit: 90, // ~3 tháng đủ để tính streak và chart 7 ngày
+      );
+      if (!mounted) return;
+      setState(() { _moodHistory = history; _moodHistoryLoading = false; });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _moodHistoryLoading = false);
+    }
+  }
+
+  void _refresh() {
     _loadCatalog();
     _loadContent();
+    _loadMoodHistory();
   }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
   Widget build(BuildContext context) {
     final session = context.sessionOrNull;
+
     final pages = [
       HomeScreen(
-        content: _contentSnapshot,
+        content: _content,
         loadingContent: _contentLoading,
         contentError: _contentError,
-        onRefreshContent: _refreshBackendData,
+        onRefreshContent: _refresh,
         session: session,
-        // Bấm method chip → chuyển qua tab Khu thư giãn (index 1)
         onGoToRelax: () => setState(() => _tab = 1),
+        moodHistory: _moodHistory,
+        moodHistoryLoading: _moodHistoryLoading,
       ),
       RelaxScreen(
-        backendActivities: _backendActivities,
+        backendActivities: _activities,
         loadingCatalog: _catalogLoading,
         catalogError: _catalogError,
-        onRefreshCatalog: _refreshBackendData,
+        onRefreshCatalog: _refresh,
       ),
       const ChallengeScreen(),
       SetupScreen(
         themeMode: widget.themeMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
-        content: _contentSnapshot,
+        content: _content,
         loadingContent: _contentLoading,
         contentError: _contentError,
-        onRefreshContent: _refreshBackendData,
+        onRefreshContent: _refresh,
       ),
     ];
 
     return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(index: _tab, children: pages),
-      ),
+      body: SafeArea(child: IndexedStack(index: _tab, children: pages)),
       bottomNavigationBar: PixelBottomNav(
         selectedIndex: _tab,
         onSelected: (index) => setState(() => _tab = index),
