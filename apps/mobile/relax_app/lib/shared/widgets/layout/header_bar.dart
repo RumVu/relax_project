@@ -7,12 +7,20 @@ class HeaderBar extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.trailing,
+    this.onBellTap,
+    this.bellHasBadge = true,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
   final Widget? trailing;
+
+  /// Bấm chuông → callback (vd mở Stats sheet). Null = bell tĩnh.
+  final VoidCallback? onBellTap;
+
+  /// Hiện chấm đỏ nhỏ ở chuông.
+  final bool bellHasBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -33,26 +41,31 @@ class HeaderBar extends StatelessWidget {
         if (trailing != null)
           SizedBox(width: 86, height: 70, child: trailing)
         else
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Icon(
-                Icons.notifications_none_rounded,
-                color: context.relax.muted,
-              ),
-              Positioned(
-                right: 1,
-                top: 1,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFE85A6A),
-                    shape: BoxShape.circle,
-                  ),
+          IconButton(
+            tooltip: 'Thống kê',
+            onPressed: onBellTap,
+            icon: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  Icons.notifications_none_rounded,
+                  color: context.relax.muted,
                 ),
-              ),
-            ],
+                if (bellHasBadge)
+                  Positioned(
+                    right: 1,
+                    top: 1,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE85A6A),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
       ],
     );

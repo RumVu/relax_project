@@ -63,6 +63,7 @@ part 'features/shell/app_shell.dart';
 part 'features/home/home_screen.dart';
 part 'features/relax/relax_screen.dart';
 part 'features/relax/sheets/relax_sheets.dart';
+part 'features/relax/sheets/stats_sheet.dart';
 part 'features/challenge/challenge_screen.dart';
 part 'features/setup/setup_screen.dart';
 

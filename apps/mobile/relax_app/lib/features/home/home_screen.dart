@@ -104,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
             subtitle: context.dark
                 ? copy.homeNightSubtitle
                 : copy.homeDaySubtitle,
+            onBellTap: () => showStatsSheet(context),
           ),
           const SizedBox(height: 14),
           PixelPanel(

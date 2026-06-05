@@ -57,34 +57,24 @@ class SetupScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          PixelPanel(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              children: [
-                CatAvatar(size: 88, imageUrl: asset?.previewImageUrl),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        displayName,
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        email.isNotEmpty
-                            ? email
-                            : (asset?.description ??
-                                'Linh thú đồng hành cùng bạn.'),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: context.relax.muted),
-              ],
-            ),
+          _ProfileHeroCard(
+            displayName: displayName,
+            avatarUrl: asset?.previewImageUrl ??
+                (user?['avatar'] as String?),
+            age: (user?['age'] as num?)?.toInt() ??
+                (user?['birthYear'] != null
+                    ? DateTime.now().year - (user!['birthYear'] as int)
+                    : null),
+            gender: user?['gender'] as String?,
+            phone: user?['phone'] as String?,
+            email: email,
+            social: user?['socialUrl'] as String? ??
+                user?['link'] as String?,
+            onEdit: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Em sẽ làm form sửa profile ở batch sau nha 💜')),
+              );
+            },
           ),
           const SizedBox(height: 12),
           PixelPanel(
@@ -294,4 +284,150 @@ class _ThemeSwatch extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Profile hero card khớp mockup: avatar pixel + tên + edit pencil + 4 dòng
+/// info (Tuổi · Giới tính / Phone / Email / Social) + chevron mở edit.
+///
+/// Nếu giá trị nào null thì bỏ qua dòng đó — không show placeholder ngơ.
+class _ProfileHeroCard extends StatelessWidget {
+  const _ProfileHeroCard({
+    required this.displayName,
+    required this.avatarUrl,
+    required this.email,
+    this.age,
+    this.gender,
+    this.phone,
+    this.social,
+    this.onEdit,
+  });
+
+  final String displayName;
+  final String? avatarUrl;
+  final int? age;
+  final String? gender;
+  final String? phone;
+  final String email;
+  final String? social;
+  final VoidCallback? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final lines = <_ProfileLine>[];
+    if (age != null || (gender != null && gender!.isNotEmpty)) {
+      final parts = <String>[];
+      if (age != null) parts.add('Tuổi: $age');
+      if (gender != null && gender!.isNotEmpty) parts.add(gender!);
+      lines.add(
+          _ProfileLine(Icons.cake_outlined, parts.join('  ·  ')));
+    }
+    if (phone != null && phone!.isNotEmpty) {
+      lines.add(_ProfileLine(Icons.call_outlined, phone!));
+    }
+    if (email.isNotEmpty) {
+      lines.add(_ProfileLine(Icons.mail_outline_rounded, email));
+    }
+    if (social != null && social!.isNotEmpty) {
+      lines.add(_ProfileLine(Icons.link_rounded, social!));
+    }
+
+    return PixelPanel(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              CatAvatar(size: 92, imageUrl: avatarUrl),
+              Positioned(
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: RelaxTheme.purple,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt_rounded,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        displayName,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    InkWell(
+                      onTap: onEdit,
+                      borderRadius: BorderRadius.circular(6),
+                      child: Padding(
+                        padding: const EdgeInsets.all(2),
+                        child: Icon(
+                          Icons.edit_outlined,
+                          size: 16,
+                          color: context.relax.muted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (lines.isEmpty) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Chưa có thông tin — bấm bút chì để bổ sung nha ~',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ] else ...[
+                  const SizedBox(height: 10),
+                  for (final l in lines) ...[
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(l.icon, size: 14, color: RelaxTheme.lavender),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              l.text,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              ],
+            ),
+          ),
+          Icon(Icons.chevron_right_rounded, color: context.relax.muted),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProfileLine {
+  const _ProfileLine(this.icon, this.text);
+  final IconData icon;
+  final String text;
 }
