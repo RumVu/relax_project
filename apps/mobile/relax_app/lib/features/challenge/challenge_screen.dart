@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../shared/widgets/charts/mood_line_chart.dart';
-import '../../shared/widgets/common/section_title.dart';
-import '../../shared/widgets/dashboard/favorite_activity.dart';
-import '../../shared/widgets/dashboard/mini_moment.dart';
-import '../../shared/widgets/dashboard/stat_card.dart';
+
+import '../../app/theme.dart';
+import '../../data/models/app_models.dart';
 import '../../shared/widgets/layout/app_scroll.dart';
 import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_panel.dart';
 
+/// Challenger tab — đang phát triển.
+/// Nội dung cũ (Stats / streak / hoạt động yêu thích) đã được dời sang
+/// Setup → "Thống kê tình trạng" (tap để mở sheet thật).
 class ChallengeScreen extends StatelessWidget {
   const ChallengeScreen({super.key});
 
@@ -21,109 +23,59 @@ class ChallengeScreen extends StatelessWidget {
             icon: Icons.emoji_events_outlined,
             title: 'Challenger',
             subtitle: 'Thử thách nhỏ mỗi ngày để chăm sóc bản thân.',
+            bellHasBadge: false,
           ),
-          const SizedBox(height: 14),
-          Row(
-            children: const [
-              Expanded(
-                child: StatCard(
-                  title: 'Streak',
-                  value: '12',
-                  caption: 'ngày liên tiếp',
-                  icon: Icons.local_fire_department_rounded,
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: StatCard(
-                  title: 'Tổng thời gian',
-                  value: '8h 42m',
-                  caption: 'thư giãn cùng Thi Ái',
-                  icon: Icons.timer_outlined,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          const StatCard(
-            title: 'Hôm nay',
-            value: '19:42',
-            caption: '24/05/2024',
-            icon: Icons.calendar_month_outlined,
-          ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 28),
           PixelPanel(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SectionTitle(
-                  title: 'Biểu đồ cảm xúc (7 ngày qua)',
-                  icon: Icons.show_chart_rounded,
+                const PixelCatScene(scene: CatScene.sleep, height: 160),
+                const SizedBox(height: 16),
+                Text(
+                  'Sắp ra mắt ✦',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
                 ),
-                const SizedBox(height: 12),
-                const MoodLineChart(),
-              ],
-            ),
-          ),
-          const SizedBox(height: 14),
-          PixelPanel(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SectionTitle(
-                  title: 'Hoạt động yêu thích',
-                  icon: Icons.star_border_rounded,
+                const SizedBox(height: 10),
+                Text(
+                  'Tính năng Challenger đang được hoàn thiện.\nHẹn bạn vài bản cập nhật nữa nha 💜',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 12),
-                const FavoriteActivity(
-                  label: 'Nhạc',
-                  value: '3h 20m',
-                  amount: .82,
-                ),
-                const FavoriteActivity(
-                  label: 'Podcast',
-                  value: '2h 10m',
-                  amount: .62,
-                ),
-                const FavoriteActivity(
-                  label: 'Hít thở',
-                  value: '1h 15m',
-                  amount: .42,
-                ),
-                const FavoriteActivity(
-                  label: 'Viết nhật kí',
-                  value: '1h 00m',
-                  amount: .36,
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: RelaxTheme.purple.withValues(alpha: .12),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.bar_chart_rounded,
+                        size: 16,
+                        color: RelaxTheme.lavender,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Xem thống kê ở Setup',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: RelaxTheme.lavender,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 12,
+                            ),
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 14),
-          SectionTitle(
-            title: 'Khoảnh khắc thư giãn gần đây',
-            icon: Icons.history_rounded,
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: const [
-              Expanded(
-                child: MiniMoment(
-                  title: 'Nhạc',
-                  time: '24/05 · 22:15',
-                  minutes: '25 phút',
-                  icon: Icons.radio_rounded,
-                ),
-              ),
-              SizedBox(width: 10),
-              Expanded(
-                child: MiniMoment(
-                  title: 'Hít thở',
-                  time: '24/05 · 21:30',
-                  minutes: '10 phút',
-                  icon: Icons.cloud_rounded,
-                ),
-              ),
-            ],
           ),
         ],
       ),

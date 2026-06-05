@@ -56,20 +56,23 @@ class _StatsSheetState extends State<_StatsSheet> {
       return;
     }
     final token = session.accessToken!;
+
+    // Mỗi API có try/catch riêng — không để 1 lỗi làm spin mãi.
+    List<RelaxSession> sessions = const [];
+    List<MoodCheckin> checkins = const [];
     try {
-      // Chạy song song cả 2 API
-      final results = await Future.wait([
-        RelaxSessionService().recent(accessToken: token, limit: 60),
-        MoodService().history(accessToken: token, limit: 90),
-      ]);
-      final sessions = results[0] as List<RelaxSession>;
-      final checkins = results[1] as List<MoodCheckin>;
-      _compute(sessions, checkins);
-    } catch (_) {
-      // Network error — show empty state, không fallback demo data.
-    } finally {
-      if (mounted) setState(() => _loading = false);
-    }
+      sessions = await RelaxSessionService()
+          .recent(accessToken: token, limit: 60)
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {/* ignore — empty stays empty */}
+    try {
+      checkins = await MoodService()
+          .history(accessToken: token, limit: 90)
+          .timeout(const Duration(seconds: 8));
+    } catch (_) {/* ignore */}
+
+    _compute(sessions, checkins);
+    if (mounted) setState(() => _loading = false);
   }
 
   void _compute(List<RelaxSession> sessions, List<MoodCheckin> checkins) {

@@ -13,8 +13,15 @@ import '../../shared/widgets/pixel/pixel_button.dart';
 import '../shell/app_shell.dart';
 import 'register_screen.dart';
 
-// Google Sign-In v7 dùng singleton instance
+// Google Sign-In v7 dùng singleton instance.
+// Để bật Google Sign-In: chạy với `--dart-define=GOOGLE_CLIENT_ID=<ios-client-id>`
+// VÀ thêm URL scheme (reversed CLIENT_ID) vào ios/Runner/Info.plist.
 final _gsi = GoogleSignIn.instance;
+const _googleClientId = String.fromEnvironment(
+  'GOOGLE_CLIENT_ID',
+  defaultValue: '',
+);
+bool get _googleEnabled => _googleClientId.isNotEmpty;
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -98,20 +105,18 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _signInWithGoogle() async {
+    if (!_googleEnabled) {
+      setState(() => _error =
+          'Google Sign-In chưa được cấu hình. Build với --dart-define=GOOGLE_CLIENT_ID=... và setup Info.plist URL scheme.');
+      return;
+    }
     setState(() { _googleSubmitting = true; _error = null; });
     try {
-      // v7 API: initialize then authenticate
-      await _gsi.initialize(
-        clientId: const String.fromEnvironment(
-          'GOOGLE_CLIENT_ID',
-          defaultValue: '', // Cần set khi build thật
-        ),
-      );
+      await _gsi.initialize(clientId: _googleClientId);
       final account = await _gsi.authenticate();
       final idToken = account.authentication.idToken;
       if (idToken == null) throw Exception('Không lấy được Google ID token');
 
-      // Gửi ID token lên backend → lấy JWT
       final auth = AuthService();
       final result = await auth.googleLogin(idToken: idToken);
       if (!mounted) return;
@@ -126,7 +131,6 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       if (!mounted) return;
       final msg = e.toString();
-      // Người dùng tự cancel thì không show lỗi
       if (!msg.contains('cancel') && !msg.contains('Cancel')) {
         setState(() => _error = 'Google Sign-In thất bại: $msg');
       }
@@ -238,64 +242,67 @@ class _LoginScreenState extends State<LoginScreen> {
                   filled: true,
                   onPressed: busy ? () {} : () => _submit(),
                 ),
-                const SizedBox(height: 10),
-                // Divider với text
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: context.relax.border)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        'hoặc',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: context.relax.muted,
-                        ),
-                      ),
-                    ),
-                    Expanded(child: Divider(color: context.relax.border)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                // Google Sign-In button
-                InkWell(
-                  onTap: busy ? null : _signInWithGoogle,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: busy
-                            ? context.relax.border
-                            : RelaxTheme.purple.withValues(alpha: .4),
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                      color: RelaxTheme.purple.withValues(alpha: .06),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (_googleSubmitting)
-                          const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        else
-                          const _GoogleIcon(),
-                        const SizedBox(width: 10),
-                        Text(
-                          _googleSubmitting
-                              ? 'Đang kết nối Google...'
-                              : 'Đăng nhập với Google',
-                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: busy ? context.relax.muted : null,
+                if (_googleEnabled) ...[
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: context.relax.border)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text(
+                          'hoặc',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: context.relax.muted,
                           ),
                         ),
-                      ],
+                      ),
+                      Expanded(child: Divider(color: context.relax.border)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                ] else
+                  const SizedBox(height: 10),
+                if (_googleEnabled) ...[
+                  InkWell(
+                    onTap: busy ? null : _signInWithGoogle,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: busy
+                              ? context.relax.border
+                              : RelaxTheme.purple.withValues(alpha: .4),
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                        color: RelaxTheme.purple.withValues(alpha: .06),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_googleSubmitting)
+                            const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          else
+                            const _GoogleIcon(),
+                          const SizedBox(width: 10),
+                          Text(
+                            _googleSubmitting
+                                ? 'Đang kết nối Google...'
+                                : 'Đăng nhập với Google',
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: busy ? context.relax.muted : null,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 10),
+                  const SizedBox(height: 10),
+                ],
                 PixelButton(
                   icon: Icons.person_add_alt_1_outlined,
                   label: 'Tạo tài khoản mới',

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/session.dart';
-import '../../data/models/app_models.dart';
+import '../../app/app_copy.dart';
 import '../../app/theme.dart';
 import '../../core/session.dart';
+import '../../data/models/app_models.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
+import '../../data/services/weather_service.dart';
 import '../../shared/widgets/common/section_title.dart';
 import '../../shared/widgets/common/speech_bubble.dart';
 import '../../shared/widgets/layout/app_scroll.dart';
@@ -52,12 +53,28 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final MoodService _moods = widget.moodService ?? MoodService();
+  final _weather = WeatherService();
 
-  /// Code mood đang highlight (sau khi user bấm hoặc lần cuối log).
   String? _activeMoodCode;
-
-  /// Code mood đang POST — chỉ để hiện loader trên đúng ô.
   String? _pendingMoodCode;
+
+  WeatherSnapshot? _weatherSnapshot;
+  bool _weatherTried = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWeather();
+  }
+
+  Future<void> _loadWeather() async {
+    final snap = await _weather.fetchCurrent();
+    if (!mounted) return;
+    setState(() {
+      _weatherSnapshot = snap;
+      _weatherTried = true;
+    });
+  }
 
   // ── Real data helpers ────────────────────────────────────────────────────
 
@@ -109,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _activeMoodCode = code;
         _pendingMoodCode = null;
       });
-      _toast('Đã ghi: ${mood.label} • Thi Ái sẽ nhớ nha ✦');
+      _toast('Đã ghi: ${mood.label} ✦');
     } catch (e) {
       if (!mounted) return;
       setState(() => _pendingMoodCode = null);
@@ -148,30 +165,37 @@ class _HomeScreenState extends State<HomeScreen> {
               .entries
               .map((entry) => MoodOption.fromBackend(entry.value, entry.key))
               .toList(growable: false);
-    final actions = backendMoods.isEmpty
-        ? const <String>[]
-        : backendMoods.first.recommendedActions;
-    final methods = actions.isEmpty
-        ? copy.methods
-        : actions.map(MethodOption.fromAction).toList(growable: false);
+    // LUÔN dùng 4 phương thức cố định từ copy. Backend chỉ trả 3
+    // recommendedActions nên không dùng để dựng grid 2×2 này.
     final visibleMoods = moods.take(6).toList(growable: false);
-    final visibleMethods = methods.take(4).toList(growable: false);
+    final visibleMethods = copy.methods.take(4).toList(growable: false);
     final speech =
         widget.content.companionMessage?.content ??
         widget.content.quote?.content ??
         (backendMoods.isNotEmpty && backendMoods.first.companionLine.isNotEmpty
             ? backendMoods.first.companionLine
             : copy.homeSpeech);
+    // Weather subtitle: ưu tiên data thật từ Open-Meteo. Fallback đẹp khi chưa có.
+    final wx = _weatherSnapshot;
+    final subtitle = wx != null
+        ? '${wx.description} · ${wx.temperatureC.toStringAsFixed(0)}°C'
+        : !_weatherTried
+            ? 'Đang xem thời tiết...'
+            : (context.dark ? copy.homeNightSubtitle : copy.homeDaySubtitle);
+    final wxIcon = wx == null
+        ? Icons.wb_sunny_outlined
+        : wx.isDay
+            ? Icons.wb_sunny_outlined
+            : Icons.nights_stay_outlined;
+
     return AppScroll(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           HeaderBar(
-            icon: Icons.wb_sunny_outlined,
+            icon: wxIcon,
             title: copy.homeTitle,
-            subtitle: context.dark
-                ? copy.homeNightSubtitle
-                : copy.homeDaySubtitle,
+            subtitle: subtitle,
             onBellTap: () => showStatsSheet(context),
           ),
           const SizedBox(height: 14),

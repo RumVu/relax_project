@@ -22,61 +22,27 @@ class RelaxScreen extends StatelessWidget {
   final String? catalogError;
   final VoidCallback onRefreshCatalog;
 
-  static const activities = [
-    Activity(
-      '01. Nhạc',
-      'Những giai điệu nhẹ nhàng giúp tâm trí bạn thư giãn.',
-      Icons.radio_rounded,
-    ),
-    Activity(
-      '02. Podcast',
-      'Lắng nghe những câu chuyện truyền cảm hứng mỗi ngày.',
-      Icons.mic_external_on_rounded,
-    ),
-    Activity(
-      '03. Viết nhật kí',
-      'Ghi lại cảm xúc và suy nghĩ để nhẹ lòng hơn nhé.',
-      Icons.menu_book_rounded,
-    ),
-    Activity(
-      '04. Hít thở không khí',
-      'Hít thở sâu, thả lỏng cơ thể và sống chậm lại nào.',
-      Icons.cloud_rounded,
-    ),
-    Activity(
-      '05. Bí ẩn',
-      'Để Thi Ái chọn một hoạt động bất ngờ phù hợp với bạn!',
-      Icons.inventory_2_rounded,
-    ),
-    Activity(
-      '06. Thiền định',
-      'Ngồi yên một chút để tâm trí có chỗ thở.',
-      Icons.self_improvement_rounded,
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final syncedActivities = backendActivities
+    // Chỉ dùng dữ liệu REAL từ backend. Không có fallback hardcode.
+    final displayActivities = backendActivities
         .map(Activity.fromBackend)
+        .toList(growable: false)
+        .asMap()
+        .entries
+        .map(
+          (entry) => Activity(
+            '${(entry.key + 1).toString().padLeft(2, '0')}. ${entry.value.title}',
+            entry.value.description,
+            entry.value.icon,
+            type: entry.value.type,
+            durationMinutes: entry.value.durationMinutes,
+            reliefPercent: entry.value.reliefPercent,
+            resources: entry.value.resources,
+          ),
+        )
         .toList(growable: false);
-    final displayActivities = syncedActivities.isEmpty
-        ? activities
-        : syncedActivities
-              .asMap()
-              .entries
-              .map(
-                (entry) => Activity(
-                  '${(entry.key + 1).toString().padLeft(2, '0')}. ${entry.value.title}',
-                  entry.value.description,
-                  entry.value.icon,
-                  type: entry.value.type,
-                  durationMinutes: entry.value.durationMinutes,
-                  reliefPercent: entry.value.reliefPercent,
-                  resources: entry.value.resources,
-                ),
-              )
-              .toList(growable: false);
+    final syncedActivities = displayActivities;
     final resourceCount = syncedActivities.fold<int>(
       0,
       (sum, activity) => sum + activity.contentCount,
@@ -102,12 +68,54 @@ class RelaxScreen extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 14),
-          ...displayActivities.map(
-            (activity) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: ActivityCard(activity: activity),
+          if (!loadingCatalog && displayActivities.isEmpty)
+            PixelPanel(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24,
+                vertical: 28,
+              ),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.spa_outlined,
+                    size: 40,
+                    color: RelaxTheme.lavender.withValues(alpha: .6),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Chưa có hoạt động nào',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Backend chưa trả danh sách thư giãn.\nThử nạp lại nha 💜',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            )
+          else if (loadingCatalog && displayActivities.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Center(
+                child: SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: RelaxTheme.lavender.withValues(alpha: .6),
+                  ),
+                ),
+              ),
+            )
+          else
+            ...displayActivities.map(
+              (activity) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: ActivityCard(activity: activity),
+              ),
             ),
-          ),
         ],
       ),
     );
