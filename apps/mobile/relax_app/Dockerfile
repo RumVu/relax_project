@@ -5,7 +5,8 @@
 # native toolchains. This image only produces the static Flutter web bundle,
 # which is convenient for previews and PR-deploys.
 
-FROM ghcr.io/cirruslabs/flutter:3.27.0 AS builder
+ARG FLUTTER_VERSION=3.41.7
+FROM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS builder
 WORKDIR /app
 
 # Manifest first so the dependency layer caches independently of source code.
