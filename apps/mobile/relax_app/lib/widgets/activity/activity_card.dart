@@ -25,6 +25,18 @@ class ActivityCard extends StatelessWidget {
                   activity.description,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    if (activity.durationMinutes != null)
+                      PixelBadge(label: '${activity.durationMinutes} phút'),
+                    if (activity.reliefPercent != null)
+                      PixelBadge(label: 'relief ${activity.reliefPercent}%'),
+                    PixelBadge(label: '${activity.contentCount} nội dung'),
+                  ],
+                ),
               ],
             ),
           ),

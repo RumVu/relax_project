@@ -1,7 +1,9 @@
 part of 'package:relax_app/main.dart';
 
 class RelaxApp extends StatefulWidget {
-  const RelaxApp({super.key});
+  const RelaxApp({super.key, this.catalogRepository});
+
+  final RelaxCatalogRepository? catalogRepository;
 
   @override
   State<RelaxApp> createState() => _RelaxAppState();
@@ -46,6 +48,7 @@ class _RelaxAppState extends State<RelaxApp> {
           themeMode: _themeMode,
           onThemeChanged: _setThemeMode,
           onLanguageChanged: _setLanguage,
+          catalogRepository: widget.catalogRepository,
         ),
       ),
     );

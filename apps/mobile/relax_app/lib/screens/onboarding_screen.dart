@@ -6,11 +6,13 @@ class OnboardingScreen extends StatefulWidget {
     required this.themeMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
+    this.catalogRepository,
   });
 
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
   final ValueChanged<AppLanguage> onLanguageChanged;
+  final RelaxCatalogRepository? catalogRepository;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -27,6 +29,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           themeMode: widget.themeMode,
           onThemeChanged: widget.onThemeChanged,
           onLanguageChanged: widget.onLanguageChanged,
+          catalogRepository: widget.catalogRepository,
         ),
       ),
     );

@@ -4,48 +4,291 @@ void showPlayerSheet(BuildContext context, Activity activity) {
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
+    isScrollControlled: true,
     showDragHandle: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    builder: (context) {
-      return Padding(
+    builder: (context) => BackendAudioPlayerSheet(activity: activity),
+  );
+}
+
+class BackendAudioPlayerSheet extends StatefulWidget {
+  const BackendAudioPlayerSheet({super.key, required this.activity});
+
+  final Activity activity;
+
+  @override
+  State<BackendAudioPlayerSheet> createState() =>
+      _BackendAudioPlayerSheetState();
+}
+
+class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
+  final _player = AudioPlayer();
+  BackendResource? _selected;
+  String? _error;
+  bool _loading = false;
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  Future<void> _play(BackendResource resource) async {
+    setState(() {
+      _selected = resource;
+      _error = null;
+      _loading = true;
+    });
+
+    final url = resource.soundUrl;
+    if (url == null) {
+      setState(() {
+        _loading = false;
+        _error = 'Nội dung này chưa có file âm thanh.';
+      });
+      return;
+    }
+
+    try {
+      await _player.setUrl(url);
+      await _player.play();
+      if (!mounted) return;
+      setState(() => _loading = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _error = 'Không phát được file này. Kiểm tra URL Supabase.';
+      });
+    }
+  }
+
+  Future<void> _toggle() async {
+    if (_player.playing) {
+      await _player.pause();
+      return;
+    }
+    if (_selected == null && widget.activity.resources.isNotEmpty) {
+      await _play(widget.activity.resources.first);
+      return;
+    }
+    await _player.play();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final resources = widget.activity.resources;
+    final selected =
+        _selected ?? (resources.isNotEmpty ? resources.first : null);
+    final height = math.min(MediaQuery.of(context).size.height * .82, 640.0);
+
+    return SizedBox(
+      height: height,
+      child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const PixelCatScene(scene: CatScene.laptop, height: 190),
-            Text(
-              'Đang nghe nhạc',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'Lo-fi Chill · Pixel Beats',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            Slider(value: .42, onChanged: (_) {}),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.skip_previous_rounded),
-                ),
-                FilledButton(
-                  onPressed: () {},
-                  child: const Icon(Icons.pause_rounded),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.skip_next_rounded),
+                PixelIconBox(icon: widget.activity.icon, size: 54),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.activity.compactTitle,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      Text(
+                        resources.isEmpty
+                            ? 'Chưa có nội dung từ backend.'
+                            : '${resources.length} nội dung từ backend deploy',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
+            const SizedBox(height: 14),
+            if (_error != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  _error!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: context.relax.danger,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            Expanded(
+              child: resources.isEmpty
+                  ? const Center(
+                      child: Text('Backend chưa trả file cho mục này.'),
+                    )
+                  : ListView.separated(
+                      itemCount: resources.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final resource = resources[index];
+                        final active = selected?.id == resource.id;
+                        return Material(
+                          color: active
+                              ? RelaxTheme.purple.withValues(alpha: .22)
+                              : context.relax.surfaceSoft,
+                          borderRadius: BorderRadius.circular(8),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () => _play(resource),
+                            child: Padding(
+                              padding: const EdgeInsets.all(10),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    active
+                                        ? Icons.pause_circle_filled_rounded
+                                        : Icons.play_circle_outline_rounded,
+                                    color: RelaxTheme.lavender,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          resource.title,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleMedium,
+                                        ),
+                                        Text(
+                                          '${resource.category} · ${resource.durationLabel}',
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            const SizedBox(height: 12),
+            PixelPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'TRÌNH PHÁT',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    selected?.title ?? 'Chọn một nội dung để nghe',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  StreamBuilder<Duration>(
+                    stream: _player.positionStream,
+                    builder: (context, snapshot) {
+                      final position = snapshot.data ?? Duration.zero;
+                      final duration = _player.duration ?? Duration.zero;
+                      final maxSeconds = math.max(
+                        duration.inMilliseconds / 1000,
+                        1.0,
+                      );
+                      final seconds = math.min(
+                        position.inMilliseconds / 1000,
+                        maxSeconds,
+                      );
+                      return Column(
+                        children: [
+                          Slider(
+                            value: seconds,
+                            min: 0,
+                            max: maxSeconds,
+                            onChanged: duration == Duration.zero
+                                ? null
+                                : (value) => _player.seek(
+                                    Duration(
+                                      milliseconds: (value * 1000).round(),
+                                    ),
+                                  ),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _formatDuration(position),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                              Text(
+                                _formatDuration(duration),
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Center(
+                    child: StreamBuilder<PlayerState>(
+                      stream: _player.playerStateStream,
+                      builder: (context, snapshot) {
+                        final playing = snapshot.data?.playing ?? false;
+                        return FilledButton.icon(
+                          onPressed: resources.isEmpty || _loading
+                              ? null
+                              : _toggle,
+                          icon: _loading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Icon(
+                                  playing
+                                      ? Icons.pause_rounded
+                                      : Icons.play_arrow_rounded,
+                                ),
+                          label: Text(playing ? 'Tạm dừng' : 'Phát'),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
-      );
-    },
-  );
+      ),
+    );
+  }
+}
+
+String _formatDuration(Duration duration) {
+  final totalSeconds = duration.inSeconds;
+  final minutes = totalSeconds ~/ 60;
+  final seconds = totalSeconds % 60;
+  return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
 void showFeedbackSheet(BuildContext context, Activity activity) {

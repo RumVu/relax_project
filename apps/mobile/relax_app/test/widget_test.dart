@@ -5,7 +5,9 @@ import 'package:relax_app/main.dart';
 
 void main() {
   testWidgets('shows splash, onboarding and English home copy', (tester) async {
-    await tester.pumpWidget(const RelaxApp());
+    await tester.pumpWidget(
+      const RelaxApp(catalogRepository: StaticRelaxCatalogRepository([])),
+    );
 
     expect(find.text('Thi Ai Chill'), findsOneWidget);
 

@@ -1,10 +1,16 @@
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:just_audio/just_audio.dart';
 
 part 'app/relax_app.dart';
+part 'core/api_client.dart';
 part 'core/theme.dart';
 part 'core/app_copy.dart';
+part 'models/backend_models.dart';
+part 'services/relax_catalog_service.dart';
 part 'screens/splash_screen.dart';
 part 'screens/onboarding_screen.dart';
 part 'screens/app_shell.dart';
@@ -18,6 +24,7 @@ part 'widgets/navigation/pixel_bottom_nav.dart';
 part 'widgets/pixel/pixel_panel.dart';
 part 'widgets/pixel/pixel_badge.dart';
 part 'widgets/common/section_title.dart';
+part 'widgets/common/backend_status_banner.dart';
 part 'widgets/common/page_dots.dart';
 part 'widgets/common/speech_bubble.dart';
 part 'widgets/buttons/pixel_button.dart';
