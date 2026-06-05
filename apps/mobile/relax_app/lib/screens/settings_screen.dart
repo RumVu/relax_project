@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme_controller.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/mood_line_chart.dart';
@@ -27,7 +28,7 @@ class SettingsScreen extends StatelessWidget {
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(
-          'Setup ✨',
+          context.t('Setup ✨'),
           style: TextStyle(
             color: context.appText,
             fontWeight: FontWeight.w800,
@@ -53,88 +54,93 @@ class SettingsScreen extends StatelessWidget {
             const SizedBox(height: 16),
             _ProfileHero(name: name, email: email, avatar: avatar, role: role),
             const SizedBox(height: 24),
-            const _SectionLabel('Thông báo'),
+            _SectionLabel(context.t('Thông báo')),
             const _NotificationCard(),
             const SizedBox(height: 24),
-            const _SectionLabel('Khám phá'),
+            _SectionLabel(context.t('Khám phá')),
             _Card(
               children: [
                 _Row(
                   icon: Icons.insights_outlined,
-                  title: 'Phân tích cảm xúc',
-                  subtitle: 'Biểu đồ & phân bố cảm xúc của bạn',
+                  title: context.t('Phân tích cảm xúc'),
+                  subtitle: context.t('Biểu đồ & phân bố cảm xúc của bạn'),
                   onTap: () => context.push('/analytics'),
                 ),
                 const _Divider(),
                 _Row(
                   icon: Icons.cloud_outlined,
-                  title: 'Thời tiết',
-                  subtitle: 'Theo dõi thời tiết & dự báo',
+                  title: context.t('Thời tiết'),
+                  subtitle: context.t('Theo dõi thời tiết & dự báo'),
                   onTap: () => context.push('/weather'),
                 ),
                 const _Divider(),
                 _Row(
                   icon: Icons.pets_outlined,
-                  title: 'Linh thú',
-                  subtitle: 'Nuôi và tương tác với bạn đồng hành',
+                  title: context.t('Linh thú'),
+                  subtitle: context.t('Nuôi và tương tác với bạn đồng hành'),
                   onTap: () => context.push('/companion'),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const _SectionLabel('Thiết bị & vị trí'),
+            _SectionLabel(context.t('Thiết bị & vị trí')),
             _Card(
               children: [
                 _Row(
                   icon: Icons.place_outlined,
-                  title: 'Vị trí của bạn',
-                  subtitle: 'Gợi ý thời tiết & địa điểm thư giãn gần bạn',
+                  title: context.t('Vị trí của bạn'),
+                  subtitle:
+                      context.t('Gợi ý thời tiết & địa điểm thư giãn gần bạn'),
                   onTap: () => context.push('/location'),
                 ),
                 const _Divider(),
                 _Row(
                   icon: Icons.phone_iphone_outlined,
-                  title: 'Thông tin thiết bị',
-                  subtitle: 'Model, hệ điều hành, phiên bản app',
+                  title: context.t('Thông tin thiết bị'),
+                  subtitle: context.t('Model, hệ điều hành, phiên bản app'),
                   onTap: () => context.push('/device-info'),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const _SectionLabel('Quy định & sử dụng'),
+            _SectionLabel(context.t('Quy định & sử dụng')),
             _Card(
               children: [
                 _Row(
                   icon: Icons.description_outlined,
-                  title: 'Điều khoản, bản quyền & giấy phép',
-                  subtitle: 'Đọc trước khi sử dụng',
+                  title: context.t('Điều khoản, bản quyền & giấy phép'),
+                  subtitle: context.t('Đọc trước khi sử dụng'),
                   onTap: () => context.push('/legal'),
                 ),
                 const _Divider(),
                 _Row(
                   icon: Icons.info_outline,
-                  title: 'Giới thiệu',
-                  subtitle: 'Phiên bản 1.0.0',
+                  title: context.t('Giới thiệu'),
+                  subtitle: context.t('Phiên bản 1.0.0'),
                   onTap: () => _showAboutDialog(context),
                 ),
               ],
             ),
             const SizedBox(height: 24),
-            const _SectionLabel('Thống kê tình trạng'),
+            _SectionLabel(context.t('Thống kê tình trạng')),
             const _StatsCard(),
             const SizedBox(height: 24),
-            const _SectionLabel('Giao diện'),
+            _SectionLabel(context.t('Giao diện')),
             const _ThemeToggleCard(),
             const SizedBox(height: 12),
             const _AccentPickerCard(),
             const SizedBox(height: 24),
-            const _SectionLabel('Nạp thẻ / Nâng cấp'),
+            _SectionLabel(context.t('Ngôn ngữ')),
+            const _LanguagePickerCard(),
+            const SizedBox(height: 24),
+            _SectionLabel(context.t('Nạp thẻ / Nâng cấp')),
             _Card(
               children: [
                 _Row(
                   icon: Icons.workspace_premium_outlined,
-                  title: 'Mở khóa tính năng nâng cao',
-                  subtitle: 'Phân tích sâu, companion theo cung & con giáp',
+                  title: context.t('Mở khóa tính năng nâng cao'),
+                  subtitle:
+                      context.t('Phân tích sâu, companion theo cung & con giáp'),
                   trailing: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -142,9 +148,9 @@ class SettingsScreen extends StatelessWidget {
                       color: RelaxColors.violet,
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Text(
-                      'Nạp ngay',
-                      style: TextStyle(
+                    child: Text(
+                      context.t('Nạp ngay'),
+                      style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
                         fontSize: 12,
@@ -156,13 +162,14 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
-            const _SectionLabel('Tài khoản'),
+            _SectionLabel(context.t('Tài khoản')),
             _Card(
               children: [
                 _Row(
                   icon: Icons.delete_outline,
-                  title: 'Xóa tài khoản',
-                  subtitle: 'Xóa vĩnh viễn toàn bộ dữ liệu của bạn',
+                  title: context.t('Xóa tài khoản'),
+                  subtitle:
+                      context.t('Xóa vĩnh viễn toàn bộ dữ liệu của bạn'),
                   trailing: const Icon(Icons.chevron_right,
                       color: RelaxColors.coral),
                   onTap: () => _confirmDelete(context),
@@ -964,6 +971,68 @@ class _AccentPickerCard extends StatelessWidget {
                 ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Hai chip Tiếng Việt / English — đổi locale toàn app ngay tại chỗ.
+class _LanguagePickerCard extends StatelessWidget {
+  const _LanguagePickerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.watch<LocaleController>();
+    Widget chip(String code, String label, String flag) {
+      final selected = loc.code == code;
+      return Expanded(
+        child: GestureDetector(
+          onTap: () => context.read<LocaleController>().set(code),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            margin: const EdgeInsets.symmetric(horizontal: 4),
+            decoration: BoxDecoration(
+              color: selected
+                  ? Theme.of(context).colorScheme.primary
+                  : context.surfaceAlt,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : context.fieldBorder,
+              ),
+            ),
+            child: Column(
+              children: [
+                Text(flag, style: const TextStyle(fontSize: 22)),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected ? Colors.white : context.appText,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.fieldBorder),
+      ),
+      child: Row(
+        children: [
+          chip('vi', 'Tiếng Việt', '🇻🇳'),
+          chip('en', 'English', '🇬🇧'),
         ],
       ),
     );

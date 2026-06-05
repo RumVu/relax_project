@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
+import 'core/locale_controller.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'screens/analytics_screen.dart';
@@ -36,18 +37,24 @@ class RelaxApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthState()),
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => AudioController()),
+        ChangeNotifierProvider(create: (_) => LocaleController()),
       ],
       child: Builder(builder: (context) {
         final auth = context.watch<AuthState>();
         final theme = context.watch<ThemeController>();
+        final loc = context.watch<LocaleController>();
         final router = _buildRouter(auth);
-        return MaterialApp.router(
-          title: 'Relax',
-          debugShowCheckedModeBanner: false,
-          theme: buildRelaxTheme(accent: theme.accent),
-          darkTheme: buildRelaxDarkTheme(accent: theme.accent),
-          themeMode: theme.mode,
-          routerConfig: router,
+        return LocaleScope(
+          lang: loc.code,
+          child: MaterialApp.router(
+            title: 'Relax',
+            debugShowCheckedModeBanner: false,
+            theme: buildRelaxTheme(accent: theme.accent),
+            darkTheme: buildRelaxDarkTheme(accent: theme.accent),
+            themeMode: theme.mode,
+            locale: loc.locale,
+            routerConfig: router,
+          ),
         );
       }),
     );
