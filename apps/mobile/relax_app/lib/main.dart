@@ -11,6 +11,7 @@ part 'core/theme.dart';
 part 'core/app_copy.dart';
 part 'models/backend_models.dart';
 part 'services/relax_catalog_service.dart';
+part 'services/mobile_content_service.dart';
 part 'screens/splash_screen.dart';
 part 'screens/onboarding_screen.dart';
 part 'screens/app_shell.dart';

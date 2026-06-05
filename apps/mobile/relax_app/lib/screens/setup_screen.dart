@@ -6,15 +6,33 @@ class SetupScreen extends StatelessWidget {
     required this.themeMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
+    required this.content,
+    required this.loadingContent,
+    required this.contentError,
+    required this.onRefreshContent,
   });
 
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
   final ValueChanged<AppLanguage> onLanguageChanged;
+  final MobileContentSnapshot content;
+  final bool loadingContent;
+  final String? contentError;
+  final VoidCallback onRefreshContent;
 
   @override
   Widget build(BuildContext context) {
     final copy = context.copy;
+    final asset = content.companionAsset;
+    final theme = content.appTheme;
+    final paidPlans = content.billingPlans
+        .where((plan) => plan.effectivePrice > 0)
+        .toList(growable: false);
+    final featuredPlan = paidPlans.isNotEmpty
+        ? paidPlans.first
+        : content.billingPlans.isNotEmpty
+        ? content.billingPlans.first
+        : null;
     return AppScroll(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -26,30 +44,42 @@ class SetupScreen extends StatelessWidget {
             trailing: const PixelCatScene(scene: CatScene.sleep, height: 64),
           ),
           const SizedBox(height: 14),
+          BackendStatusBanner(
+            loading: loadingContent,
+            error: contentError,
+            loadedCount: content.loadedSections,
+            resourceCount:
+                content.moodOptions.length +
+                content.breathingExercises.length +
+                content.billingPlans.length,
+            onRefresh: onRefreshContent,
+          ),
+          const SizedBox(height: 12),
           PixelPanel(
             child: Row(
               children: [
-                const CatAvatar(size: 94),
+                CatAvatar(size: 94, imageUrl: asset?.previewImageUrl),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Thi Ái ✎',
+                        asset?.name ?? 'Thi Ái ✎',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Tuổi: 22   |   Nữ',
+                        asset?.description ??
+                            'Hồ sơ người dùng sẽ nạp sau khi mobile có đăng nhập.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       Text(
-                        '0123 456 789',
+                        'Nguồn: /companion-assets/default',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       Text(
-                        'thiai.chill@email.com',
+                        'Profile cá nhân: chờ JWT mobile',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
@@ -70,20 +100,32 @@ class SetupScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 10),
                 Row(
-                  children: const [
-                    Expanded(child: TimeChip(time: '17:00', selected: false)),
-                    SizedBox(width: 8),
-                    Expanded(child: TimeChip(time: '19:00', selected: false)),
-                    SizedBox(width: 8),
-                    Expanded(child: TimeChip(time: '21:00', selected: true)),
+                  children: [
+                    const Expanded(
+                      child: TimeChip(time: '17:00', selected: false),
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: TimeChip(time: '19:00', selected: false),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TimeChip(
+                        time: content.companionMessage == null
+                            ? '21:00'
+                            : '21:30',
+                        selected: true,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 10),
                 SettingRow(
                   icon: Icons.volume_up_outlined,
-                  title: 'Âm báo: Tiếng mèo con kêu',
+                  title: 'Tin nhắn companion',
                   subtitle:
-                      'Người dùng ≤ 32 tuổi nên có thể chọn khung giờ sau 21:00',
+                      content.companionMessage?.content ??
+                      'Đang dùng thông báo mẫu đến khi backend trả message.',
                 ),
               ],
             ),
@@ -108,6 +150,34 @@ class SetupScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
+          if (content.breathingExercises.isNotEmpty) ...[
+            PixelPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SectionTitle(
+                    title: 'Bài thở từ backend',
+                    icon: Icons.air_rounded,
+                  ),
+                  const SizedBox(height: 10),
+                  ...content.breathingExercises
+                      .take(4)
+                      .map(
+                        (exercise) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: SettingRow(
+                            icon: Icons.bubble_chart_outlined,
+                            title: exercise.title,
+                            subtitle:
+                                '${exercise.patternLabel} x ${exercise.cycles} · ${exercise.durationSeconds}s',
+                          ),
+                        ),
+                      ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           PixelPanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,15 +193,33 @@ class SetupScreen extends StatelessWidget {
                   language: copy.language,
                   onChanged: onLanguageChanged,
                 ),
+                if (theme != null) ...[
+                  const SizedBox(height: 12),
+                  SettingRow(
+                    icon: Icons.color_lens_outlined,
+                    title: 'Theme backend: ${theme.name}',
+                    subtitle: '${theme.mode} · /app-themes/default',
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      _ThemeSwatch(color: theme.primaryColor),
+                      const SizedBox(width: 8),
+                      _ThemeSwatch(color: theme.accentColor),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
           const SizedBox(height: 12),
           SettingAction(
             icon: Icons.credit_card_rounded,
-            title: 'Nạp thẻ / Nâng cấp',
-            subtitle: 'Mở khóa tính năng nâng cao',
-            action: 'Nạp ngay',
+            title: featuredPlan?.title ?? 'Nạp thẻ / Nâng cấp',
+            subtitle: featuredPlan == null
+                ? 'Mở khóa tính năng nâng cao'
+                : '${featuredPlan.description} · ${featuredPlan.priceLabel}',
+            action: featuredPlan == null ? 'Nạp ngay' : featuredPlan.priceLabel,
           ),
           const SizedBox(height: 10),
           SettingAction(
@@ -161,6 +249,26 @@ class SetupScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeSwatch extends StatelessWidget {
+  const _ThemeSwatch({required this.color});
+
+  final String color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        height: 34,
+        decoration: BoxDecoration(
+          color: _colorFromHex(color, RelaxTheme.purple),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.relax.border),
+        ),
       ),
     );
   }

@@ -66,6 +66,23 @@ class MoodOption {
   final String label;
   final IconData icon;
   final int percent;
+
+  factory MoodOption.fromBackend(BackendMoodOption option, int index) {
+    final icon = switch (option.mood) {
+      'HAPPY' => Icons.sentiment_very_satisfied_rounded,
+      'SAD' => Icons.sentiment_dissatisfied_rounded,
+      'STRESSED' => Icons.psychology_alt_rounded,
+      'TIRED' => Icons.cloudy_snowing,
+      'ANXIOUS' => Icons.battery_1_bar_rounded,
+      'CALM' => Icons.spa_rounded,
+      'EXCITED' => Icons.local_fire_department_rounded,
+      'LONELY' => Icons.nights_stay_rounded,
+      'GRATEFUL' => Icons.favorite_rounded,
+      _ => Icons.sentiment_neutral_rounded,
+    };
+
+    return MoodOption(option.label, icon, math.max(12, 82 - index * 6));
+  }
 }
 
 class MethodOption {
@@ -73,6 +90,19 @@ class MethodOption {
 
   final String label;
   final IconData icon;
+
+  factory MethodOption.fromAction(String action) {
+    return switch (action) {
+      'MEDITATION' => const MethodOption(
+        'Thiền định',
+        Icons.self_improvement_rounded,
+      ),
+      'BREATHING' => const MethodOption('Hít thở', Icons.cloud_queue_rounded),
+      'JOURNAL' => const MethodOption('Viết nhật kí', Icons.edit_note_rounded),
+      'MUSIC' => const MethodOption('Nghe nhạc', Icons.headphones_rounded),
+      _ => MethodOption(action, Icons.spa_rounded),
+    };
+  }
 }
 
 class NavItem {
