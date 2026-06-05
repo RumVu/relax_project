@@ -42,6 +42,12 @@ dependencies:
   provider: ^6.1.2
   # Phát nhạc nền / podcast streaming từ URL.
   just_audio: ^0.9.42
+  # WebView để mở trang thanh toán SePay (form auto-submit).
+  webview_flutter: ^4.10.0
+  # Thông tin thiết bị cho mục "Thông tin thiết bị".
+  device_info_plus: ^11.2.0
+  # Lấy vị trí GPS cho mục Setup location.
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:

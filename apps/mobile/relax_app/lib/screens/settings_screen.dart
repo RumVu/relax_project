@@ -82,6 +82,25 @@ class SettingsScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 24),
+            const _SectionLabel('Thiết bị & vị trí'),
+            _Card(
+              children: [
+                _Row(
+                  icon: Icons.place_outlined,
+                  title: 'Vị trí của bạn',
+                  subtitle: 'Gợi ý thời tiết & địa điểm thư giãn gần bạn',
+                  onTap: () => context.push('/location'),
+                ),
+                const _Divider(),
+                _Row(
+                  icon: Icons.phone_iphone_outlined,
+                  title: 'Thông tin thiết bị',
+                  subtitle: 'Model, hệ điều hành, phiên bản app',
+                  onTap: () => context.push('/device-info'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
             const _SectionLabel('Quy định & sử dụng'),
             _Card(
               children: [
@@ -130,7 +149,7 @@ class SettingsScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onTap: () => _showNotImplemented(context),
+                  onTap: () => context.push('/billing'),
                 ),
               ],
             ),
