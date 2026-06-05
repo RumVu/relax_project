@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../pixel/pixel_panel.dart';
 
 class MiniMoment extends StatelessWidget {
   const MiniMoment({

@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../app/theme.dart';
 
 class SectionTitle extends StatelessWidget {
   const SectionTitle({super.key, required this.title, required this.icon});

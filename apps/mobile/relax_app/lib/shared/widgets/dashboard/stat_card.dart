@@ -1,4 +1,6 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../app/theme.dart';
+import '../pixel/pixel_panel.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({

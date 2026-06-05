@@ -1,4 +1,7 @@
-part of 'package:relax_app/main.dart';
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import '../../shared/painters/pixel_scene_painter.dart';
+import 'backend_models.dart';
 
 class OnboardingSlide {
   const OnboardingSlide({

@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../app/theme.dart';
 
 class PixelBadge extends StatelessWidget {
   const PixelBadge({super.key, required this.label});

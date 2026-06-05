@@ -1,4 +1,6 @@
-part of 'package:relax_app/main.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/env.dart';
 
 /// Cấu hình base URL backend. Source-of-truth thật là [Env.apiUrl] —
 /// `BackendConfig.defaultBaseUrl` chỉ là alias để code cũ vẫn compile.
@@ -20,10 +22,10 @@ class ApiClient {
     http.Client? client,
     String baseUrl = Env.apiUrl,
     this.timeout = const Duration(seconds: 10),
-  })  : _client = client ?? http.Client(),
-        baseUrl = baseUrl.endsWith('/')
-            ? baseUrl.substring(0, baseUrl.length - 1)
-            : baseUrl;
+  }) : _client = client ?? http.Client(),
+       baseUrl = baseUrl.endsWith('/')
+           ? baseUrl.substring(0, baseUrl.length - 1)
+           : baseUrl;
 
   final http.Client _client;
   final String baseUrl;
@@ -34,7 +36,10 @@ class ApiClient {
     return Uri.parse('$baseUrl$p');
   }
 
-  Map<String, String> _headers({String? accessToken, bool sendingJson = false}) {
+  Map<String, String> _headers({
+    String? accessToken,
+    bool sendingJson = false,
+  }) {
     return <String, String>{
       'Accept': 'application/json',
       if (sendingJson) 'Content-Type': 'application/json; charset=utf-8',

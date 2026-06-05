@@ -1,4 +1,15 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/session.dart';
+import '../../app/app_copy.dart';
+import '../../core/session.dart';
+import '../../data/models/backend_models.dart';
+import '../../data/services/mobile_content_service.dart';
+import '../../data/services/relax_catalog_service.dart';
+import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
+import '../challenge/challenge_screen.dart';
+import '../home/home_screen.dart';
+import '../relax/relax_screen.dart';
+import '../setup/setup_screen.dart';
 
 class RelaxShell extends StatefulWidget {
   const RelaxShell({

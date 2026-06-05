@@ -1,4 +1,7 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/api_client.dart';
+import '../pixel/pixel_panel.dart';
+import '../pixel/pixel_badge.dart';
 
 class BackendStatusBanner extends StatelessWidget {
   const BackendStatusBanner({

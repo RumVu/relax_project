@@ -1,4 +1,20 @@
-part of 'package:relax_app/main.dart';
+import '../../../../core/session.dart';
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import '../../app/app_copy.dart';
+import '../../app/theme.dart';
+import '../../data/models/app_models.dart';
+import '../../data/services/mobile_content_service.dart';
+import '../../data/services/relax_catalog_service.dart';
+import '../../shared/widgets/buttons/pill_controls.dart';
+import '../../shared/widgets/common/page_dots.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_badge.dart';
+import '../../shared/widgets/pixel/pixel_button.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
+import '../auth/login_screen.dart';
+import '../auth/register_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({
@@ -24,10 +40,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  void _enterApp() {
-    Navigator.of(context).pushReplacement(
+  void _goLogin() {
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => RelaxShell(
+        builder: (_) => LoginScreen(
+          themeMode: widget.themeMode,
+          onThemeChanged: widget.onThemeChanged,
+          onLanguageChanged: widget.onLanguageChanged,
+          catalogRepository: widget.catalogRepository,
+          contentRepository: widget.contentRepository,
+        ),
+      ),
+    );
+  }
+
+  void _goRegister() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => RegisterScreen(
           themeMode: widget.themeMode,
           onThemeChanged: widget.onThemeChanged,
           onLanguageChanged: widget.onLanguageChanged,
@@ -70,68 +100,97 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ],
               ),
               const SizedBox(height: 16),
-              Expanded(
-                child: PixelPanel(
-                  padding: EdgeInsets.zero,
-                  child: PageView.builder(
-                    controller: _controller,
-                    onPageChanged: (value) => setState(() => _page = value),
-                    itemCount: slides.length,
-                    itemBuilder: (context, index) {
-                      final slide = slides[index];
-                      return LayoutBuilder(
-                        builder: (context, constraints) {
-                          final compact = constraints.maxHeight < 620;
-                          return SingleChildScrollView(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                minHeight: constraints.maxHeight - 38,
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  PixelBadge(label: copy.homeBadge),
-                                  SizedBox(height: compact ? 20 : 42),
-                                  Text(
-                                    copy.onboardingWelcome,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.titleLarge,
+              Flexible(
+                child: LayoutBuilder(
+                  builder: (context, outerConstraints) {
+                    final panelHeight = math.min(
+                      outerConstraints.maxHeight,
+                      560.0,
+                    );
+                    return SizedBox(
+                      height: panelHeight,
+                      child: PixelPanel(
+                        padding: EdgeInsets.zero,
+                        child: PageView.builder(
+                          controller: _controller,
+                          onPageChanged: (value) =>
+                              setState(() => _page = value),
+                          itemCount: slides.length,
+                          itemBuilder: (context, index) {
+                            final slide = slides[index];
+                            return LayoutBuilder(
+                              builder: (context, constraints) {
+                                final compact = constraints.maxHeight < 500;
+                                return SingleChildScrollView(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    20,
+                                    20,
+                                    20,
+                                    18,
                                   ),
-                                  SizedBox(height: compact ? 18 : 42),
-                                  Center(
-                                    child: PixelCatScene(
-                                      scene: slide.scene,
-                                      height: compact ? 150 : 220,
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: constraints.maxHeight - 38,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            PixelBadge(label: copy.homeBadge),
+                                            SizedBox(height: compact ? 18 : 30),
+                                            Text(
+                                              copy.onboardingWelcome,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.titleLarge,
+                                            ),
+                                          ],
+                                        ),
+                                        Center(
+                                          child: PixelCatScene(
+                                            scene: slide.scene,
+                                            height: compact ? 140 : 190,
+                                          ),
+                                        ),
+                                        Column(
+                                          children: [
+                                            Center(
+                                              child: Text(
+                                                slide.title,
+                                                textAlign: TextAlign.center,
+                                                style: Theme.of(
+                                                  context,
+                                                ).textTheme.headlineSmall,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 12),
+                                            Text(
+                                              slide.body,
+                                              textAlign: TextAlign.center,
+                                              style: Theme.of(
+                                                context,
+                                              ).textTheme.bodyMedium,
+                                            ),
+                                            const SizedBox(height: 6),
+                                          ],
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  SizedBox(height: compact ? 18 : 42),
-                                  Center(
-                                    child: Text(
-                                      slide.title,
-                                      textAlign: TextAlign.center,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.headlineSmall,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Text(
-                                    slide.body,
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 14),
@@ -141,13 +200,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 icon: Icons.person_outline_rounded,
                 label: copy.signIn,
                 filled: true,
-                onPressed: _enterApp,
+                onPressed: _goLogin,
               ),
               const SizedBox(height: 10),
               PixelButton(
                 icon: Icons.person_add_alt_1_outlined,
                 label: copy.signUp,
-                onPressed: _enterApp,
+                onPressed: _goRegister,
+              ),
+              const SizedBox(height: 8),
+              const SizedBox(
+                height: 64,
+                child: PixelCatScene(scene: CatScene.sleep),
               ),
             ],
           ),

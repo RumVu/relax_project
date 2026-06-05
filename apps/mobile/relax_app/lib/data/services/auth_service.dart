@@ -1,4 +1,4 @@
-part of 'package:relax_app/main.dart';
+import '../../core/api_client.dart';
 
 /// Kết quả thành công từ /auth/login | /auth/register | /auth/refresh.
 class AuthResult {

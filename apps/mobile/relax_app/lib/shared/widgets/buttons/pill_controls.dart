@@ -1,4 +1,7 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../../../../app/theme.dart';
+import '../../../../app/theme.dart';
+import '../../../../app/app_copy.dart';
 
 class ThemePill extends StatelessWidget {
   const ThemePill({

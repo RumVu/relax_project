@@ -1,4 +1,6 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../../../../app/theme.dart';
+import '../../../../app/theme.dart';
 
 class TimeChip extends StatelessWidget {
   const TimeChip({super.key, required this.time, required this.selected});

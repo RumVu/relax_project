@@ -1,4 +1,10 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../../core/session.dart';
+import '../../../app/theme.dart';
+import '../../../core/session.dart';
+import '../../../data/services/relax_session_service.dart';
+import '../../../shared/widgets/common/section_title.dart';
+import '../../../shared/widgets/pixel/pixel_panel.dart';
 
 /// Sheet "Thống kê tình trạng" — khớp đúng mockup trang 3:
 /// - 3 metric chips: Streak / Tổng thời gian / Hôm nay
@@ -52,8 +58,10 @@ class _StatsSheetState extends State<_StatsSheet> {
     }
     try {
       final svc = RelaxSessionService();
-      final sessions =
-          await svc.recent(accessToken: session.accessToken!, limit: 60);
+      final sessions = await svc.recent(
+        accessToken: session.accessToken!,
+        limit: 60,
+      );
       _compute(sessions);
     } catch (_) {
       _applyDemo();
@@ -73,7 +81,11 @@ class _StatsSheetState extends State<_StatsSheet> {
       ..clear()
       ..addAll(const [
         _FavoriteActivityRow('Nhạc', Icons.radio_rounded, '3h 20m'),
-        _FavoriteActivityRow('Podcast', Icons.mic_external_on_rounded, '2h 10m'),
+        _FavoriteActivityRow(
+          'Podcast',
+          Icons.mic_external_on_rounded,
+          '2h 10m',
+        ),
         _FavoriteActivityRow('Hít thở', Icons.cloud_rounded, '1h 15m'),
         _FavoriteActivityRow('Viết nhật ký', Icons.menu_book_rounded, '1h 00m'),
         _FavoriteActivityRow('Bí ẩn', Icons.inventory_2_rounded, '56m'),
@@ -83,8 +95,12 @@ class _StatsSheetState extends State<_StatsSheet> {
       ..addAll(const [
         _RecentMomentRow('Nhạc', Icons.radio_rounded, '24/05 · 22:15', 25),
         _RecentMomentRow('Hít thở', Icons.cloud_rounded, '24/05 · 21:30', 10),
-        _RecentMomentRow('Viết nhật ký', Icons.menu_book_rounded,
-            '24/05 · 20:45', 15),
+        _RecentMomentRow(
+          'Viết nhật ký',
+          Icons.menu_book_rounded,
+          '24/05 · 20:45',
+          15,
+        ),
       ]);
   }
 
@@ -101,11 +117,7 @@ class _StatsSheetState extends State<_StatsSheet> {
       final dur = end.difference(s.startedAt);
       if (dur.isNegative) continue;
       total += dur;
-      byActivity.update(
-        s.activityCode,
-        (v) => v + dur,
-        ifAbsent: () => dur,
-      );
+      byActivity.update(s.activityCode, (v) => v + dur, ifAbsent: () => dur);
       final d = DateTime(s.startedAt.year, s.startedAt.month, s.startedAt.day);
       if (d == today) todaySpent += dur;
     }
@@ -113,8 +125,9 @@ class _StatsSheetState extends State<_StatsSheet> {
     // Streak — đếm ngược từ hôm nay, dừng ở ngày đầu tiên không có session.
     int streak = 0;
     final days = sessions
-        .map((s) =>
-            DateTime(s.startedAt.year, s.startedAt.month, s.startedAt.day))
+        .map(
+          (s) => DateTime(s.startedAt.year, s.startedAt.month, s.startedAt.day),
+        )
         .toSet();
     for (var i = 0; i < 365; i++) {
       final probe = today.subtract(Duration(days: i));
@@ -134,43 +147,53 @@ class _StatsSheetState extends State<_StatsSheet> {
       ..sort((a, b) => b.value.compareTo(a.value));
     _favorites
       ..clear()
-      ..addAll(sorted.take(5).map((e) => _FavoriteActivityRow(
-            _labelFor(e.key),
-            _iconFor(e.key),
-            _formatDur(e.value),
-          )));
+      ..addAll(
+        sorted
+            .take(5)
+            .map(
+              (e) => _FavoriteActivityRow(
+                _labelFor(e.key),
+                _iconFor(e.key),
+                _formatDur(e.value),
+              ),
+            ),
+      );
 
     // Recent moments: 3 phiên gần nhất đã finish.
     final recent = sessions.where((s) => s.finishedAt != null).take(3).toList();
     _recent
       ..clear()
-      ..addAll(recent.map((s) => _RecentMomentRow(
+      ..addAll(
+        recent.map(
+          (s) => _RecentMomentRow(
             _labelFor(s.activityCode),
             _iconFor(s.activityCode),
             _formatWhen(s.startedAt),
             s.finishedAt!.difference(s.startedAt).inMinutes,
-          )));
+          ),
+        ),
+      );
   }
 
   String _labelFor(String code) => switch (code) {
-        'MUSIC' => 'Nhạc',
-        'PODCAST' => 'Podcast',
-        'BREATHING' => 'Hít thở',
-        'JOURNAL' => 'Viết nhật ký',
-        'MEDITATION' => 'Thiền',
-        'MYSTERY' => 'Bí ẩn',
-        _ => code,
-      };
+    'MUSIC' => 'Nhạc',
+    'PODCAST' => 'Podcast',
+    'BREATHING' => 'Hít thở',
+    'JOURNAL' => 'Viết nhật ký',
+    'MEDITATION' => 'Thiền',
+    'MYSTERY' => 'Bí ẩn',
+    _ => code,
+  };
 
   IconData _iconFor(String code) => switch (code) {
-        'MUSIC' => Icons.radio_rounded,
-        'PODCAST' => Icons.mic_external_on_rounded,
-        'BREATHING' => Icons.cloud_rounded,
-        'JOURNAL' => Icons.menu_book_rounded,
-        'MEDITATION' => Icons.self_improvement_rounded,
-        'MYSTERY' => Icons.inventory_2_rounded,
-        _ => Icons.spa_rounded,
-      };
+    'MUSIC' => Icons.radio_rounded,
+    'PODCAST' => Icons.mic_external_on_rounded,
+    'BREATHING' => Icons.cloud_rounded,
+    'JOURNAL' => Icons.menu_book_rounded,
+    'MEDITATION' => Icons.self_improvement_rounded,
+    'MYSTERY' => Icons.inventory_2_rounded,
+    _ => Icons.spa_rounded,
+  };
 
   String _formatDur(Duration d) {
     final h = d.inHours;
@@ -180,8 +203,10 @@ class _StatsSheetState extends State<_StatsSheet> {
   }
 
   String _formatWhen(DateTime t) {
-    final d = '${t.day.toString().padLeft(2, '0')}/${t.month.toString().padLeft(2, '0')}';
-    final hm = '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    final d =
+        '${t.day.toString().padLeft(2, '0')}/${t.month.toString().padLeft(2, '0')}';
+    final hm =
+        '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
     return '$d · $hm';
   }
 
@@ -204,9 +229,9 @@ class _StatsSheetState extends State<_StatsSheet> {
                     'THỐNG KÊ TÌNH TRẠNG TÂM TRẠNG',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: RelaxTheme.lavender,
-                          letterSpacing: 1.4,
-                        ),
+                      color: RelaxTheme.lavender,
+                      letterSpacing: 1.4,
+                    ),
                   ),
                   const SizedBox(height: 14),
                   Row(
@@ -307,9 +332,9 @@ class _StatsSheetState extends State<_StatsSheet> {
                       Text(
                         'Xem tất cả ›',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: RelaxTheme.lavender,
-                              fontWeight: FontWeight.w800,
-                            ),
+                          color: RelaxTheme.lavender,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ],
                   ),
@@ -324,8 +349,7 @@ class _StatsSheetState extends State<_StatsSheet> {
                       children: [
                         for (var i = 0; i < _recent.length; i++) ...[
                           Expanded(child: _recentCard(context, _recent[i])),
-                          if (i != _recent.length - 1)
-                            const SizedBox(width: 8),
+                          if (i != _recent.length - 1) const SizedBox(width: 8),
                         ],
                       ],
                     ),
@@ -351,9 +375,9 @@ class _StatsSheetState extends State<_StatsSheet> {
           Text(
             row.duration,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: RelaxTheme.lavender,
-                  fontWeight: FontWeight.w800,
-                ),
+              color: RelaxTheme.lavender,
+              fontWeight: FontWeight.w800,
+            ),
           ),
         ],
       ),
@@ -377,16 +401,16 @@ class _StatsSheetState extends State<_StatsSheet> {
           const SizedBox(height: 2),
           Text(
             row.when,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 11,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontSize: 11),
           ),
           const SizedBox(height: 4),
           Text(
             '${row.minutes} phút',
-            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: RelaxTheme.purple,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(color: RelaxTheme.purple),
           ),
         ],
       ),
@@ -423,9 +447,9 @@ class _MetricChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontSize: 11,
-                        color: context.relax.muted,
-                      ),
+                    fontSize: 11,
+                    color: context.relax.muted,
+                  ),
                 ),
               ),
             ],
@@ -433,17 +457,17 @@ class _MetricChip extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: RelaxTheme.purple,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(color: RelaxTheme.purple),
           ),
           Text(
             unit,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 10,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontSize: 10),
           ),
         ],
       ),
@@ -456,9 +480,9 @@ class _DayLabel extends StatelessWidget {
   final String text;
   @override
   Widget build(BuildContext context) => Text(
-        text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
-      );
+    text,
+    style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
+  );
 }
 
 class _MoodChartPainter extends CustomPainter {

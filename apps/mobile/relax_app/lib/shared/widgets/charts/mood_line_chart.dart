@@ -1,4 +1,6 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../../../../app/theme.dart';
+import '../../../../app/theme.dart';
 
 class MoodLineChart extends StatelessWidget {
   const MoodLineChart({super.key, this.compact = false});

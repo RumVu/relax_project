@@ -1,4 +1,4 @@
-part of 'package:relax_app/main.dart';
+import '../../core/api_client.dart';
 
 /// Một phiên thư giãn (relax session). UI cần `id` để gọi finish sau.
 class RelaxSession {
@@ -20,7 +20,8 @@ class RelaxSession {
     return RelaxSession(
       id: (j['id'] ?? '').toString(),
       activityCode: (j['activityCode'] ?? j['code'] ?? '').toString(),
-      startedAt: DateTime.tryParse((j['startedAt'] ?? '').toString()) ??
+      startedAt:
+          DateTime.tryParse((j['startedAt'] ?? '').toString()) ??
           DateTime.now(),
       finishedAt: j['finishedAt'] == null
           ? null
@@ -49,16 +50,13 @@ class RelaxSessionService {
     String? title,
     String? moodBefore,
   }) async {
-    final body = await _client.postJson(
-      '/relax-sessions/start',
-      <String, Object?>{
-        'activityType': activityType,
-        'resourceId': ?resourceId,
-        'title': ?title,
-        'moodBefore': ?moodBefore,
-      },
-      accessToken: accessToken,
-    );
+    final body = await _client
+        .postJson('/relax-sessions/start', <String, Object?>{
+          'activityType': activityType,
+          'resourceId': ?resourceId,
+          'title': ?title,
+          'moodBefore': ?moodBefore,
+        }, accessToken: accessToken);
     return _asSession(body);
   }
 
@@ -71,15 +69,12 @@ class RelaxSessionService {
     String? moodAfter,
   }) async {
     final trimmed = note?.trim();
-    final body = await _client.postJson(
-      '/relax-sessions/$sessionId/finish',
-      <String, Object?>{
-        'reliefLevel': reliefLevel.clamp(1, 5),
-        'moodAfter': ?moodAfter,
-        if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
-      },
-      accessToken: accessToken,
-    );
+    final body = await _client
+        .postJson('/relax-sessions/$sessionId/finish', <String, Object?>{
+          'reliefLevel': reliefLevel.clamp(1, 5),
+          'moodAfter': ?moodAfter,
+          if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
+        }, accessToken: accessToken);
     return _asSession(body);
   }
 
@@ -95,8 +90,8 @@ class RelaxSessionService {
     final items = raw is Map && raw['items'] is List
         ? raw['items'] as List
         : raw is List
-            ? raw
-            : const <Object?>[];
+        ? raw
+        : const <Object?>[];
     return items
         .whereType<Map>()
         .map((e) => RelaxSession.fromJson(Map<String, dynamic>.from(e)))

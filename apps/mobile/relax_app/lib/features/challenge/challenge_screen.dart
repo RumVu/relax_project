@@ -1,4 +1,12 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../shared/widgets/charts/mood_line_chart.dart';
+import '../../shared/widgets/common/section_title.dart';
+import '../../shared/widgets/dashboard/favorite_activity.dart';
+import '../../shared/widgets/dashboard/mini_moment.dart';
+import '../../shared/widgets/dashboard/stat_card.dart';
+import '../../shared/widgets/layout/app_scroll.dart';
+import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
 
 class ChallengeScreen extends StatelessWidget {
   const ChallengeScreen({super.key});

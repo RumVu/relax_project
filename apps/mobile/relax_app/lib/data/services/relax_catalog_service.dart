@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import '../../core/api_client.dart';
+import '../models/backend_models.dart';
 
 abstract class RelaxCatalogRepository {
   Future<List<BackendRelaxActivity>> fetchActivities();

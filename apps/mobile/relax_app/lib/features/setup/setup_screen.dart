@@ -1,4 +1,22 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../app/app_copy.dart';
+import '../../app/theme.dart';
+import '../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../data/services/mobile_content_service.dart';
+import '../../shared/widgets/buttons/pill_controls.dart';
+import '../../shared/widgets/charts/mood_line_chart.dart';
+import '../../shared/widgets/common/section_title.dart';
+import '../../shared/widgets/layout/app_scroll.dart';
+import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
+import '../../shared/widgets/settings/setting_action.dart';
+import '../../shared/widgets/settings/setting_row.dart';
+import '../../shared/widgets/settings/time_chip.dart';
+import '../relax/sheets/relax_sheets.dart';
 
 class SetupScreen extends StatelessWidget {
   const SetupScreen({
@@ -59,20 +77,23 @@ class SetupScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _ProfileHeroCard(
             displayName: displayName,
-            avatarUrl: asset?.previewImageUrl ??
-                (user?['avatar'] as String?),
-            age: (user?['age'] as num?)?.toInt() ??
+            avatarUrl: asset?.previewImageUrl ?? (user?['avatar'] as String?),
+            age:
+                (user?['age'] as num?)?.toInt() ??
                 (user?['birthYear'] != null
                     ? DateTime.now().year - (user!['birthYear'] as int)
                     : null),
             gender: user?['gender'] as String?,
             phone: user?['phone'] as String?,
             email: email,
-            social: user?['socialUrl'] as String? ??
-                user?['link'] as String?,
+            social: user?['socialUrl'] as String? ?? user?['link'] as String?,
             onEdit: () {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Em sẽ làm form sửa profile ở batch sau nha 💜')),
+                const SnackBar(
+                  content: Text(
+                    'Em sẽ làm form sửa profile ở batch sau nha 💜',
+                  ),
+                ),
               );
             },
           ),
@@ -112,7 +133,7 @@ class SetupScreen extends StatelessWidget {
                   title: 'Tin nhắn companion',
                   subtitle:
                       content.companionMessage?.content ??
-                      'Đang dùng thông báo mẫu đến khi backend trả message.',
+                      'Chưa có tin nhắn mới, đang dùng lời nhắc nhẹ.',
                 ),
               ],
             ),
@@ -157,7 +178,7 @@ class SetupScreen extends StatelessWidget {
                   SettingRow(
                     icon: Icons.color_lens_outlined,
                     title: theme.name,
-                    subtitle: 'Giao diện gợi ý từ backend',
+                    subtitle: 'Bảng màu được đề xuất cho không gian của bạn',
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -254,7 +275,7 @@ class _SetupSyncNote extends StatelessWidget {
             Expanded(
               child: Text(
                 loading
-                    ? 'Đang nạp cài đặt từ backend...'
+                    ? 'Đang nạp cài đặt mới...'
                     : 'Chưa nạp được cài đặt, bấm để thử lại.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
@@ -318,8 +339,7 @@ class _ProfileHeroCard extends StatelessWidget {
       final parts = <String>[];
       if (age != null) parts.add('Tuổi: $age');
       if (gender != null && gender!.isNotEmpty) parts.add(gender!);
-      lines.add(
-          _ProfileLine(Icons.cake_outlined, parts.join('  ·  ')));
+      lines.add(_ProfileLine(Icons.cake_outlined, parts.join('  ·  ')));
     }
     if (phone != null && phone!.isNotEmpty) {
       lines.add(_ProfileLine(Icons.call_outlined, phone!));
@@ -430,4 +450,11 @@ class _ProfileLine {
   const _ProfileLine(this.icon, this.text);
   final IconData icon;
   final String text;
+}
+
+Color _colorFromHex(String value, Color fallback) {
+  final sanitized = value.replaceFirst('#', '').trim();
+  if (sanitized.length != 6) return fallback;
+  final parsed = int.tryParse('FF$sanitized', radix: 16);
+  return parsed == null ? fallback : Color(parsed);
 }

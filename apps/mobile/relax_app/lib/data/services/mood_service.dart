@@ -1,4 +1,4 @@
-part of 'package:relax_app/main.dart';
+import '../../core/api_client.dart';
 
 /// Một dòng mood check-in trả về từ /mood-checkins/me.
 class MoodCheckin {
@@ -21,7 +21,8 @@ class MoodCheckin {
       id: (j['id'] ?? '').toString(),
       mood: (j['mood'] ?? '').toString(),
       intensity: (j['intensity'] as num?)?.toInt() ?? 3,
-      createdAt: DateTime.tryParse((j['createdAt'] ?? '').toString()) ??
+      createdAt:
+          DateTime.tryParse((j['createdAt'] ?? '').toString()) ??
           DateTime.now(),
       note: j['note'] as String?,
     );
@@ -42,16 +43,12 @@ class MoodService {
     List<String> tags = const ['home'],
   }) async {
     final trimmed = note?.trim();
-    final body = await _client.postJson(
-      '/mood-checkins/me',
-      {
-        'mood': mood,
-        'intensity': intensity,
-        if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
-        'tags': tags,
-      },
-      accessToken: accessToken,
-    );
+    final body = await _client.postJson('/mood-checkins/me', {
+      'mood': mood,
+      'intensity': intensity,
+      if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
+      'tags': tags,
+    }, accessToken: accessToken);
     if (body is Map<String, dynamic>) return MoodCheckin.fromJson(body);
     if (body is Map) {
       return MoodCheckin.fromJson(Map<String, dynamic>.from(body));
@@ -71,8 +68,8 @@ class MoodService {
     final items = raw is Map && raw['items'] is List
         ? raw['items'] as List
         : raw is List
-            ? raw
-            : const <Object?>[];
+        ? raw
+        : const <Object?>[];
     return items
         .whereType<Map>()
         .map((e) => MoodCheckin.fromJson(Map<String, dynamic>.from(e)))

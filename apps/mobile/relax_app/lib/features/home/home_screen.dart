@@ -1,4 +1,21 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../app/theme.dart';
+import '../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../data/services/mobile_content_service.dart';
+import '../../data/services/mood_service.dart';
+import '../../shared/widgets/common/section_title.dart';
+import '../../shared/widgets/common/speech_bubble.dart';
+import '../../shared/widgets/layout/app_scroll.dart';
+import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/mood/method_chip.dart';
+import '../../shared/widgets/mood/mood_progress.dart';
+import '../../shared/widgets/mood/mood_tile.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
+import '../relax/sheets/stats_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({

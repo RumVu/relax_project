@@ -1,4 +1,4 @@
-part of 'package:relax_app/main.dart';
+// Standalone library. No internal imports needed.
 
 /// Cấu hình build-time đọc qua `String.fromEnvironment` — giá trị truyền vào
 /// khi build/run bằng `--dart-define=KEY=VALUE` hoặc `--dart-define-from-file=.env`.
@@ -49,12 +49,12 @@ class Env {
 
   /// Một map gọn để dump ra log khi debug — không in secret nguyên dạng.
   static Map<String, String> summary() => {
-        'apiUrl': apiUrl,
-        'supabaseUrl': supabaseUrl.isEmpty ? '<unset>' : supabaseUrl,
-        'supabaseAnonKey': supabaseAnonKey.isEmpty
-            ? '<unset>'
-            : '${supabaseAnonKey.substring(0, 6)}…',
-        'sepayReturnUrl': sepayReturnUrl,
-        'flavor': flavor,
-      };
+    'apiUrl': apiUrl,
+    'supabaseUrl': supabaseUrl.isEmpty ? '<unset>' : supabaseUrl,
+    'supabaseAnonKey': supabaseAnonKey.isEmpty
+        ? '<unset>'
+        : '${supabaseAnonKey.substring(0, 6)}…',
+    'sepayReturnUrl': sepayReturnUrl,
+    'flavor': flavor,
+  };
 }

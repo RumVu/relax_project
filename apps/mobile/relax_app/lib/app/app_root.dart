@@ -1,4 +1,11 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../core/session.dart';
+import '../data/services/mobile_content_service.dart';
+import '../data/services/relax_catalog_service.dart';
+import '../features/onboarding/onboarding_screen.dart';
+import '../features/splash/splash_screen.dart';
+import 'app_copy.dart';
+import 'theme.dart';
 
 class RelaxApp extends StatefulWidget {
   const RelaxApp({super.key, this.catalogRepository, this.contentRepository});
@@ -65,28 +72,4 @@ class _RelaxAppState extends State<RelaxApp> {
       ),
     );
   }
-}
-
-/// InheritedWidget mỏng để widget bất kỳ đọc `SessionState` qua
-/// `context.session` mà không cần Provider/Riverpod.
-class SessionScope extends InheritedNotifier<SessionState> {
-  const SessionScope({
-    super.key,
-    required SessionState session,
-    required super.child,
-  }) : super(notifier: session);
-
-  static SessionState? maybeOf(BuildContext c) =>
-      c.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
-
-  static SessionState of(BuildContext c) {
-    final s = maybeOf(c);
-    assert(s != null, 'SessionScope chưa được mount ở trên cây widget.');
-    return s!;
-  }
-}
-
-extension SessionContextX on BuildContext {
-  SessionState get session => SessionScope.of(this);
-  SessionState? get sessionOrNull => SessionScope.maybeOf(this);
 }

@@ -1,4 +1,7 @@
-part of 'package:relax_app/main.dart';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import '../../config/env.dart';
+import '../../core/api_client.dart';
 
 /// Upload ảnh / file trực tiếp lên Supabase Storage (avatar, journal media)
 /// dùng anon key.
@@ -13,9 +16,9 @@ class SupabaseStorageService {
     http.Client? client,
     String? supabaseUrl,
     String? anonKey,
-  })  : _client = client ?? http.Client(),
-        _supabaseUrl = supabaseUrl ?? Env.supabaseUrl,
-        _anonKey = anonKey ?? Env.supabaseAnonKey;
+  }) : _client = client ?? http.Client(),
+       _supabaseUrl = supabaseUrl ?? Env.supabaseUrl,
+       _anonKey = anonKey ?? Env.supabaseAnonKey;
 
   final http.Client _client;
   final String _supabaseUrl;

@@ -1,4 +1,8 @@
-part of 'package:relax_app/main.dart';
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import '../../app/theme.dart';
+import '../../../app/theme.dart';
+import '../../data/models/app_models.dart';
 
 class PixelScenePainter extends CustomPainter {
   const PixelScenePainter({required this.scene, required this.dark});

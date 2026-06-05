@@ -1,4 +1,7 @@
-part of 'package:relax_app/main.dart';
+import 'dart:convert';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../data/services/auth_service.dart';
 
 /// Lưu access/refresh token + user profile vào Keychain (iOS) / Keystore
 /// (Android). Mọi đọc/ghi đều async vì secure storage là plug-in native.
@@ -7,7 +10,7 @@ part of 'package:relax_app/main.dart';
 /// đăng xuất / refresh.
 class SecureSession {
   SecureSession({FlutterSecureStorage? storage})
-      : _storage = storage ?? const FlutterSecureStorage();
+    : _storage = storage ?? const FlutterSecureStorage();
 
   final FlutterSecureStorage _storage;
 
@@ -49,12 +52,36 @@ class SecureSession {
   }
 }
 
+/// InheritedWidget mỏng để widget bất kỳ đọc [SessionState] qua
+/// `context.session` mà không cần Provider/Riverpod.
+class SessionScope extends InheritedNotifier<SessionState> {
+  const SessionScope({
+    super.key,
+    required SessionState session,
+    required super.child,
+  }) : super(notifier: session);
+
+  static SessionState? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
+
+  static SessionState of(BuildContext context) {
+    final session = maybeOf(context);
+    assert(session != null, 'SessionScope chưa được mount ở trên cây widget.');
+    return session!;
+  }
+}
+
+extension SessionContextX on BuildContext {
+  SessionState get session => SessionScope.of(this);
+  SessionState? get sessionOrNull => SessionScope.maybeOf(this);
+}
+
 /// State global cho phiên đăng nhập — UI watch để rebuild khi user đổi.
 /// Không dùng provider/riverpod để giữ codebase thuần stdlib.
 class SessionState extends ChangeNotifier {
   SessionState({SecureSession? storage, AuthService? auth})
-      : _storage = storage ?? SecureSession(),
-        _auth = auth ?? AuthService() {
+    : _storage = storage ?? SecureSession(),
+      _auth = auth ?? AuthService() {
     _bootstrap();
   }
 

@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import 'app_copy.dart';
 
 class RelaxTheme {
   static const purple = Color(0xFF6C4DE6);

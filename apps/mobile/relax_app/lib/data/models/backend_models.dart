@@ -1,5 +1,3 @@
-part of 'package:relax_app/main.dart';
-
 class BackendRelaxActivity {
   const BackendRelaxActivity({
     required this.type,
@@ -270,22 +268,6 @@ List<Map<String, Object?>> _readList(Object? value) {
       .toList(growable: false);
 }
 
-List<Map<String, Object?>> _readItems(Object? value) {
-  if (value is List) return _readList(value);
-  if (value is Map) {
-    final items = value['items'];
-    if (items is List) return _readList(items);
-    final data = value['data'];
-    if (data is List) return _readList(data);
-  }
-  return const [];
-}
-
-Map<String, Object?> _readMap(Object? value) {
-  if (value is! Map) return const {};
-  return value.map((key, value) => MapEntry(key.toString(), value as Object?));
-}
-
 String _readString(Object? value, {String fallback = ''}) {
   if (value == null) return fallback;
   final text = value.toString().trim();
@@ -301,12 +283,4 @@ int _readInt(Object? value) {
   if (value is int) return value;
   if (value is num) return value.round();
   return int.tryParse(value?.toString() ?? '') ?? 0;
-}
-
-Color _colorFromHex(String value, Color fallback) {
-  final sanitized = value.replaceFirst('#', '').trim();
-  if (sanitized.length != 6) return fallback;
-  final parsed = int.tryParse('FF$sanitized', radix: 16);
-  if (parsed == null) return fallback;
-  return Color(parsed);
 }

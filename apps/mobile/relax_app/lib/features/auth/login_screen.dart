@@ -1,4 +1,17 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../app/app_copy.dart';
+import '../../app/theme.dart';
+import '../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../data/services/auth_service.dart';
+import '../../data/services/mobile_content_service.dart';
+import '../../data/services/relax_catalog_service.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_button.dart';
+import '../shell/app_shell.dart';
+import 'register_screen.dart';
 
 /// Form đăng nhập đơn giản — pixel style, có nút Đăng kí ở dưới đổi qua
 /// [RegisterScreen]. Sau khi login thành công, đẩy thẳng [RelaxShell].
@@ -146,9 +159,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     labelText: 'Mật khẩu',
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
                     suffixIcon: IconButton(
-                      icon: Icon(_obscure
-                          ? Icons.visibility_rounded
-                          : Icons.visibility_off_rounded),
+                      icon: Icon(
+                        _obscure
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
+                      ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
                   ),
@@ -163,9 +178,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     _error!,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: context.relax.danger,
-                          fontWeight: FontWeight.w800,
-                        ),
+                      color: context.relax.danger,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 18),

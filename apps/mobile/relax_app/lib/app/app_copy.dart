@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../data/models/app_models.dart';
 
 enum AppLanguage { vi, en }
 

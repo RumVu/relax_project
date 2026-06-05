@@ -1,4 +1,15 @@
-part of 'package:relax_app/main.dart';
+import '../../../../../core/session.dart';
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import '../../../app/theme.dart';
+import '../../../core/session.dart';
+import '../../../data/models/app_models.dart';
+import '../../../data/models/backend_models.dart';
+import '../../../data/services/relax_session_service.dart';
+import '../../../shared/widgets/pixel/cat_widgets.dart';
+import '../../../shared/widgets/pixel/pixel_button.dart';
+import '../../../shared/widgets/pixel/pixel_panel.dart';
 
 void showPlayerSheet(BuildContext context, Activity activity) {
   showModalBottomSheet<void>(
@@ -428,9 +439,9 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
             Text(
               _error!,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.relax.danger,
-                    fontWeight: FontWeight.w800,
-                  ),
+                color: context.relax.danger,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ],
           const SizedBox(height: 14),
@@ -595,10 +606,9 @@ class RatingChip extends StatelessWidget {
               FittedBox(
                 child: Text(
                   label,
-                  style: Theme.of(context)
-                      .textTheme
-                      .labelLarge
-                      ?.copyWith(fontSize: 11),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(fontSize: 11),
                 ),
               ),
             ],

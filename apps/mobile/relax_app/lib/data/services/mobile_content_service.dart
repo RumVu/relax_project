@@ -1,4 +1,5 @@
-part of 'package:relax_app/main.dart';
+import '../../core/api_client.dart';
+import '../models/backend_models.dart';
 
 class MobileContentSnapshot {
   const MobileContentSnapshot({
@@ -91,6 +92,36 @@ class MobileContentService implements MobileContentRepository {
     } catch (_) {
       return null;
     }
+  }
+
+  List<Map<String, Object?>> _readItems(Object? value) {
+    if (value is List) return _readList(value);
+    if (value is Map) {
+      final items = value['items'];
+      if (items is List) return _readList(items);
+      final data = value['data'];
+      if (data is List) return _readList(data);
+    }
+    return const [];
+  }
+
+  List<Map<String, Object?>> _readList(Object? value) {
+    if (value is! List) return const [];
+    return value
+        .whereType<Map>()
+        .map(
+          (item) => item.map(
+            (key, value) => MapEntry(key.toString(), value as Object?),
+          ),
+        )
+        .toList(growable: false);
+  }
+
+  Map<String, Object?> _readMap(Object? value) {
+    if (value is! Map) return const {};
+    return value.map(
+      (key, value) => MapEntry(key.toString(), value as Object?),
+    );
   }
 }
 

@@ -1,4 +1,14 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../core/session.dart';
+import '../../data/models/app_models.dart';
+import '../../app/theme.dart';
+import '../../data/models/app_models.dart';
+import '../../data/models/backend_models.dart';
+import '../../shared/widgets/activity/activity_card.dart';
+import '../../shared/widgets/layout/app_scroll.dart';
+import '../../shared/widgets/layout/header_bar.dart';
+import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
 
 class RelaxScreen extends StatelessWidget {
   const RelaxScreen({
@@ -83,14 +93,16 @@ class RelaxScreen extends StatelessWidget {
             subtitle: 'Chọn một cách để thư giãn nhé ~',
             trailing: const PixelCatScene(scene: CatScene.sleep, height: 66),
           ),
-          const SizedBox(height: 14),
-          _RelaxSyncStrip(
-            loading: loadingCatalog,
-            error: catalogError,
-            activityCount: displayActivities.length,
-            resourceCount: resourceCount,
-            onRefresh: onRefreshCatalog,
-          ),
+          if (loadingCatalog || catalogError != null) ...[
+            const SizedBox(height: 14),
+            _RelaxSyncStrip(
+              loading: loadingCatalog,
+              error: catalogError,
+              activityCount: displayActivities.length,
+              resourceCount: resourceCount,
+              onRefresh: onRefreshCatalog,
+            ),
+          ],
           const SizedBox(height: 14),
           ...displayActivities.map(
             (activity) => Padding(
@@ -122,9 +134,9 @@ class _RelaxSyncStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = loading
-        ? 'Đang đồng bộ thư viện...'
+        ? 'Đang chuẩn bị thư viện thư giãn...'
         : error != null
-        ? 'Chưa kết nối backend, bấm để thử lại.'
+        ? 'Chưa nạp được thư viện, bấm để thử lại.'
         : '$activityCount mục hoạt động · $resourceCount nội dung đi kèm';
     return PixelPanel(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),

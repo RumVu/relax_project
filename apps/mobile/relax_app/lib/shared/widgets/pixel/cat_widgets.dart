@@ -1,4 +1,8 @@
-part of 'package:relax_app/main.dart';
+import 'package:flutter/material.dart';
+import '../../../../../../../app/theme.dart';
+import '../../../../app/theme.dart';
+import '../../../data/models/app_models.dart';
+import '../../painters/pixel_scene_painter.dart';
 
 class CatAvatar extends StatelessWidget {
   const CatAvatar({super.key, this.size = 84, this.imageUrl});
