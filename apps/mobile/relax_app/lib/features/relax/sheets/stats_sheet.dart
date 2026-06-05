@@ -51,8 +51,6 @@ class _StatsSheetState extends State<_StatsSheet> {
   Future<void> _load() async {
     final session = context.sessionOrNull;
     if (session == null || !session.isLoggedIn) {
-      // Demo data để vẫn hiện mockup khi chưa login.
-      _applyDemo();
       if (mounted) setState(() => _loading = false);
       return;
     }
@@ -64,44 +62,10 @@ class _StatsSheetState extends State<_StatsSheet> {
       );
       _compute(sessions);
     } catch (_) {
-      _applyDemo();
+      // Network error — show empty state, không fallback demo data.
     } finally {
       if (mounted) setState(() => _loading = false);
     }
-  }
-
-  void _applyDemo() {
-    _streakDays = 12;
-    _totalTime = const Duration(hours: 8, minutes: 42);
-    _todayTime = const Duration(hours: 0, minutes: 35);
-    _moodChart
-      ..clear()
-      ..addAll(const [0.45, 0.55, 0.48, 0.62, 0.70, 0.75, 0.85]);
-    _favorites
-      ..clear()
-      ..addAll(const [
-        _FavoriteActivityRow('Nhạc', Icons.radio_rounded, '3h 20m'),
-        _FavoriteActivityRow(
-          'Podcast',
-          Icons.mic_external_on_rounded,
-          '2h 10m',
-        ),
-        _FavoriteActivityRow('Hít thở', Icons.cloud_rounded, '1h 15m'),
-        _FavoriteActivityRow('Viết nhật ký', Icons.menu_book_rounded, '1h 00m'),
-        _FavoriteActivityRow('Bí ẩn', Icons.inventory_2_rounded, '56m'),
-      ]);
-    _recent
-      ..clear()
-      ..addAll(const [
-        _RecentMomentRow('Nhạc', Icons.radio_rounded, '24/05 · 22:15', 25),
-        _RecentMomentRow('Hít thở', Icons.cloud_rounded, '24/05 · 21:30', 10),
-        _RecentMomentRow(
-          'Viết nhật ký',
-          Icons.menu_book_rounded,
-          '24/05 · 20:45',
-          15,
-        ),
-      ]);
   }
 
   void _compute(List<RelaxSession> sessions) {
@@ -213,28 +177,59 @@ class _StatsSheetState extends State<_StatsSheet> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height * .9;
+    final session = context.sessionOrNull;
     final now = DateTime.now();
     final todayLabel =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    // Check if we have real data or just empty state
+    final hasData = _favorites.isNotEmpty || _recent.isNotEmpty;
 
     return SizedBox(
       height: height,
       child: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-              child: ListView(
-                children: [
-                  Text(
-                    'THỐNG KÊ TÌNH TRẠNG TÂM TRẠNG',
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      color: RelaxTheme.lavender,
-                      letterSpacing: 1.4,
+          : !hasData && (session == null || !session.isLoggedIn)
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.trending_up_rounded,
+                          size: 64,
+                          color: RelaxTheme.lavender.withOpacity(0.5),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Chưa có dữ liệu',
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Hãy bắt đầu phiên thư giãn đầu tiên để Thi Ái theo dõi tiến độ của bạn nha ✦',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  Row(
+                )
+              : Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+                  child: ListView(
+                    children: [
+                      Text(
+                        'THỐNG KÊ TÌNH TRẠNG TÂM TRẠNG',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: RelaxTheme.lavender,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
                     children: [
                       Expanded(
                         child: _MetricChip(
@@ -353,9 +348,9 @@ class _StatsSheetState extends State<_StatsSheet> {
                         ],
                       ],
                     ),
-                ],
+                  ],
+                ),
               ),
-            ),
     );
   }
 
