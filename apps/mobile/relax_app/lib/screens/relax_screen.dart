@@ -83,20 +83,67 @@ class RelaxScreen extends StatelessWidget {
             subtitle: 'Chọn một cách để thư giãn nhé ~',
             trailing: const PixelCatScene(scene: CatScene.sleep, height: 66),
           ),
-          const SizedBox(height: 12),
-          BackendStatusBanner(
+          const SizedBox(height: 14),
+          _RelaxSyncStrip(
             loading: loadingCatalog,
             error: catalogError,
-            loadedCount: syncedActivities.length,
+            activityCount: displayActivities.length,
             resourceCount: resourceCount,
             onRefresh: onRefreshCatalog,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ...displayActivities.map(
             (activity) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: ActivityCard(activity: activity),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RelaxSyncStrip extends StatelessWidget {
+  const _RelaxSyncStrip({
+    required this.loading,
+    required this.error,
+    required this.activityCount,
+    required this.resourceCount,
+    required this.onRefresh,
+  });
+
+  final bool loading;
+  final String? error;
+  final int activityCount;
+  final int resourceCount;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = loading
+        ? 'Đang đồng bộ thư viện...'
+        : error != null
+        ? 'Chưa kết nối backend, bấm để thử lại.'
+        : '$activityCount mục hoạt động · $resourceCount nội dung đi kèm';
+    return PixelPanel(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          PixelIconBox(
+            icon: error == null
+                ? Icons.cloud_done_rounded
+                : Icons.cloud_off_outlined,
+            size: 42,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(text, style: Theme.of(context).textTheme.bodyLarge),
+          ),
+          IconButton(
+            tooltip: 'Tải lại',
+            onPressed: onRefresh,
+            icon: Icon(Icons.refresh_rounded, color: context.relax.muted),
           ),
         ],
       ),

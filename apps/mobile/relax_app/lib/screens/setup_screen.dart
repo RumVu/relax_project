@@ -43,22 +43,19 @@ class SetupScreen extends StatelessWidget {
             subtitle: 'Tùy chỉnh không gian của Thi Ái ~',
             trailing: const PixelCatScene(scene: CatScene.sleep, height: 64),
           ),
-          const SizedBox(height: 14),
-          BackendStatusBanner(
-            loading: loadingContent,
-            error: contentError,
-            loadedCount: content.loadedSections,
-            resourceCount:
-                content.moodOptions.length +
-                content.breathingExercises.length +
-                content.billingPlans.length,
-            onRefresh: onRefreshContent,
-          ),
+          if (loadingContent || contentError != null) ...[
+            const SizedBox(height: 12),
+            _SetupSyncNote(
+              loading: loadingContent,
+              onRefresh: onRefreshContent,
+            ),
+          ],
           const SizedBox(height: 12),
           PixelPanel(
+            padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                CatAvatar(size: 94, imageUrl: asset?.previewImageUrl),
+                CatAvatar(size: 88, imageUrl: asset?.previewImageUrl),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
@@ -70,16 +67,7 @@ class SetupScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        asset?.description ??
-                            'Hồ sơ người dùng sẽ nạp sau khi mobile có đăng nhập.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        'Nguồn: /companion-assets/default',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                      Text(
-                        'Profile cá nhân: chờ JWT mobile',
+                        asset?.description ?? 'Linh thú đồng hành cùng bạn.',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
@@ -150,34 +138,6 @@ class SetupScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          if (content.breathingExercises.isNotEmpty) ...[
-            PixelPanel(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SectionTitle(
-                    title: 'Bài thở từ backend',
-                    icon: Icons.air_rounded,
-                  ),
-                  const SizedBox(height: 10),
-                  ...content.breathingExercises
-                      .take(4)
-                      .map(
-                        (exercise) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: SettingRow(
-                            icon: Icons.bubble_chart_outlined,
-                            title: exercise.title,
-                            subtitle:
-                                '${exercise.patternLabel} x ${exercise.cycles} · ${exercise.durationSeconds}s',
-                          ),
-                        ),
-                      ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-          ],
           PixelPanel(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -197,8 +157,8 @@ class SetupScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   SettingRow(
                     icon: Icons.color_lens_outlined,
-                    title: 'Theme backend: ${theme.name}',
-                    subtitle: '${theme.mode} · /app-themes/default',
+                    title: theme.name,
+                    subtitle: 'Giao diện gợi ý từ backend',
                   ),
                   const SizedBox(height: 10),
                   Row(
@@ -249,6 +209,47 @@ class SetupScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SetupSyncNote extends StatelessWidget {
+  const _SetupSyncNote({required this.loading, required this.onRefresh});
+
+  final bool loading;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(8),
+      onTap: onRefresh,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: context.relax.surfaceSoft,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.relax.border),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              loading ? Icons.sync_rounded : Icons.refresh_rounded,
+              color: RelaxTheme.lavender,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                loading
+                    ? 'Đang nạp cài đặt từ backend...'
+                    : 'Chưa nạp được cài đặt, bấm để thử lại.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

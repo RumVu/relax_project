@@ -7,10 +7,17 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final meta = [
+      if (activity.durationMinutes != null) '${activity.durationMinutes} phút',
+      if (activity.reliefPercent != null) 'relief ${activity.reliefPercent}%',
+      '${activity.contentCount} nội dung',
+    ].join(' · ');
+
     return PixelPanel(
+      padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          PixelIconBox(icon: activity.icon, size: 74),
+          PixelIconBox(icon: activity.icon, size: 78),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -18,24 +25,25 @@ class ActivityCard extends StatelessWidget {
               children: [
                 Text(
                   activity.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 6),
                 Text(
                   activity.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    if (activity.durationMinutes != null)
-                      PixelBadge(label: '${activity.durationMinutes} phút'),
-                    if (activity.reliefPercent != null)
-                      PixelBadge(label: 'relief ${activity.reliefPercent}%'),
-                    PixelBadge(label: '${activity.contentCount} nội dung'),
-                  ],
+                Text(
+                  meta,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelLarge?.copyWith(color: RelaxTheme.lavender),
                 ),
               ],
             ),
