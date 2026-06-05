@@ -25,6 +25,12 @@ class SetupScreen extends StatelessWidget {
     final copy = context.copy;
     final asset = content.companionAsset;
     final theme = content.appTheme;
+    final session = context.sessionOrNull;
+    final user = session?.user;
+    final displayName = (user?['name'] as String?)?.trim().isNotEmpty == true
+        ? user!['name'] as String
+        : asset?.name ?? 'Thi Ái ✎';
+    final email = (user?['email'] as String?) ?? '';
     final paidPlans = content.billingPlans
         .where((plan) => plan.effectivePrice > 0)
         .toList(growable: false);
@@ -62,12 +68,15 @@ class SetupScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        asset?.name ?? 'Thi Ái ✎',
+                        displayName,
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        asset?.description ?? 'Linh thú đồng hành cùng bạn.',
+                        email.isNotEmpty
+                            ? email
+                            : (asset?.description ??
+                                'Linh thú đồng hành cùng bạn.'),
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
@@ -200,13 +209,25 @@ class SetupScreen extends StatelessWidget {
           SettingAction(
             icon: Icons.logout_rounded,
             title: 'Đăng xuất',
-            subtitle: 'Đăng xuất khỏi tài khoản hiện tại',
-            onTap: () => showConfirmSheet(
-              context,
-              title: 'Đăng xuất?',
-              body: 'Hẹn gặp lại Thi Ái nhé. Thi Ái nhớ chăm sóc bản thân nha.',
-              action: 'Đăng xuất',
-            ),
+            subtitle: session?.isLoggedIn == true
+                ? 'Đang đăng nhập: ${email.isEmpty ? displayName : email}'
+                : 'Bạn chưa đăng nhập',
+            onTap: () async {
+              final navigator = Navigator.of(context);
+              await showConfirmSheet(
+                context,
+                title: 'Đăng xuất?',
+                body:
+                    'Hẹn gặp lại Thi Ái nhé. Thi Ái nhớ chăm sóc bản thân nha.',
+                action: 'Đăng xuất',
+                onConfirm: () async {
+                  await session?.logout();
+                },
+              );
+              if (session?.isLoggedIn == false && navigator.canPop()) {
+                navigator.popUntil((r) => r.isFirst);
+              }
+            },
           ),
         ],
       ),

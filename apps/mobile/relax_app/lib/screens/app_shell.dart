@@ -92,12 +92,14 @@ class _RelaxShellState extends State<RelaxShell> {
 
   @override
   Widget build(BuildContext context) {
+    final session = context.sessionOrNull;
     final pages = [
       HomeScreen(
         content: _contentSnapshot,
         loadingContent: _contentLoading,
         contentError: _contentError,
         onRefreshContent: _refreshBackendData,
+        session: session,
       ),
       RelaxScreen(
         backendActivities: _backendActivities,

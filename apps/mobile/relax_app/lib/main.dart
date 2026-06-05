@@ -22,6 +22,8 @@ part 'services/relax_catalog_service.dart';
 part 'services/mobile_content_service.dart';
 part 'screens/splash_screen.dart';
 part 'screens/onboarding_screen.dart';
+part 'screens/login_screen.dart';
+part 'screens/register_screen.dart';
 part 'screens/app_shell.dart';
 part 'screens/home_screen.dart';
 part 'screens/relax_screen.dart';

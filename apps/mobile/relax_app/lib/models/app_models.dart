@@ -61,11 +61,15 @@ class Activity {
 }
 
 class MoodOption {
-  const MoodOption(this.label, this.icon, this.percent);
+  const MoodOption(this.label, this.icon, this.percent, {this.code});
 
   final String label;
   final IconData icon;
   final int percent;
+
+  /// Mã backend (HAPPY / SAD / STRESSED…). Cần để POST `/mood-checkins/me`.
+  /// `null` cho các mood mẫu trong [AppCopy] khi backend chưa trả gì.
+  final String? code;
 
   factory MoodOption.fromBackend(BackendMoodOption option, int index) {
     final icon = switch (option.mood) {
@@ -81,7 +85,12 @@ class MoodOption {
       _ => Icons.sentiment_neutral_rounded,
     };
 
-    return MoodOption(option.label, icon, math.max(12, 82 - index * 6));
+    return MoodOption(
+      option.label,
+      icon,
+      math.max(12, 82 - index * 6),
+      code: option.mood,
+    );
   }
 }
 

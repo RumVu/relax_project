@@ -13,6 +13,7 @@ class RelaxApp extends StatefulWidget {
 class _RelaxAppState extends State<RelaxApp> {
   ThemeMode _themeMode = ThemeMode.dark;
   AppLanguage _language = AppLanguage.vi;
+  final SessionState _session = SessionState();
 
   void _setThemeMode(ThemeMode mode) {
     setState(() => _themeMode = mode);
@@ -20,6 +21,12 @@ class _RelaxAppState extends State<RelaxApp> {
 
   void _setLanguage(AppLanguage language) {
     setState(() => _language = language);
+  }
+
+  @override
+  void dispose() {
+    _session.dispose();
+    super.dispose();
   }
 
   @override
@@ -33,12 +40,15 @@ class _RelaxAppState extends State<RelaxApp> {
       builder: (context, child) {
         return AppCopyScope(
           copy: AppCopy(_language),
-          child: ColoredBox(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 430),
-                child: child ?? const SizedBox.shrink(),
+          child: SessionScope(
+            session: _session,
+            child: ColoredBox(
+              color: Theme.of(context).scaffoldBackgroundColor,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 430),
+                  child: child ?? const SizedBox.shrink(),
+                ),
               ),
             ),
           ),
@@ -55,4 +65,28 @@ class _RelaxAppState extends State<RelaxApp> {
       ),
     );
   }
+}
+
+/// InheritedWidget mỏng để widget bất kỳ đọc `SessionState` qua
+/// `context.session` mà không cần Provider/Riverpod.
+class SessionScope extends InheritedNotifier<SessionState> {
+  const SessionScope({
+    super.key,
+    required SessionState session,
+    required super.child,
+  }) : super(notifier: session);
+
+  static SessionState? maybeOf(BuildContext c) =>
+      c.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
+
+  static SessionState of(BuildContext c) {
+    final s = maybeOf(c);
+    assert(s != null, 'SessionScope chưa được mount ở trên cây widget.');
+    return s!;
+  }
+}
+
+extension SessionContextX on BuildContext {
+  SessionState get session => SessionScope.of(this);
+  SessionState? get sessionOrNull => SessionScope.maybeOf(this);
 }

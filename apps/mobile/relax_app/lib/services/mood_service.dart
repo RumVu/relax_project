@@ -41,12 +41,13 @@ class MoodService {
     String? note,
     List<String> tags = const ['home'],
   }) async {
+    final trimmed = note?.trim();
     final body = await _client.postJson(
       '/mood-checkins/me',
       {
         'mood': mood,
         'intensity': intensity,
-        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+        if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
         'tags': tags,
       },
       accessToken: accessToken,

@@ -1,12 +1,14 @@
 part of 'package:relax_app/main.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({
     super.key,
     required this.content,
     required this.loadingContent,
     required this.contentError,
     required this.onRefreshContent,
+    this.session,
+    this.moodService,
   });
 
   final MobileContentSnapshot content;
@@ -14,10 +16,63 @@ class HomeScreen extends StatelessWidget {
   final String? contentError;
   final VoidCallback onRefreshContent;
 
+  /// Phiên đăng nhập — null khi chưa wire (test / preview).
+  final SessionState? session;
+
+  /// Dịch vụ POST mood — DI để test dễ.
+  final MoodService? moodService;
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  late final MoodService _moods = widget.moodService ?? MoodService();
+
+  /// Code mood đang highlight (sau khi user bấm hoặc lần cuối log).
+  String? _activeMoodCode;
+
+  /// Code mood đang POST — chỉ để hiện loader trên đúng ô.
+  String? _pendingMoodCode;
+
+  Future<void> _logMood(MoodOption mood) async {
+    final code = mood.code;
+    final session = widget.session;
+    if (code == null) return;
+    if (session == null || !session.isLoggedIn) {
+      _toast('Hãy đăng nhập để Thi Ái nhớ cảm xúc của bạn nha 💜');
+      return;
+    }
+    setState(() => _pendingMoodCode = code);
+    try {
+      await _moods.log(
+        accessToken: session.accessToken!,
+        mood: code,
+        intensity: 3,
+      );
+      if (!mounted) return;
+      setState(() {
+        _activeMoodCode = code;
+        _pendingMoodCode = null;
+      });
+      _toast('Đã ghi: ${mood.label} • Thi Ái sẽ nhớ nha ✦');
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _pendingMoodCode = null);
+      _toast('Không ghi được — $e');
+    }
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final copy = context.copy;
-    final backendMoods = content.moodOptions;
+    final backendMoods = widget.content.moodOptions;
     final moods = backendMoods.isEmpty
         ? copy.moods
         : backendMoods
@@ -34,8 +89,8 @@ class HomeScreen extends StatelessWidget {
     final visibleMoods = moods.take(6).toList(growable: false);
     final visibleMethods = methods.take(4).toList(growable: false);
     final speech =
-        content.companionMessage?.content ??
-        content.quote?.content ??
+        widget.content.companionMessage?.content ??
+        widget.content.quote?.content ??
         (backendMoods.isNotEmpty && backendMoods.first.companionLine.isNotEmpty
             ? backendMoods.first.companionLine
             : copy.homeSpeech);
@@ -58,11 +113,11 @@ class HomeScreen extends StatelessWidget {
                 SpeechBubble(text: speech),
                 const SizedBox(height: 12),
                 const PixelCatScene(scene: CatScene.wave, height: 188),
-                if (loadingContent || contentError != null) ...[
+                if (widget.loadingContent || widget.contentError != null) ...[
                   const SizedBox(height: 10),
                   _SoftSyncLine(
-                    loading: loadingContent,
-                    onRefresh: onRefreshContent,
+                    loading: widget.loadingContent,
+                    onRefresh: widget.onRefreshContent,
                   ),
                 ],
               ],
@@ -86,7 +141,15 @@ class HomeScreen extends StatelessWidget {
             ),
             itemBuilder: (context, index) {
               final mood = visibleMoods[index];
-              return MoodTile(mood: mood, selected: index == 0);
+              final code = mood.code;
+              final isActive = code != null && code == _activeMoodCode;
+              final isBusy = code != null && code == _pendingMoodCode;
+              return MoodTile(
+                mood: mood,
+                selected: isActive || (_activeMoodCode == null && index == 0),
+                busy: isBusy,
+                onTap: code == null ? null : () => _logMood(mood),
+              );
             },
           ),
           const SizedBox(height: 14),

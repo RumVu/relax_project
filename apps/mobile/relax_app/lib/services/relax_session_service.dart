@@ -31,6 +31,12 @@ class RelaxSession {
 }
 
 /// Bắt đầu / kết thúc một phiên thư giãn. Cần access token.
+///
+/// Khớp với contract backend:
+/// - POST `/v1/relax-sessions/start` body `{activityType, resourceId?, title?,
+///   moodBefore?}`.
+/// - POST `/v1/relax-sessions/:id/finish` body `{moodAfter?, reliefLevel 1..5,
+///   note?}`.
 class RelaxSessionService {
   RelaxSessionService({ApiClient? client}) : _client = client ?? ApiClient();
   final ApiClient _client;
@@ -38,28 +44,39 @@ class RelaxSessionService {
   /// Bắt đầu phiên ngay khi user bấm "Play" — backend trả `id` để chốt sau.
   Future<RelaxSession> start({
     required String accessToken,
-    required String activityCode,
+    required String activityType,
+    String? resourceId,
+    String? title,
+    String? moodBefore,
   }) async {
     final body = await _client.postJson(
-      '/relax-sessions/me',
-      {'activityCode': activityCode},
+      '/relax-sessions/start',
+      <String, Object?>{
+        'activityType': activityType,
+        'resourceId': ?resourceId,
+        'title': ?title,
+        'moodBefore': ?moodBefore,
+      },
       accessToken: accessToken,
     );
     return _asSession(body);
   }
 
-  /// Kết thúc khi user bấm "Finish" — kèm rating + note từ FeedbackSheet.
+  /// Kết thúc khi user bấm "Finish" — `reliefLevel` 1..5 + note tự do.
   Future<RelaxSession> finish({
     required String accessToken,
     required String sessionId,
-    required int rating,
+    required int reliefLevel,
     String? note,
+    String? moodAfter,
   }) async {
+    final trimmed = note?.trim();
     final body = await _client.postJson(
-      '/relax-sessions/me/$sessionId/finish',
-      {
-        'rating': rating,
-        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      '/relax-sessions/$sessionId/finish',
+      <String, Object?>{
+        'reliefLevel': reliefLevel.clamp(1, 5),
+        'moodAfter': ?moodAfter,
+        if (trimmed != null && trimmed.isNotEmpty) 'note': trimmed,
       },
       accessToken: accessToken,
     );
