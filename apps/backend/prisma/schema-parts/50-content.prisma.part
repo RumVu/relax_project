@@ -30,6 +30,7 @@ model Reminder {
   scheduledAt DateTime
   repeatRule  String?
   isActive    Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,6 +55,7 @@ model Notification {
 
   isRead Boolean @default(false)
   readAt DateTime?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -72,6 +74,7 @@ model ContentRating {
   contentId   String
   rating      Int
   review      String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -94,6 +97,7 @@ model AnalyticsSnapshot {
   totalSessionTime Int      @default(0)
   meditationCount  Int      @default(0)
   journalCount     Int      @default(0)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -112,6 +116,7 @@ model Insight {
   title      String
   content    String @db.Text
   confidence Float
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -129,6 +134,7 @@ model AIInsight {
   content    String @db.Text
   aiProvider String
   isUseful   Boolean?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -145,6 +151,7 @@ model Recommendation {
   contentId   String
   reason      String
   score       Float
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 

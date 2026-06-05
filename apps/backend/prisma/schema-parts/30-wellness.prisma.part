@@ -27,6 +27,7 @@ model OnboardingSlide {
   displayOrder Int @default(0)
 
   isActive Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -52,6 +53,7 @@ model AppTheme {
 
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

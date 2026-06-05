@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:relax_app/main.dart';
 
 void main() {
-  testWidgets('shows splash, onboarding and English home copy', (tester) async {
+  testWidgets('shows splash, onboarding and login flow copy', (tester) async {
     await tester.pumpWidget(
       const RelaxApp(
         catalogRepository: StaticRelaxCatalogRepository([]),
@@ -35,7 +35,8 @@ void main() {
     await tester.tap(loginButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('You are back, Thi Ai ~'), findsOneWidget);
-    expect(find.text('How is Thi Ai feeling today?'), findsOneWidget);
+    expect(find.text('Chào mừng quay lại ~'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Mật khẩu'), findsOneWidget);
   });
 }

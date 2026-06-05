@@ -194,14 +194,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.favorite_border_rounded,
                 ),
                 const SizedBox(height: 12),
-                Row(
-                  children: [
-                    for (var i = 0; i < visibleMethods.length; i++) ...[
-                      Expanded(child: MethodChip(method: visibleMethods[i])),
-                      if (i != visibleMethods.length - 1)
-                        const SizedBox(width: 8),
-                    ],
-                  ],
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: visibleMethods.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 1.2,
+                  ),
+                  itemBuilder: (context, index) =>
+                      MethodChip(method: visibleMethods[index]),
                 ),
               ],
             ),

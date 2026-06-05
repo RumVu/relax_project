@@ -190,6 +190,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   filled: true,
                   onPressed: _submitting ? () {} : () => _submit(),
                 ),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Google Sign-In sẽ được thêm vào batch tiếp theo nha 💜'),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: context.relax.border),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.g_mobiledata, color: context.relax.muted),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Đăng nhập với Google',
+                          style: Theme.of(context).textTheme.labelLarge,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 PixelButton(
                   icon: Icons.person_add_alt_1_outlined,

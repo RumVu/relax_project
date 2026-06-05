@@ -14,6 +14,7 @@ model MoodCheckin {
   scoredAt  DateTime?
   note      String? @db.Text
   tags      String[]
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -34,6 +35,7 @@ model WeeklyMoodStat {
   stressReducePct Float
   streakDays      Int
   dominantMood    MoodType?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,6 +72,7 @@ model Achievement {
   points      Int             @default(10)
   condition   Json
   isActive    Boolean         @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -91,6 +94,7 @@ model UserAchievement {
   achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
   unlockedAt DateTime @default(now())
+  isDelete Boolean @default(false)
 
   @@unique([userId, achievementId])
   @@index([userId])
@@ -107,6 +111,7 @@ model Badge {
   category    String
   rarity      String  @default("COMMON")
   isActive    Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,6 +134,7 @@ model UserBadge {
   badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
 
   earnedAt DateTime @default(now())
+  isDelete Boolean @default(false)
 
   @@unique([userId, badgeId])
   @@index([userId])
@@ -149,6 +155,7 @@ model UserStreak {
   lastActivityDate  DateTime?
   startDate         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
+  isDelete Boolean @default(false)
 
   @@map("user_streaks")
 }
@@ -162,6 +169,7 @@ model UserPoints {
   updatedAt   DateTime @updatedAt
 
   pointsHistory PointsTransaction[]
+  isDelete Boolean @default(false)
 
   @@map("user_points")
 }
@@ -173,6 +181,7 @@ model PointsTransaction {
 
   amount    Int
   reason    String
+  isDelete Boolean @default(false)
   createdAt DateTime @default(now())
 
   @@index([userPointsId])
@@ -188,6 +197,7 @@ model UserLevel {
   experience   Int      @default(0)
   nextLevelExp Int      @default(1000)
   updatedAt    DateTime @updatedAt
+  isDelete Boolean @default(false)
 
   @@map("user_levels")
 }
@@ -203,6 +213,7 @@ model Friend {
   status      FriendRequestStatus @default(PENDING)
   requestedAt DateTime            @default(now())
   respondedAt DateTime?
+  isDelete Boolean @default(false)
 
   @@unique([userId, friendId])
   @@index([userId])
@@ -226,6 +237,7 @@ model Challenge {
   startDate    DateTime
   endDate      DateTime
   isActive     Boolean  @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -248,6 +260,7 @@ model UserChallenge {
   completed   Boolean   @default(false)
   completedAt DateTime?
   joinedAt    DateTime  @default(now())
+  isDelete Boolean @default(false)
 
   @@unique([userId, challengeId])
   @@index([userId])
@@ -264,6 +277,7 @@ model LeaderboardEntry {
   score     Int
   period    String   @default("WEEKLY")
   updatedAt DateTime @updatedAt
+  isDelete Boolean @default(false)
 
   @@unique([userId, period])
   @@index([rank])
@@ -282,6 +296,7 @@ model FeedEntry {
   relatedId   String?
   visibility  String   @default("PUBLIC")
   likes       Int      @default(0)
+  isDelete Boolean @default(false)
   createdAt   DateTime @default(now())
 
   @@index([userId])
@@ -302,6 +317,7 @@ model Journal {
 
   isPrivate  Boolean @default(true)
   isFavorite Boolean @default(false)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -324,6 +340,7 @@ model AmbientSound {
   duration Int?
 
   isActive Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -346,6 +363,7 @@ model SoundSession {
   startedAt DateTime @default(now())
   endedAt   DateTime?
   duration  Int?
+  isDelete Boolean @default(false)
 
   @@index([userId])
   @@index([soundId])
@@ -367,6 +385,7 @@ model BreathingExercise {
 
   imageUrl String?
   isActive Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -391,6 +410,7 @@ model BreathingSession {
 
   moodBefore MoodType?
   moodAfter  MoodType?
+  isDelete Boolean @default(false)
 
   @@index([userId])
   @@index([exerciseId])
@@ -414,6 +434,7 @@ model MeditationGuide {
   imageUrl   String?
   instructor String?
   isActive   Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -443,6 +464,7 @@ model MeditationSession {
   mood      MoodType?
   quality   Int?
   notes     String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -491,6 +513,7 @@ model RelaxSession {
   stressReliefPercent Int?
   note                String? @db.Text
   nextActionAccepted  String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -513,6 +536,7 @@ model SleepSession {
 
   quality Int?
   note    String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -530,6 +554,7 @@ model CozyQuote {
   imageUrl String?
 
   isActive Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

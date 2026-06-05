@@ -43,6 +43,7 @@ model SubscriptionTier {
   billingCycle  BillingCycle
   displayOrder  Int          @default(0)
   isActive      Boolean      @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -66,6 +67,7 @@ model TierFeature {
   name        String
   included    Boolean @default(true)
   description String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -83,6 +85,7 @@ model TierLimit {
   name  String
   value Int
   unit  String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -109,6 +112,7 @@ model Subscription {
   endDate   DateTime?
 
   externalSubscriptionId String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -134,6 +138,7 @@ model Payment {
   stripePaymentId   String?
   paypalPaymentId   String?
   description       String?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -154,6 +159,7 @@ model IntegrationLink {
   accessToken    String?
   refreshToken   String?
   tokenExpiresAt DateTime?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -171,6 +177,7 @@ model Feedback {
   subject String?
   message String @db.Text
   status  String @default("OPEN")
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -196,6 +203,7 @@ model StorageFile {
   isPublic  Boolean @default(true)
   expiresAt DateTime?
   metadata  Json?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -214,6 +222,7 @@ model PlatformEvent {
 
   type EventType
   data Json?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -232,6 +241,7 @@ model AdminLog {
   targetId   String?
   targetType String?
   details    String @db.Text
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -250,6 +260,7 @@ model RateLimitCounter {
   endpoint String
   count    Int      @default(1)
   resetAt  DateTime
+  isDelete Boolean @default(false)
 
   @@unique([identifier, endpoint])
   @@index([userId])
@@ -264,6 +275,7 @@ model SearchIndex {
   title      String
   content    String   @db.Text
   tags       String[]
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -277,6 +289,7 @@ model CacheEntry {
   key       String   @unique
   value     String   @db.Text
   expiresAt DateTime
+  isDelete Boolean @default(false)
   createdAt DateTime @default(now())
 
   @@index([expiresAt])
@@ -292,6 +305,7 @@ model AppEvent {
 
   type String
   data Json?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 

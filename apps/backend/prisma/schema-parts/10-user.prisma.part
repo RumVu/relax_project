@@ -50,6 +50,7 @@ model User {
 
   lastLoginAt DateTime?
   deletedAt   DateTime?
+  isDelete Boolean @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -121,6 +122,7 @@ model UserProfile {
   /// Mood analytics should derive streaks from MoodCheckin/WeeklyMoodStat.
   currentStreak     Int @default(0)
   longestStreak     Int @default(0)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -150,6 +152,7 @@ model UserPreference {
   enableHaptics           Boolean @default(true)
   pushNotificationsEnabled  Boolean @default(true)
   emailNotificationsEnabled Boolean @default(false)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -169,6 +172,7 @@ model Session {
   userAgent    String?
   ipAddress    String?
   expiresAt    DateTime
+  isDelete Boolean @default(false)
   createdAt    DateTime @default(now())
 
   @@index([userId])
@@ -186,6 +190,7 @@ model AccountToken {
   expiresAt DateTime
   consumedAt DateTime?
   metadata  Json?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -212,6 +217,7 @@ model PushDevice {
   enabled    Boolean @default(true)
 
   lastSeenAt DateTime @default(now())
+  isDelete Boolean @default(false)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 

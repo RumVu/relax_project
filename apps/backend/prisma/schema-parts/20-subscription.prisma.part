@@ -73,6 +73,7 @@ model CompanionAsset {
 
   isDefault Boolean @default(false)
   isActive  Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -107,6 +108,7 @@ model UserCompanion {
   lastSeenAt DateTime?
   lastFedAt  DateTime?
   lastMoodAt DateTime?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -131,6 +133,7 @@ model CompanionState {
 
   startedAt DateTime @default(now())
   endedAt   DateTime?
+  isDelete Boolean @default(false)
 
   @@index([companionId])
   @@index([startedAt])
@@ -151,6 +154,7 @@ model CompanionMessage {
 
   weight   Int     @default(1)
   isActive Boolean @default(true)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,6 +180,7 @@ model CompanionMessageLog {
   shownAt     DateTime @default(now())
   clickedAt   DateTime?
   dismissedAt DateTime?
+  isDelete Boolean @default(false)
 
   @@index([userId])
   @@index([messageId])
@@ -191,6 +196,7 @@ model FavoriteCompanionMessage {
 
   user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   message CompanionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
@@ -209,6 +215,7 @@ model CompanionInteraction {
 
   type     String
   metadata Json?
+  isDelete Boolean @default(false)
 
   createdAt DateTime @default(now())
 
