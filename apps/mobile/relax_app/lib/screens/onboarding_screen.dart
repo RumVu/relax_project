@@ -1,0 +1,152 @@
+part of 'package:relax_app/main.dart';
+
+class OnboardingScreen extends StatefulWidget {
+  const OnboardingScreen({
+    super.key,
+    required this.themeMode,
+    required this.onThemeChanged,
+    required this.onLanguageChanged,
+  });
+
+  final ThemeMode themeMode;
+  final ValueChanged<ThemeMode> onThemeChanged;
+  final ValueChanged<AppLanguage> onLanguageChanged;
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final _controller = PageController();
+  int _page = 0;
+
+  void _enterApp() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => RelaxShell(
+          themeMode: widget.themeMode,
+          onThemeChanged: widget.onThemeChanged,
+          onLanguageChanged: widget.onLanguageChanged,
+        ),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final copy = context.copy;
+    final slides = copy.onboardingSlides;
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+          child: Column(
+            children: [
+              Wrap(
+                alignment: WrapAlignment.center,
+                runSpacing: 8,
+                spacing: 8,
+                children: [
+                  ThemePill(
+                    themeMode: widget.themeMode,
+                    onChanged: widget.onThemeChanged,
+                  ),
+                  LanguagePill(
+                    language: copy.language,
+                    onChanged: widget.onLanguageChanged,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: PixelPanel(
+                  padding: EdgeInsets.zero,
+                  child: PageView.builder(
+                    controller: _controller,
+                    onPageChanged: (value) => setState(() => _page = value),
+                    itemCount: slides.length,
+                    itemBuilder: (context, index) {
+                      final slide = slides[index];
+                      return LayoutBuilder(
+                        builder: (context, constraints) {
+                          final compact = constraints.maxHeight < 620;
+                          return SingleChildScrollView(
+                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight - 38,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  PixelBadge(label: copy.homeBadge),
+                                  SizedBox(height: compact ? 20 : 42),
+                                  Text(
+                                    copy.onboardingWelcome,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleLarge,
+                                  ),
+                                  SizedBox(height: compact ? 18 : 42),
+                                  Center(
+                                    child: PixelCatScene(
+                                      scene: slide.scene,
+                                      height: compact ? 150 : 220,
+                                    ),
+                                  ),
+                                  SizedBox(height: compact ? 18 : 42),
+                                  Center(
+                                    child: Text(
+                                      slide.title,
+                                      textAlign: TextAlign.center,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.headlineSmall,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    slide.body,
+                                    textAlign: TextAlign.center,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodyMedium,
+                                  ),
+                                  SizedBox(height: compact ? 18 : 28),
+                                  PageDots(count: slides.length, active: _page),
+                                  SizedBox(height: compact ? 16 : 24),
+                                  PixelButton(
+                                    icon: Icons.person_outline_rounded,
+                                    label: copy.signIn,
+                                    filled: true,
+                                    onPressed: _enterApp,
+                                  ),
+                                  const SizedBox(height: 10),
+                                  PixelButton(
+                                    icon: Icons.person_add_alt_1_outlined,
+                                    label: copy.signUp,
+                                    onPressed: _enterApp,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
