@@ -1519,7 +1519,7 @@ class _MiniInfoCard extends StatelessWidget {
         ? const Color(0xFF48D3A8)
         : RelaxTheme.lavender;
     return Container(
-      constraints: const BoxConstraints(minHeight: 92),
+      height: 92,
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: context.relax.surfaceSoft,
@@ -1532,9 +1532,9 @@ class _MiniInfoCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Icon(item.icon, color: color, size: 18),
-          const Spacer(),
           Text(
             item.label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
