@@ -12,6 +12,7 @@ import '../../data/models/app_models.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
 import '../shell/app_shell.dart';
+import 'forgot_password_screen.dart';
 import 'register_screen.dart';
 
 // Google Sign-In v7 dùng singleton instance.
@@ -237,6 +238,25 @@ class _LoginScreenState extends State<LoginScreen> {
                     if ((v ?? '').length < 6) return 'Mật khẩu ≥ 6 ký tự';
                     return null;
                   },
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: busy
+                        ? null
+                        : () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => const ForgotPasswordScreen(),
+                            ),
+                          ),
+                    child: const Text(
+                      'Quên mật khẩu?',
+                      style: TextStyle(
+                        color: RelaxTheme.lavender,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
                 ),
                 if (_error != null) ...[
                   const SizedBox(height: 10),

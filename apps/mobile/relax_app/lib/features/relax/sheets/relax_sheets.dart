@@ -806,7 +806,7 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
     } catch (e) {
       _error = e.toString();
     }
-    if (!mounted) return;
+    if (!context.mounted) return;
     setState(() => _submitting = false);
     if (_error != null) return; // giữ sheet để user thấy lỗi.
     final navContext = context;

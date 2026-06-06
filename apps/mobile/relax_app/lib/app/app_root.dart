@@ -87,6 +87,9 @@ class _RelaxAppState extends State<RelaxApp> {
           );
         },
         home: SplashGate(
+          themeMode: _themeMode,
+          onThemeChanged: _setThemeMode,
+          onLanguageChanged: _setLanguage,
           child: OnboardingScreen(
             themeMode: _themeMode,
             onThemeChanged: _setThemeMode,

@@ -83,7 +83,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
           intensity: 3,
           tags: const ['journey-before'],
         );
-      } catch (_) {/* swallow — flow tiếp tục */}
+      } catch (_) {
+        /* swallow — flow tiếp tục */
+      }
     }
     await Future.delayed(const Duration(milliseconds: 280));
     _goTo(_Chapter.whisper);
@@ -92,7 +94,9 @@ class _JourneyScreenState extends State<JourneyScreen> {
   /// Submit phản hồi ở chapter 4 → POST relax-session + chuyển chapter 5.
   Future<void> _submitReflection() async {
     if (_rating == 0) {
-      setState(() => _error = 'Hãy chọn 1 đến 5 sao để mình biết cảm nhận của bạn nha');
+      setState(
+        () => _error = 'Hãy chọn 1 đến 5 sao để mình biết cảm nhận của bạn nha',
+      );
       return;
     }
     setState(() {
@@ -283,9 +287,9 @@ class _ThresholdChapter extends StatelessWidget {
                     activityLabel,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: context.relax.muted,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      color: context.relax.muted,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 TextButton(
@@ -304,17 +308,17 @@ class _ThresholdChapter extends StatelessWidget {
               'Hôm nay bạn cảm thấy\nthế nào trước phiên này?',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.3,
-                  ),
+                fontWeight: FontWeight.w800,
+                height: 1.3,
+              ),
             ),
             const SizedBox(height: 10),
             Text(
               'Mình muốn hiểu bạn hơn để đồng hành tốt hơn ✦',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.relax.muted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: context.relax.muted),
             ),
             const SizedBox(height: 28),
             Wrap(
@@ -363,9 +367,9 @@ class _MoodChip extends StatelessWidget {
               Text(
                 choice.label,
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 12,
-                    ),
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12,
+                ),
               ),
             ],
           ),
@@ -435,7 +439,7 @@ class _WhisperChapterState extends State<_WhisperChapter>
               // Vòng tròn breathing — phình to/co theo controller
               AnimatedBuilder(
                 animation: _ctrl,
-                builder: (_, __) {
+                builder: (context, child) {
                   final t = _ctrl.value;
                   final size = 130 + 70 * t;
                   return Container(
@@ -473,9 +477,7 @@ class _WhisperChapterState extends State<_WhisperChapter>
                         _phrases[_phraseIdx],
                         key: ValueKey(_phraseIdx),
                         textAlign: TextAlign.center,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
+                        style: Theme.of(context).textTheme.titleMedium
                             ?.copyWith(
                               fontWeight: FontWeight.w700,
                               height: 1.5,
@@ -552,7 +554,9 @@ class _ImmersionBody extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
-                    Theme.of(context).scaffoldBackgroundColor.withValues(alpha: 0),
+                    Theme.of(
+                      context,
+                    ).scaffoldBackgroundColor.withValues(alpha: 0),
                     Theme.of(context).scaffoldBackgroundColor,
                   ],
                   begin: Alignment.topCenter,
@@ -614,9 +618,9 @@ class _ReflectionChapter extends StatelessWidget {
             Center(
               child: Text(
                 activityLabel,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: context.relax.muted,
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: context.relax.muted),
               ),
             ),
             const SizedBox(height: 16),
@@ -626,17 +630,17 @@ class _ReflectionChapter extends StatelessWidget {
               'Bạn thấy thế nào\nsau phiên này?',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1.3,
-                  ),
+                fontWeight: FontWeight.w800,
+                height: 1.3,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Mình lắng nghe nha ~',
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.relax.muted,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: context.relax.muted),
             ),
             const SizedBox(height: 22),
             // 5 star rating row
@@ -652,7 +656,9 @@ class _ReflectionChapter extends StatelessWidget {
                       duration: const Duration(milliseconds: 180),
                       scale: filled ? 1.18 : 1.0,
                       child: Icon(
-                        filled ? Icons.star_rounded : Icons.star_outline_rounded,
+                        filled
+                            ? Icons.star_rounded
+                            : Icons.star_outline_rounded,
                         color: filled ? RelaxTheme.purple : context.relax.muted,
                         size: 40,
                       ),
@@ -667,9 +673,9 @@ class _ReflectionChapter extends StatelessWidget {
                 child: Text(
                   _ratingLabel(rating),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: RelaxTheme.lavender,
-                        fontWeight: FontWeight.w800,
-                      ),
+                    color: RelaxTheme.lavender,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
             const SizedBox(height: 18),
@@ -678,7 +684,8 @@ class _ReflectionChapter extends StatelessWidget {
               enabled: !submitting,
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: 'Có điều gì muốn chia sẻ thêm không? (Không bắt buộc)',
+                hintText:
+                    'Có điều gì muốn chia sẻ thêm không? (Không bắt buộc)',
                 filled: true,
                 fillColor: context.relax.surfaceSoft,
                 border: OutlineInputBorder(
@@ -693,9 +700,9 @@ class _ReflectionChapter extends StatelessWidget {
                 error!,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: context.relax.danger,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  color: context.relax.danger,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
             const SizedBox(height: 20),
@@ -714,13 +721,13 @@ class _ReflectionChapter extends StatelessWidget {
   }
 
   String _ratingLabel(int r) => switch (r) {
-        1 => 'Rất tệ — mình ghi nhớ nhé',
-        2 => 'Tệ — mình sẽ điều chỉnh',
-        3 => 'Bình thường',
-        4 => 'Tốt — mình vui lắm',
-        5 => 'Tuyệt vời ✦',
-        _ => '',
-      };
+    1 => 'Rất tệ — mình ghi nhớ nhé',
+    2 => 'Tệ — mình sẽ điều chỉnh',
+    3 => 'Bình thường',
+    4 => 'Tốt — mình vui lắm',
+    5 => 'Tuyệt vời ✦',
+    _ => '',
+  };
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -766,12 +773,12 @@ class _HealingChapterState extends State<_HealingChapter>
   }
 
   String get _praise => switch (widget.rating) {
-        5 => 'Tuyệt vời! Bạn đã làm rất tốt ✦',
-        4 => 'Bạn đã rất chăm chút bản thân rồi nè 💜',
-        3 => 'Một bước nhỏ vẫn là tiến lên ~',
-        2 => 'Không sao đâu, chúng ta thử cách khác nhé 🌿',
-        _ => 'Cảm xúc cũng cần được nghe. Mình cùng đi tiếp nhé.',
-      };
+    5 => 'Tuyệt vời! Bạn đã làm rất tốt ✦',
+    4 => 'Bạn đã rất chăm chút bản thân rồi nè 💜',
+    3 => 'Một bước nhỏ vẫn là tiến lên ~',
+    2 => 'Không sao đâu, chúng ta thử cách khác nhé 🌿',
+    _ => 'Cảm xúc cũng cần được nghe. Mình cùng đi tiếp nhé.',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -783,9 +790,8 @@ class _HealingChapterState extends State<_HealingChapter>
             child: IgnorePointer(
               child: AnimatedBuilder(
                 animation: _confetti,
-                builder: (_, __) => CustomPaint(
-                  painter: _ConfettiPainter(_confetti.value),
-                ),
+                builder: (context, child) =>
+                    CustomPaint(painter: _ConfettiPainter(_confetti.value)),
               ),
             ),
           ),
@@ -830,17 +836,17 @@ class _HealingChapterState extends State<_HealingChapter>
                   _praise,
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        height: 1.4,
-                      ),
+                    fontWeight: FontWeight.w800,
+                    height: 1.4,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   'Cảm ơn bạn đã dành thời gian\nchăm sóc bản thân ✦',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: context.relax.muted,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(color: context.relax.muted),
                 ),
                 const Spacer(flex: 2),
                 if (widget.hasNext)

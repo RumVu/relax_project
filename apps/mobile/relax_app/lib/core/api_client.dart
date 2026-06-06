@@ -17,11 +17,16 @@ class BackendConfig {
 /// - hỗ trợ `Authorization: Bearer <token>` khi có
 /// - timeout cứng để UI không treo
 /// - phân biệt 401 vs 4xx khác để [SessionState] có thể refresh
+/// Callback do SessionState đăng ký để client tự gia hạn token khi 401.
+/// Trả về token mới nếu refresh ok, null nếu thất bại → call site bắn lỗi.
+typedef TokenRefresher = Future<String?> Function();
+
 class ApiClient {
   ApiClient({
     http.Client? client,
     String baseUrl = Env.apiUrl,
     this.timeout = const Duration(seconds: 10),
+    this.onRefreshNeeded,
   }) : _client = client ?? http.Client(),
        baseUrl = baseUrl.endsWith('/')
            ? baseUrl.substring(0, baseUrl.length - 1)
@@ -30,6 +35,10 @@ class ApiClient {
   final http.Client _client;
   final String baseUrl;
   final Duration timeout;
+
+  /// Khi gặp 401 và có accessToken, gọi callback để xin token mới rồi
+  /// retry 1 lần. Null = không retry.
+  final TokenRefresher? onRefreshNeeded;
 
   Uri _resolve(String path) {
     final p = path.startsWith('/') ? path : '/$path';
@@ -71,11 +80,31 @@ class ApiClient {
     throw ApiException(message, statusCode: code);
   }
 
+  /// Common 401-retry wrapper. Nếu request đầu trả 401 và caller có
+  /// `accessToken` + ApiClient có `onRefreshNeeded`, thử refresh 1 lần
+  /// rồi gọi lại request với token mới.
+  Future<http.Response> _send(
+    Future<http.Response> Function(String? token) doRequest, {
+    String? accessToken,
+  }) async {
+    final res = await doRequest(accessToken).timeout(timeout);
+    if (res.statusCode != 401 ||
+        accessToken == null ||
+        onRefreshNeeded == null) {
+      return res;
+    }
+    // Lần retry: xin token mới rồi resend
+    final newToken = await onRefreshNeeded!();
+    if (newToken == null) return res; // refresh fail → caller throw 401
+    return doRequest(newToken).timeout(timeout);
+  }
+
   Future<Object?> getJson(String path, {String? accessToken}) async {
     final uri = _resolve(path);
-    final res = await _client
-        .get(uri, headers: _headers(accessToken: accessToken))
-        .timeout(timeout);
+    final res = await _send(
+      (token) => _client.get(uri, headers: _headers(accessToken: token)),
+      accessToken: accessToken,
+    );
     if (res.statusCode < 200 || res.statusCode >= 300) _throwFor(res, uri);
     return _decode(res);
   }
@@ -86,13 +115,15 @@ class ApiClient {
     String? accessToken,
   }) async {
     final uri = _resolve(path);
-    final res = await _client
-        .post(
-          uri,
-          headers: _headers(accessToken: accessToken, sendingJson: true),
-          body: body == null ? null : jsonEncode(body),
-        )
-        .timeout(timeout);
+    final encoded = body == null ? null : jsonEncode(body);
+    final res = await _send(
+      (token) => _client.post(
+        uri,
+        headers: _headers(accessToken: token, sendingJson: true),
+        body: encoded,
+      ),
+      accessToken: accessToken,
+    );
     if (res.statusCode < 200 || res.statusCode >= 300) _throwFor(res, uri);
     return _decode(res);
   }
@@ -103,22 +134,25 @@ class ApiClient {
     String? accessToken,
   }) async {
     final uri = _resolve(path);
-    final res = await _client
-        .patch(
-          uri,
-          headers: _headers(accessToken: accessToken, sendingJson: true),
-          body: body == null ? null : jsonEncode(body),
-        )
-        .timeout(timeout);
+    final encoded = body == null ? null : jsonEncode(body);
+    final res = await _send(
+      (token) => _client.patch(
+        uri,
+        headers: _headers(accessToken: token, sendingJson: true),
+        body: encoded,
+      ),
+      accessToken: accessToken,
+    );
     if (res.statusCode < 200 || res.statusCode >= 300) _throwFor(res, uri);
     return _decode(res);
   }
 
   Future<void> delete(String path, {String? accessToken}) async {
     final uri = _resolve(path);
-    final res = await _client
-        .delete(uri, headers: _headers(accessToken: accessToken))
-        .timeout(timeout);
+    final res = await _send(
+      (token) => _client.delete(uri, headers: _headers(accessToken: token)),
+      accessToken: accessToken,
+    );
     if (res.statusCode < 200 || res.statusCode >= 300) _throwFor(res, uri);
   }
 }

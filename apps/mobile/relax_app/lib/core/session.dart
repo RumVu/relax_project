@@ -61,8 +61,17 @@ class SessionScope extends InheritedNotifier<SessionState> {
     required super.child,
   }) : super(notifier: session);
 
-  static SessionState? maybeOf(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<SessionScope>()?.notifier;
+  static SessionState? maybeOf(BuildContext context, {bool listen = true}) {
+    if (listen) {
+      return context
+          .dependOnInheritedWidgetOfExactType<SessionScope>()
+          ?.notifier;
+    }
+    final widget = context
+        .getElementForInheritedWidgetOfExactType<SessionScope>()
+        ?.widget;
+    return widget is SessionScope ? widget.notifier : null;
+  }
 
   static SessionState of(BuildContext context) {
     final session = maybeOf(context);
@@ -170,5 +179,12 @@ class SessionState extends ChangeNotifier {
       await logout();
       return false;
     }
+  }
+
+  /// Callback ApiClient gọi khi gặp 401 → refresh rồi trả access token mới.
+  /// Nếu refresh fail (refresh token cũng hết hạn) → trả null + logout.
+  Future<String?> refreshForApi() async {
+    final ok = await tryRefresh();
+    return ok ? _access : null;
   }
 }

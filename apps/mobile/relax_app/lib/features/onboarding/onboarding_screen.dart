@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
-import '../../data/models/app_models.dart';
+import '../../core/preferences.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/buttons/pill_controls.dart';
@@ -39,7 +39,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
+  Future<void> _markOnboardingDone() async {
+    final prefs = await AppPreferences.instance();
+    await prefs.setOnboardingDone(true);
+  }
+
   void _goLogin() {
+    _markOnboardingDone(); // fire-and-forget
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => LoginScreen(
@@ -54,6 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _goRegister() {
+    _markOnboardingDone();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => RegisterScreen(

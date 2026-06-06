@@ -21,6 +21,7 @@ class AppPreferences {
   static const _kLanguage = 'language';
   static const _kReminderTime = 'reminder_time';
   static const _kSoundChoice = 'sound_choice';
+  static const _kOnboardingDone = 'onboarding_done';
 
   // ── Theme ──────────────────────────────────────────────────────────────
   ThemeMode get themeMode {
@@ -60,5 +61,13 @@ class AppPreferences {
       _prefs.getString(_kSoundChoice) ?? 'Tiếng mèo con kêu';
   Future<void> setSoundChoice(String name) async {
     await _prefs.setString(_kSoundChoice, name);
+  }
+
+  // ── Onboarding done ────────────────────────────────────────────────────
+  /// true sau lần đầu user hoàn thành onboarding (bấm "Bắt đầu" hoặc đăng nhập).
+  /// Lần mở app sau, splash sẽ skip thẳng vào login/shell.
+  bool get onboardingDone => _prefs.getBool(_kOnboardingDone) ?? false;
+  Future<void> setOnboardingDone(bool done) async {
+    await _prefs.setBool(_kOnboardingDone, done);
   }
 }

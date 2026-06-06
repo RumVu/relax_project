@@ -58,6 +58,12 @@ class AuthService {
     return AuthResult.fromJson(_asMap(body));
   }
 
+  /// Yêu cầu reset mật khẩu — backend gửi email với link reset.
+  /// Trả về bình thường ngay cả khi email không tồn tại (security best practice).
+  Future<void> forgotPassword({required String email}) async {
+    await _client.postJson('/auth/forgot-password', {'email': email.trim()});
+  }
+
   /// Đăng nhập qua Google — gửi idToken lên backend /auth/google
   /// Backend verify với Google và trả về JWT access/refresh token.
   Future<AuthResult> googleLogin({required String idToken}) async {
