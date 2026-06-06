@@ -43,3 +43,6 @@ pnpm-debug.log*
 apps/backend/prisma/backups/*.sql
 .tunnel-url
 apps/web/.vercel/
+
+# Google Sign-In setup script backups
+**/Info.plist.bak

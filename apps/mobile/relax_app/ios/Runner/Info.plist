@@ -70,7 +70,7 @@
 		sẽ tự ẩn ở UI để app không crash.
 	-->
 	<key>GIDClientID</key>
-	<string>YOUR_GOOGLE_IOS_CLIENT_ID.apps.googleusercontent.com</string>
+	<string>884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5.apps.googleusercontent.com</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -78,7 +78,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.YOUR_GOOGLE_IOS_CLIENT_ID</string>
+				<string>com.googleusercontent.apps.884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5</string>
 			</array>
 		</dict>
 	</array>
