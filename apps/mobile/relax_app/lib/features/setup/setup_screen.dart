@@ -10,6 +10,7 @@ import '../../data/models/backend_models.dart';
 import '../../data/services/device_service.dart';
 import '../../data/services/billing_service.dart';
 import '../../data/services/mobile_content_service.dart';
+import '../../data/services/notification_service.dart';
 import '../../data/services/reminder_service.dart';
 import '../../data/services/supabase_storage_service.dart';
 import '../../data/services/users_service.dart';
@@ -17,6 +18,7 @@ import '../../shared/widgets/charts/mood_line_chart.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
 import '../billing/checkout_screen.dart';
+import '../journal/journal_history_screen.dart';
 import '../legal/legal_screen.dart';
 import '../relax/sheets/relax_sheets.dart';
 import '../relax/sheets/stats_sheet.dart';
@@ -116,6 +118,25 @@ class _SetupScreenState extends State<SetupScreen> {
 
   /// Khi user tap chip giờ, POST reminder mới + xóa reminder cùng giờ cũ.
   /// Khi chưa login → chỉ save vào prefs cục bộ.
+  /// Map "HH:mm" → stable integer ID để overwrite cùng giờ.
+  int _notificationId(String time) {
+    final parts = time.split(':');
+    final h = int.tryParse(parts[0]) ?? 0;
+    final m = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
+    return h * 60 + m;
+  }
+
+  Future<void> _scheduleLocalReminder(String time) async {
+    final granted = await NotificationService.instance.requestPermission();
+    if (!granted) return;
+    // Hủy reminder cũ trước khi schedule mới — chỉ giữ 1 reminder gần đây
+    await NotificationService.instance.cancelAll();
+    await NotificationService.instance.scheduleDaily(
+      time: time,
+      id: _notificationId(time),
+    );
+  }
+
   Future<void> _selectTime(String time) async {
     final session = context.sessionOrNull;
     setState(() {
@@ -123,6 +144,8 @@ class _SetupScreenState extends State<SetupScreen> {
       _remindersBusy = true;
     });
     await _prefs?.setReminderTime(time);
+    // Schedule local notification ngay (không phụ thuộc backend)
+    await _scheduleLocalReminder(time);
 
     if (session != null && session.isLoggedIn) {
       try {
@@ -329,13 +352,31 @@ class _SetupScreenState extends State<SetupScreen> {
           const SizedBox(height: 10),
           _SectionCard(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-            child: _TapRow(
-              icon: Icons.description_outlined,
-              title: 'Quy định & sử dụng',
-              subtitle: 'Điều khoản, chính sách & giấy phép',
-              onTap: () => Navigator.of(
-                context,
-              ).push(MaterialPageRoute(builder: (_) => const LegalScreen())),
+            child: Column(
+              children: [
+                _TapRow(
+                  icon: Icons.menu_book_rounded,
+                  title: 'Nhật ký của bạn',
+                  subtitle: 'Xem lại các entries đã viết',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const JournalHistoryScreen(),
+                    ),
+                  ),
+                ),
+                Divider(
+                  height: 1,
+                  color: RelaxTheme.lavender.withValues(alpha: .14),
+                ),
+                _TapRow(
+                  icon: Icons.description_outlined,
+                  title: 'Quy định & sử dụng',
+                  subtitle: 'Điều khoản, chính sách & giấy phép',
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LegalScreen()),
+                  ),
+                ),
+              ],
             ),
           ),
 

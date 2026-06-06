@@ -65,6 +65,12 @@
 	<string>Cần truy cập thư viện ảnh để bạn chọn avatar tùy chỉnh.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Cần camera để bạn chụp avatar mới (tùy chọn).</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+	</array>
 	<!--
 		Google Sign-In: thay 2 giá trị dưới bằng iOS OAuth Client ID lấy từ
 		Google Cloud Console → APIs & Services → Credentials → iOS client.

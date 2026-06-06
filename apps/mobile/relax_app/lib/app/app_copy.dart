@@ -53,12 +53,17 @@ class AppCopy {
             scene: CatScene.window,
           ),
           OnboardingSlide(
+            title: 'Track how you feel',
+            body: 'Tap a mood, write a line — see your week unfold.',
+            scene: CatScene.wave,
+          ),
+          OnboardingSlide(
             title: 'Your daily companion',
-            body: 'Get reminders, encouragement and helpful tiny suggestions.',
+            body: 'Get reminders, encouragement and tiny suggestions.',
             scene: CatScene.laptop,
           ),
           OnboardingSlide(
-            title: 'Simple and easy to use',
+            title: 'Sleep well, start fresh',
             body: 'A cute, minimal interface for everyday self-care.',
             scene: CatScene.sleep,
           ),
@@ -66,17 +71,22 @@ class AppCopy {
       : const [
           OnboardingSlide(
             title: 'Không gian chill dành cho bạn',
-            body: 'Thư giãn, hít thở và tận hưởng những khoảnh khắc bình yên.',
+            body: 'Thư giãn, hít thở và tận hưởng khoảnh khắc bình yên.',
             scene: CatScene.window,
           ),
           OnboardingSlide(
-            title: 'Đồng hành mỗi ngày',
-            body: 'Nhận lời nhắc, động viên và những gợi ý hữu ích cho bạn.',
+            title: 'Theo dõi cảm xúc mỗi ngày',
+            body: 'Bấm 1 mood, viết vài dòng — nhìn lại cả tuần dễ thương.',
+            scene: CatScene.wave,
+          ),
+          OnboardingSlide(
+            title: 'Đồng hành cùng bạn',
+            body: 'Nhận lời nhắc, động viên và gợi ý nhỏ vào đúng lúc cần.',
             scene: CatScene.laptop,
           ),
           OnboardingSlide(
-            title: 'Đơn giản và dễ dùng',
-            body: 'Giao diện dễ thương, tối giản để bạn sử dụng mỗi ngày.',
+            title: 'Ngủ ngon, thức dậy nhẹ tênh',
+            body: 'Giao diện tối giản, dễ thương để bạn dùng mỗi ngày.',
             scene: CatScene.sleep,
           ),
         ];

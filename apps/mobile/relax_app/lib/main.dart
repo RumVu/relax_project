@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app/app_root.dart';
+import 'core/error_boundary.dart';
 
 export 'app/app_copy.dart';
 export 'app/app_root.dart';
@@ -13,5 +14,7 @@ export 'data/services/mobile_content_service.dart';
 export 'data/services/relax_catalog_service.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  ErrorBoundary.install();
   runApp(const RelaxApp());
 }
