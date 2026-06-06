@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
@@ -7,12 +8,15 @@ import '../../core/session.dart';
 import '../../data/models/app_models.dart';
 import '../../data/models/backend_models.dart';
 import '../../data/services/device_service.dart';
+import '../../data/services/billing_service.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/reminder_service.dart';
+import '../../data/services/supabase_storage_service.dart';
 import '../../data/services/users_service.dart';
 import '../../shared/widgets/charts/mood_line_chart.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
+import '../billing/checkout_screen.dart';
 import '../legal/legal_screen.dart';
 import '../relax/sheets/relax_sheets.dart';
 import '../relax/sheets/stats_sheet.dart';
@@ -207,6 +211,7 @@ class _SetupScreenState extends State<SetupScreen> {
     String? gender,
     String? socialUrl,
     int? birthYear,
+    String? avatar,
   }) async {
     final session = context.sessionOrNull;
     final patch = <String, dynamic>{};
@@ -215,6 +220,7 @@ class _SetupScreenState extends State<SetupScreen> {
     if (gender != null) patch['gender'] = gender;
     if (socialUrl != null) patch['socialUrl'] = socialUrl;
     if (birthYear != null) patch['birthYear'] = birthYear;
+    if (avatar != null) patch['avatar'] = avatar;
     // Update local cache ngay để UI phản hồi
     await session?.updateCachedUser(patch);
 
@@ -227,6 +233,7 @@ class _SetupScreenState extends State<SetupScreen> {
           gender: gender,
           socialUrl: socialUrl,
           birthYear: birthYear,
+          avatar: avatar,
         );
         await session.updateCachedUser(updated);
         if (!mounted) return;
@@ -438,6 +445,40 @@ void _toast(BuildContext context, String msg) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 }
 
+/// Tạo checkout session + mở WebView SePay.
+Future<void> _startCheckout(
+  BuildContext context,
+  BackendBillingPlan plan,
+) async {
+  final session = context.sessionOrNull;
+  if (session == null || !session.isLoggedIn) {
+    _toast(context, 'Hãy đăng nhập để nâng cấp gói nha 💜');
+    return;
+  }
+  // Đóng bottom sheet billing trước khi mở WebView
+  Navigator.of(context).pop();
+
+  CheckoutSession ckt;
+  try {
+    ckt = await BillingService().createCheckoutSession(
+      accessToken: session.accessToken!,
+      planName: plan.name,
+      provider: 'MANUAL', // SePay default — backend sẽ trả URL nếu wire
+    );
+  } catch (e) {
+    _toast(context, 'Không tạo được phiên thanh toán: $e');
+    return;
+  }
+  if (!context.mounted) return;
+  final ok = await Navigator.of(context).push<bool>(
+    MaterialPageRoute(builder: (_) => CheckoutScreen(session: ckt)),
+  );
+  if (!context.mounted) return;
+  if (ok == true) {
+    _toast(context, 'Cảm ơn bạn! Gói ${plan.title} đã được kích hoạt ✦');
+  }
+}
+
 typedef _ProfileSaver =
     Future<void> Function({
       String? name,
@@ -445,6 +486,7 @@ typedef _ProfileSaver =
       String? gender,
       String? socialUrl,
       int? birthYear,
+      String? avatar,
     });
 
 Future<void> _showProfileSheet(
@@ -485,7 +527,9 @@ class _ProfileSheetState extends State<_ProfileSheet> {
     text: widget.user?['birthYear']?.toString() ?? '',
   );
   late String _gender = (widget.user?['gender'] ?? '').toString();
+  late String? _avatarUrl = widget.user?['avatar'] as String?;
   bool _saving = false;
+  bool _uploadingAvatar = false;
 
   @override
   void dispose() {
@@ -496,16 +540,67 @@ class _ProfileSheetState extends State<_ProfileSheet> {
     super.dispose();
   }
 
+  Future<void> _pickAvatar() async {
+    final storage = SupabaseStorageService();
+    if (!storage.configured) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Supabase chưa được cấu hình — anh build với --dart-define=SUPABASE_URL=... và SUPABASE_ANON_KEY=...',
+          ),
+        ),
+      );
+      return;
+    }
+    final picker = ImagePicker();
+    final XFile? file = await picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (file == null || !mounted) return;
+
+    setState(() => _uploadingAvatar = true);
+    try {
+      final bytes = await file.readAsBytes();
+      final session = context.sessionOrNull;
+      final userId = (session?.user?['id'] as String?) ?? 'guest';
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final ext = file.name.split('.').last.toLowerCase();
+      final url = await storage.upload(
+        bucket: 'avatars',
+        path: '$userId/avatar-$ts.$ext',
+        bytes: bytes,
+        contentType: 'image/$ext',
+        userAccessToken: session?.accessToken,
+      );
+      if (!mounted) return;
+      setState(() => _avatarUrl = url);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đã upload avatar mới ✦')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Upload thất bại: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _uploadingAvatar = false);
+    }
+  }
+
   Future<void> _save() async {
     setState(() => _saving = true);
     final yearStr = _yearCtrl.text.trim();
     final year = int.tryParse(yearStr);
+    final avatarChanged = _avatarUrl != widget.user?['avatar'];
     await widget.onSave(
       name: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
       phone: _phoneCtrl.text.trim(),
       socialUrl: _linkCtrl.text.trim(),
       gender: _gender.isEmpty ? null : _gender,
       birthYear: year,
+      avatar: avatarChanged ? _avatarUrl : null,
     );
     if (!mounted) return;
     Navigator.of(context).pop();
@@ -533,6 +628,44 @@ class _ProfileSheetState extends State<_ProfileSheet> {
             Text(
               'Cập nhật thông tin hiển thị trong app. Bạn có thể bỏ trống các mục không muốn chia sẻ.',
               style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 14),
+            // Avatar with tap-to-upload
+            Center(
+              child: GestureDetector(
+                onTap: _uploadingAvatar ? null : _pickAvatar,
+                child: Stack(
+                  children: [
+                    CatAvatar(size: 92, imageUrl: _avatarUrl),
+                    Positioned(
+                      right: 0,
+                      bottom: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: RelaxTheme.purple,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: _uploadingAvatar
+                            ? const SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.camera_alt_rounded,
+                                color: Colors.white,
+                                size: 14,
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 14),
             TextField(
@@ -802,15 +935,7 @@ class _PlanCard extends StatelessWidget {
               ),
               icon: const Icon(Icons.bolt_rounded, size: 18),
               label: const Text('Chọn gói này'),
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Sẽ mở SePay checkout cho ${plan.title} — tích hợp ở batch sau.',
-                    ),
-                  ),
-                );
-              },
+              onPressed: () => _startCheckout(context, plan),
             ),
           ),
         ],

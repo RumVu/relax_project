@@ -6,6 +6,7 @@ import '../../../app/theme.dart';
 import '../../../core/session.dart';
 import '../../../data/models/app_models.dart';
 import '../../../data/models/backend_models.dart';
+import '../../../data/services/journal_service.dart';
 import '../../../data/services/relax_session_service.dart';
 import '../../../shared/widgets/pixel/cat_widgets.dart';
 import '../../../shared/widgets/pixel/pixel_button.dart';
@@ -528,6 +529,7 @@ class JournalPracticeSheet extends StatefulWidget {
 class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
   final _controller = TextEditingController();
   String _prompt = 'Điều gì đang làm bạn nặng lòng nhất lúc này?';
+  bool _saving = false;
 
   static const _prompts = [
     'Điều gì đang làm bạn nặng lòng nhất lúc này?',
@@ -542,7 +544,7 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
     super.dispose();
   }
 
-  void _save() {
+  Future<void> _save() async {
     final text = _controller.text.trim();
     if (text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -550,12 +552,40 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã giữ lại ghi chú trong phiên này.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+    final session = context.sessionOrNull;
+    setState(() => _saving = true);
+
+    if (session != null && session.isLoggedIn) {
+      try {
+        await JournalService().create(
+          accessToken: session.accessToken!,
+          content: text,
+          title: _prompt,
+          tags: const ['mobile-journey'],
+          isPrivate: true,
+        );
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Đã lưu nhật ký lên server ✦')),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lưu nhật ký thất bại: $e')),
+        );
+        setState(() => _saving = false);
+        return;
+      }
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Chưa đăng nhập — chỉ lưu tạm trong phiên.'),
+        ),
+      );
+    }
+    if (!mounted) return;
+    setState(() => _saving = false);
     Navigator.of(context).pop();
     showFeedbackSheet(context, widget.activity);
   }
@@ -628,19 +658,23 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
             ),
             const SizedBox(height: 14),
             PixelButton(
-              icon: Icons.save_rounded,
-              label: 'Lưu nhật ký',
+              icon: _saving
+                  ? Icons.hourglass_top_rounded
+                  : Icons.save_rounded,
+              label: _saving ? 'Đang lưu...' : 'Lưu nhật ký',
               filled: true,
-              onPressed: _save,
+              onPressed: _saving ? () {} : () => _save(),
             ),
             const SizedBox(height: 8),
             PixelButton(
               icon: Icons.flag_rounded,
               label: 'Finish',
-              onPressed: () {
-                Navigator.of(context).pop();
-                showFeedbackSheet(context, widget.activity);
-              },
+              onPressed: _saving
+                  ? () {}
+                  : () {
+                      Navigator.of(context).pop();
+                      showFeedbackSheet(context, widget.activity);
+                    },
             ),
           ],
         ),

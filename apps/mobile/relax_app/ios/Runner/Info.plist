@@ -61,6 +61,10 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cần vị trí để hiển thị thời tiết phù hợp cho trải nghiệm thư giãn.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cần truy cập thư viện ảnh để bạn chọn avatar tùy chỉnh.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cần camera để bạn chụp avatar mới (tùy chọn).</string>
 	<!--
 		Google Sign-In: thay 2 giá trị dưới bằng iOS OAuth Client ID lấy từ
 		Google Cloud Console → APIs & Services → Credentials → iOS client.

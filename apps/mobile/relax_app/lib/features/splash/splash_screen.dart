@@ -102,7 +102,10 @@ class SplashScreen extends StatelessWidget {
               builder: (context, value, child) {
                 return Opacity(
                   opacity: value.clamp(0.0, 1.0).toDouble(),
-                  child: Transform.scale(scale: .86 + value * .14, child: child),
+                  child: Transform.scale(
+                    scale: .86 + value * .14,
+                    child: child,
+                  ),
                 );
               },
               child: PixelPanel(
