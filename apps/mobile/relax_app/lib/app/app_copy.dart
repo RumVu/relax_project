@@ -133,7 +133,11 @@ class AppCopy {
             type: 'MEDITATION',
           ),
           MethodOption('Hít thở', Icons.cloud_queue_rounded, type: 'BREATHING'),
-          MethodOption('Viết nhật kí', Icons.edit_note_rounded, type: 'JOURNAL'),
+          MethodOption(
+            'Viết nhật kí',
+            Icons.edit_note_rounded,
+            type: 'JOURNAL',
+          ),
           MethodOption('Nghe nhạc', Icons.headphones_rounded, type: 'MUSIC'),
         ];
 

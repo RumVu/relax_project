@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/app_copy.dart';
 import '../../core/session.dart';
+import '../../data/models/app_models.dart';
 import '../../data/models/backend_models.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
@@ -8,6 +9,7 @@ import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
 import '../challenge/challenge_screen.dart';
 import '../home/home_screen.dart';
+import '../practice/practice_screen.dart';
 import '../relax/relax_screen.dart';
 import '../setup/setup_screen.dart';
 
@@ -134,6 +136,105 @@ class _RelaxShellState extends State<RelaxShell> {
     _loadMoodHistory();
   }
 
+  Activity _activityForMethod(MethodOption method) {
+    for (final backendActivity in _activities) {
+      if (backendActivity.type == method.type) {
+        return Activity.fromBackend(backendActivity);
+      }
+    }
+
+    final fallback = switch (method.type) {
+      'MUSIC' => (
+        title: '01. Nhạc',
+        description: 'Nghe nhạc hoặc âm thanh nền để dịu nhịp cảm xúc.',
+        duration: 25,
+      ),
+      'MEDITATION' => (
+        title: '05. Thiền định',
+        description: 'Một phiên thiền ngắn giúp hạ tải và quay về với mình.',
+        duration: 12,
+      ),
+      'BREATHING' => (
+        title: '04. Hít thở không khí',
+        description: 'Một bài thở ngắn để giảm tải cơ thể.',
+        duration: 10,
+      ),
+      'JOURNAL' => (
+        title: '03. Viết nhật kí',
+        description: 'Viết vài dòng để gọi tên điều đang diễn ra bên trong.',
+        duration: 15,
+      ),
+      _ => (
+        title: method.label,
+        description: 'Chọn một nhịp nghỉ phù hợp với cảm xúc hiện tại.',
+        duration: 12,
+      ),
+    };
+
+    return Activity(
+      fallback.title,
+      fallback.description,
+      method.icon,
+      type: method.type,
+      durationMinutes: fallback.duration,
+      reliefPercent: 0,
+    );
+  }
+
+  /// Danh sách tất cả Activity (đã merge từ backend) — dùng cho gợi ý
+  /// "Tiếp theo bạn muốn làm gì?" trong recovery flow.
+  List<Activity> get _allActivities {
+    if (_activities.isNotEmpty) {
+      return _activities.map(Activity.fromBackend).toList(growable: false);
+    }
+    // Fallback từ 4 methods cố định khi backend chưa trả catalog
+    return [
+      _activityForMethod(const MethodOption(
+        'Thiền định',
+        Icons.self_improvement_rounded,
+        type: 'MEDITATION',
+      )),
+      _activityForMethod(const MethodOption(
+        'Hít thở',
+        Icons.cloud_queue_rounded,
+        type: 'BREATHING',
+      )),
+      _activityForMethod(const MethodOption(
+        'Viết nhật kí',
+        Icons.edit_note_rounded,
+        type: 'JOURNAL',
+      )),
+      _activityForMethod(const MethodOption(
+        'Nghe nhạc',
+        Icons.headphones_rounded,
+        type: 'MUSIC',
+      )),
+    ];
+  }
+
+  void _openPractice(MethodOption method) {
+    _pushPracticeFor(_activityForMethod(method));
+  }
+
+  /// Push 1 PracticeScreen mới với activity được chọn từ recovery flow.
+  /// Dùng pushReplacement để màn cũ bị bỏ — flow là 1 chuỗi liên tục,
+  /// user back sẽ về thẳng tab Relax, không phải xem lại màn cũ.
+  void _pushPracticeFor(Activity activity) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => PracticeScreen(
+          activity: activity,
+          allActivities: _allActivities,
+          onChainNext: (next) {
+            // Pop màn hiện tại + push màn mới cho activity kế.
+            Navigator.of(context).pop();
+            _pushPracticeFor(next);
+          },
+        ),
+      ),
+    );
+  }
+
   // ── Build ─────────────────────────────────────────────────────────────────
 
   @override
@@ -147,7 +248,7 @@ class _RelaxShellState extends State<RelaxShell> {
         contentError: _contentError,
         onRefreshContent: _refresh,
         session: session,
-        onMethodSelected: (_) => setState(() => _tab = 1),
+        onMethodSelected: _openPractice,
         moodHistory: _moodHistory,
         moodHistoryLoading: _moodHistoryLoading,
       ),
@@ -157,6 +258,7 @@ class _RelaxShellState extends State<RelaxShell> {
         catalogError: _catalogError,
         onRefreshCatalog: _refresh,
         onBack: () => setState(() => _tab = 0),
+        onChainNext: _pushPracticeFor,
       ),
       const ChallengeScreen(),
       SetupScreen(

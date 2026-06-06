@@ -716,14 +716,27 @@ String _formatDuration(Duration duration) {
   return '$minutes:${seconds.toString().padLeft(2, '0')}';
 }
 
-void showFeedbackSheet(BuildContext context, Activity activity) {
+/// Callback khi user bấm "Continue" trong recovery flow.
+/// [nextActivity] do `showNextStepSheet` chọn từ danh sách [allActivities].
+typedef NextStepHandler = void Function(Activity nextActivity);
+
+void showFeedbackSheet(
+  BuildContext context,
+  Activity activity, {
+  List<Activity> allActivities = const [],
+  NextStepHandler? onContinueNext,
+}) {
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
     isScrollControlled: true,
     showDragHandle: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    builder: (_) => _FeedbackSheet(activity: activity),
+    builder: (_) => _FeedbackSheet(
+      activity: activity,
+      allActivities: allActivities,
+      onContinueNext: onContinueNext,
+    ),
   );
 }
 
@@ -732,8 +745,14 @@ void showFeedbackSheet(BuildContext context, Activity activity) {
 /// thì POST `/relax-sessions/me/:id/finish`. Backend trả `stressDelta` →
 /// truyền sang [showEncourageSheet] để hiển thị "Đã giảm X% rồi nè".
 class _FeedbackSheet extends StatefulWidget {
-  const _FeedbackSheet({required this.activity});
+  const _FeedbackSheet({
+    required this.activity,
+    this.allActivities = const [],
+    this.onContinueNext,
+  });
   final Activity activity;
+  final List<Activity> allActivities;
+  final NextStepHandler? onContinueNext;
 
   @override
   State<_FeedbackSheet> createState() => _FeedbackSheetState();
@@ -790,8 +809,16 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
     if (!mounted) return;
     setState(() => _submitting = false);
     if (_error != null) return; // giữ sheet để user thấy lỗi.
-    Navigator.of(context).pop();
-    showEncourageSheet(context, reductionPercent: reduction.clamp(5, 80));
+    final navContext = context;
+    Navigator.of(navContext).pop();
+    showEncourageSheet(
+      navContext,
+      reductionPercent: reduction.clamp(5, 80),
+      currentActivity: widget.activity,
+      allActivities: widget.allActivities,
+      onContinueNext: widget.onContinueNext,
+      rating: _rating,
+    );
   }
 
   @override
@@ -877,13 +904,37 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
   }
 }
 
-void showEncourageSheet(BuildContext context, {int reductionPercent = 27}) {
+/// Sheet "Mức độ giảm tải" — bước 2 của recovery flow.
+/// - Hiện reduction% + lời động viên
+/// - 2 buttons: "Tiếp tục với hoạt động khác" → mở [showNextStepSheet]
+///                "Quay về trang chủ" → pop hết về root
+void showEncourageSheet(
+  BuildContext context, {
+  int reductionPercent = 27,
+  Activity? currentActivity,
+  List<Activity> allActivities = const [],
+  NextStepHandler? onContinueNext,
+  int rating = 4,
+}) {
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
     showDragHandle: true,
+    isScrollControlled: true,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    builder: (context) {
+    builder: (sheetCtx) {
+      // Lời nhắn tự sinh theo rating
+      final praise = switch (rating) {
+        5 => 'Tuyệt vời! Bạn đã làm rất tốt ✦',
+        4 => 'Bạn đã rất chăm chút bản thân rồi nè 💜',
+        3 => 'Một bước nhỏ vẫn là tiến lên ~',
+        2 => 'Không sao đâu, chúng ta thử cách khác nhé 🌿',
+        _ => 'Cảm xúc cũng cần được nghe. Mình cùng đi tiếp nhé.',
+      };
+
+      // Có activities khác → cho phép "Tiếp tục"
+      final hasNext = allActivities.length > 1 && onContinueNext != null;
+
       return Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
         child: Column(
@@ -891,27 +942,292 @@ void showEncourageSheet(BuildContext context, {int reductionPercent = 27}) {
           children: [
             Text(
               'Mức độ giảm tải',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(sheetCtx).textTheme.headlineSmall,
             ),
             const SizedBox(height: 10),
-            const PixelCatScene(scene: CatScene.wave, height: 160),
-            Text(
-              'Thi Ái thấy bạn đã giảm stress khoảng $reductionPercent% rồi nè!',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyLarge,
+            const PixelCatScene(scene: CatScene.wave, height: 150),
+            const SizedBox(height: 10),
+            // Big % chip
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              decoration: BoxDecoration(
+                color: RelaxTheme.purple,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                '✦ Giảm $reductionPercent% stress ✦',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 14,
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Text(
+              praise,
+              textAlign: TextAlign.center,
+              style: Theme.of(sheetCtx).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            ),
+            const SizedBox(height: 18),
+            if (hasNext)
+              PixelButton(
+                icon: Icons.auto_awesome_rounded,
+                label: 'Tiếp tục với hoạt động khác',
+                filled: true,
+                onPressed: () {
+                  Navigator.of(sheetCtx).pop();
+                  showNextStepSheet(
+                    context,
+                    currentActivity: currentActivity,
+                    allActivities: allActivities,
+                    onContinue: onContinueNext,
+                  );
+                },
+              )
+            else
+              PixelButton(
+                icon: Icons.spa_rounded,
+                label: 'Hoàn tất phiên này',
+                filled: true,
+                onPressed: () => Navigator.of(sheetCtx).pop(),
+              ),
+            const SizedBox(height: 8),
             PixelButton(
               icon: Icons.home_rounded,
               label: 'Quay về trang chủ',
-              filled: true,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () {
+                Navigator.of(sheetCtx).pop();
+                Navigator.of(context).popUntil((r) => r.isFirst);
+              },
             ),
           ],
         ),
       );
     },
   );
+}
+
+/// Bước 3 — "Tiếp theo bạn muốn làm gì?"
+/// Đưa ra 2-3 gợi ý hoạt động khác (loại trừ activity vừa làm).
+/// Sắp xếp theo `reliefPercent` giảm dần để gợi ý cái hiệu quả nhất trước.
+void showNextStepSheet(
+  BuildContext context, {
+  Activity? currentActivity,
+  required List<Activity> allActivities,
+  required NextStepHandler? onContinue,
+}) {
+  // Lọc: bỏ activity vừa làm
+  final candidates = allActivities
+      .where((a) => a.type != currentActivity?.type)
+      .toList()
+    ..sort((a, b) =>
+        (b.reliefPercent ?? 0).compareTo(a.reliefPercent ?? 0));
+  final suggestions = candidates.take(3).toList();
+
+  showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    showDragHandle: true,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    builder: (sheetCtx) {
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Tiếp theo bạn muốn làm gì? ✦',
+              style: Theme.of(sheetCtx).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Mình gợi ý vài hoạt động khác để bạn tiếp tục dịu lại nha ~',
+              style: Theme.of(sheetCtx).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            if (suggestions.isEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                child: Text(
+                  'Bạn đã thử hết các hoạt động hiện có rồi. Hẹn lần sau nhé!',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(sheetCtx).textTheme.bodyMedium,
+                ),
+              )
+            else
+              for (var i = 0; i < suggestions.length; i++) ...[
+                _NextStepTile(
+                  activity: suggestions[i],
+                  isBest: i == 0,
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    onContinue?.call(suggestions[i]);
+                  },
+                ),
+                if (i != suggestions.length - 1) const SizedBox(height: 8),
+              ],
+            const SizedBox(height: 14),
+            PixelButton(
+              icon: Icons.home_rounded,
+              label: 'Quay về trang chủ',
+              onPressed: () {
+                Navigator.of(sheetCtx).pop();
+                Navigator.of(context).popUntil((r) => r.isFirst);
+              },
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
+
+class _NextStepTile extends StatelessWidget {
+  const _NextStepTile({
+    required this.activity,
+    required this.isBest,
+    required this.onTap,
+  });
+
+  final Activity activity;
+  final bool isBest;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isBest
+                ? RelaxTheme.purple.withValues(alpha: .12)
+                : context.relax.surfaceSoft,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isBest
+                  ? RelaxTheme.purple
+                  : RelaxTheme.lavender.withValues(alpha: .2),
+              width: isBest ? 1.6 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: RelaxTheme.purple.withValues(alpha: .15),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  activity.icon,
+                  color: RelaxTheme.lavender,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            activity.compactTitle,
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                        ),
+                        if (isBest)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: RelaxTheme.purple,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: const Text(
+                              '★ Tốt nhất',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      activity.description,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontSize: 11.5,
+                          ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 11,
+                          color: context.relax.muted,
+                        ),
+                        const SizedBox(width: 3),
+                        Text(
+                          '${activity.durationMinutes ?? 12} phút',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                fontSize: 10,
+                                color: context.relax.muted,
+                              ),
+                        ),
+                        if ((activity.reliefPercent ?? 0) > 0) ...[
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.spa_rounded,
+                            size: 11,
+                            color: context.relax.muted,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            'relief ${activity.reliefPercent}%',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  fontSize: 10,
+                                  color: context.relax.muted,
+                                ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: RelaxTheme.lavender,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 Future<void> showConfirmSheet(

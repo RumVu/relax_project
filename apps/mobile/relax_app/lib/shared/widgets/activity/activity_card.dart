@@ -6,9 +6,18 @@ import '../buttons/small_action_button.dart';
 import '../pixel/pixel_panel.dart';
 
 class ActivityCard extends StatelessWidget {
-  const ActivityCard({super.key, required this.activity});
+  const ActivityCard({
+    super.key,
+    required this.activity,
+    this.allActivities = const [],
+    this.onChainNext,
+  });
 
   final Activity activity;
+  final List<Activity> allActivities;
+
+  /// Khi user chọn 1 activity từ recovery flow → shell xử lý chain.
+  final ValueChanged<Activity>? onChainNext;
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +74,12 @@ class ActivityCard extends StatelessWidget {
               SmallActionButton(
                 icon: Icons.flag_rounded,
                 label: 'Finish',
-                onTap: () => showFeedbackSheet(context, activity),
+                onTap: () => showFeedbackSheet(
+                  context,
+                  activity,
+                  allActivities: allActivities,
+                  onContinueNext: onChainNext,
+                ),
               ),
             ],
           ),

@@ -61,6 +61,27 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Cần vị trí để hiển thị thời tiết phù hợp cho trải nghiệm thư giãn.</string>
+	<!--
+		Google Sign-In: thay 2 giá trị dưới bằng iOS OAuth Client ID lấy từ
+		Google Cloud Console → APIs & Services → Credentials → iOS client.
+		- GIDClientID: <CLIENT_ID>.apps.googleusercontent.com
+		- CFBundleURLSchemes: REVERSED (com.googleusercontent.apps.<CLIENT_ID>)
+		Khi 2 giá trị này vẫn là placeholder "YOUR_*", button "Đăng nhập với Google"
+		sẽ tự ẩn ở UI để app không crash.
+	-->
+	<key>GIDClientID</key>
+	<string>YOUR_GOOGLE_IOS_CLIENT_ID.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.YOUR_GOOGLE_IOS_CLIENT_ID</string>
+			</array>
+		</dict>
+	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

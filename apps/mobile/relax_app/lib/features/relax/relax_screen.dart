@@ -16,6 +16,7 @@ class RelaxScreen extends StatelessWidget {
     required this.catalogError,
     required this.onRefreshCatalog,
     this.onBack,
+    this.onChainNext,
   });
 
   final List<BackendRelaxActivity> backendActivities;
@@ -23,6 +24,9 @@ class RelaxScreen extends StatelessWidget {
   final String? catalogError;
   final VoidCallback onRefreshCatalog;
   final VoidCallback? onBack;
+
+  /// Khi user finish 1 activity và chọn tiếp tục với activity khác từ recovery flow.
+  final ValueChanged<Activity>? onChainNext;
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +117,11 @@ class RelaxScreen extends StatelessWidget {
             ...displayActivities.map(
               (activity) => Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: ActivityCard(activity: activity),
+                child: ActivityCard(
+                  activity: activity,
+                  allActivities: displayActivities,
+                  onChainNext: onChainNext,
+                ),
               ),
             ),
         ],
