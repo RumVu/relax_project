@@ -152,16 +152,22 @@ export class AuthService {
     userAgent?: string,
     ipAddress?: string,
   ) {
-    const clientId = this.configService.get<string>('app.googleClientId');
-    if (!clientId) {
+    // GOOGLE_CLIENT_ID can be a single value or a comma-separated list
+    // (web + iOS + Android). Token only needs to match one.
+    const clientIdEnv = this.configService.get<string>('app.googleClientId');
+    if (!clientIdEnv) {
       throw new UnauthorizedException({
         code: ErrorCode.AUTH_INVALID_CREDENTIALS,
         message:
           'Google sign-in is not configured (missing GOOGLE_CLIENT_ID on backend).',
       });
     }
+    const clientIds = clientIdEnv
+      .split(',')
+      .map((c) => c.trim())
+      .filter((c) => c.length > 0);
 
-    const payload = await verifyGoogleIdToken(dto.idToken, clientId);
+    const payload = await verifyGoogleIdToken(dto.idToken, clientIds);
     const email = payload.email?.toLowerCase();
     if (!email) {
       throw new UnauthorizedException({
