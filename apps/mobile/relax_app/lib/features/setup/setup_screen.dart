@@ -3,6 +3,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
+import '../../config/env.dart';
 import '../../core/preferences.dart';
 import '../../core/session.dart';
 import '../../data/models/app_models.dart';
@@ -20,6 +21,7 @@ import '../../shared/widgets/pixel/pixel_button.dart';
 import '../billing/checkout_screen.dart';
 import '../journal/journal_history_screen.dart';
 import '../legal/legal_screen.dart';
+import '../theme/customs_theme_screen.dart';
 import '../relax/sheets/relax_sheets.dart';
 import '../relax/sheets/stats_sheet.dart';
 
@@ -403,6 +405,13 @@ class _SetupScreenState extends State<SetupScreen> {
                 setState(() => _themeTab = tab);
                 if (tab == 'light') widget.onThemeChanged(ThemeMode.light);
                 if (tab == 'dark') widget.onThemeChanged(ThemeMode.dark);
+                if (tab == 'custom') {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const CustomsThemeScreen(),
+                    ),
+                  );
+                }
               },
               appTheme: widget.content.appTheme,
             ),
@@ -609,7 +618,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
       final ts = DateTime.now().millisecondsSinceEpoch;
       final ext = file.name.split('.').last.toLowerCase();
       final url = await storage.upload(
-        bucket: 'avatars',
+        bucket: Env.supabaseAvatarBucket,
         path: '$userId/avatar-$ts.$ext',
         bytes: bytes,
         contentType: 'image/$ext',

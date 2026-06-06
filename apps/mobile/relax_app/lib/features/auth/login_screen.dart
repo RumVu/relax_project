@@ -63,7 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _navigateToShell() {
-    Navigator.of(context).pushReplacement(
+    // pushAndRemoveUntil → xóa toàn bộ stack (Login + Onboarding nếu có)
+    // → Shell là route DUY NHẤT. Bấm back ở Shell sẽ KHÔNG về Login nữa.
+    Navigator.of(context).pushAndRemoveUntil(
       PageRouteBuilder(
         pageBuilder: (context, animation, secondaryAnimation) => RelaxShell(
           themeMode: widget.themeMode,
@@ -76,6 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
             FadeTransition(opacity: animation, child: child),
         transitionDuration: const Duration(milliseconds: 300),
       ),
+      (route) => false, // drop everything
     );
   }
 

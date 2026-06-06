@@ -17,15 +17,23 @@ class Env {
   );
 
   /// Supabase project URL — dùng cho direct file upload (avatar, journal media).
+  /// Default = project chính thức của Relax (URL public OK để hardcode).
   static const String supabaseUrl = String.fromEnvironment(
     'SUPABASE_URL',
-    defaultValue: '',
+    defaultValue: 'https://koshdbyfhivhpmydcgst.supabase.co',
   );
 
-  /// Supabase anon public key.
+  /// Supabase publishable key — KHÔNG phải secret. Anon key kiểu cũ hoặc
+  /// publishable key kiểu mới đều an toàn share client side (RLS bảo vệ).
   static const String supabaseAnonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
-    defaultValue: '',
+    defaultValue: 'sb_publishable_l1SSozDXVwm-gfQ-gnjQbw_eSe3rGvM',
+  );
+
+  /// Bucket Supabase Storage để upload avatar.
+  static const String supabaseAvatarBucket = String.fromEnvironment(
+    'SUPABASE_AVATAR_BUCKET',
+    defaultValue: 'public-assets',
   );
 
   /// SePay redirect base — backend sẽ thêm `?status=success|cancel|error`.

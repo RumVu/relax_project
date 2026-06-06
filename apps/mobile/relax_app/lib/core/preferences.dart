@@ -22,6 +22,7 @@ class AppPreferences {
   static const _kReminderTime = 'reminder_time';
   static const _kSoundChoice = 'sound_choice';
   static const _kOnboardingDone = 'onboarding_done';
+  static const _kAccentColor = 'accent_color';
 
   // ── Theme ──────────────────────────────────────────────────────────────
   ThemeMode get themeMode {
@@ -69,5 +70,12 @@ class AppPreferences {
   bool get onboardingDone => _prefs.getBool(_kOnboardingDone) ?? false;
   Future<void> setOnboardingDone(bool done) async {
     await _prefs.setBool(_kOnboardingDone, done);
+  }
+
+  // ── Accent color ───────────────────────────────────────────────────────
+  /// Màu nhấn user chọn ở Customs theme. Default = RelaxTheme.purple (0xFF6C4DE6).
+  int get accentColorValue => _prefs.getInt(_kAccentColor) ?? 0xFF6C4DE6;
+  Future<void> setAccentColorValue(int value) async {
+    await _prefs.setInt(_kAccentColor, value);
   }
 }

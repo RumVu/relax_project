@@ -70,7 +70,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         user: result.user,
       );
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (_) => RelaxShell(
             themeMode: widget.themeMode,
@@ -80,6 +80,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             contentRepository: widget.contentRepository,
           ),
         ),
+        (route) => false,
       );
     } catch (e) {
       if (!mounted) return;

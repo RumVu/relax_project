@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../app/app_copy.dart';
 import '../../core/session.dart';
 import '../../data/models/app_models.dart';
@@ -281,14 +282,57 @@ class _RelaxShellState extends State<RelaxShell> {
       ),
     ];
 
-    return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(index: _tab, children: pages),
-      ),
-      bottomNavigationBar: PixelBottomNav(
-        selectedIndex: _tab,
-        onSelected: (index) => setState(() => _tab = index),
+    return PopScope(
+      // Chỉ cho phép pop khi đang ở tab Home (_tab == 0). Khi đang ở
+      // tab khác, intercept để chuyển về Home thay vì pop ra Login.
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_tab != 0) {
+          setState(() => _tab = 0);
+          return;
+        }
+        // Đang ở Home → confirm trước khi cho thoát app
+        _confirmExitApp();
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: IndexedStack(index: _tab, children: pages),
+        ),
+        bottomNavigationBar: PixelBottomNav(
+          selectedIndex: _tab,
+          onSelected: (index) => setState(() => _tab = index),
+        ),
       ),
     );
+  }
+
+  Future<void> _confirmExitApp() async {
+    final ctx = context;
+    final ok = await showDialog<bool>(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Thoát app?'),
+        content: const Text('Hẹn gặp lại Thi Ái ở lần ghé sau nha 💜'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
+            child: const Text('Ở lại'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
+            child: const Text('Thoát'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    // Đóng app — không pop Navigator vì Shell là route gốc duy nhất
+    // (Login dùng pushAndRemoveUntil khi authenticate xong).
+    // SystemNavigator.pop() chỉ work trên Android. iOS guidelines không
+    // cho phép app tự đóng — user phải dùng home button.
+    if (!mounted) return;
+    // ignore: deprecated_member_use
+    await SystemChannels.platform.invokeMethod('SystemNavigator.pop');
   }
 }
