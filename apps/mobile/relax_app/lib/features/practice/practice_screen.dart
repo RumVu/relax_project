@@ -15,6 +15,7 @@ class PracticeScreen extends StatelessWidget {
     required this.activity,
     this.allActivities = const [],
     this.onChainNext,
+    this.onFinish,
   });
 
   final Activity activity;
@@ -23,6 +24,10 @@ class PracticeScreen extends StatelessWidget {
   /// Khi user chọn activity tiếp theo trong recovery flow.
   /// Shell sẽ push 1 PracticeScreen mới với activity đó.
   final ValueChanged<Activity>? onChainNext;
+
+  /// Khi non-null: Finish button → callback (Journey reflection chapter).
+  /// Khi null (standalone): Finish → showFeedbackSheet legacy.
+  final VoidCallback? onFinish;
 
   bool get _isBreathing => activity.type == 'BREATHING';
   bool get _isJournal => activity.type == 'JOURNAL';
@@ -133,13 +138,14 @@ class PracticeScreen extends StatelessWidget {
                     const SizedBox(height: 10),
                     PixelButton(
                       icon: Icons.flag_rounded,
-                      label: 'Finish',
-                      onPressed: () => showFeedbackSheet(
-                        context,
-                        activity,
-                        allActivities: allActivities,
-                        onContinueNext: onChainNext,
-                      ),
+                      label: 'Hoàn tất phiên',
+                      onPressed: onFinish ??
+                          () => showFeedbackSheet(
+                                context,
+                                activity,
+                                allActivities: allActivities,
+                                onContinueNext: onChainNext,
+                              ),
                     ),
                   ],
                 ),

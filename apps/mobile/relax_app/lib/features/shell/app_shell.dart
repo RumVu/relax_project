@@ -267,7 +267,7 @@ class _RelaxShellState extends State<RelaxShell> {
         catalogError: _catalogError,
         onRefreshCatalog: _refresh,
         onBack: () => setState(() => _tab = 0),
-        onChainNext: _pushPracticeFor,
+        onStartJourney: _pushPracticeFor,
       ),
       const ChallengeScreen(),
       SetupScreen(

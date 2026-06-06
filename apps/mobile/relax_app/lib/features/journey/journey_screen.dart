@@ -531,49 +531,12 @@ class _ImmersionBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // PracticeScreen có sẵn UI đầy đủ — em không clone code. Thay vào đó
-    // hiện PracticeScreen + 1 nút "Hoàn tất phiên" overlay ở dưới để
-    // trigger onFinish thay vì showFeedbackSheet.
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: PracticeScreen(
-            activity: activity,
-            // allActivities = [] + onChainNext = null → Finish button trong
-            // PracticeScreen mở showFeedbackSheet không có "Tiếp tục".
-            // Em sẽ override bằng overlay button bên dưới.
-          ),
-        ),
-        Positioned(
-          left: 16,
-          right: 16,
-          bottom: 24,
-          child: SafeArea(
-            top: false,
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Theme.of(
-                      context,
-                    ).scaffoldBackgroundColor.withValues(alpha: 0),
-                    Theme.of(context).scaffoldBackgroundColor,
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              padding: const EdgeInsets.fromLTRB(0, 24, 0, 0),
-              child: PixelButton(
-                icon: Icons.spa_rounded,
-                label: 'Hoàn tất phiên này',
-                filled: true,
-                onPressed: onFinish,
-              ),
-            ),
-          ),
-        ),
-      ],
+    // PracticeScreen render full UI. `onFinish` non-null → nút Finish trong
+    // PracticeScreen sẽ trigger journey's reflection chapter thay vì mở
+    // feedback sheet legacy → flow liền mạch không gãy story.
+    return PracticeScreen(
+      activity: activity,
+      onFinish: onFinish,
     );
   }
 }
