@@ -8,6 +8,7 @@ import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
 import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
+import '../auth/login_screen.dart';
 import '../challenge/challenge_screen.dart';
 import '../home/home_screen.dart';
 import '../journey/journey_screen.dart';
@@ -20,6 +21,7 @@ class RelaxShell extends StatefulWidget {
     required this.themeMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
+    this.onAccentChanged,
     this.catalogRepository,
     this.contentRepository,
   });
@@ -27,6 +29,7 @@ class RelaxShell extends StatefulWidget {
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
   final ValueChanged<AppLanguage> onLanguageChanged;
+  final ValueChanged<Color>? onAccentChanged;
   final RelaxCatalogRepository? catalogRepository;
   final MobileContentRepository? contentRepository;
 
@@ -57,13 +60,63 @@ class _RelaxShellState extends State<RelaxShell> {
   List<MoodCheckin> _moodHistory = const [];
   bool _moodHistoryLoading = false; // false until we know logged-in
 
+  SessionState? _watchedSession;
+  bool _wasLoggedIn = false;
+
   @override
   void initState() {
     super.initState();
     _loadCatalog();
     _loadContent();
     // Mood history needs token — defer until after first frame so session is ready
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadMoodHistory());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadMoodHistory();
+      _attachSessionListener();
+    });
+  }
+
+  /// Subscribe vào SessionState — khi user logout (từ Setup, delete account,
+  /// hoặc 401 force-logout từ ApiClient) → tự push LoginScreen replace Shell.
+  /// Tránh user kẹt ở Shell với session rỗng (Home/Setup hiển thị empty state
+  /// nhưng không có lối ra).
+  void _attachSessionListener() {
+    final session = context.sessionOrNull;
+    if (session == null) return;
+    _watchedSession = session;
+    _wasLoggedIn = session.isLoggedIn;
+    session.addListener(_onSessionChanged);
+  }
+
+  void _onSessionChanged() {
+    final session = _watchedSession;
+    if (session == null || !mounted) return;
+    final loggedIn = session.isLoggedIn;
+    // Transition: logged-in → logged-out → kick về Login
+    if (_wasLoggedIn && !loggedIn) {
+      _wasLoggedIn = false;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => LoginScreen(
+            themeMode: widget.themeMode,
+            onThemeChanged: widget.onThemeChanged,
+            onLanguageChanged: widget.onLanguageChanged,
+            catalogRepository: widget.catalogRepository,
+            contentRepository: widget.contentRepository,
+          ),
+        ),
+        (route) => false,
+      );
+    } else if (!_wasLoggedIn && loggedIn) {
+      // Login lại trong app (hiếm) → reload data
+      _wasLoggedIn = true;
+      _loadMoodHistory();
+    }
+  }
+
+  @override
+  void dispose() {
+    _watchedSession?.removeListener(_onSessionChanged);
+    super.dispose();
   }
 
   // ── Loaders ───────────────────────────────────────────────────────────────
@@ -274,6 +327,7 @@ class _RelaxShellState extends State<RelaxShell> {
         themeMode: widget.themeMode,
         onThemeChanged: widget.onThemeChanged,
         onLanguageChanged: widget.onLanguageChanged,
+        onAccentChanged: widget.onAccentChanged,
         content: _content,
         loadingContent: _contentLoading,
         contentError: _contentError,

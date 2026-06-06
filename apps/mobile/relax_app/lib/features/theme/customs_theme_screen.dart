@@ -6,7 +6,11 @@ import '../../core/preferences.dart';
 /// Customs theme — chọn accent color cá nhân.
 /// Lưu vào AppPreferences, áp dụng cho toàn app sau khi save.
 class CustomsThemeScreen extends StatefulWidget {
-  const CustomsThemeScreen({super.key});
+  const CustomsThemeScreen({super.key, this.onAccentChanged});
+
+  /// Khi non-null: lưu màu xong → invoke để app_root live-apply theme
+  /// ngay (không cần restart).
+  final ValueChanged<Color>? onAccentChanged;
 
   @override
   State<CustomsThemeScreen> createState() => _CustomsThemeScreenState();
@@ -46,12 +50,14 @@ class _CustomsThemeScreenState extends State<CustomsThemeScreen> {
 
   Future<void> _save() async {
     await _prefs?.setAccentColorValue(_accent.toARGB32());
+    // Live-apply: callback đẩy lên app_root → MaterialApp rebuild với accent
+    // mới ngay → không cần restart app nữa.
+    widget.onAccentChanged?.call(_accent);
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Đã lưu màu — restart app để áp dụng toàn bộ ✦'),
-      ),
-    );
+    final msg = widget.onAccentChanged != null
+        ? 'Đã đổi màu nhấn ✦'
+        : 'Đã lưu màu — restart app để áp dụng ✦';
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
     Navigator.of(context).pop(_accent);
   }
 
@@ -190,7 +196,9 @@ class _CustomsThemeScreenState extends State<CustomsThemeScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Màu sẽ được áp dụng sau khi bạn restart app. Bấm "Lưu" ở trên để xác nhận.',
+                      widget.onAccentChanged != null
+                          ? 'Bấm "Lưu" để đổi màu nhấn toàn app ngay lập tức.'
+                          : 'Bấm "Lưu" + restart app để áp dụng màu mới.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontSize: 11.5,
                           ),

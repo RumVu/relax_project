@@ -13,7 +13,16 @@ import '../../../shared/widgets/pixel/cat_widgets.dart';
 import '../../../shared/widgets/pixel/pixel_button.dart';
 import '../../../shared/widgets/pixel/pixel_panel.dart';
 
-void showPlayerSheet(BuildContext context, Activity activity) {
+/// Mở sheet phát/luyện tập cho 1 activity.
+///
+/// [onFinish] (optional): khi non-null, các nút "Hoàn tất" trong sheet sẽ pop
+/// sheet + invoke callback này thay vì mở `showFeedbackSheet` legacy. Dùng
+/// để Journey 5-chương dẫn user qua Immersion → Reflection liền mạch.
+void showPlayerSheet(
+  BuildContext context,
+  Activity activity, {
+  VoidCallback? onFinish,
+}) {
   showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
@@ -22,18 +31,32 @@ void showPlayerSheet(BuildContext context, Activity activity) {
     backgroundColor: Theme.of(context).colorScheme.surface,
     builder: (context) {
       return switch (activity.type) {
-        'BREATHING' => BreathingPracticeSheet(activity: activity),
-        'JOURNAL' => JournalPracticeSheet(activity: activity),
-        _ => BackendAudioPlayerSheet(activity: activity),
+        'BREATHING' => BreathingPracticeSheet(
+          activity: activity,
+          onFinish: onFinish,
+        ),
+        'JOURNAL' => JournalPracticeSheet(
+          activity: activity,
+          onFinish: onFinish,
+        ),
+        _ => BackendAudioPlayerSheet(activity: activity, onFinish: onFinish),
       };
     },
   );
 }
 
 class BackendAudioPlayerSheet extends StatefulWidget {
-  const BackendAudioPlayerSheet({super.key, required this.activity});
+  const BackendAudioPlayerSheet({
+    super.key,
+    required this.activity,
+    this.onFinish,
+  });
 
   final Activity activity;
+
+  /// Khi non-null (Journey context): hiển thị nút "Hoàn tất phiên" → pop sheet
+  /// + invoke. Khi null (standalone): không hiển thị.
+  final VoidCallback? onFinish;
 
   @override
   State<BackendAudioPlayerSheet> createState() =>
@@ -351,6 +374,19 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
                       },
                     ),
                   ),
+                  if (widget.onFinish != null) ...[
+                    const SizedBox(height: 10),
+                    PixelButton(
+                      icon: Icons.flag_rounded,
+                      label: 'Hoàn tất phiên',
+                      onPressed: () async {
+                        await _player.stop();
+                        if (!context.mounted) return;
+                        Navigator.of(context).pop();
+                        widget.onFinish!();
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -362,9 +398,17 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
 }
 
 class BreathingPracticeSheet extends StatefulWidget {
-  const BreathingPracticeSheet({super.key, required this.activity});
+  const BreathingPracticeSheet({
+    super.key,
+    required this.activity,
+    this.onFinish,
+  });
 
   final Activity activity;
+
+  /// Khi non-null (Journey context): Finish button + auto-complete 5 vòng
+  /// đều bubble lên Journey reflection thay vì mở showFeedbackSheet legacy.
+  final VoidCallback? onFinish;
 
   @override
   State<BreathingPracticeSheet> createState() => _BreathingPracticeSheetState();
@@ -416,7 +460,15 @@ class _BreathingPracticeSheetState extends State<BreathingPracticeSheet> {
         _remaining = _steps.first.seconds;
         _cycle = 1;
       });
-      showEncourageSheet(context, reductionPercent: 32);
+      // Đủ 5 vòng → nếu trong Journey context (onFinish non-null), pop sheet
+      // và để Reflection chapter dẫn user tiếp. Nếu standalone → show
+      // encourage sheet legacy.
+      if (widget.onFinish != null) {
+        Navigator.of(context).pop();
+        widget.onFinish!();
+      } else {
+        showEncourageSheet(context, reductionPercent: 32);
+      }
       return;
     }
     setState(() {
@@ -516,11 +568,15 @@ class _BreathingPracticeSheetState extends State<BreathingPracticeSheet> {
             const SizedBox(height: 8),
             PixelButton(
               icon: Icons.flag_rounded,
-              label: 'Finish',
+              label: 'Hoàn tất phiên',
               onPressed: () {
                 _timer?.cancel();
                 Navigator.of(context).pop();
-                showFeedbackSheet(context, widget.activity);
+                if (widget.onFinish != null) {
+                  widget.onFinish!();
+                } else {
+                  showFeedbackSheet(context, widget.activity);
+                }
               },
             ),
           ],
@@ -531,9 +587,17 @@ class _BreathingPracticeSheetState extends State<BreathingPracticeSheet> {
 }
 
 class JournalPracticeSheet extends StatefulWidget {
-  const JournalPracticeSheet({super.key, required this.activity});
+  const JournalPracticeSheet({
+    super.key,
+    required this.activity,
+    this.onFinish,
+  });
 
   final Activity activity;
+
+  /// Khi non-null (Journey context): sau khi lưu nhật ký xong → pop sheet +
+  /// invoke (chuyển sang Reflection chapter).
+  final VoidCallback? onFinish;
 
   @override
   State<JournalPracticeSheet> createState() => _JournalPracticeSheetState();
@@ -600,7 +664,13 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
     if (!mounted) return;
     setState(() => _saving = false);
     Navigator.of(context).pop();
-    showFeedbackSheet(context, widget.activity);
+    // Journey context: bubble lên Reflection chapter. Standalone: feedback
+    // sheet legacy.
+    if (widget.onFinish != null) {
+      widget.onFinish!();
+    } else {
+      showFeedbackSheet(context, widget.activity);
+    }
   }
 
   @override
@@ -681,12 +751,16 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
             const SizedBox(height: 8),
             PixelButton(
               icon: Icons.flag_rounded,
-              label: 'Finish',
+              label: 'Hoàn tất phiên',
               onPressed: _saving
                   ? () {}
                   : () {
                       Navigator.of(context).pop();
-                      showFeedbackSheet(context, widget.activity);
+                      if (widget.onFinish != null) {
+                        widget.onFinish!();
+                      } else {
+                        showFeedbackSheet(context, widget.activity);
+                      }
                     },
             ),
           ],

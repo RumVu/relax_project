@@ -44,6 +44,7 @@ class SetupScreen extends StatefulWidget {
     required this.themeMode,
     required this.onThemeChanged,
     required this.onLanguageChanged,
+    this.onAccentChanged,
     required this.content,
     required this.loadingContent,
     required this.contentError,
@@ -54,6 +55,10 @@ class SetupScreen extends StatefulWidget {
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode> onThemeChanged;
   final ValueChanged<AppLanguage> onLanguageChanged;
+
+  /// Khi user lưu màu nhấn ở Customs theme → đẩy lên app_root để live-apply.
+  final ValueChanged<Color>? onAccentChanged;
+
   final MobileContentSnapshot content;
   final bool loadingContent;
   final String? contentError;
@@ -408,7 +413,9 @@ class _SetupScreenState extends State<SetupScreen> {
                 if (tab == 'custom') {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => const CustomsThemeScreen(),
+                      builder: (_) => CustomsThemeScreen(
+                        onAccentChanged: widget.onAccentChanged,
+                      ),
                     ),
                   );
                 }

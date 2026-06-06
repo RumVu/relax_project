@@ -15,8 +15,12 @@ void main() {
 
     expect(find.text('Thi Ai Chill'), findsOneWidget);
 
-    await tester.pump(const Duration(milliseconds: 1600));
-    await tester.pump(const Duration(milliseconds: 500));
+    // Splash gate: min 900ms + chờ session bootstrap (hoặc max 2.5s).
+    // Trong test, secure storage có thể chưa init ngay → cần advance fake
+    // clock đủ lâu để max wait kick in.
+    for (var i = 0; i < 8; i++) {
+      await tester.pump(const Duration(milliseconds: 500));
+    }
 
     expect(find.text('chào mừng trở lại, \${user_name}'), findsOneWidget);
     expect(find.text('Đăng nhập'), findsOneWidget);

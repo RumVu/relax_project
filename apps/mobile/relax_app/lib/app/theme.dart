@@ -10,7 +10,7 @@ class RelaxTheme {
   static const mist = Color(0xFFF7F5FF);
   static const line = Color(0xFFC9BFFF);
 
-  static ThemeData light() {
+  static ThemeData light({Color? accent}) {
     return _base(
       brightness: Brightness.light,
       scaffold: const Color(0xFFF8F6FF),
@@ -18,10 +18,11 @@ class RelaxTheme {
       surfaceSoft: const Color(0xFFF0ECFF),
       text: ink,
       muted: const Color(0xFF746D9B),
+      accent: accent ?? purple,
     );
   }
 
-  static ThemeData dark() {
+  static ThemeData dark({Color? accent}) {
     return _base(
       brightness: Brightness.dark,
       scaffold: night,
@@ -29,6 +30,7 @@ class RelaxTheme {
       surfaceSoft: const Color(0xFF222945),
       text: const Color(0xFFEDE8FF),
       muted: const Color(0xFFA8A2CA),
+      accent: accent ?? purple,
     );
   }
 
@@ -39,11 +41,12 @@ class RelaxTheme {
     required Color surfaceSoft,
     required Color text,
     required Color muted,
+    required Color accent,
   }) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: purple,
+      seedColor: accent,
       brightness: brightness,
-      primary: purple,
+      primary: accent,
       surface: surface,
     );
 

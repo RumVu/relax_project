@@ -123,7 +123,8 @@ class PracticeScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    if (_isAudio) _AudioPreview(activity: activity),
+                    if (_isAudio)
+                      _AudioPreview(activity: activity, onFinish: onFinish),
                     if (_isBreathing) const _BreathingPreview(),
                     if (_isJournal) const _JournalPreview(),
                     const SizedBox(height: 16),
@@ -133,7 +134,13 @@ class PracticeScreen extends StatelessWidget {
                           : Icons.play_arrow_rounded,
                       label: _primaryLabel,
                       filled: true,
-                      onPressed: () => showPlayerSheet(context, activity),
+                      onPressed: () => showPlayerSheet(
+                        context,
+                        activity,
+                        // Trong Journey: bubble Finish của sheet → Reflection
+                        // chapter (qua onFinish của PracticeScreen).
+                        onFinish: onFinish,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     PixelButton(
@@ -208,9 +215,10 @@ class _PracticeHeader extends StatelessWidget {
 }
 
 class _AudioPreview extends StatelessWidget {
-  const _AudioPreview({required this.activity});
+  const _AudioPreview({required this.activity, this.onFinish});
 
   final Activity activity;
+  final VoidCallback? onFinish;
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +244,11 @@ class _AudioPreview extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return _ResourceRow(
                     resource: resources[index],
-                    onTap: () => showPlayerSheet(context, activity),
+                    onTap: () => showPlayerSheet(
+                      context,
+                      activity,
+                      onFinish: onFinish,
+                    ),
                   );
                 },
               ),

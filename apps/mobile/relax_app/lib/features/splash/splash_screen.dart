@@ -20,45 +20,98 @@ class SplashGate extends StatefulWidget {
     this.themeMode = ThemeMode.dark,
     this.onThemeChanged,
     this.onLanguageChanged,
+    this.onAccentChanged,
   });
 
   final Widget child;
   final ThemeMode themeMode;
   final ValueChanged<ThemeMode>? onThemeChanged;
   final dynamic onLanguageChanged;
+  final ValueChanged<Color>? onAccentChanged;
 
   @override
   State<SplashGate> createState() => _SplashGateState();
 }
 
 class _SplashGateState extends State<SplashGate> {
-  bool _showSplash = true;
+  bool _minSplashElapsed = false;
+  bool _prefsLoaded = false;
+  bool _maxSplashElapsed = false; // safety net khi session bootstrap kẹt
   bool _onboardingDone = false;
+  SessionState? _watchedSession;
 
   @override
   void initState() {
     super.initState();
-    // Preload prefs để biết có cần onboarding không
     _loadPrefs();
-    Future<void>.delayed(const Duration(milliseconds: 1250), () {
-      if (mounted) setState(() => _showSplash = false);
+    // Min splash duration để cat scene kịp animate vào
+    Future<void>.delayed(const Duration(milliseconds: 900), () {
+      if (mounted) setState(() => _minSplashElapsed = true);
     });
+    // Max wait — nếu session bootstrap không xong sau 2.5s (offline, network
+    // timeout, secure storage block trong test...) → vẫn route đi tiếp với
+    // cached state để user không kẹt ở splash.
+    Future<void>.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) setState(() => _maxSplashElapsed = true);
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe SessionState để rebuild khi isBooting flip false
+    final session = SessionScope.maybeOf(context);
+    if (session != _watchedSession) {
+      _watchedSession?.removeListener(_onSessionChanged);
+      _watchedSession = session;
+      _watchedSession?.addListener(_onSessionChanged);
+    }
+  }
+
+  @override
+  void dispose() {
+    _watchedSession?.removeListener(_onSessionChanged);
+    super.dispose();
+  }
+
+  void _onSessionChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadPrefs() async {
     final prefs = await AppPreferences.instance();
     if (!mounted) return;
-    setState(() => _onboardingDone = prefs.onboardingDone);
+    setState(() {
+      _onboardingDone = prefs.onboardingDone;
+      _prefsLoaded = true;
+    });
+  }
+
+  /// Splash chỉ tắt khi:
+  ///   1. Min duration (900ms) đã trôi qua VÀ
+  ///   2. (AppPreferences load + SessionState bootstrap xong) HOẶC max wait
+  ///      (2.5s) đã trôi qua như safety net.
+  /// Tránh race: trước đây splash tắt sau 1250ms cứng → nếu session bootstrap
+  /// chậm hơn → user logged-in vẫn bị đá về Login screen. Max wait handles
+  /// offline + test env nơi method channels không có platform mock.
+  bool get _ready {
+    if (!_minSplashElapsed) return false;
+    if (_maxSplashElapsed) return true; // safety net
+    if (!_prefsLoaded) return false;
+    final session = _watchedSession;
+    if (session != null && session.isBooting) return false;
+    return true;
   }
 
   Widget _routeTarget() {
-    final session = SessionScope.maybeOf(context, listen: false);
+    final session = _watchedSession;
     // Đã login → vào thẳng shell, skip onboarding
     if (session != null && session.isLoggedIn) {
       return RelaxShell(
         themeMode: widget.themeMode,
         onThemeChanged: widget.onThemeChanged ?? (_) {},
         onLanguageChanged: widget.onLanguageChanged ?? (_) {},
+        onAccentChanged: widget.onAccentChanged,
       );
     }
     // Đã qua onboarding → login
@@ -73,16 +126,13 @@ class _SplashGateState extends State<SplashGate> {
     return widget.child;
   }
 
-  /// Long-press splash 3 giây → force logout + reset onboarding flag.
   @override
   Widget build(BuildContext context) {
-    // DEV banner đã được wire ở app_root.dart (visible mọi screen)
-    // SplashGate chỉ làm route — không cần banner riêng nữa
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 420),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
-      child: _showSplash ? const SplashScreen() : _routeTarget(),
+      child: _ready ? _routeTarget() : const SplashScreen(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/preferences.dart';
 import '../core/session.dart';
@@ -23,6 +24,7 @@ class RelaxApp extends StatefulWidget {
 class _RelaxAppState extends State<RelaxApp> {
   ThemeMode _themeMode = ThemeMode.dark;
   AppLanguage _language = AppLanguage.vi;
+  Color _accent = RelaxTheme.purple;
   final SessionState _session = SessionState();
   AppPreferences? _prefs;
 
@@ -41,6 +43,7 @@ class _RelaxAppState extends State<RelaxApp> {
       _prefs = p;
       _themeMode = p.themeMode;
       _language = p.language;
+      _accent = Color(p.accentColorValue);
     });
   }
 
@@ -52,6 +55,12 @@ class _RelaxAppState extends State<RelaxApp> {
   Future<void> _setLanguage(AppLanguage language) async {
     setState(() => _language = language);
     await _prefs?.setLanguage(language);
+  }
+
+  /// Customs theme save → live-apply không cần restart.
+  Future<void> _setAccent(Color color) async {
+    setState(() => _accent = color);
+    await _prefs?.setAccentColorValue(color.toARGB32());
   }
 
   @override
@@ -68,8 +77,17 @@ class _RelaxAppState extends State<RelaxApp> {
         title: 'Thi Ai Chill',
         debugShowCheckedModeBanner: false,
         themeMode: _themeMode,
-        theme: RelaxTheme.light(),
-        darkTheme: RelaxTheme.dark(),
+        theme: RelaxTheme.light(accent: _accent),
+        darkTheme: RelaxTheme.dark(accent: _accent),
+        locale: _language == AppLanguage.vi
+            ? const Locale('vi')
+            : const Locale('en'),
+        supportedLocales: const [Locale('vi'), Locale('en')],
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
         builder: (context, child) {
           return ListenableBuilder(
             listenable: _session,
@@ -97,6 +115,7 @@ class _RelaxAppState extends State<RelaxApp> {
           themeMode: _themeMode,
           onThemeChanged: _setThemeMode,
           onLanguageChanged: _setLanguage,
+          onAccentChanged: _setAccent,
           child: OnboardingScreen(
             themeMode: _themeMode,
             onThemeChanged: _setThemeMode,
