@@ -76,6 +76,13 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
   }
 
   Future<void> _play(BackendResource resource) async {
+    // Stop track cũ trước khi đặt source mới → tránh overlap khi user
+    // tap nhanh 2 track liên tiếp. setAudioSource sẽ tự cancel nhưng
+    // explicit stop() đảm bảo audio session reset clean.
+    if (_player.playing) {
+      await _player.stop();
+    }
+    if (!mounted) return;
     setState(() {
       _selected = resource;
       _error = null;
@@ -746,15 +753,14 @@ class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
                   : Icons.save_rounded,
               label: _saving ? 'Đang lưu...' : 'Lưu nhật ký',
               filled: true,
-              onPressed: _saving ? () {} : () => _save(),
+              onPressed: _saving ? null : () => _save(),
             ),
             const SizedBox(height: 8),
             PixelButton(
               icon: Icons.flag_rounded,
               label: 'Hoàn tất phiên',
               onPressed: _saving
-                  ? () {}
-                  : () {
+                  ? null : () {
                       Navigator.of(context).pop();
                       if (widget.onFinish != null) {
                         widget.onFinish!();
@@ -1011,13 +1017,13 @@ class _FeedbackSheetState extends State<_FeedbackSheet> {
             icon: Icons.arrow_forward_rounded,
             label: _submitting ? 'Đang gửi…' : 'Continue',
             filled: true,
-            onPressed: _submitting ? () {} : () => _submit(),
+            onPressed: _submitting ? null : () => _submit(),
           ),
           const SizedBox(height: 8),
           PixelButton(
             icon: Icons.work_outline_rounded,
             label: "I'm fine, I'm going back to my work",
-            onPressed: _submitting ? () {} : () => Navigator.of(context).pop(),
+            onPressed: _submitting ? null : () => Navigator.of(context).pop(),
           ),
         ],
       ),

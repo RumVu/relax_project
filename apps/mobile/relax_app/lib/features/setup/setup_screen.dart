@@ -222,12 +222,43 @@ class _SetupScreenState extends State<SetupScreen> {
   Future<void> _requestNotifications() async {
     setState(() => _notificationRequesting = true);
     try {
+      final wasEnabled =
+          await NotificationService.instance.areNotificationsEnabled();
       final device = await _deviceService.requestNotifications();
       if (!mounted) return;
       setState(() => _device = device);
+      // Nếu user denied permanently (request không pop dialog → status
+      // không đổi), guide ra Settings thay vì spam request.
+      final isEnabled =
+          await NotificationService.instance.areNotificationsEnabled();
+      if (!mounted) return;
+      if (!isEnabled && !wasEnabled) {
+        _showSettingsGuide();
+      }
     } finally {
       if (mounted) setState(() => _notificationRequesting = false);
     }
+  }
+
+  /// Hiện dialog hướng dẫn user ra Settings bật quyền noti — khi request
+  /// đã denied permanently nên system không pop dialog nữa.
+  void _showSettingsGuide() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Bật thông báo trong Cài đặt'),
+        content: const Text(
+          'Bạn đã từ chối quyền thông báo. Để app có thể nhắc bạn nghỉ ngơi, '
+          'mở Cài đặt → Thi Ai Chill → Thông báo → bật lên nha 💜',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Để sau'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _refreshAll() async {
@@ -647,9 +678,25 @@ class _ProfileSheetState extends State<_ProfileSheet> {
   }
 
   Future<void> _save() async {
-    setState(() => _saving = true);
     final yearStr = _yearCtrl.text.trim();
-    final year = int.tryParse(yearStr);
+    int? year;
+    if (yearStr.isNotEmpty) {
+      final parsed = int.tryParse(yearStr);
+      final currentYear = DateTime.now().year;
+      // Validate: 1900 → year hiện tại. Tránh user nhập 9999 hoặc 12.
+      if (parsed == null || parsed < 1900 || parsed > currentYear) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Năm sinh phải từ 1900 đến $currentYear nha ~',
+            ),
+          ),
+        );
+        return;
+      }
+      year = parsed;
+    }
+    setState(() => _saving = true);
     final avatarChanged = _avatarUrl != widget.user?['avatar'];
     await widget.onSave(
       name: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
@@ -787,7 +834,7 @@ class _ProfileSheetState extends State<_ProfileSheet> {
               icon: _saving ? Icons.hourglass_top_rounded : Icons.save_rounded,
               label: _saving ? 'Đang lưu...' : 'Lưu hồ sơ',
               filled: true,
-              onPressed: _saving ? () {} : _save,
+              onPressed: _saving ? null : _save,
             ),
           ],
         ),
@@ -1339,9 +1386,18 @@ class _NotificationBody extends StatelessWidget {
             Expanded(
               child: _ExpandChip(
                 onTap: () async {
+                  // Initial time = giờ đang chọn (không hardcode 21:00) để
+                  // user mở picker đã thấy giá trị hiện tại.
+                  final parts = selected.split(':');
+                  final initial = parts.length == 2
+                      ? TimeOfDay(
+                          hour: int.tryParse(parts[0]) ?? 21,
+                          minute: int.tryParse(parts[1]) ?? 0,
+                        )
+                      : const TimeOfDay(hour: 21, minute: 0);
                   final picked = await showTimePicker(
                     context: context,
-                    initialTime: const TimeOfDay(hour: 21, minute: 0),
+                    initialTime: initial,
                   );
                   if (picked == null) return;
                   onSelected(
@@ -1476,7 +1532,7 @@ class _DevicePermissionBody extends StatelessWidget {
                 icon: Icons.notifications_active_outlined,
                 label: requesting ? 'Đang xin quyền...' : 'Cho phép thông báo',
                 filled: !allowed,
-                onPressed: requesting ? () {} : onRequestNotifications,
+                onPressed: requesting ? null : onRequestNotifications,
               ),
             ),
           ],

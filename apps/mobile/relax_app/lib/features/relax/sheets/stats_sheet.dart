@@ -213,14 +213,47 @@ class _StatsSheetState extends State<_StatsSheet> {
     final todayLabel =
         '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
 
-    // Check if we have real data or just empty state
+    // 3 trạng thái rõ ràng:
+    //   - loading: spinner
+    //   - chưa login: "Đăng nhập để xem hành trình"
+    //   - đã login + chưa có data: "Hãy bắt đầu phiên đầu tiên"
+    //   - có data: dashboard đầy đủ
     final hasData = _favorites.isNotEmpty || _recent.isNotEmpty;
+    final notLoggedIn = session == null || !session.isLoggedIn;
 
     return SizedBox(
       height: height,
       child: _loading
           ? const Center(child: CircularProgressIndicator())
-          : !hasData && (session == null || !session.isLoggedIn)
+          : notLoggedIn
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_outline_rounded,
+                      size: 56,
+                      color: RelaxTheme.lavender.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Đăng nhập để theo dõi hành trình',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Streak, lịch sử mood, phiên thư giãn... sẽ hiển thị ở đây sau khi bạn đăng nhập ✦',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : !hasData
           ? Center(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -234,12 +267,13 @@ class _StatsSheetState extends State<_StatsSheet> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Chưa có dữ liệu',
+                      'Hành trình của bạn sẽ hiện ở đây ✦',
                       style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Hãy bắt đầu phiên thư giãn đầu tiên để Thi Ái theo dõi tiến độ của bạn nha ✦',
+                      'Hãy bắt đầu phiên thư giãn đầu tiên — chỉ 2 phút, Thi Ái sẽ theo dõi tiến độ giúp bạn 💜',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),

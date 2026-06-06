@@ -39,13 +39,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  Future<void> _markOnboardingDone() async {
-    final prefs = await AppPreferences.instance();
-    await prefs.setOnboardingDone(true);
+  /// Fire-and-forget — không block navigation. Race window rất nhỏ (vài ms
+  /// SharedPreferences write) và flag chỉ được check trên cold start, nên
+  /// chấp nhận được. Nếu user logout ngay sau khi push login (race < 100ms),
+  /// flag có thể chưa flush → next cold boot vẫn vào onboarding (acceptable).
+  void _markOnboardingDone() {
+    AppPreferences.instance().then((p) => p.setOnboardingDone(true));
   }
 
   void _goLogin() {
-    _markOnboardingDone(); // fire-and-forget
+    _markOnboardingDone();
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => LoginScreen(

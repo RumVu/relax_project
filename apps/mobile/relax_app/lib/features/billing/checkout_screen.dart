@@ -37,14 +37,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           },
           onNavigationRequest: (request) {
             final u = request.url.toLowerCase();
-            // SePay return URL convention: ?status=success|cancel|error
-            if (u.contains('status=success') ||
-                u.contains('/billing?success') ||
-                u.contains('payment-success')) {
+            // Mở rộng pattern detection — SePay/Stripe/PayPal đều có thể
+            // dùng các convention khác nhau. Match càng nhiều tốt cho user.
+            final successPatterns = [
+              'status=success',
+              'status=succeeded',
+              'status=paid',
+              'status=completed',
+              '/billing?success',
+              '/billing/success',
+              'payment-success',
+              'payment_success',
+              'transaction=success',
+              '/success?',
+            ];
+            final cancelPatterns = [
+              'status=cancel',
+              'status=cancelled',
+              'status=canceled',
+              'status=failed',
+              'payment-cancel',
+              'payment_cancel',
+              '/cancel?',
+              '/failed?',
+            ];
+            if (successPatterns.any(u.contains)) {
               _onSuccess();
               return NavigationDecision.prevent;
             }
-            if (u.contains('status=cancel') || u.contains('payment-cancel')) {
+            if (cancelPatterns.any(u.contains)) {
               _onCancel();
               return NavigationDecision.prevent;
             }
@@ -63,6 +84,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Future<void> _onSuccess() async {
     if (_confirming) return;
     setState(() => _confirming = true);
+    bool confirmOk = false;
     try {
       final sess = context.sessionOrNull;
       if (sess != null && sess.isLoggedIn) {
@@ -70,10 +92,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           accessToken: sess.accessToken!,
           paymentId: widget.session.paymentId,
         );
+        confirmOk = true;
       }
-    } catch (_) {/* swallow — webhook sẽ confirm sau */}
+    } catch (e) {
+      // Trước đây silent — nếu webhook fail thì payment confirmed ở
+      // gateway nhưng backend không biết → user mất tiền không có gói.
+      // Log + show toast warn user contact support; vẫn pop true vì
+      // payment thực sự success ở gateway.
+      debugPrint('[checkout] confirmPayment failed: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Đã thanh toán nhưng kích hoạt gói chậm. '
+              'Liên hệ hỗ trợ nếu sau 10 phút chưa thấy gói mới.',
+            ),
+            duration: Duration(seconds: 6),
+          ),
+        );
+      }
+    }
     if (!mounted) return;
-    Navigator.of(context).pop(true); // true = success
+    Navigator.of(context).pop(confirmOk); // true = backend confirmed
   }
 
   void _onCancel() {

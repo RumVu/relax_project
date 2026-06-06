@@ -26,6 +26,32 @@ const _googleClientId = String.fromEnvironment(
 );
 bool get _googleEnabled => _googleClientId.isNotEmpty;
 
+/// Regex email RFC 5322 simplified — bắt được "a@", "@b", " @ " mà
+/// `contains('@')` cho qua.
+final _emailRegex = RegExp(r"^[\w.\-+]+@[\w\-]+(\.[\w\-]+)+$");
+
+/// Parse raw exception → message thân thiện. Tránh hiện
+/// "Exception: 401 from /auth/login\nstack: ..." cho user.
+String _friendlyAuthError(Object e) {
+  final raw = e.toString();
+  if (raw.contains('Unauthorized') || raw.contains('401')) {
+    return 'Email hoặc mật khẩu chưa đúng. Thử lại nha 💜';
+  }
+  if (raw.contains('SocketException') ||
+      raw.contains('TimeoutException') ||
+      raw.contains('Connection')) {
+    return 'Mạng yếu quá — kiểm tra kết nối rồi thử lại nha ~';
+  }
+  if (raw.contains('429') || raw.toLowerCase().contains('rate')) {
+    return 'Bạn thử hơi nhiều rồi, đợi 1 phút nha 🌿';
+  }
+  if (raw.contains('500') || raw.contains('502') || raw.contains('503')) {
+    return 'Server đang nghỉ một chút. Thử lại sau nha 🍃';
+  }
+  // Strip "Exception: " prefix nếu có
+  return raw.replaceFirst(RegExp(r'^Exception:\s*'), '');
+}
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     super.key,
@@ -105,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _navigateToShell();
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      setState(() => _error = _friendlyAuthError(e));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -145,9 +171,13 @@ class _LoginScreenState extends State<LoginScreen> {
       _navigateToShell();
     } catch (e) {
       if (!mounted) return;
-      final msg = e.toString();
-      if (!msg.contains('cancel') && !msg.contains('Cancel')) {
-        setState(() => _error = 'Google Sign-In thất bại: $msg');
+      // Case-insensitive check + bao gồm GIDCancellation iOS code
+      final msg = e.toString().toLowerCase();
+      final isCancel = msg.contains('cancel') ||
+          msg.contains('cancelled') ||
+          msg.contains('gidcancellation');
+      if (!isCancel) {
+        setState(() => _error = _friendlyAuthError(e));
       }
     } finally {
       if (mounted) setState(() => _googleSubmitting = false);
@@ -215,7 +245,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   validator: (v) {
                     final s = (v ?? '').trim();
                     if (s.isEmpty) return 'Nhập email nha';
-                    if (!s.contains('@')) return 'Email chưa đúng định dạng';
+                    if (!_emailRegex.hasMatch(s)) {
+                      return 'Email chưa đúng định dạng';
+                    }
                     return null;
                   },
                 ),
@@ -276,7 +308,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   icon: Icons.login_rounded,
                   label: _submitting ? 'Đang vào…' : 'Đăng nhập',
                   filled: true,
-                  onPressed: busy ? () {} : () => _submit(),
+                  // Khi busy: empty callback CỘNG opacity .5 để user thấy
+                  // button thực sự disabled (không spam-click được).
+                  onPressed: busy ? null : () => _submit(),
                 ),
                 if (_googleEnabled) ...[
                   const SizedBox(height: 10),
@@ -342,7 +376,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 PixelButton(
                   icon: Icons.person_add_alt_1_outlined,
                   label: 'Tạo tài khoản mới',
-                  onPressed: busy ? () {} : _goRegister,
+                  onPressed: busy ? null : _goRegister,
                 ),
               ],
             ),

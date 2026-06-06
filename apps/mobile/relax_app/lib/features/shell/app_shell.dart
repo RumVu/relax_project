@@ -280,15 +280,19 @@ class _RelaxShellState extends State<RelaxShell> {
 
   /// Push 1 JourneyScreen mới — wrap PracticeScreen trong hành trình 5 chương:
   /// Threshold → Whisper → Immersion → Reflection → Healing.
+  ///
+  /// Khi user chain next activity ở chapter Healing → pop journey hiện tại +
+  /// push journey MỚI (fresh state). Dùng UniqueKey để đảm bảo
+  /// JourneyScreen.State được tạo lại từ đầu, không leak _rating / _moodBefore
+  /// / _noteCtrl từ phiên trước.
   void _pushPracticeFor(Activity activity) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => JourneyScreen(
+          key: UniqueKey(),
           activity: activity,
           allActivities: _allActivities,
           onChainNext: (next) {
-            // Khi user chọn next activity ở chapter Healing:
-            // pop journey hiện tại + push journey mới cho activity kế.
             Navigator.of(context).pop();
             _pushPracticeFor(next);
           },
@@ -313,6 +317,7 @@ class _RelaxShellState extends State<RelaxShell> {
         onMethodSelected: _openPractice,
         moodHistory: _moodHistory,
         moodHistoryLoading: _moodHistoryLoading,
+        onMoodLogged: _loadMoodHistory, // re-fetch ngay sau khi log mood
       ),
       RelaxScreen(
         backendActivities: _activities,
@@ -322,7 +327,7 @@ class _RelaxShellState extends State<RelaxShell> {
         onBack: () => setState(() => _tab = 0),
         onStartJourney: _pushPracticeFor,
       ),
-      const ChallengeScreen(),
+      ChallengeScreen(onJumpToHome: () => setState(() => _tab = 0)),
       SetupScreen(
         themeMode: widget.themeMode,
         onThemeChanged: widget.onThemeChanged,

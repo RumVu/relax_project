@@ -9,6 +9,26 @@ import '../../shared/widgets/pixel/pixel_button.dart';
 import '../shell/app_shell.dart';
 import 'login_screen.dart';
 
+final _registerEmailRegex = RegExp(r"^[\w.\-+]+@[\w\-]+(\.[\w\-]+)+$");
+
+String _registerFriendlyError(Object e) {
+  final raw = e.toString();
+  if (raw.contains('409') ||
+      raw.toLowerCase().contains('exists') ||
+      raw.toLowerCase().contains('đã tồn tại')) {
+    return 'Email này đã được dùng rồi — thử đăng nhập nha 💜';
+  }
+  if (raw.contains('SocketException') ||
+      raw.contains('TimeoutException') ||
+      raw.contains('Connection')) {
+    return 'Mạng yếu quá — kiểm tra kết nối rồi thử lại nha ~';
+  }
+  if (raw.contains('500') || raw.contains('502') || raw.contains('503')) {
+    return 'Server đang nghỉ một chút. Thử lại sau nha 🍃';
+  }
+  return raw.replaceFirst(RegExp(r'^Exception:\s*'), '');
+}
+
 /// Form đăng kí — name + email + password. Sau khi tạo OK, app tự login
 /// luôn (backend trả access + refresh trong cùng response) rồi nhảy vào
 /// [RelaxShell].
@@ -84,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = e.toString());
+      setState(() => _error = _registerFriendlyError(e));
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
@@ -156,7 +176,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   validator: (v) {
                     final s = (v ?? '').trim();
                     if (s.isEmpty) return 'Nhập email nha';
-                    if (!s.contains('@')) return 'Email chưa đúng định dạng';
+                    if (!_registerEmailRegex.hasMatch(s)) {
+                      return 'Email chưa đúng định dạng';
+                    }
                     return null;
                   },
                 ),
@@ -198,13 +220,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   icon: Icons.person_add_alt_1_rounded,
                   label: _submitting ? 'Đang tạo…' : 'Đăng kí',
                   filled: true,
-                  onPressed: _submitting ? () {} : () => _submit(),
+                  onPressed: _submitting ? null : () => _submit(),
                 ),
                 const SizedBox(height: 8),
                 PixelButton(
                   icon: Icons.login_rounded,
                   label: 'Mình đã có tài khoản',
-                  onPressed: _submitting ? () {} : _goLogin,
+                  onPressed: _submitting ? null : _goLogin,
                 ),
               ],
             ),

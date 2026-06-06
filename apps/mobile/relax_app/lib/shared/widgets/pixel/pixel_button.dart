@@ -12,22 +12,31 @@ class PixelButton extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final VoidCallback onPressed;
+
+  /// Null → button thực sự disabled (không nhận tap). Trước đây callers pass
+  /// `() {}` để "fake disable" → user spam click vẫn fire → multiple requests.
+  final VoidCallback? onPressed;
+
   final bool filled;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final accent = theme.colorScheme.primary;
     return SizedBox(
       width: double.infinity,
       height: 54,
       child: FilledButton.icon(
         style: FilledButton.styleFrom(
-          backgroundColor: filled ? RelaxTheme.purple : Colors.transparent,
-          foregroundColor: filled ? Colors.white : RelaxTheme.purple,
+          backgroundColor: filled ? accent : Colors.transparent,
+          foregroundColor: filled ? Colors.white : accent,
+          disabledBackgroundColor:
+              filled ? accent.withValues(alpha: .35) : Colors.transparent,
+          disabledForegroundColor: context.relax.muted,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
             side: BorderSide(
-              color: filled ? RelaxTheme.purple : context.relax.border,
+              color: filled ? accent : context.relax.border,
               width: 1.2,
             ),
           ),

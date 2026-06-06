@@ -123,9 +123,13 @@ class _JourneyScreenState extends State<JourneyScreen> {
       }
     } catch (e) {
       if (!mounted) return;
+      final raw = e.toString();
+      final friendly = raw.contains('Socket') || raw.contains('Timeout')
+          ? 'Mạng yếu quá — phản hồi của bạn được lưu cục bộ rồi nha 💜'
+          : raw.replaceFirst(RegExp(r'^Exception:\s*'), '');
       setState(() {
         _submitting = false;
-        _error = e.toString();
+        _error = friendly;
       });
       return;
     }
@@ -675,7 +679,7 @@ class _ReflectionChapter extends StatelessWidget {
                   : Icons.arrow_forward_rounded,
               label: submitting ? 'Đang lưu...' : 'Tiếp tục',
               filled: true,
-              onPressed: submitting ? () {} : onSubmit,
+              onPressed: submitting ? null : onSubmit,
             ),
           ],
         ),

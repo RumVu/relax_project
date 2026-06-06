@@ -57,9 +57,30 @@ class NotificationService {
       final android = _plugin.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
       final ok = await android?.requestNotificationsPermission();
-      return ok ?? true;
+      // SECURITY: default false (denied) — user phải explicit cho phép.
+      // Trước đây default true → app coi như có quyền dù plugin chưa khởi tạo
+      // → schedule fail silent + user không nhận noti.
+      return ok ?? false;
     }
-    return true;
+    return false;
+  }
+
+  /// Check status (không pop request) — dùng để biết permanently denied
+  /// → show guide ra Settings thay vì spam request.
+  Future<bool> areNotificationsEnabled() async {
+    await _ensureInit();
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      return await android?.areNotificationsEnabled() ?? false;
+    }
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final ios = _plugin.resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin>();
+      final settings = await ios?.checkPermissions();
+      return settings?.isAlertEnabled ?? false;
+    }
+    return false;
   }
 
   /// Schedule 1 reminder lặp lại hàng ngày tại [time] ("HH:mm").

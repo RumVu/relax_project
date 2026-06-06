@@ -28,6 +28,7 @@ class HomeScreen extends StatefulWidget {
     this.onMethodSelected,
     this.moodHistory = const [],
     this.moodHistoryLoading = false,
+    this.onMoodLogged,
   });
 
   final MobileContentSnapshot content;
@@ -44,6 +45,10 @@ class HomeScreen extends StatefulWidget {
 
   /// true khi đang fetch history lần đầu.
   final bool moodHistoryLoading;
+
+  /// Khi user log mood mới từ Home → shell sẽ refetch history → Stats sheet
+  /// & chart 7-day sync ngay không cần restart app hay reopen tab.
+  final VoidCallback? onMoodLogged;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -134,6 +139,9 @@ class _HomeScreenState extends State<HomeScreen> {
         _activeMoodCode = code;
         _pendingMoodCode = null;
       });
+      // Báo shell refetch history → chart 7-ngày + Stats sheet + Setup stats
+      // đều cập nhật ngay khi user log thêm mood.
+      widget.onMoodLogged?.call();
       _toast('Đã ghi: ${mood.label} ✦');
     } catch (e) {
       if (!mounted) return;

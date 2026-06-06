@@ -34,7 +34,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       _error = null;
     });
     try {
-      await AuthService().forgotPassword(email: _emailCtrl.text);
+      await AuthService().forgotPassword(email: _emailCtrl.text.trim());
       if (!mounted) return;
       setState(() {
         _submitting = false;
@@ -105,7 +105,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             validator: (v) {
               final s = (v ?? '').trim();
               if (s.isEmpty) return 'Nhập email nha';
-              if (!s.contains('@')) return 'Email chưa đúng định dạng';
+              if (!RegExp(r"^[\w.\-+]+@[\w\-]+(\.[\w\-]+)+$").hasMatch(s)) {
+                return 'Email chưa đúng định dạng';
+              }
               return null;
             },
           ),
@@ -126,7 +128,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 : Icons.email_outlined,
             label: _submitting ? 'Đang gửi...' : 'Gửi email đặt lại',
             filled: true,
-            onPressed: _submitting ? () {} : () => _submit(),
+            onPressed: _submitting ? null : () => _submit(),
           ),
         ],
       ),
