@@ -48,14 +48,19 @@ class MoodLineChart extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.show_chart_rounded,
-                color: context.relax.muted.withValues(alpha: .4), size: 26),
+            Icon(
+              Icons.show_chart_rounded,
+              color: context.relax.muted.withValues(alpha: .4),
+              size: 26,
+            ),
             const SizedBox(height: 6),
             Text(
               'Chưa có dữ liệu — bắt đầu check-in cảm xúc nhé ✦',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: context.relax.muted, fontSize: 11),
+                color: context.relax.muted,
+                fontSize: 11,
+              ),
             ),
           ],
         ),
@@ -80,9 +85,15 @@ class MoodLineChart extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: dayLabels
-                .map((l) => Text(l,
+                .map(
+                  (l) => Text(
+                    l,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 10, color: context.relax.muted)))
+                      fontSize: 10,
+                      color: context.relax.muted,
+                    ),
+                  ),
+                )
                 .toList(),
           ),
         ],
@@ -92,8 +103,11 @@ class MoodLineChart extends StatelessWidget {
 }
 
 class MoodLinePainter extends CustomPainter {
-  const MoodLinePainter(
-      {required this.dark, required this.border, required this.values});
+  const MoodLinePainter({
+    required this.dark,
+    required this.border,
+    required this.values,
+  });
 
   final bool dark;
   final Color border;
@@ -121,7 +135,9 @@ class MoodLinePainter extends CustomPainter {
 
     // gradient fill
     final fill = Path()..moveTo(pts.first.dx, size.height);
-    for (final p in pts) fill.lineTo(p.dx, p.dy);
+    for (final p in pts) {
+      fill.lineTo(p.dx, p.dy);
+    }
     fill.lineTo(pts.last.dx, size.height);
     fill.close();
     canvas.drawPath(
@@ -141,7 +157,9 @@ class MoodLinePainter extends CustomPainter {
     final line = Path()..moveTo(pts.first.dx, pts.first.dy);
     for (var i = 1; i < pts.length; i++) {
       final mid = Offset(
-          (pts[i - 1].dx + pts[i].dx) / 2, (pts[i - 1].dy + pts[i].dy) / 2);
+        (pts[i - 1].dx + pts[i].dx) / 2,
+        (pts[i - 1].dy + pts[i].dy) / 2,
+      );
       line.quadraticBezierTo(pts[i - 1].dx, pts[i - 1].dy, mid.dx, mid.dy);
     }
     line.lineTo(pts.last.dx, pts.last.dy);

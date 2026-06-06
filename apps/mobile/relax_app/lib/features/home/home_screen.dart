@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../app/app_copy.dart';
 import '../../app/theme.dart';
 import '../../core/session.dart';
 import '../../data/models/app_models.dart';
@@ -27,7 +26,7 @@ class HomeScreen extends StatefulWidget {
     required this.onRefreshContent,
     this.session,
     this.moodService,
-    this.onGoToRelax,
+    this.onMethodSelected,
     this.moodHistory = const [],
     this.moodHistoryLoading = false,
   });
@@ -39,7 +38,7 @@ class HomeScreen extends StatefulWidget {
 
   final SessionState? session;
   final MoodService? moodService;
-  final VoidCallback? onGoToRelax;
+  final ValueChanged<MethodOption>? onMethodSelected;
 
   /// Lịch sử mood check-in từ API — dùng để tính % và chart 7 ngày.
   final List<MoodCheckin> moodHistory;
@@ -97,7 +96,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final today = DateTime(now.year, now.month, now.day);
     final counts = List<int>.filled(7, 0);
     for (final c in history) {
-      final day = DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day);
+      final day = DateTime(
+        c.createdAt.year,
+        c.createdAt.month,
+        c.createdAt.day,
+      );
       final diff = today.difference(day).inDays;
       if (diff >= 0 && diff < 7) counts[6 - diff]++;
     }
@@ -149,13 +152,15 @@ class _HomeScreenState extends State<HomeScreen> {
     final isLoggedIn = session?.isLoggedIn == true;
 
     // Real % từ history — null khi đang load (chưa login thì luôn null)
-    final percents = (!isLoggedIn || histLoading) ? null : _realPercents(history);
+    final percents = (!isLoggedIn || histLoading)
+        ? null
+        : _realPercents(history);
     // Real 7-day chart data — null khi load, [] khi empty
     final chartData = !isLoggedIn
         ? <double>[]
         : histLoading
-            ? null
-            : _chartData(history);
+        ? null
+        : _chartData(history);
 
     final backendMoods = widget.content.moodOptions;
     final moods = backendMoods.isEmpty
@@ -167,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
               .toList(growable: false);
     // LUÔN dùng 4 phương thức cố định từ copy. Backend chỉ trả 3
     // recommendedActions nên không dùng để dựng grid 2×2 này.
-    final visibleMoods = moods.take(6).toList(growable: false);
+    final visibleMoods = moods.take(9).toList(growable: false);
     final visibleMethods = copy.methods.take(4).toList(growable: false);
     final speech =
         widget.content.companionMessage?.content ??
@@ -180,13 +185,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final subtitle = wx != null
         ? '${wx.description} · ${wx.temperatureC.toStringAsFixed(0)}°C'
         : !_weatherTried
-            ? 'Đang xem thời tiết...'
-            : (context.dark ? copy.homeNightSubtitle : copy.homeDaySubtitle);
+        ? 'Đang xem thời tiết...'
+        : (context.dark ? copy.homeNightSubtitle : copy.homeDaySubtitle);
     final wxIcon = wx == null
         ? Icons.wb_sunny_outlined
         : wx.isDay
-            ? Icons.wb_sunny_outlined
-            : Icons.nights_stay_outlined;
+        ? Icons.wb_sunny_outlined
+        : Icons.nights_stay_outlined;
 
     return AppScroll(
       child: Column(
@@ -203,7 +208,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                SpeechBubble(text: speech),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: SpeechBubble(text: speech)),
+                    const SizedBox(width: 8),
+                    IconButton.filledTonal(
+                      tooltip: 'Đổi lời nhắn',
+                      onPressed: widget.onRefreshContent,
+                      icon: const Icon(Icons.refresh_rounded),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 const PixelCatScene(scene: CatScene.wave, height: 188),
                 if (widget.loadingContent || widget.contentError != null) ...[
@@ -229,7 +245,9 @@ class _HomeScreenState extends State<HomeScreen> {
             Row(
               children: List.generate(3, (col) {
                 final i = row * 3 + col;
-                if (i >= visibleMoods.length) return const Expanded(child: SizedBox());
+                if (i >= visibleMoods.length) {
+                  return const Expanded(child: SizedBox());
+                }
                 final mood = visibleMoods[i];
                 final code = mood.code;
                 final isActive = code != null && code == _activeMoodCode;
@@ -258,17 +276,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: Icons.bar_chart_rounded,
                 ),
                 const SizedBox(height: 8),
-                MoodLineChart(
-                  compact: true,
-                  data: chartData,
-                ),
+                MoodLineChart(compact: true, data: chartData),
                 const SizedBox(height: 12),
-                ...visibleMoods.map((mood) => MoodProgress(
-                      mood: mood,
-                      realPercent: percents == null
-                          ? null  // loading
-                          : percents[mood.code ?? ''] ?? 0,
-                    )),
+                ...visibleMoods.map(
+                  (mood) => MoodProgress(
+                    mood: mood,
+                    realPercent: percents == null
+                        ? null // loading
+                        : percents[mood.code ?? ''] ?? 0,
+                  ),
+                ),
               ],
             ),
           ),
@@ -290,7 +307,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: MethodChip(
                           method: visibleMethods[i],
-                          onTap: widget.onGoToRelax,
+                          onTap: () =>
+                              widget.onMethodSelected?.call(visibleMethods[i]),
                         ),
                       ),
                     ],
@@ -314,8 +332,8 @@ class _SoftSyncLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = loading
-        ? 'Đang nạp nội dung từ backend...'
-        : 'Backend chưa sẵn sàng, đang dùng nội dung mẫu.';
+        ? 'Đang làm mới không gian của bạn...'
+        : 'Chưa lấy được dữ liệu mới. Chạm để thử lại.';
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onRefresh,

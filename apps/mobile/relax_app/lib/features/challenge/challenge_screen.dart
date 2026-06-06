@@ -35,8 +35,8 @@ class ChallengeScreen extends StatelessWidget {
                 Text(
                   'Sắp ra mắt ✦',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
                 const SizedBox(height: 10),
                 Text(
@@ -66,10 +66,10 @@ class ChallengeScreen extends StatelessWidget {
                       Text(
                         'Xem thống kê ở Setup',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: RelaxTheme.lavender,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 12,
-                            ),
+                          color: RelaxTheme.lavender,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                   ),

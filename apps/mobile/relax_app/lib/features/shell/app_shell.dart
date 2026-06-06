@@ -66,30 +66,45 @@ class _RelaxShellState extends State<RelaxShell> {
   // ── Loaders ───────────────────────────────────────────────────────────────
 
   Future<void> _loadCatalog() async {
-    setState(() { _catalogLoading = true; _catalogError = null; });
+    setState(() {
+      _catalogLoading = true;
+      _catalogError = null;
+    });
     try {
       final acts = await _catalogRepo.fetchActivities();
       if (!mounted) return;
-      setState(() { _activities = acts; _catalogLoading = false; });
+      setState(() {
+        _activities = acts;
+        _catalogLoading = false;
+      });
     } catch (e) {
       if (!mounted) return;
-      setState(() { _catalogLoading = false; _catalogError = e.toString(); });
+      setState(() {
+        _catalogLoading = false;
+        _catalogError = e.toString();
+      });
     }
   }
 
   Future<void> _loadContent() async {
-    setState(() { _contentLoading = true; _contentError = null; });
+    setState(() {
+      _contentLoading = true;
+      _contentError = null;
+    });
     try {
       final snap = await _contentRepo.fetchSnapshot();
       if (!mounted) return;
       setState(() {
         _content = snap;
         _contentLoading = false;
-        _contentError = snap.hasData ? null : 'Backend chưa trả dữ liệu.';
+        _contentError = snap.hasData ? null : 'Chưa lấy được dữ liệu mới.';
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() { _contentLoading = false; _contentError = e.toString(); });
+      setState(() {
+        _contentLoading = false;
+        _contentError = e.toString();
+      });
     }
   }
 
@@ -103,7 +118,10 @@ class _RelaxShellState extends State<RelaxShell> {
         limit: 90, // ~3 tháng đủ để tính streak và chart 7 ngày
       );
       if (!mounted) return;
-      setState(() { _moodHistory = history; _moodHistoryLoading = false; });
+      setState(() {
+        _moodHistory = history;
+        _moodHistoryLoading = false;
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() => _moodHistoryLoading = false);
@@ -129,7 +147,7 @@ class _RelaxShellState extends State<RelaxShell> {
         contentError: _contentError,
         onRefreshContent: _refresh,
         session: session,
-        onGoToRelax: () => setState(() => _tab = 1),
+        onMethodSelected: (_) => setState(() => _tab = 1),
         moodHistory: _moodHistory,
         moodHistoryLoading: _moodHistoryLoading,
       ),
@@ -138,6 +156,7 @@ class _RelaxShellState extends State<RelaxShell> {
         loadingCatalog: _catalogLoading,
         catalogError: _catalogError,
         onRefreshCatalog: _refresh,
+        onBack: () => setState(() => _tab = 0),
       ),
       const ChallengeScreen(),
       SetupScreen(
@@ -153,7 +172,9 @@ class _RelaxShellState extends State<RelaxShell> {
     ];
 
     return Scaffold(
-      body: SafeArea(child: IndexedStack(index: _tab, children: pages)),
+      body: SafeArea(
+        child: IndexedStack(index: _tab, children: pages),
+      ),
       bottomNavigationBar: PixelBottomNav(
         selectedIndex: _tab,
         onSelected: (index) => setState(() => _tab = index),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../app/app_copy.dart';
@@ -19,7 +20,8 @@ import 'register_screen.dart';
 final _gsi = GoogleSignIn.instance;
 const _googleClientId = String.fromEnvironment(
   'GOOGLE_CLIENT_ID',
-  defaultValue: '',
+  defaultValue:
+      '884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com',
 );
 bool get _googleEnabled => _googleClientId.isNotEmpty;
 
@@ -62,17 +64,15 @@ class _LoginScreenState extends State<LoginScreen> {
   void _navigateToShell() {
     Navigator.of(context).pushReplacement(
       PageRouteBuilder(
-        pageBuilder: (_, animation, __) => RelaxShell(
+        pageBuilder: (context, animation, secondaryAnimation) => RelaxShell(
           themeMode: widget.themeMode,
           onThemeChanged: widget.onThemeChanged,
           onLanguageChanged: widget.onLanguageChanged,
           catalogRepository: widget.catalogRepository,
           contentRepository: widget.contentRepository,
         ),
-        transitionsBuilder: (_, animation, __, child) => FadeTransition(
-          opacity: animation,
-          child: child,
-        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+            FadeTransition(opacity: animation, child: child),
         transitionDuration: const Duration(milliseconds: 300),
       ),
     );
@@ -80,7 +80,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() { _submitting = true; _error = null; });
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
     try {
       final auth = AuthService();
       final result = await auth.login(
@@ -106,13 +109,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInWithGoogle() async {
     if (!_googleEnabled) {
-      setState(() => _error =
-          'Google Sign-In chưa được cấu hình. Build với --dart-define=GOOGLE_CLIENT_ID=... và setup Info.plist URL scheme.');
+      setState(
+        () => _error =
+            'Google Sign-In chưa được cấu hình. Build với --dart-define=GOOGLE_CLIENT_ID=... và setup Info.plist URL scheme.',
+      );
       return;
     }
-    setState(() { _googleSubmitting = true; _error = null; });
+    setState(() {
+      _googleSubmitting = true;
+      _error = null;
+    });
     try {
-      await _gsi.initialize(clientId: _googleClientId);
+      await _gsi.initialize(
+        clientId: kIsWeb ? _googleClientId : null,
+        serverClientId: _googleClientId,
+      );
       final account = await _gsi.authenticate();
       final idToken = account.authentication.idToken;
       if (idToken == null) throw Exception('Không lấy được Google ID token');
@@ -214,7 +225,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
                     suffixIcon: IconButton(
                       icon: Icon(
-                        _obscure ? Icons.visibility_rounded : Icons.visibility_off_rounded,
+                        _obscure
+                            ? Icons.visibility_rounded
+                            : Icons.visibility_off_rounded,
                       ),
                       onPressed: () => setState(() => _obscure = !_obscure),
                     ),
@@ -251,9 +264,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text(
                           'hoặc',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: context.relax.muted,
-                          ),
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: context.relax.muted),
                         ),
                       ),
                       Expanded(child: Divider(color: context.relax.border)),
@@ -293,9 +305,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             _googleSubmitting
                                 ? 'Đang kết nối Google...'
                                 : 'Đăng nhập với Google',
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: busy ? context.relax.muted : null,
-                            ),
+                            style: Theme.of(context).textTheme.labelLarge
+                                ?.copyWith(
+                                  color: busy ? context.relax.muted : null,
+                                ),
                           ),
                         ],
                       ),

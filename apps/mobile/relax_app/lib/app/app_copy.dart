@@ -90,10 +90,10 @@ class AppCopy {
   String get homeSpeech => en
       ? 'Feeling stressed? I am here for you, $_name.'
       : 'Stress quá rồi hả $_name?\nNói cho tôi nghe đi nè!';
-  String get moodPrompt =>
-      en ? 'How are you feeling today, $_name?' : '$_name đang cảm thấy thế nào?';
-  String get moodChartTitle =>
-      en ? 'Mood tracker' : 'Theo dõi cảm xúc';
+  String get moodPrompt => en
+      ? 'How are you feeling today, $_name?'
+      : '$_name đang cảm thấy thế nào?';
+  String get moodChartTitle => en ? 'Mood tracker' : 'Theo dõi cảm xúc';
   String get methodTitle =>
       en ? 'Methods that fit you' : 'Phương thức phù hợp cho $_name';
 
@@ -117,16 +117,24 @@ class AppCopy {
 
   List<MethodOption> get methods => en
       ? const [
-          MethodOption('Meditate', Icons.self_improvement_rounded),
-          MethodOption('Breathe', Icons.cloud_queue_rounded),
-          MethodOption('Journal', Icons.edit_note_rounded),
-          MethodOption('Music', Icons.headphones_rounded),
+          MethodOption(
+            'Meditate',
+            Icons.self_improvement_rounded,
+            type: 'MEDITATION',
+          ),
+          MethodOption('Breathe', Icons.cloud_queue_rounded, type: 'BREATHING'),
+          MethodOption('Journal', Icons.edit_note_rounded, type: 'JOURNAL'),
+          MethodOption('Music', Icons.headphones_rounded, type: 'MUSIC'),
         ]
       : const [
-          MethodOption('Thiền định', Icons.self_improvement_rounded),
-          MethodOption('Hít thở', Icons.cloud_queue_rounded),
-          MethodOption('Viết nhật kí', Icons.edit_note_rounded),
-          MethodOption('Nghe nhạc', Icons.headphones_rounded),
+          MethodOption(
+            'Thiền định',
+            Icons.self_improvement_rounded,
+            type: 'MEDITATION',
+          ),
+          MethodOption('Hít thở', Icons.cloud_queue_rounded, type: 'BREATHING'),
+          MethodOption('Viết nhật kí', Icons.edit_note_rounded, type: 'JOURNAL'),
+          MethodOption('Nghe nhạc', Icons.headphones_rounded, type: 'MUSIC'),
         ];
 
   List<NavItem> get navItems => en

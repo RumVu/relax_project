@@ -36,7 +36,8 @@ class WeatherSnapshot {
 
 /// Lấy thời tiết hiện tại từ vị trí thiết bị, dùng Open-Meteo (miễn phí, no API key).
 class WeatherService {
-  WeatherService({http.Client? httpClient}) : _http = httpClient ?? http.Client();
+  WeatherService({http.Client? httpClient})
+    : _http = httpClient ?? http.Client();
 
   final http.Client _http;
 

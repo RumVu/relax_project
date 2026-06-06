@@ -10,7 +10,7 @@ class MoodProgress extends StatelessWidget {
   const MoodProgress({
     super.key,
     required this.mood,
-    this.realPercent,   // null = loading, 0-100 = real data
+    this.realPercent, // null = loading, 0-100 = real data
   });
 
   final MoodOption mood;

@@ -64,12 +64,16 @@ class _StatsSheetState extends State<_StatsSheet> {
       sessions = await RelaxSessionService()
           .recent(accessToken: token, limit: 60)
           .timeout(const Duration(seconds: 8));
-    } catch (_) {/* ignore — empty stays empty */}
+    } catch (_) {
+      /* ignore — empty stays empty */
+    }
     try {
       checkins = await MoodService()
           .history(accessToken: token, limit: 90)
           .timeout(const Duration(seconds: 8));
-    } catch (_) {/* ignore */}
+    } catch (_) {
+      /* ignore */
+    }
 
     _compute(sessions, checkins);
     if (mounted) setState(() => _loading = false);
@@ -82,16 +86,22 @@ class _StatsSheetState extends State<_StatsSheet> {
     // ── Mood chart: 7 ngày từ checkin history ────────────────────────────
     final dayCounts = List<int>.filled(7, 0);
     for (final c in checkins) {
-      final day = DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day);
+      final day = DateTime(
+        c.createdAt.year,
+        c.createdAt.month,
+        c.createdAt.day,
+      );
       final diff = today.difference(day).inDays;
       if (diff >= 0 && diff < 7) dayCounts[6 - diff]++;
     }
     final maxDay = dayCounts.reduce((a, b) => a > b ? a : b);
     _moodChart
       ..clear()
-      ..addAll(maxDay == 0
-          ? List.filled(7, 0.0)
-          : dayCounts.map((c) => c / maxDay).toList());
+      ..addAll(
+        maxDay == 0
+            ? List.filled(7, 0.0)
+            : dayCounts.map((c) => c / maxDay).toList(),
+      );
 
     Duration total = Duration.zero;
     Duration todaySpent = Duration.zero;
@@ -211,46 +221,46 @@ class _StatsSheetState extends State<_StatsSheet> {
       child: _loading
           ? const Center(child: CircularProgressIndicator())
           : !hasData && (session == null || !session.isLoggedIn)
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.trending_up_rounded,
-                          size: 64,
-                          color: RelaxTheme.lavender.withOpacity(0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Chưa có dữ liệu',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Hãy bắt đầu phiên thư giãn đầu tiên để Thi Ái theo dõi tiến độ của bạn nha ✦',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.trending_up_rounded,
+                      size: 64,
+                      color: RelaxTheme.lavender.withValues(alpha: 0.5),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Chưa có dữ liệu',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Hãy bắt đầu phiên thư giãn đầu tiên để Thi Ái theo dõi tiến độ của bạn nha ✦',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          : Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+              child: ListView(
+                children: [
+                  Text(
+                    'THỐNG KÊ TÌNH TRẠNG TÂM TRẠNG',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: RelaxTheme.lavender,
+                      letterSpacing: 1.4,
                     ),
                   ),
-                )
-              : Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                  child: ListView(
-                    children: [
-                      Text(
-                        'THỐNG KÊ TÌNH TRẠNG TÂM TRẠNG',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: RelaxTheme.lavender,
-                          letterSpacing: 1.4,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
+                  const SizedBox(height: 14),
+                  Row(
                     children: [
                       Expanded(
                         child: _MetricChip(
@@ -362,9 +372,9 @@ class _StatsSheetState extends State<_StatsSheet> {
                         ],
                       ],
                     ),
-                  ],
-                ),
+                ],
               ),
+            ),
     );
   }
 
@@ -492,61 +502,6 @@ class _DayLabel extends StatelessWidget {
     text,
     style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 11),
   );
-}
-
-class _MoodChartPainter extends CustomPainter {
-  _MoodChartPainter({
-    required this.points,
-    required this.line,
-    required this.dot,
-    required this.grid,
-  });
-  final List<double> points; // 0..1
-  final Color line;
-  final Color dot;
-  final Color grid;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (points.isEmpty) return;
-    final paintGrid = Paint()
-      ..color = grid
-      ..strokeWidth = 1;
-    // 4 grid lines.
-    for (var i = 0; i < 5; i++) {
-      final y = size.height * (i / 4);
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paintGrid);
-    }
-    final paintLine = Paint()
-      ..color = line
-      ..strokeWidth = 2.4
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    final paintDot = Paint()..color = dot;
-
-    final path = Path();
-    final spacing = points.length <= 1 ? 0.0 : size.width / (points.length - 1);
-    for (var i = 0; i < points.length; i++) {
-      final x = spacing * i;
-      final y = size.height - points[i].clamp(0.0, 1.0) * size.height;
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-    }
-    canvas.drawPath(path, paintLine);
-    for (var i = 0; i < points.length; i++) {
-      final x = spacing * i;
-      final y = size.height - points[i].clamp(0.0, 1.0) * size.height;
-      canvas.drawCircle(Offset(x, y), 3.5, paintDot);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _MoodChartPainter old) =>
-      old.points != points || old.line != line || old.dot != dot;
 }
 
 class _FavoriteActivityRow {

@@ -61,9 +61,7 @@ class AuthService {
   /// Đăng nhập qua Google — gửi idToken lên backend /auth/google
   /// Backend verify với Google và trả về JWT access/refresh token.
   Future<AuthResult> googleLogin({required String idToken}) async {
-    final body = await _client.postJson('/auth/google', {
-      'idToken': idToken,
-    });
+    final body = await _client.postJson('/auth/google', {'idToken': idToken});
     return AuthResult.fromJson(_asMap(body));
   }
 

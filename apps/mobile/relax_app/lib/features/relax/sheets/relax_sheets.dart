@@ -1,5 +1,5 @@
-import '../../../../../core/session.dart';
 import 'dart:math' as math;
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import '../../../app/theme.dart';
@@ -16,9 +16,15 @@ void showPlayerSheet(BuildContext context, Activity activity) {
     context: context,
     useSafeArea: true,
     isScrollControlled: true,
-    showDragHandle: true,
+    showDragHandle: false,
     backgroundColor: Theme.of(context).colorScheme.surface,
-    builder: (context) => BackendAudioPlayerSheet(activity: activity),
+    builder: (context) {
+      return switch (activity.type) {
+        'BREATHING' => BreathingPracticeSheet(activity: activity),
+        'JOURNAL' => JournalPracticeSheet(activity: activity),
+        _ => BackendAudioPlayerSheet(activity: activity),
+      };
+    },
   );
 }
 
@@ -91,18 +97,25 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
     final resources = widget.activity.resources;
     final selected =
         _selected ?? (resources.isNotEmpty ? resources.first : null);
-    final height = math.min(MediaQuery.of(context).size.height * .82, 640.0);
+    final height = math.min(MediaQuery.of(context).size.height * .86, 700.0);
+    final isMeditation = widget.activity.type == 'MEDITATION';
+    final eyebrow = switch (widget.activity.type) {
+      'PODCAST' => 'PODCAST THƯ GIÃN',
+      'MEDITATION' => 'KHÔNG GIAN THIỀN',
+      'MUSIC' => 'DÀN ÂM THANH',
+      _ => 'NỘI DUNG ĐI KÈM',
+    };
 
     return SizedBox(
       height: height,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                PixelIconBox(icon: widget.activity.icon, size: 54),
+                _SheetBackButton(onTap: () => Navigator.of(context).pop()),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -114,13 +127,14 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
                       ),
                       Text(
                         resources.isEmpty
-                            ? 'Chưa có nội dung từ backend.'
-                            : '${resources.length} nội dung từ backend deploy',
+                            ? 'Chọn một nhịp nghỉ nhẹ nhàng.'
+                            : '${resources.length} nội dung sẵn sàng để nghe',
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                     ],
                   ),
                 ),
+                PixelIconBox(icon: widget.activity.icon, size: 46),
               ],
             ),
             const SizedBox(height: 14),
@@ -137,8 +151,32 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
               ),
             Expanded(
               child: resources.isEmpty
-                  ? const Center(
-                      child: Text('Backend chưa trả file cho mục này.'),
+                  ? Center(
+                      child: PixelPanel(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isMeditation
+                                  ? Icons.self_improvement_rounded
+                                  : Icons.music_off_rounded,
+                              color: RelaxTheme.lavender,
+                              size: 42,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Chưa có file để phát',
+                              style: Theme.of(context).textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Bấm làm mới ở Khu thư giãn hoặc nạp thêm nội dung trong trang quản trị.',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          ],
+                        ),
+                      ),
                     )
                   : ListView.separated(
                       itemCount: resources.length,
@@ -159,11 +197,28 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
                               padding: const EdgeInsets.all(10),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    active
-                                        ? Icons.pause_circle_filled_rounded
-                                        : Icons.play_circle_outline_rounded,
-                                    color: RelaxTheme.lavender,
+                                  Container(
+                                    width: 42,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                      color: active
+                                          ? RelaxTheme.purple
+                                          : Theme.of(
+                                              context,
+                                            ).colorScheme.surface,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: context.relax.border,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      active
+                                          ? Icons.pause_rounded
+                                          : Icons.play_arrow_rounded,
+                                      color: active
+                                          ? Colors.white
+                                          : RelaxTheme.lavender,
+                                    ),
                                   ),
                                   const SizedBox(width: 10),
                                   Expanded(
@@ -201,10 +256,7 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'TRÌNH PHÁT',
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
+                  Text(eyebrow, style: Theme.of(context).textTheme.bodyMedium),
                   const SizedBox(height: 6),
                   Text(
                     selected?.title ?? 'Chọn một nội dung để nghe',
@@ -289,6 +341,368 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class BreathingPracticeSheet extends StatefulWidget {
+  const BreathingPracticeSheet({super.key, required this.activity});
+
+  final Activity activity;
+
+  @override
+  State<BreathingPracticeSheet> createState() => _BreathingPracticeSheetState();
+}
+
+class _BreathingPracticeSheetState extends State<BreathingPracticeSheet> {
+  static const _steps = [
+    (label: 'Hít vào', seconds: 4, scale: 1.0),
+    (label: 'Giữ hơi', seconds: 4, scale: 1.18),
+    (label: 'Thở ra', seconds: 6, scale: .78),
+  ];
+
+  Timer? _timer;
+  bool _running = false;
+  int _stepIndex = 0;
+  int _remaining = _steps.first.seconds;
+  int _cycle = 1;
+  final int _totalCycles = 5;
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void _toggle() {
+    if (_running) {
+      _timer?.cancel();
+      setState(() => _running = false);
+      return;
+    }
+    setState(() => _running = true);
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+  }
+
+  void _tick() {
+    if (!_running) return;
+    if (_remaining > 1) {
+      setState(() => _remaining--);
+      return;
+    }
+    final nextStep = (_stepIndex + 1) % _steps.length;
+    final nextCycle = nextStep == 0 ? _cycle + 1 : _cycle;
+    if (nextCycle > _totalCycles) {
+      _timer?.cancel();
+      setState(() {
+        _running = false;
+        _stepIndex = 0;
+        _remaining = _steps.first.seconds;
+        _cycle = 1;
+      });
+      showEncourageSheet(context, reductionPercent: 32);
+      return;
+    }
+    setState(() {
+      _stepIndex = nextStep;
+      _cycle = nextCycle;
+      _remaining = _steps[nextStep].seconds;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final step = _steps[_stepIndex];
+    final progress =
+        ((_cycle - 1) * _steps.length + _stepIndex + 1) /
+        (_steps.length * _totalCycles);
+    final height = math.min(MediaQuery.of(context).size.height * .84, 660.0);
+
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 14, 18, 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SheetHeader(
+              icon: Icons.cloud_queue_rounded,
+              title: widget.activity.compactTitle,
+              subtitle:
+                  'Theo nhịp ${_steps.map((s) => s.seconds).join('-')} · $_totalCycles vòng',
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: PixelPanel(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 8),
+                    Text(
+                      step.label,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Vòng $_cycle/$_totalCycles · còn $_remaining giây',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const Spacer(),
+                    AnimatedScale(
+                      scale: _running ? step.scale : .88,
+                      duration: Duration(milliseconds: step.seconds * 900),
+                      curve: Curves.easeInOutCubic,
+                      child: Container(
+                        width: 190,
+                        height: 190,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: RadialGradient(
+                            colors: [
+                              RelaxTheme.lavender.withValues(alpha: .92),
+                              RelaxTheme.purple.withValues(alpha: .55),
+                              context.relax.surfaceSoft,
+                            ],
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: RelaxTheme.purple.withValues(alpha: .35),
+                              blurRadius: 34,
+                              spreadRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            '$_remaining',
+                            style: Theme.of(context).textTheme.displaySmall
+                                ?.copyWith(color: Colors.white, fontSize: 48),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    LinearProgressIndicator(
+                      value: progress,
+                      minHeight: 8,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            PixelButton(
+              icon: _running ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              label: _running ? 'Tạm dừng nhịp thở' : 'Bắt đầu hít thở',
+              filled: true,
+              onPressed: _toggle,
+            ),
+            const SizedBox(height: 8),
+            PixelButton(
+              icon: Icons.flag_rounded,
+              label: 'Finish',
+              onPressed: () {
+                _timer?.cancel();
+                Navigator.of(context).pop();
+                showFeedbackSheet(context, widget.activity);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class JournalPracticeSheet extends StatefulWidget {
+  const JournalPracticeSheet({super.key, required this.activity});
+
+  final Activity activity;
+
+  @override
+  State<JournalPracticeSheet> createState() => _JournalPracticeSheetState();
+}
+
+class _JournalPracticeSheetState extends State<JournalPracticeSheet> {
+  final _controller = TextEditingController();
+  String _prompt = 'Điều gì đang làm bạn nặng lòng nhất lúc này?';
+
+  static const _prompts = [
+    'Điều gì đang làm bạn nặng lòng nhất lúc này?',
+    'Một chuyện nhỏ hôm nay khiến bạn thấy biết ơn là gì?',
+    'Nếu dịu dàng với bản thân hơn, bạn sẽ nói gì?',
+    'Bạn muốn buông xuống điều gì trước khi ngủ?',
+  ];
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _save() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Viết vài dòng trước đã nha.')),
+      );
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Đã giữ lại ghi chú trong phiên này.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+    Navigator.of(context).pop();
+    showFeedbackSheet(context, widget.activity);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final height = math.min(MediaQuery.of(context).size.height * .86, 700.0);
+    return SizedBox(
+      height: height,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          14,
+          18,
+          24 + MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _SheetHeader(
+              icon: Icons.edit_note_rounded,
+              title: widget.activity.compactTitle,
+              subtitle: 'Ghi lại cảm xúc để nhẹ lòng hơn một chút.',
+            ),
+            const SizedBox(height: 14),
+            PixelPanel(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'GỢI Ý VIẾT',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(_prompt, style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _prompts.map((prompt) {
+                      final selected = prompt == _prompt;
+                      return ChoiceChip(
+                        label: Text(prompt.split(' ').take(3).join(' ')),
+                        selected: selected,
+                        onSelected: (_) => setState(() => _prompt = prompt),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                expands: true,
+                maxLines: null,
+                minLines: null,
+                textAlignVertical: TextAlignVertical.top,
+                decoration: InputDecoration(
+                  hintText: 'Viết cho Thi Ái nghe nè...',
+                  filled: true,
+                  fillColor: context.relax.surfaceSoft,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(color: context.relax.border),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 14),
+            PixelButton(
+              icon: Icons.save_rounded,
+              label: 'Lưu nhật ký',
+              filled: true,
+              onPressed: _save,
+            ),
+            const SizedBox(height: 8),
+            PixelButton(
+              icon: Icons.flag_rounded,
+              label: 'Finish',
+              onPressed: () {
+                Navigator.of(context).pop();
+                showFeedbackSheet(context, widget.activity);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetHeader extends StatelessWidget {
+  const _SheetHeader({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _SheetBackButton(onTap: () => Navigator.of(context).pop()),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.headlineSmall),
+              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
+        ),
+        PixelIconBox(icon: icon, size: 46),
+      ],
+    );
+  }
+}
+
+class _SheetBackButton extends StatelessWidget {
+  const _SheetBackButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          color: context.relax.surfaceSoft,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: context.relax.border),
+        ),
+        child: const Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: RelaxTheme.lavender,
+          size: 18,
         ),
       ),
     );

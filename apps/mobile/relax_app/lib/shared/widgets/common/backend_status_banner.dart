@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/api_client.dart';
 import '../pixel/pixel_panel.dart';
-import '../pixel/pixel_badge.dart';
 
 class BackendStatusBanner extends StatelessWidget {
   const BackendStatusBanner({
@@ -28,14 +26,14 @@ class BackendStatusBanner extends StatelessWidget {
         ? Icons.cloud_off_rounded
         : Icons.cloud_done_rounded;
     final title = loading
-        ? 'Đang nạp backend deploy'
+        ? 'Đang làm mới thư viện'
         : hasError
-        ? 'Không nạp được backend'
-        : 'Đã đồng bộ từ backend';
+        ? 'Chưa nạp được thư viện'
+        : 'Đã đồng bộ nội dung';
     final body = loading
-        ? BackendConfig.defaultBaseUrl
+        ? 'Đang lấy hoạt động, âm thanh và nội dung đi kèm.'
         : hasError
-        ? 'App đang dùng dữ liệu mẫu. Bấm thử lại để gọi lại API.'
+        ? 'Bấm thử lại để gọi lại dữ liệu mới.'
         : '$loadedCount mục hoạt động · $resourceCount nội dung đi kèm';
 
     return PixelPanel(

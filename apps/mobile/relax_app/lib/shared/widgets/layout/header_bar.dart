@@ -9,6 +9,7 @@ class HeaderBar extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.trailing,
+    this.onLeadingTap,
     this.onBellTap,
     this.bellHasBadge = true,
   });
@@ -17,6 +18,7 @@ class HeaderBar extends StatelessWidget {
   final String title;
   final String subtitle;
   final Widget? trailing;
+  final VoidCallback? onLeadingTap;
 
   /// Bấm chuông → callback (vd mở Stats sheet). Null = bell tĩnh.
   final VoidCallback? onBellTap;
@@ -28,7 +30,11 @@ class HeaderBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        PixelIconBox(icon: icon),
+        InkWell(
+          onTap: onLeadingTap,
+          borderRadius: BorderRadius.circular(8),
+          child: PixelIconBox(icon: icon),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(

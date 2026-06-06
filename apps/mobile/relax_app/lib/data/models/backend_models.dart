@@ -230,6 +230,7 @@ class BackendBillingPlan {
     required this.effectivePrice,
     required this.currency,
     required this.billingCycle,
+    this.features = const [],
   });
 
   final String name;
@@ -238,8 +239,13 @@ class BackendBillingPlan {
   final int effectivePrice;
   final String currency;
   final String billingCycle;
+  final List<String> features;
 
   factory BackendBillingPlan.fromJson(Map<String, Object?> json) {
+    final featsRaw = json['features'];
+    final features = featsRaw is List
+        ? featsRaw.whereType<String>().toList(growable: false)
+        : const <String>[];
     return BackendBillingPlan(
       name: _readString(json['name'], fallback: 'FREE'),
       title: _readString(json['title'], fallback: 'Free'),
@@ -247,6 +253,7 @@ class BackendBillingPlan {
       effectivePrice: _readInt(json['effectivePrice']),
       currency: _readString(json['currency'], fallback: 'VND'),
       billingCycle: _readString(json['billingCycle'], fallback: 'MONTHLY'),
+      features: features,
     );
   }
 

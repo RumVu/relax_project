@@ -15,12 +15,14 @@ class RelaxScreen extends StatelessWidget {
     required this.loadingCatalog,
     required this.catalogError,
     required this.onRefreshCatalog,
+    this.onBack,
   });
 
   final List<BackendRelaxActivity> backendActivities;
   final bool loadingCatalog;
   final String? catalogError;
   final VoidCallback onRefreshCatalog;
+  final VoidCallback? onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +57,7 @@ class RelaxScreen extends StatelessWidget {
             icon: Icons.arrow_back_ios_new_rounded,
             title: 'Thư giãn ✦',
             subtitle: 'Chọn một cách để thư giãn nhé ~',
+            onLeadingTap: onBack,
             trailing: const PixelCatScene(scene: CatScene.sleep, height: 66),
           ),
           if (loadingCatalog || catalogError != null) ...[
@@ -70,10 +73,7 @@ class RelaxScreen extends StatelessWidget {
           const SizedBox(height: 14),
           if (!loadingCatalog && displayActivities.isEmpty)
             PixelPanel(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 28,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
               child: Column(
                 children: [
                   Icon(
@@ -88,7 +88,7 @@ class RelaxScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Backend chưa trả danh sách thư giãn.\nThử nạp lại nha 💜',
+                    'Chưa lấy được danh sách thư giãn.\nThử nạp lại nha.',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),

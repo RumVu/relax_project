@@ -97,21 +97,35 @@ class MoodOption {
 }
 
 class MethodOption {
-  const MethodOption(this.label, this.icon);
+  const MethodOption(this.label, this.icon, {required this.type});
 
   final String label;
   final IconData icon;
+  final String type;
 
   factory MethodOption.fromAction(String action) {
     return switch (action) {
       'MEDITATION' => const MethodOption(
         'Thiền định',
         Icons.self_improvement_rounded,
+        type: 'MEDITATION',
       ),
-      'BREATHING' => const MethodOption('Hít thở', Icons.cloud_queue_rounded),
-      'JOURNAL' => const MethodOption('Viết nhật kí', Icons.edit_note_rounded),
-      'MUSIC' => const MethodOption('Nghe nhạc', Icons.headphones_rounded),
-      _ => MethodOption(action, Icons.spa_rounded),
+      'BREATHING' => const MethodOption(
+        'Hít thở',
+        Icons.cloud_queue_rounded,
+        type: 'BREATHING',
+      ),
+      'JOURNAL' => const MethodOption(
+        'Viết nhật kí',
+        Icons.edit_note_rounded,
+        type: 'JOURNAL',
+      ),
+      'MUSIC' => const MethodOption(
+        'Nghe nhạc',
+        Icons.headphones_rounded,
+        type: 'MUSIC',
+      ),
+      _ => MethodOption(action, Icons.spa_rounded, type: action),
     };
   }
 }

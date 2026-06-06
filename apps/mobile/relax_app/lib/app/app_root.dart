@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../core/preferences.dart';
 import '../core/session.dart';
 import '../data/services/mobile_content_service.dart';
 import '../data/services/relax_catalog_service.dart';
@@ -21,16 +23,34 @@ class _RelaxAppState extends State<RelaxApp> {
   ThemeMode _themeMode = ThemeMode.dark;
   AppLanguage _language = AppLanguage.vi;
   final SessionState _session = SessionState();
+  AppPreferences? _prefs;
 
-  String get _userName =>
-      (_session.user?['name'] as String?)?.trim() ?? '';
+  String get _userName => (_session.user?['name'] as String?)?.trim() ?? '';
 
-  void _setThemeMode(ThemeMode mode) {
-    setState(() => _themeMode = mode);
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
   }
 
-  void _setLanguage(AppLanguage language) {
+  Future<void> _loadPrefs() async {
+    final p = await AppPreferences.instance();
+    if (!mounted) return;
+    setState(() {
+      _prefs = p;
+      _themeMode = p.themeMode;
+      _language = p.language;
+    });
+  }
+
+  Future<void> _setThemeMode(ThemeMode mode) async {
+    setState(() => _themeMode = mode);
+    await _prefs?.setThemeMode(mode);
+  }
+
+  Future<void> _setLanguage(AppLanguage language) async {
     setState(() => _language = language);
+    await _prefs?.setLanguage(language);
   }
 
   @override
@@ -50,10 +70,9 @@ class _RelaxAppState extends State<RelaxApp> {
         theme: RelaxTheme.light(),
         darkTheme: RelaxTheme.dark(),
         builder: (context, child) {
-          // Rebuild AppCopy whenever session changes (login/logout → username)
           return ListenableBuilder(
             listenable: _session,
-            builder: (_, __) => AppCopyScope(
+            builder: (context, ignored) => AppCopyScope(
               copy: AppCopy(_language, userName: _userName),
               child: ColoredBox(
                 color: Theme.of(context).scaffoldBackgroundColor,

@@ -2,12 +2,19 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_copy.dart';
 import '../../app/theme.dart';
+import '../../core/preferences.dart';
 import '../../core/session.dart';
 import '../../data/models/app_models.dart';
 import '../../data/models/backend_models.dart';
+import '../../data/services/device_service.dart';
 import '../../data/services/mobile_content_service.dart';
+import '../../data/services/reminder_service.dart';
+import '../../data/services/users_service.dart';
 import '../../shared/widgets/charts/mood_line_chart.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
+import '../../shared/widgets/pixel/pixel_button.dart';
+import '../../shared/widgets/pixel/pixel_panel.dart';
+import '../legal/legal_screen.dart';
 import '../relax/sheets/relax_sheets.dart';
 import '../relax/sheets/stats_sheet.dart';
 
@@ -51,16 +58,200 @@ class SetupScreen extends StatefulWidget {
 }
 
 class _SetupScreenState extends State<SetupScreen> {
-  /// Khung giờ thông báo được chọn (default 21:00).
-  String _selectedTime = '21:00';
+  final _deviceService = DeviceCapabilityService();
+  final _reminderService = ReminderService();
+  final _usersService = UsersService();
 
-  /// Theme tab tự quản — Light / Dark / Customs.
+  String _selectedTime = '21:00';
   String _themeTab = 'dark';
+  String _soundChoice = 'Tiếng mèo con kêu';
+
+  AppPreferences? _prefs;
+  DeviceSnapshot? _device;
+  bool _deviceLoading = true;
+  bool _notificationRequesting = false;
+
+  List<Reminder> _reminders = const [];
+  bool _remindersBusy = false;
 
   @override
   void initState() {
     super.initState();
     _themeTab = widget.themeMode == ThemeMode.light ? 'light' : 'dark';
+    _loadDevice();
+    _loadPrefsAndReminders();
+  }
+
+  Future<void> _loadPrefsAndReminders() async {
+    final p = await AppPreferences.instance();
+    if (!mounted) return;
+    setState(() {
+      _prefs = p;
+      _selectedTime = p.reminderTime;
+      _soundChoice = p.soundChoice;
+    });
+    await _loadReminders();
+  }
+
+  Future<void> _loadReminders() async {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) return;
+    try {
+      final list = await _reminderService.list(
+        accessToken: session.accessToken!,
+      );
+      if (!mounted) return;
+      setState(() {
+        _reminders = list;
+        // sync selectedTime với reminder mới nhất nếu có
+        if (list.isNotEmpty) _selectedTime = list.first.time;
+      });
+    } catch (_) {/* ignore — empty stays empty */}
+  }
+
+  /// Khi user tap chip giờ, POST reminder mới + xóa reminder cùng giờ cũ.
+  /// Khi chưa login → chỉ save vào prefs cục bộ.
+  Future<void> _selectTime(String time) async {
+    setState(() {
+      _selectedTime = time;
+      _remindersBusy = true;
+    });
+    await _prefs?.setReminderTime(time);
+
+    final session = context.sessionOrNull;
+    if (session != null && session.isLoggedIn) {
+      try {
+        // Xóa các reminder cũ cùng time để tránh trùng
+        for (final r in _reminders.where((r) => r.time == time)) {
+          try {
+            await _reminderService.delete(
+              accessToken: session.accessToken!,
+              id: r.id,
+            );
+          } catch (_) {}
+        }
+        // Tạo reminder mới
+        final created = await _reminderService.create(
+          accessToken: session.accessToken!,
+          time: time,
+        );
+        if (!mounted) return;
+        setState(() {
+          _reminders = [created, ..._reminders.where((r) => r.id != created.id)];
+        });
+        _toast(context, 'Đã đặt nhắc lúc $time ✦');
+      } catch (e) {
+        if (!mounted) return;
+        _toast(context, 'Không lưu được nhắc nhở: $e');
+      }
+    } else {
+      _toast(context, 'Đã lưu trên thiết bị. Đăng nhập để đồng bộ ✦');
+    }
+
+    if (mounted) setState(() => _remindersBusy = false);
+  }
+
+  Future<void> _pickSound() async {
+    final picked = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      showDragHandle: true,
+      builder: (ctx) => _SoundPicker(current: _soundChoice),
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _soundChoice = picked);
+    await _prefs?.setSoundChoice(picked);
+    if (!mounted) return;
+    _toast(context, 'Đã chọn âm báo: $picked');
+  }
+
+  Future<void> _loadDevice() async {
+    setState(() => _deviceLoading = true);
+    try {
+      final device = await _deviceService.load();
+      if (!mounted) return;
+      setState(() {
+        _device = device;
+        _deviceLoading = false;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _deviceLoading = false);
+    }
+  }
+
+  Future<void> _requestNotifications() async {
+    setState(() => _notificationRequesting = true);
+    try {
+      final device = await _deviceService.requestNotifications();
+      if (!mounted) return;
+      setState(() => _device = device);
+    } finally {
+      if (mounted) setState(() => _notificationRequesting = false);
+    }
+  }
+
+  Future<void> _refreshAll() async {
+    widget.onRefreshContent();
+    await Future.wait([_loadDevice(), _loadReminders()]);
+  }
+
+  Future<void> _saveProfile({
+    String? name,
+    String? phone,
+    String? gender,
+    String? socialUrl,
+    int? birthYear,
+  }) async {
+    final session = context.sessionOrNull;
+    final patch = <String, dynamic>{
+      if (name != null) 'name': name,
+      if (phone != null) 'phone': phone,
+      if (gender != null) 'gender': gender,
+      if (socialUrl != null) 'socialUrl': socialUrl,
+      if (birthYear != null) 'birthYear': birthYear,
+    };
+    // Update local cache ngay để UI phản hồi
+    await session?.updateCachedUser(patch);
+
+    if (session != null && session.isLoggedIn) {
+      try {
+        final updated = await _usersService.updateMe(
+          accessToken: session.accessToken!,
+          name: name,
+          phone: phone,
+          gender: gender,
+          socialUrl: socialUrl,
+          birthYear: birthYear,
+        );
+        await session.updateCachedUser(updated);
+        if (!mounted) return;
+        _toast(context, 'Đã đồng bộ hồ sơ ✦');
+      } catch (e) {
+        if (!mounted) return;
+        _toast(context, 'Lưu cục bộ thành công. Lỗi đồng bộ: $e');
+      }
+    } else {
+      if (!mounted) return;
+      _toast(context, 'Đã lưu trên thiết bị. Đăng nhập để đồng bộ ~');
+    }
+  }
+
+  Future<void> _deleteAccount() async {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) {
+      await session?.logout();
+      return;
+    }
+    try {
+      await _usersService.deleteMe(accessToken: session.accessToken!);
+      await session.logout();
+      if (!mounted) return;
+      _toast(context, 'Tài khoản đã được xóa.');
+    } catch (e) {
+      if (!mounted) return;
+      _toast(context, 'Xóa thất bại: $e');
+    }
   }
 
   @override
@@ -72,10 +263,14 @@ class _SetupScreenState extends State<SetupScreen> {
         ? widget.content.billingPlans.first
         : null;
 
-    return ListView(
+    return RefreshIndicator(
+      onRefresh: _refreshAll,
+      color: RelaxTheme.purple,
+      child: ListView(
       padding: EdgeInsets.zero,
+      physics: const AlwaysScrollableScrollPhysics(),
       children: [
-        _SetupHeader(),
+        _SetupHeader(onRefresh: _refreshAll),
 
         const SizedBox(height: 8),
         const _SectionLabel(icon: Icons.person_outline, label: 'Trang cá nhân'),
@@ -85,7 +280,11 @@ class _SetupScreenState extends State<SetupScreen> {
             user: user,
             assetName: asset?.name,
             avatarUrl: asset?.previewImageUrl ?? (user?['avatar'] as String?),
-            onEdit: () => _toast(context, 'Form sửa profile ở batch sau nha 💜'),
+            onEdit: () => _showProfileSheet(
+              context,
+              user,
+              onSave: _saveProfile,
+            ),
           ),
         ),
 
@@ -98,10 +297,21 @@ class _SetupScreenState extends State<SetupScreen> {
         _SectionCard(
           child: _NotificationBody(
             selected: _selectedTime,
-            onSelected: (t) => setState(() => _selectedTime = t),
-            soundLabel: widget.content.companionMessage?.content != null
-                ? 'Tiếng companion: ${widget.content.companionMessage!.content.split('.').first}'
-                : 'Tiếng mèo con kêu',
+            onSelected: _selectTime,
+            soundLabel: _soundChoice,
+            onSoundTap: _pickSound,
+            busy: _remindersBusy,
+          ),
+        ),
+
+        const SizedBox(height: 10),
+        _SectionCard(
+          child: _DevicePermissionBody(
+            device: _device,
+            loading: _deviceLoading,
+            requesting: _notificationRequesting,
+            onReload: _loadDevice,
+            onRequestNotifications: _requestNotifications,
           ),
         ),
 
@@ -112,7 +322,9 @@ class _SetupScreenState extends State<SetupScreen> {
             icon: Icons.description_outlined,
             title: 'Quy định & sử dụng',
             subtitle: 'Điều khoản, chính sách & giấy phép',
-            onTap: () => _toast(context, 'Trang quy định sẽ có ở batch sau ✦'),
+            onTap: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const LegalScreen())),
           ),
         ),
 
@@ -130,10 +342,7 @@ class _SetupScreenState extends State<SetupScreen> {
         ),
 
         const SizedBox(height: 10),
-        const _SectionLabel(
-          icon: Icons.palette_outlined,
-          label: 'Giao diện',
-        ),
+        const _SectionLabel(icon: Icons.palette_outlined, label: 'Giao diện'),
         const SizedBox(height: 8),
         _SectionCard(
           child: _AppearanceBody(
@@ -156,10 +365,11 @@ class _SetupScreenState extends State<SetupScreen> {
             subtitle: featuredPlan == null
                 ? 'Mở khóa tính năng nâng cao'
                 : featuredPlan.description,
-            trailing: _PurpleChip(
-              text: featuredPlan?.priceLabel ?? 'Nạp ngay',
+            trailing: _PurpleChip(text: featuredPlan?.priceLabel ?? 'Nạp ngay'),
+            onTap: () => _showBillingSheet(
+              context,
+              widget.content.billingPlans,
             ),
-            onTap: () => _toast(context, 'Trang nạp thẻ sẽ có ở batch sau ✦'),
           ),
         ),
 
@@ -171,13 +381,20 @@ class _SetupScreenState extends State<SetupScreen> {
             title: 'Xóa tài khoản',
             subtitle: 'Xóa vĩnh viễn toàn bộ dữ liệu của bạn',
             danger: true,
-            onTap: () => showConfirmSheet(
-              context,
-              title: 'Xóa tài khoản?',
-              body: 'Mọi dữ liệu sẽ biến mất và không thể khôi phục.',
-              action: 'Xóa vĩnh viễn',
-              danger: true,
-            ),
+            onTap: () async {
+              final navigator = Navigator.of(context);
+              await showConfirmSheet(
+                context,
+                title: 'Xóa tài khoản?',
+                body: 'Mọi dữ liệu sẽ biến mất và không thể khôi phục.',
+                action: 'Xóa vĩnh viễn',
+                danger: true,
+                onConfirm: _deleteAccount,
+              );
+              if (session?.isLoggedIn == false && navigator.canPop()) {
+                navigator.popUntil((r) => r.isFirst);
+              }
+            },
           ),
         ),
 
@@ -208,6 +425,7 @@ class _SetupScreenState extends State<SetupScreen> {
         const _HintsFooter(),
         const SizedBox(height: 32),
       ],
+      ),
     );
   }
 }
@@ -216,11 +434,393 @@ void _toast(BuildContext context, String msg) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
 }
 
+typedef _ProfileSaver = Future<void> Function({
+  String? name,
+  String? phone,
+  String? gender,
+  String? socialUrl,
+  int? birthYear,
+});
+
+Future<void> _showProfileSheet(
+  BuildContext context,
+  Map<String, dynamic>? user, {
+  required _ProfileSaver onSave,
+}) {
+  return showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    builder: (sheetContext) => _ProfileSheet(user: user, onSave: onSave),
+  );
+}
+
+class _ProfileSheet extends StatefulWidget {
+  const _ProfileSheet({required this.user, required this.onSave});
+  final Map<String, dynamic>? user;
+  final _ProfileSaver onSave;
+
+  @override
+  State<_ProfileSheet> createState() => _ProfileSheetState();
+}
+
+class _ProfileSheetState extends State<_ProfileSheet> {
+  late final TextEditingController _nameCtrl = TextEditingController(
+    text: (widget.user?['name'] ?? '').toString(),
+  );
+  late final TextEditingController _phoneCtrl = TextEditingController(
+    text: (widget.user?['phone'] ?? '').toString(),
+  );
+  late final TextEditingController _linkCtrl = TextEditingController(
+    text: (widget.user?['socialUrl'] ?? widget.user?['link'] ?? '').toString(),
+  );
+  late final TextEditingController _yearCtrl = TextEditingController(
+    text: widget.user?['birthYear']?.toString() ?? '',
+  );
+  late String _gender = (widget.user?['gender'] ?? '').toString();
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _phoneCtrl.dispose();
+    _linkCtrl.dispose();
+    _yearCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    final yearStr = _yearCtrl.text.trim();
+    final year = int.tryParse(yearStr);
+    await widget.onSave(
+      name: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+      phone: _phoneCtrl.text.trim(),
+      socialUrl: _linkCtrl.text.trim(),
+      gender: _gender.isEmpty ? null : _gender,
+      birthYear: year,
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        24 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Trang cá nhân',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Cập nhật thông tin hiển thị trong app. Bạn có thể bỏ trống các mục không muốn chia sẻ.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Tên hiển thị',
+                prefixIcon: Icon(Icons.person_outline_rounded),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _yearCtrl,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    decoration: const InputDecoration(
+                      labelText: 'Năm sinh',
+                      counterText: '',
+                      prefixIcon: Icon(Icons.cake_outlined),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _gender.isEmpty ? null : _gender,
+                    decoration: const InputDecoration(
+                      labelText: 'Giới tính',
+                      prefixIcon: Icon(Icons.wc_outlined),
+                    ),
+                    items: const [
+                      DropdownMenuItem(value: 'Nam', child: Text('Nam')),
+                      DropdownMenuItem(value: 'Nữ', child: Text('Nữ')),
+                      DropdownMenuItem(value: 'Khác', child: Text('Khác')),
+                    ],
+                    onChanged: (v) => setState(() => _gender = v ?? ''),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _phoneCtrl,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(
+                labelText: 'Số điện thoại',
+                prefixIcon: Icon(Icons.call_outlined),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: _linkCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Liên kết cá nhân (linktr, IG, ...)',
+                prefixIcon: Icon(Icons.link_rounded),
+              ),
+            ),
+            const SizedBox(height: 14),
+            PixelButton(
+              icon: _saving ? Icons.hourglass_top_rounded : Icons.save_rounded,
+              label: _saving ? 'Đang lưu...' : 'Lưu hồ sơ',
+              filled: true,
+              onPressed: _saving ? () {} : _save,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> _showBillingSheet(
+  BuildContext context,
+  List<BackendBillingPlan> plans,
+) {
+  final paidPlans = plans.where((p) => p.effectivePrice > 0).toList();
+  return showModalBottomSheet<void>(
+    context: context,
+    useSafeArea: true,
+    isScrollControlled: true,
+    showDragHandle: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    builder: (sheetContext) {
+      final height = MediaQuery.of(sheetContext).size.height * .8;
+      return SizedBox(
+        height: height,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Nâng cấp gói',
+                      style: Theme.of(sheetContext).textTheme.headlineSmall,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded),
+                    onPressed: () => Navigator.of(sheetContext).pop(),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Chọn một gói để mở khóa tính năng nâng cao. Thanh toán an toàn qua SePay.',
+                style: Theme.of(sheetContext).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 14),
+              if (paidPlans.isEmpty)
+                Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        'Chưa có gói nâng cấp. Vui lòng thử lại sau ~',
+                        textAlign: TextAlign.center,
+                        style: Theme.of(sheetContext).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    itemCount: paidPlans.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, i) {
+                      final plan = paidPlans[i];
+                      final isPopular = i == 0;
+                      return _PlanCard(plan: plan, popular: isPopular);
+                    },
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({required this.plan, required this.popular});
+  final BackendBillingPlan plan;
+  final bool popular;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: popular
+            ? RelaxTheme.purple.withValues(alpha: .08)
+            : context.relax.surfaceSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: popular
+              ? RelaxTheme.purple
+              : RelaxTheme.lavender.withValues(alpha: .2),
+          width: popular ? 1.6 : 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  plan.title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w900,
+                      ),
+                ),
+              ),
+              if (popular)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: RelaxTheme.purple,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: const Text(
+                    '★ Phổ biến',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            plan.description,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontSize: 12,
+                ),
+          ),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                plan.priceLabel,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      color: RelaxTheme.lavender,
+                      fontWeight: FontWeight.w900,
+                    ),
+              ),
+              const SizedBox(width: 6),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text(
+                  '/ ${plan.billingCycle.toLowerCase() == "annual" ? "năm" : "tháng"}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 11,
+                        color: context.relax.muted,
+                      ),
+                ),
+              ),
+            ],
+          ),
+          if (plan.features.isNotEmpty) ...[
+            const SizedBox(height: 10),
+            for (final f in plan.features.take(4))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      size: 14,
+                      color: RelaxTheme.lavender,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        f,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 12,
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: popular ? RelaxTheme.purple : null,
+                foregroundColor: popular ? Colors.white : null,
+              ),
+              icon: const Icon(Icons.bolt_rounded, size: 18),
+              label: const Text('Chọn gói này'),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Sẽ mở SePay checkout cho ${plan.title} — tích hợp ở batch sau.',
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 //  SECTIONS
 // ════════════════════════════════════════════════════════════════════════════
 
 class _SetupHeader extends StatelessWidget {
+  const _SetupHeader({required this.onRefresh});
+  final Future<void> Function() onRefresh;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -236,9 +836,8 @@ class _SetupHeader extends StatelessWidget {
                   children: [
                     Text(
                       'Setup',
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
+                      style: Theme.of(context).textTheme.headlineMedium
+                          ?.copyWith(fontWeight: FontWeight.w900),
                     ),
                     const SizedBox(width: 6),
                     const Icon(
@@ -255,6 +854,11 @@ class _SetupHeader extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+          IconButton(
+            tooltip: 'Tải lại',
+            onPressed: onRefresh,
+            icon: const Icon(Icons.refresh_rounded, color: RelaxTheme.lavender),
           ),
           const PixelCatScene(scene: CatScene.sleep, height: 64),
         ],
@@ -278,9 +882,9 @@ class _SectionLabel extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
           ),
         ],
       ),
@@ -349,7 +953,8 @@ class _ProfileBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final phone = (user?['phone'] as String?)?.trim();
     final email = (user?['email'] as String?)?.trim();
-    final social = (user?['socialUrl'] as String?)?.trim() ??
+    final social =
+        (user?['socialUrl'] as String?)?.trim() ??
         (user?['link'] as String?)?.trim();
     final gender = (user?['gender'] as String?)?.trim();
 
@@ -400,8 +1005,8 @@ class _ProfileBody extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w900,
-                          ),
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 6),
@@ -439,9 +1044,9 @@ class _ProfileBody extends StatelessWidget {
                   child: Text(
                     'Bấm bút chì để thêm thông tin ~',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                        ),
+                      fontSize: 12,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
                 ),
             ],
@@ -471,9 +1076,9 @@ class _ProfileLine extends StatelessWidget {
               text,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 12.5,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 12.5),
             ),
           ),
         ],
@@ -491,11 +1096,15 @@ class _NotificationBody extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     required this.soundLabel,
+    required this.onSoundTap,
+    this.busy = false,
   });
 
   final String selected;
   final ValueChanged<String> onSelected;
   final String soundLabel;
+  final VoidCallback onSoundTap;
+  final bool busy;
 
   @override
   Widget build(BuildContext context) {
@@ -504,9 +1113,9 @@ class _NotificationBody extends StatelessWidget {
       children: [
         Text(
           'Chọn khung giờ bạn muốn nhận thông báo nhé ~',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 12.5,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontSize: 12.5),
         ),
         const SizedBox(height: 12),
         Row(
@@ -537,23 +1146,236 @@ class _NotificationBody extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: _ExpandChip(
-                onTap: () => _toast(context, 'Thêm khung giờ ở batch sau ~'),
+                onTap: () async {
+                  final picked = await showTimePicker(
+                    context: context,
+                    initialTime: const TimeOfDay(hour: 21, minute: 0),
+                  );
+                  if (picked == null) return;
+                  onSelected(
+                    '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}',
+                  );
+                },
               ),
             ),
           ],
         ),
+        if (busy)
+          Padding(
+            padding: const EdgeInsets.only(top: 6),
+            child: Row(
+              children: [
+                const SizedBox(
+                  width: 12,
+                  height: 12,
+                  child: CircularProgressIndicator(strokeWidth: 1.6),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'Đang lưu nhắc nhở...',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 11,
+                        color: context.relax.muted,
+                      ),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 12),
-        _SoundRow(soundLabel: soundLabel),
+        _SoundRow(soundLabel: soundLabel, onTap: onSoundTap),
         const SizedBox(height: 8),
         Text(
           '✦ Bạn ≤ 32 tuổi mới có thể chọn khung giờ sau 21:00',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 11,
-                fontStyle: FontStyle.italic,
-                color: context.relax.muted,
-              ),
+            fontSize: 11,
+            fontStyle: FontStyle.italic,
+            color: context.relax.muted,
+          ),
         ),
       ],
+    );
+  }
+}
+
+class _DevicePermissionBody extends StatelessWidget {
+  const _DevicePermissionBody({
+    required this.device,
+    required this.loading,
+    required this.requesting,
+    required this.onReload,
+    required this.onRequestNotifications,
+  });
+
+  final DeviceSnapshot? device;
+  final bool loading;
+  final bool requesting;
+  final VoidCallback onReload;
+  final VoidCallback onRequestNotifications;
+
+  @override
+  Widget build(BuildContext context) {
+    final status = device?.notificationLabel ?? 'Đang kiểm tra';
+    final allowed = device?.notificationsAllowed == true;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(
+              Icons.devices_other_rounded,
+              color: RelaxTheme.lavender,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Thiết bị & quyền thông báo',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            IconButton(
+              tooltip: 'Tải lại',
+              onPressed: loading ? null : onReload,
+              icon: loading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.refresh_rounded),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _MiniInfoGrid(
+          items: [
+            _MiniInfoItem(
+              icon: allowed
+                  ? Icons.notifications_active_rounded
+                  : Icons.notifications_off_outlined,
+              label: 'Thông báo',
+              value: status,
+              highlight: allowed,
+            ),
+            _MiniInfoItem(
+              icon: Icons.smartphone_rounded,
+              label: 'Thiết bị',
+              value: device?.deviceName ?? 'Đang đọc thông tin',
+            ),
+            _MiniInfoItem(
+              icon: Icons.memory_rounded,
+              label: 'Nền tảng',
+              value: device == null
+                  ? 'Đang kiểm tra'
+                  : '${device!.platform} · ${device!.osVersion}',
+            ),
+            _MiniInfoItem(
+              icon: Icons.new_releases_outlined,
+              label: 'Phiên bản app',
+              value: device?.appLabel ?? 'Đang kiểm tra',
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: PixelButton(
+                icon: Icons.notifications_active_outlined,
+                label: requesting ? 'Đang xin quyền...' : 'Cho phép thông báo',
+                filled: !allowed,
+                onPressed: requesting ? () {} : onRequestNotifications,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniInfoGrid extends StatelessWidget {
+  const _MiniInfoGrid({required this.items});
+
+  final List<_MiniInfoItem> items;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        for (var row = 0; row < 2; row++) ...[
+          if (row > 0) const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(child: _MiniInfoCard(item: items[row * 2])),
+              const SizedBox(width: 8),
+              Expanded(child: _MiniInfoCard(item: items[row * 2 + 1])),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _MiniInfoItem {
+  const _MiniInfoItem({
+    required this.icon,
+    required this.label,
+    required this.value,
+    this.highlight = false,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool highlight;
+}
+
+class _MiniInfoCard extends StatelessWidget {
+  const _MiniInfoCard({required this.item});
+
+  final _MiniInfoItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = item.highlight
+        ? const Color(0xFF48D3A8)
+        : RelaxTheme.lavender;
+    return Container(
+      constraints: const BoxConstraints(minHeight: 92),
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: context.relax.surfaceSoft,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: item.highlight
+              ? color.withValues(alpha: .55)
+              : context.relax.border,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(item.icon, color: color, size: 18),
+          const Spacer(),
+          Text(
+            item.label,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            item.value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(
+              context,
+            ).textTheme.labelLarge?.copyWith(fontSize: 12),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -659,37 +1481,147 @@ class _ExpandChip extends StatelessWidget {
 }
 
 class _SoundRow extends StatelessWidget {
-  const _SoundRow({required this.soundLabel});
+  const _SoundRow({required this.soundLabel, required this.onTap});
   final String soundLabel;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: context.relax.surfaceSoft,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          decoration: BoxDecoration(
+            color: context.relax.surfaceSoft,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Row(
+            children: [
+              const Icon(
+                Icons.volume_up_outlined,
+                size: 18,
+                color: RelaxTheme.lavender,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Âm báo: $soundLabel',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 12.5,
+                      ),
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: context.relax.muted),
+            ],
+          ),
+        ),
       ),
-      child: Row(
+    );
+  }
+}
+
+/// Bottom sheet chọn âm báo. Trả về sound name khi user chọn.
+class _SoundPicker extends StatelessWidget {
+  const _SoundPicker({required this.current});
+  final String current;
+
+  static const _sounds = <(String, IconData)>[
+    ('Tiếng mèo con kêu', Icons.pets_rounded),
+    ('Tiếng chim hót', Icons.flutter_dash_rounded),
+    ('Tiếng nước chảy', Icons.water_drop_rounded),
+    ('Tiếng chuông gió', Icons.notifications_active_rounded),
+    ('Tiếng đàn nhẹ', Icons.music_note_rounded),
+    ('Im lặng', Icons.volume_off_rounded),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.volume_up_outlined,
-            size: 18,
-            color: RelaxTheme.lavender,
+          Text(
+            'Chọn âm báo',
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              'Âm báo: $soundLabel',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: 12.5,
-                  ),
+          const SizedBox(height: 4),
+          Text(
+            'Âm thanh nhẹ nhàng để nhắc bạn ~',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 14),
+          for (final s in _sounds)
+            _SoundOption(
+              icon: s.$2,
+              label: s.$1,
+              selected: s.$1 == current,
+              onTap: () => Navigator.of(context).pop(s.$1),
             ),
-          ),
-          Icon(Icons.chevron_right_rounded, color: context.relax.muted),
         ],
+      ),
+    );
+  }
+}
+
+class _SoundOption extends StatelessWidget {
+  const _SoundOption({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? RelaxTheme.purple.withValues(alpha: .12)
+              : context.relax.surfaceSoft,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: selected
+                ? RelaxTheme.purple
+                : RelaxTheme.lavender.withValues(alpha: .14),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: RelaxTheme.lavender),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+              ),
+            ),
+            if (selected)
+              const Icon(
+                Icons.check_circle_rounded,
+                color: RelaxTheme.purple,
+                size: 18,
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -704,7 +1636,7 @@ class _StatsBody extends StatelessWidget {
   final List<dynamic> moodHistory;
   final VoidCallback onOpen;
 
-  /// Chuẩn hóa 7 ngày cuối thành List<double> [0,1].
+  /// Chuẩn hóa 7 ngày cuối thành danh sách giá trị từ 0 đến 1.
   List<double> get _chartData {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -735,9 +1667,9 @@ class _StatsBody extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Xem lại hành trình cảm xúc của bạn',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 12.5,
-                      ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontSize: 12.5),
                 ),
               ),
               Container(
@@ -781,10 +1713,7 @@ class _StatsBody extends StatelessWidget {
               ),
               if (moodHistory.isNotEmpty) ...[
                 const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: _StressDropPanel(),
-                ),
+                Expanded(flex: 2, child: _StressDropPanel()),
               ],
             ],
           ),
@@ -810,17 +1739,17 @@ class _StressDropPanel extends StatelessWidget {
           Text(
             'Tuần này',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                ),
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             'Bấm xem chi tiết',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 10,
-                  color: context.relax.muted,
-                ),
+              fontSize: 10,
+              color: context.relax.muted,
+            ),
           ),
           const SizedBox(height: 6),
           Row(
@@ -868,9 +1797,9 @@ class _AppearanceBody extends StatelessWidget {
       children: [
         Text(
           'Thay đổi màu sắc của app',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: 12.5,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontSize: 12.5),
         ),
         const SizedBox(height: 12),
         Row(
@@ -1045,17 +1974,17 @@ class _TapRow extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: danger ? color : null,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 14,
-                        ),
+                      color: danger ? color : null,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
                   const SizedBox(height: 1),
                   Text(
                     subtitle,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: 11.5,
-                        ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(fontSize: 11.5),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -1174,11 +2103,7 @@ class _HintsFooter extends StatelessWidget {
 }
 
 class _HintCol extends StatelessWidget {
-  const _HintCol({
-    required this.icon,
-    required this.title,
-    required this.body,
-  });
+  const _HintCol({required this.icon, required this.title, required this.body});
   final IconData icon;
   final String title;
   final String body;
@@ -1211,10 +2136,9 @@ class _HintCol extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             body,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 9.5,
-                  height: 1.3,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(fontSize: 9.5, height: 1.3),
           ),
         ],
       ),

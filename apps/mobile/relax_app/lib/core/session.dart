@@ -135,6 +135,14 @@ class SessionState extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateCachedUser(Map<String, dynamic> patch) async {
+    final current = _user ?? <String, dynamic>{};
+    final next = {...current, ...patch};
+    _user = next;
+    await _storage.writeUser(next);
+    notifyListeners();
+  }
+
   /// Quay lại trạng thái chưa đăng nhập.
   Future<void> logout() async {
     _access = null;

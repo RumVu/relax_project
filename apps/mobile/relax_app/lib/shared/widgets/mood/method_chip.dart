@@ -41,9 +41,9 @@ class MethodChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 11,
-                      ),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                  ),
                 ),
               ),
             ],
