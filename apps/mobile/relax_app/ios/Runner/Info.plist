@@ -67,6 +67,7 @@
 	<string>Cần camera để bạn chụp avatar mới (tùy chọn).</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>processing</string>
 		<string>remote-notification</string>

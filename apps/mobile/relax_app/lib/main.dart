@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 
 import 'app/app_root.dart';
 import 'core/error_boundary.dart';
@@ -13,8 +14,16 @@ export 'data/models/backend_models.dart';
 export 'data/services/mobile_content_service.dart';
 export 'data/services/relax_catalog_service.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   ErrorBoundary.install();
+  // Background audio: lock-screen + notification controls khi play nhạc/podcast.
+  try {
+    await JustAudioBackground.init(
+      androidNotificationChannelId: 'com.example.relaxApp.audio',
+      androidNotificationChannelName: 'Phát nhạc thư giãn',
+      androidNotificationOngoing: true,
+    );
+  } catch (_) {/* swallow — không chặn app boot */}
   runApp(const RelaxApp());
 }

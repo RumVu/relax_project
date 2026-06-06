@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import '../../../app/theme.dart';
 import '../../../core/session.dart';
 import '../../../data/models/app_models.dart';
@@ -68,7 +69,19 @@ class _BackendAudioPlayerSheetState extends State<BackendAudioPlayerSheet> {
     }
 
     try {
-      await _player.setUrl(url);
+      // Set audio source với MediaItem → iOS Control Center + Android
+      // notification hiển thị title/artist khi lock screen
+      await _player.setAudioSource(
+        AudioSource.uri(
+          Uri.parse(url),
+          tag: MediaItem(
+            id: resource.id.isEmpty ? url : resource.id,
+            title: resource.title.isEmpty ? 'Thi Ái Chill' : resource.title,
+            artist: widget.activity.compactTitle,
+            album: 'Khu thư giãn',
+          ),
+        ),
+      );
       await _player.play();
       if (!mounted) return;
       setState(() => _loading = false);
