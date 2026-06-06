@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
@@ -73,14 +74,41 @@ class _SplashGateState extends State<SplashGate> {
     return widget.child;
   }
 
+  /// Long-press splash 3 giây → force logout + reset onboarding flag.
+  /// Tiện cho dev test login lại. Chỉ active trong DEBUG mode.
+  Future<void> _devForceLogout() async {
+    final session = SessionScope.maybeOf(context, listen: false);
+    final messenger = ScaffoldMessenger.of(context);
+    await session?.logout();
+    final prefs = await AppPreferences.instance();
+    await prefs.setOnboardingDone(false);
+    if (!mounted) return;
+    setState(() {
+      _onboardingDone = false;
+      _showSplash = false;
+    });
+    messenger.showSnackBar(
+      const SnackBar(content: Text('[DEV] Đã clear session + onboarding flag')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AnimatedSwitcher(
+    final body = AnimatedSwitcher(
       duration: const Duration(milliseconds: 420),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: _showSplash ? const SplashScreen() : _routeTarget(),
     );
+    // DEBUG mode: long-press toàn màn để force logout + reset onboarding
+    if (!kReleaseMode && _showSplash) {
+      return GestureDetector(
+        onLongPress: _devForceLogout,
+        behavior: HitTestBehavior.opaque,
+        child: body,
+      );
+    }
+    return body;
   }
 }
 

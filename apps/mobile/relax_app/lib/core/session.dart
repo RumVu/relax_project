@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../data/services/auth_service.dart';
+import 'api_client.dart';
 
 /// Lưu access/refresh token + user profile vào Keychain (iOS) / Keystore
 /// (Android). Mọi đọc/ghi đều async vì secure storage là plug-in native.
@@ -107,27 +108,72 @@ class SessionState extends ChangeNotifier {
   bool get isLoggedIn => _access != null && _user != null;
   bool get isBooting => _booting;
 
-  /// Đọc token đã lưu lúc app khởi động — nếu còn token thì gọi /me xác minh.
+  /// Đọc token đã lưu lúc app khởi động.
+  ///
+  /// Flow:
+  ///   1. Đọc access/refresh token + user cache từ secure storage
+  ///   2. Nếu có access → gọi /users/me để verify token còn sống
+  ///      - Network error (offline/timeout) → giữ cache, vẫn coi như logged in
+  ///      - 401 (token invalid/expired) → thử refresh
+  ///        - Refresh ok → fetchMe lại với token mới
+  ///        - Refresh fail (refresh token cũng hết) → clear hết, về login
   Future<void> _bootstrap() async {
     try {
       _access = await _storage.readAccess();
       _refresh = await _storage.readRefresh();
       _user = await _storage.readUser();
-      if (_access != null) {
-        // Best-effort refresh user — nếu lỗi, vẫn giữ cache cũ để app boot
-        // được offline.
+      if (_access == null) return;
+
+      try {
+        final fresh = await _auth.fetchMe(_access!);
+        _user = fresh;
+        await _storage.writeUser(fresh);
+      } on UnauthorizedException {
+        // Token đã chết → thử refresh
+        final ok = _refresh != null && await _tryRefreshSilent();
+        if (!ok) {
+          // Refresh fail → clear hết, user phải login lại
+          await _clearAllInMemory();
+          await _storage.clear();
+          return;
+        }
+        // Refresh thành công → thử fetchMe 1 lần nữa với token mới
         try {
           final fresh = await _auth.fetchMe(_access!);
           _user = fresh;
           await _storage.writeUser(fresh);
-        } catch (_) {
-          // ignore — sẽ retry lúc gọi API thật.
-        }
+        } catch (_) {/* network ok, giữ cache */}
+      } catch (_) {
+        // Network error → giữ cache cũ để app boot được offline
       }
     } finally {
       _booting = false;
       notifyListeners();
     }
+  }
+
+  /// Refresh tĩnh lặng cho _bootstrap — KHÔNG gọi logout() trực tiếp,
+  /// để bootstrap quyết định clear / giữ session.
+  Future<bool> _tryRefreshSilent() async {
+    try {
+      final result = await _auth.refresh(_refresh!);
+      _access = result.accessToken;
+      _refresh = result.refreshToken;
+      await _storage.writeTokens(
+        access: result.accessToken,
+        refresh: result.refreshToken,
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// Reset state trong RAM (không xóa secure storage — caller phải tự gọi).
+  Future<void> _clearAllInMemory() async {
+    _access = null;
+    _refresh = null;
+    _user = null;
   }
 
   /// Lưu kết quả sau login/register thành công.
