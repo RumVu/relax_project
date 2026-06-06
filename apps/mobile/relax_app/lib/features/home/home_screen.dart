@@ -15,7 +15,6 @@ import '../../shared/widgets/mood/mood_progress.dart';
 import '../../shared/widgets/mood/mood_tile.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_panel.dart';
-import '../relax/sheets/stats_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -56,6 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? _activeMoodCode;
   String? _pendingMoodCode;
+  bool _notificationsOpen = false;
 
   WeatherSnapshot? _weatherSnapshot;
   bool _weatherTried = false;
@@ -73,6 +73,11 @@ class _HomeScreenState extends State<HomeScreen> {
       _weatherSnapshot = snap;
       _weatherTried = true;
     });
+  }
+
+  void _refreshHomeData() {
+    widget.onRefreshContent();
+    _loadWeather();
   }
 
   // ── Real data helpers ────────────────────────────────────────────────────
@@ -201,7 +206,41 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: wxIcon,
             title: copy.homeTitle,
             subtitle: subtitle,
-            onBellTap: () => showStatsSheet(context),
+            onBellTap: () {
+              setState(() => _notificationsOpen = !_notificationsOpen);
+            },
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 260),
+            transitionBuilder: (child, animation) {
+              final curved = CurvedAnimation(
+                parent: animation,
+                curve: Curves.easeOutCubic,
+                reverseCurve: Curves.easeInCubic,
+              );
+              return SizeTransition(
+                sizeFactor: curved,
+                axisAlignment: -1,
+                child: FadeTransition(opacity: curved, child: child),
+              );
+            },
+            child: _notificationsOpen
+                ? Padding(
+                    key: const ValueKey('home-notifications'),
+                    padding: const EdgeInsets.only(top: 12),
+                    child: _HomeNotificationPanel(
+                      loadingContent: widget.loadingContent,
+                      contentError: widget.contentError,
+                      weather: _weatherSnapshot,
+                      loggedIn: isLoggedIn,
+                      moodHistoryLoading: histLoading,
+                      historyCount: history.length,
+                      onRefresh: _refreshHomeData,
+                    ),
+                  )
+                : const SizedBox.shrink(
+                    key: ValueKey('home-notifications-off'),
+                  ),
           ),
           const SizedBox(height: 14),
           PixelPanel(
@@ -358,6 +397,144 @@ class _SoftSyncLine extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _HomeNotificationPanel extends StatelessWidget {
+  const _HomeNotificationPanel({
+    required this.loadingContent,
+    required this.contentError,
+    required this.weather,
+    required this.loggedIn,
+    required this.moodHistoryLoading,
+    required this.historyCount,
+    required this.onRefresh,
+  });
+
+  final bool loadingContent;
+  final String? contentError;
+  final WeatherSnapshot? weather;
+  final bool loggedIn;
+  final bool moodHistoryLoading;
+  final int historyCount;
+  final VoidCallback onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final wx = weather;
+    return PixelPanel(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.notifications_active_outlined,
+                color: RelaxTheme.lavender,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Thông báo hôm nay',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ),
+              IconButton(
+                tooltip: 'Làm mới',
+                onPressed: onRefresh,
+                icon: const Icon(Icons.refresh_rounded),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          _NotificationLine(
+            icon: loadingContent
+                ? Icons.sync_rounded
+                : contentError == null
+                ? Icons.cloud_done_outlined
+                : Icons.cloud_off_outlined,
+            title: loadingContent
+                ? 'Đang đồng bộ nội dung'
+                : contentError == null
+                ? 'Nội dung đã sẵn sàng'
+                : 'Chưa lấy được nội dung mới',
+            subtitle: loadingContent
+                ? 'Đợi một chút để app kéo dữ liệu mới nhất.'
+                : contentError == null
+                ? 'Âm thanh, lời nhắn và mood đã được nạp.'
+                : 'Bấm làm mới để thử lại kết nối backend.',
+          ),
+          const SizedBox(height: 8),
+          _NotificationLine(
+            icon: wx == null
+                ? Icons.location_searching_rounded
+                : wx.isDay
+                ? Icons.wb_sunny_outlined
+                : Icons.nights_stay_outlined,
+            title: wx == null
+                ? 'Đang xem vị trí thời tiết'
+                : '${wx.description} · ${wx.temperatureC.toStringAsFixed(0)}°C',
+            subtitle: wx == null
+                ? 'Nếu thiết bị chưa cấp quyền, app sẽ dùng dữ liệu mặc định.'
+                : 'Gợi ý thư giãn sẽ mềm hơn theo thời tiết hiện tại.',
+          ),
+          const SizedBox(height: 8),
+          _NotificationLine(
+            icon: loggedIn
+                ? Icons.sentiment_satisfied_alt_rounded
+                : Icons.login_rounded,
+            title: loggedIn ? 'Mood tracker hoạt động' : 'Chưa đăng nhập',
+            subtitle: loggedIn
+                ? moodHistoryLoading
+                      ? 'Đang tải lịch sử cảm xúc...'
+                      : '$historyCount check-in đang được dùng để tính gợi ý.'
+                : 'Đăng nhập để đồng bộ mood, phiên thư giãn và nhắc nhở.',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NotificationLine extends StatelessWidget {
+  const _NotificationLine({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: context.relax.surfaceSoft,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: context.relax.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: RelaxTheme.lavender, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                const SizedBox(height: 2),
+                Text(subtitle, style: Theme.of(context).textTheme.bodyMedium),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

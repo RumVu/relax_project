@@ -967,9 +967,9 @@ void showEncourageSheet(
             Text(
               praise,
               textAlign: TextAlign.center,
-              style: Theme.of(sheetCtx).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: Theme.of(
+                sheetCtx,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 18),
             if (hasNext)
@@ -1020,11 +1020,11 @@ void showNextStepSheet(
   required NextStepHandler? onContinue,
 }) {
   // Lọc: bỏ activity vừa làm
-  final candidates = allActivities
-      .where((a) => a.type != currentActivity?.type)
-      .toList()
-    ..sort((a, b) =>
-        (b.reliefPercent ?? 0).compareTo(a.reliefPercent ?? 0));
+  final candidates =
+      allActivities.where((a) => a.type != currentActivity?.type).toList()
+        ..sort(
+          (a, b) => (b.reliefPercent ?? 0).compareTo(a.reliefPercent ?? 0),
+        );
   final suggestions = candidates.take(3).toList();
 
   showModalBottomSheet<void>(
@@ -1174,9 +1174,9 @@ class _NextStepTile extends StatelessWidget {
                       activity.description,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontSize: 11.5,
-                          ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(fontSize: 11.5),
                     ),
                     const SizedBox(height: 4),
                     Row(

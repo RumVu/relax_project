@@ -211,11 +211,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 label: copy.signUp,
                 onPressed: _goRegister,
               ),
-              const SizedBox(height: 8),
-              const SizedBox(
-                height: 64,
-                child: PixelCatScene(scene: CatScene.sleep),
-              ),
             ],
           ),
         ),

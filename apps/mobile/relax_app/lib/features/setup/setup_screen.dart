@@ -866,7 +866,11 @@ class _SetupHeader extends StatelessWidget {
             onPressed: onRefresh,
             icon: const Icon(Icons.refresh_rounded, color: RelaxTheme.lavender),
           ),
-          const PixelCatScene(scene: CatScene.sleep, height: 64),
+          const SizedBox(
+            width: 86,
+            height: 64,
+            child: PixelCatScene(scene: CatScene.sleep, height: 64),
+          ),
         ],
       ),
     );

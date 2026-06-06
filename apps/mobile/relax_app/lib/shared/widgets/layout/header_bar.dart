@@ -50,7 +50,7 @@ class HeaderBar extends StatelessWidget {
           SizedBox(width: 86, height: 70, child: trailing)
         else
           IconButton(
-            tooltip: 'Thống kê',
+            tooltip: 'Thông báo',
             onPressed: onBellTap,
             icon: Stack(
               clipBehavior: Clip.none,

@@ -9,7 +9,7 @@ import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
 import '../challenge/challenge_screen.dart';
 import '../home/home_screen.dart';
-import '../practice/practice_screen.dart';
+import '../journey/journey_screen.dart';
 import '../relax/relax_screen.dart';
 import '../setup/setup_screen.dart';
 
@@ -189,26 +189,34 @@ class _RelaxShellState extends State<RelaxShell> {
     }
     // Fallback từ 4 methods cố định khi backend chưa trả catalog
     return [
-      _activityForMethod(const MethodOption(
-        'Thiền định',
-        Icons.self_improvement_rounded,
-        type: 'MEDITATION',
-      )),
-      _activityForMethod(const MethodOption(
-        'Hít thở',
-        Icons.cloud_queue_rounded,
-        type: 'BREATHING',
-      )),
-      _activityForMethod(const MethodOption(
-        'Viết nhật kí',
-        Icons.edit_note_rounded,
-        type: 'JOURNAL',
-      )),
-      _activityForMethod(const MethodOption(
-        'Nghe nhạc',
-        Icons.headphones_rounded,
-        type: 'MUSIC',
-      )),
+      _activityForMethod(
+        const MethodOption(
+          'Thiền định',
+          Icons.self_improvement_rounded,
+          type: 'MEDITATION',
+        ),
+      ),
+      _activityForMethod(
+        const MethodOption(
+          'Hít thở',
+          Icons.cloud_queue_rounded,
+          type: 'BREATHING',
+        ),
+      ),
+      _activityForMethod(
+        const MethodOption(
+          'Viết nhật kí',
+          Icons.edit_note_rounded,
+          type: 'JOURNAL',
+        ),
+      ),
+      _activityForMethod(
+        const MethodOption(
+          'Nghe nhạc',
+          Icons.headphones_rounded,
+          type: 'MUSIC',
+        ),
+      ),
     ];
   }
 
@@ -216,17 +224,17 @@ class _RelaxShellState extends State<RelaxShell> {
     _pushPracticeFor(_activityForMethod(method));
   }
 
-  /// Push 1 PracticeScreen mới với activity được chọn từ recovery flow.
-  /// Dùng pushReplacement để màn cũ bị bỏ — flow là 1 chuỗi liên tục,
-  /// user back sẽ về thẳng tab Relax, không phải xem lại màn cũ.
+  /// Push 1 JourneyScreen mới — wrap PracticeScreen trong hành trình 5 chương:
+  /// Threshold → Whisper → Immersion → Reflection → Healing.
   void _pushPracticeFor(Activity activity) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PracticeScreen(
+        builder: (_) => JourneyScreen(
           activity: activity,
           allActivities: _allActivities,
           onChainNext: (next) {
-            // Pop màn hiện tại + push màn mới cho activity kế.
+            // Khi user chọn next activity ở chapter Healing:
+            // pop journey hiện tại + push journey mới cho activity kế.
             Navigator.of(context).pop();
             _pushPracticeFor(next);
           },

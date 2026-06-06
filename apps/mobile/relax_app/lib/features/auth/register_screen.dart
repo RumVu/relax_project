@@ -132,11 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'Đặt cho Thi Ái một cái tên thật xinh nha ✦',
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                const SizedBox(height: 14),
-                const Center(
-                  child: PixelCatScene(scene: CatScene.wave, height: 130),
-                ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 18),
                 TextFormField(
                   controller: _nameCtrl,
                   decoration: const InputDecoration(
