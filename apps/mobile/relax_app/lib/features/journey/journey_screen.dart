@@ -41,11 +41,17 @@ class JourneyScreen extends StatefulWidget {
     required this.activity,
     this.allActivities = const [],
     this.onChainNext,
+    this.onGoHome,
   });
 
   final Activity activity;
   final List<Activity> allActivities;
   final ValueChanged<Activity>? onChainNext;
+
+  /// Khi user bấm "Về trang chủ" ở Healing chapter hoặc trong NextStep sheet
+  /// → shell pops journey + switch về Home tab. Nếu null → fallback
+  /// `popUntil(isFirst)` (chỉ pop route, tab có thể vẫn ở Relax).
+  final VoidCallback? onGoHome;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -151,6 +157,7 @@ class _JourneyScreenState extends State<JourneyScreen> {
         Navigator.of(context).pop();
         widget.onChainNext?.call(next);
       },
+      onHome: widget.onGoHome, // sheet "Quay về" → shell switch Home tab
     );
   }
 
@@ -228,7 +235,11 @@ class _JourneyScreenState extends State<JourneyScreen> {
           hasNext:
               widget.onChainNext != null && widget.allActivities.length > 1,
           onNext: _openNextStep,
-          onHome: () => Navigator.of(context).popUntil((r) => r.isFirst),
+          onHome: () {
+            // Pop journey route → về Shell. Shell switches tab nếu có callback.
+            Navigator.of(context).popUntil((r) => r.isFirst);
+            widget.onGoHome?.call();
+          },
         );
     }
   }

@@ -26,8 +26,13 @@ class SecureSession {
     required String access,
     required String refresh,
   }) async {
-    await _storage.write(key: _accessKey, value: access);
-    await _storage.write(key: _refreshKey, value: refresh);
+    // Parallel write — giảm window inconsistent nếu app bị kill giữa chừng.
+    // Vẫn không 100% atomic (no transactional API ở secure storage) nhưng
+    // window thu hẹp từ 2 sequential writes xuống 1 IO round-trip.
+    await Future.wait([
+      _storage.write(key: _accessKey, value: access),
+      _storage.write(key: _refreshKey, value: refresh),
+    ]);
   }
 
   Future<Map<String, dynamic>?> readUser() async {

@@ -94,6 +94,19 @@ class _SetupScreenState extends State<SetupScreen> {
     _loadPrefsAndReminders();
   }
 
+  @override
+  void didUpdateWidget(SetupScreen old) {
+    super.didUpdateWidget(old);
+    // 2-way sync: nếu themeMode đổi từ nơi khác (DEV banner, system,
+    // multi-window...) → cập nhật pill state.
+    if (widget.themeMode != old.themeMode) {
+      final next = widget.themeMode == ThemeMode.light ? 'light' : 'dark';
+      if (_themeTab != 'custom' && _themeTab != next) {
+        setState(() => _themeTab = next);
+      }
+    }
+  }
+
   Future<void> _loadPrefsAndReminders() async {
     final p = await AppPreferences.instance();
     if (!mounted) return;
@@ -145,6 +158,9 @@ class _SetupScreenState extends State<SetupScreen> {
   }
 
   Future<void> _selectTime(String time) async {
+    // Mutex: nếu đang busy, ignore tap mới → tránh race khi user spam-tap
+    // 2 chip cùng lúc → 2 reminder cùng giờ tạo song song → backend dup.
+    if (_remindersBusy) return;
     final session = context.sessionOrNull;
     setState(() {
       _selectedTime = time;
@@ -437,18 +453,28 @@ class _SetupScreenState extends State<SetupScreen> {
           _SectionCard(
             child: _AppearanceBody(
               tab: _themeTab,
-              onTabChanged: (tab) {
-                setState(() => _themeTab = tab);
-                if (tab == 'light') widget.onThemeChanged(ThemeMode.light);
-                if (tab == 'dark') widget.onThemeChanged(ThemeMode.dark);
-                if (tab == 'custom') {
-                  Navigator.of(context).push(
+              onTabChanged: (tab) async {
+                if (tab == 'light') {
+                  setState(() => _themeTab = tab);
+                  widget.onThemeChanged(ThemeMode.light);
+                } else if (tab == 'dark') {
+                  setState(() => _themeTab = tab);
+                  widget.onThemeChanged(ThemeMode.dark);
+                } else if (tab == 'custom') {
+                  // Chưa set _themeTab='custom' ngay → push màn picker.
+                  // Chỉ commit pill khi user thực sự lưu (push trả Color).
+                  final result = await Navigator.of(context).push<Color>(
                     MaterialPageRoute(
                       builder: (_) => CustomsThemeScreen(
                         onAccentChanged: widget.onAccentChanged,
                       ),
                     ),
                   );
+                  if (!mounted) return;
+                  if (result != null) {
+                    setState(() => _themeTab = 'custom');
+                  }
+                  // result == null (user back without save) → giữ pill cũ.
                 }
               },
               appTheme: widget.content.appTheme,
@@ -683,31 +709,54 @@ class _ProfileSheetState extends State<_ProfileSheet> {
     if (yearStr.isNotEmpty) {
       final parsed = int.tryParse(yearStr);
       final currentYear = DateTime.now().year;
-      // Validate: 1900 → year hiện tại. Tránh user nhập 9999 hoặc 12.
       if (parsed == null || parsed < 1900 || parsed > currentYear) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              'Năm sinh phải từ 1900 đến $currentYear nha ~',
-            ),
+            content: Text('Năm sinh phải từ 1900 đến $currentYear nha ~'),
           ),
         );
         return;
       }
       year = parsed;
     }
+    // socialUrl validation — chấp nhận URL http(s) hoặc handle dạng @user
+    // hoặc bỏ trống. Reject text vô nghĩa kiểu "hello world".
+    final social = _linkCtrl.text.trim();
+    if (social.isNotEmpty) {
+      final isUrl = RegExp(r'^https?://[\w.\-]+').hasMatch(social);
+      final isHandle = RegExp(r'^@?[\w.\-]+$').hasMatch(social);
+      if (!isUrl && !isHandle) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Link cá nhân: dùng URL (https://...) hoặc handle (@user) nha',
+            ),
+          ),
+        );
+        return;
+      }
+    }
     setState(() => _saving = true);
     final avatarChanged = _avatarUrl != widget.user?['avatar'];
-    await widget.onSave(
-      name: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
-      phone: _phoneCtrl.text.trim(),
-      socialUrl: _linkCtrl.text.trim(),
-      gender: _gender.isEmpty ? null : _gender,
-      birthYear: year,
-      avatar: avatarChanged ? _avatarUrl : null,
-    );
-    if (!mounted) return;
-    Navigator.of(context).pop();
+    try {
+      await widget.onSave(
+        name: _nameCtrl.text.trim().isEmpty ? null : _nameCtrl.text.trim(),
+        phone: _phoneCtrl.text.trim(),
+        socialUrl: social,
+        gender: _gender.isEmpty ? null : _gender,
+        birthYear: year,
+        avatar: avatarChanged ? _avatarUrl : null,
+      );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (e) {
+      // Nếu save fail → reset _saving để user thử lại không bị kẹt button.
+      if (!mounted) return;
+      setState(() => _saving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lưu hồ sơ thất bại: $e')),
+      );
+    }
   }
 
   @override
@@ -1800,6 +1849,38 @@ class _SoundPicker extends StatelessWidget {
           Text(
             'Âm thanh nhẹ nhàng để nhắc bạn ~',
             style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: RelaxTheme.lavender.withValues(alpha: .1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: RelaxTheme.lavender.withValues(alpha: .25),
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.info_outline_rounded,
+                  size: 14,
+                  color: RelaxTheme.lavender,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    'Notification dùng âm hệ thống. Lựa chọn này chỉ '
+                    'ghi nhớ sở thích — sẽ áp dụng khi mình thêm custom '
+                    'sound trong update sắp tới ✦',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: 10.5,
+                      color: context.relax.muted,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 14),
           for (final s in _sounds)

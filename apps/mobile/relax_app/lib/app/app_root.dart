@@ -137,9 +137,13 @@ class _DevBanner extends StatelessWidget {
 
   Future<void> _forceLogout(BuildContext context) async {
     final navigator = Navigator.of(context, rootNavigator: true);
-    await session.logout();
-    final prefs = await AppPreferences.instance();
-    await prefs.setOnboardingDone(false);
+    try {
+      await session.logout();
+      final prefs = await AppPreferences.instance();
+      await prefs.setOnboardingDone(false);
+    } catch (_) {
+      /* swallow — DEV banner không được crash app vì logout fail */
+    }
     if (!context.mounted) return;
     // Pop tất cả routes về root → SplashGate sẽ re-route đúng
     navigator.popUntil((r) => r.isFirst);

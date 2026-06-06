@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../app/theme.dart';
 
@@ -13,6 +14,24 @@ class LegalScreen extends StatefulWidget {
 class _LegalScreenState extends State<LegalScreen>
     with SingleTickerProviderStateMixin {
   late final TabController _tab = TabController(length: 3, vsync: this);
+  String _version = '...';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVersion();
+  }
+
+  Future<void> _loadVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      if (!mounted) return;
+      setState(() => _version = 'Version ${info.version} — Build ${info.buildNumber}');
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _version = 'Version chưa xác định');
+    }
+  }
 
   @override
   void dispose() {
@@ -43,8 +62,8 @@ class _LegalScreenState extends State<LegalScreen>
       ),
       body: TabBarView(
         controller: _tab,
-        children: const [
-          _LegalBody(
+        children: [
+          const _LegalBody(
             title: 'Điều khoản sử dụng',
             sections: [
               _Section(
@@ -74,7 +93,7 @@ class _LegalScreenState extends State<LegalScreen>
               ),
             ],
           ),
-          _LegalBody(
+          const _LegalBody(
             title: 'Chính sách bảo mật',
             sections: [
               _Section(
@@ -107,22 +126,22 @@ class _LegalScreenState extends State<LegalScreen>
           _LegalBody(
             title: 'Giấy phép & ghi nhận',
             sections: [
-              _Section(
+              const _Section(
                 heading: 'Open source',
                 body:
                     'Ứng dụng sử dụng các thư viện mã nguồn mở: Flutter, just_audio, geolocator, http, shared_preferences, google_sign_in, flutter_secure_storage.',
               ),
-              _Section(
+              const _Section(
                 heading: 'Thời tiết',
                 body:
                     'Dữ liệu thời tiết được cung cấp bởi Open-Meteo (open-meteo.com) — dịch vụ miễn phí cho mục đích phi thương mại.',
               ),
-              _Section(
+              const _Section(
                 heading: 'Hình ảnh',
                 body:
                     'Các minh họa pixel art được tạo riêng cho ứng dụng. Vui lòng không sao chép sử dụng bên ngoài app.',
               ),
-              _Section(heading: 'Phiên bản', body: 'Version 1.0.1 — Build 2'),
+              _Section(heading: 'Phiên bản', body: _version),
             ],
           ),
         ],

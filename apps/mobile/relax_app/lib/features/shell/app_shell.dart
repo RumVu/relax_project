@@ -296,6 +296,9 @@ class _RelaxShellState extends State<RelaxShell> {
             Navigator.of(context).pop();
             _pushPracticeFor(next);
           },
+          // Khi user "Về trang chủ" ở Healing → switch tab Home để storytelling
+          // khép kín tròn (Home → Journey → Home), không kẹt ở Relax tab.
+          onGoHome: () => setState(() => _tab = 0),
         ),
       ),
     );

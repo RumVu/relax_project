@@ -1145,6 +1145,7 @@ void showNextStepSheet(
   Activity? currentActivity,
   required List<Activity> allActivities,
   required NextStepHandler? onContinue,
+  VoidCallback? onHome,
 }) {
   // Lọc: bỏ activity vừa làm
   final candidates =
@@ -1205,6 +1206,7 @@ void showNextStepSheet(
               onPressed: () {
                 Navigator.of(sheetCtx).pop();
                 Navigator.of(context).popUntil((r) => r.isFirst);
+                onHome?.call();
               },
             ),
           ],
