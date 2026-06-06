@@ -25,7 +25,30 @@ flutter run \
 
 ---
 
-## 🤖 Android — Setup theo 4 bước
+## ✅ Android — Đã setup xong
+
+| Item | Value |
+|---|---|
+| Package name | `com.example.relax_app` |
+| Client ID | `884741112800-vkq8svs2c4012n457uta7uva4n4mteii.apps.googleusercontent.com` |
+| SHA-1 | Đã đăng ký ở Google Cloud Console |
+
+Build & test:
+
+```bash
+flutter run -d <android-device-id> \
+  --dart-define=GOOGLE_CLIENT_ID=884741112800-vkq8svs2c4012n457uta7uva4n4mteii.apps.googleusercontent.com
+```
+
+> ⚠️ Android **không** cần patch `AndroidManifest.xml` hay code app side.
+> Google verify qua package name + SHA-1 cert đã đăng ký ở Cloud Console.
+
+---
+
+<details>
+<summary>📚 Hướng dẫn chi tiết (cho lần setup keystore release sau)</summary>
+
+### Setup từ đầu cho Android — 4 bước
 
 ### **Bước 1: Lấy SHA-1 fingerprint của debug keystore**
 
@@ -114,6 +137,8 @@ flutter run -d <android-device-id> \
   --dart-define=GOOGLE_CLIENT_ID=884741112800-<ANDROID_PREFIX>.apps.googleusercontent.com
 ```
 
+</details>
+
 ---
 
 ## 🚨 Khi đóng gói production
@@ -169,8 +194,8 @@ Signing tự gen 1 cái khác nữa).
 
 | Platform | Identifier | Client ID |
 |---|---|---|
-| **Web** | `relax-project-web-dashboard.vercel.app` | `627379199532-4o73eb98p9s6l70dav8s4l8qujja1ljr.apps.googleusercontent.com` |
+| **Web** | `relax-project-web-dashboard.vercel.app` | `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com` |
 | **iOS** | Bundle: `com.example.relaxApp` | `884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5.apps.googleusercontent.com` |
-| **Android** | Package: `com.example.relax_app` | _(điền sau khi tạo)_ |
+| **Android** | Package: `com.example.relax_app` | `884741112800-vkq8svs2c4012n457uta7uva4n4mteii.apps.googleusercontent.com` |
 
 Backend env (`GOOGLE_CLIENT_ID`) = list 3 cái trên, ngăn cách dấu phẩy.
