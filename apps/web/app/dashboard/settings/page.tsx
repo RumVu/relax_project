@@ -273,6 +273,7 @@ const VI_SETTINGS_COPY = {
   upgradeFailedReason: (reason: string) => `Lỗi từ server: ${reason}`,
   missingPaymentId:
     'Backend không trả về ID thanh toán — không thể kích hoạt gói. Báo dev kiểm tra /v1/billing/me/checkout-session.',
+  redirectingToSepay: 'Đang chuyển tới cổng thanh toán SePay…',
   show: 'Hiển thị',
   sessionsPerPage: 'phiên / trang',
   previousPage: 'Trang trước',
@@ -430,6 +431,7 @@ const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
   upgradeFailedReason: (reason: string) => `Server error: ${reason}`,
   missingPaymentId:
     'Backend did not return a payment id — cannot activate plan. Ask dev to check /v1/billing/me/checkout-session.',
+  redirectingToSepay: 'Redirecting to SePay payment gateway…',
   show: 'Show',
   sessionsPerPage: 'sessions / page',
   previousPage: 'Previous page',
@@ -2408,7 +2410,16 @@ export default function SettingsPage() {
                   errorUrl: `${redirectOrigin}/dashboard/settings?payment=error`,
                   cancelUrl: `${redirectOrigin}/dashboard/settings?payment=cancel`,
                 }),
-              })) as CheckoutResult & { checkout?: { url?: string } };
+              })) as CheckoutResult & {
+                checkout?: {
+                  // SePay PG SDK trả checkoutUrl (form action) + checkoutFormfields
+                  // (hidden POST fields). Browser cần build <form> rồi submit POST.
+                  checkoutUrl?: string;
+                  checkoutFormfields?: Record<string, string | number>;
+                  // Provider khác (Stripe / mock) có thể trả url đơn giản cho GET redirect.
+                  url?: string;
+                };
+              };
               setCheckoutResult(result);
 
               const paymentId = result.payment?.id;
@@ -2422,8 +2433,42 @@ export default function SettingsPage() {
                 return;
               }
 
-              // Path A: Backend trả checkout.url (SePay QR page / Stripe / ...).
-              // Redirect user tới đó. Đây là production path khi SEPAY env wired.
+              // Path A1: SePay PG SDK shape — `checkoutUrl` + `checkoutFormfields`.
+              // Browser KHÔNG redirect GET được — phải build <form method=POST>
+              // submit để SePay nhận đủ fields cần thiết (order_invoice_number,
+              // amount, currency, success/error/cancel URLs...). Sau đó SePay
+              // sẽ redirect user qua QR/banking page.
+              const sepayUrl = result.checkout?.checkoutUrl;
+              const sepayFields = result.checkout?.checkoutFormfields;
+              if (
+                sepayUrl &&
+                sepayFields &&
+                Object.keys(sepayFields).length > 0 &&
+                !isDowngradeToFree
+              ) {
+                pushToast({
+                  tone: 'info',
+                  title: copy.intentCreated(checkoutPlan.title),
+                  message: copy.redirectingToSepay,
+                });
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = sepayUrl;
+                form.style.display = 'none';
+                for (const [key, value] of Object.entries(sepayFields)) {
+                  const input = document.createElement('input');
+                  input.type = 'hidden';
+                  input.name = key;
+                  input.value = String(value);
+                  form.appendChild(input);
+                }
+                document.body.appendChild(form);
+                form.submit();
+                return;
+              }
+
+              // Path A2: Simple GET redirect URL (Stripe/mock). Đây là path em
+              // dùng cho mock-checkout dev, không phải SePay PG.
               const externalUrl = result.checkout?.url;
               if (externalUrl && !isDowngradeToFree) {
                 pushToast({
