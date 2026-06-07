@@ -57,7 +57,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 3,
     metric: 'journal_entries',
     category: 'journal',
-    title: { vi: 'Viết 3 nhật ký trong tuần', en: 'Write 3 journal entries this week' },
+    title: {
+      vi: 'Viết 3 nhật ký trong tuần',
+      en: 'Write 3 journal entries this week',
+    },
     description: {
       vi: 'Mỗi lần 2 phút thôi cũng đủ để duy trì thói quen.',
       en: 'Two minutes per entry is plenty to keep the habit alive.',
@@ -69,7 +72,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 1,
     metric: 'favorite_journals',
     category: 'journal',
-    title: { vi: 'Đánh dấu yêu thích một nhật ký', en: 'Favourite a journal entry' },
+    title: {
+      vi: 'Đánh dấu yêu thích một nhật ký',
+      en: 'Favourite a journal entry',
+    },
     description: {
       vi: 'Lưu lại một dòng tự hào để đọc lại vào ngày buồn.',
       en: 'Pin a proud line so a low day has something to come back to.',
@@ -105,7 +111,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 3,
     metric: 'mood_checkins',
     category: 'mood',
-    title: { vi: 'Ghi cảm xúc 3 ngày trong tuần', en: 'Mood check-ins on 3 different days' },
+    title: {
+      vi: 'Ghi cảm xúc 3 ngày trong tuần',
+      en: 'Mood check-ins on 3 different days',
+    },
     description: {
       vi: 'Cách nhanh nhất để cải thiện chuỗi (streak) là bắt đầu nhịp 3 ngày.',
       en: 'A 3-day rhythm is the fastest path to a real streak.',
@@ -117,7 +126,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 3,
     metric: 'distinct_mood_types',
     category: 'mood',
-    title: { vi: 'Ghi nhận 3 loại cảm xúc khác nhau', en: 'Log 3 distinct mood types' },
+    title: {
+      vi: 'Ghi nhận 3 loại cảm xúc khác nhau',
+      en: 'Log 3 distinct mood types',
+    },
     description: {
       vi: 'Cảm xúc nào cũng có chỗ đứng — đừng chỉ ghi khi vui.',
       en: 'Every mood counts — not just the happy ones.',
@@ -129,7 +141,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 1,
     metric: 'breathing_sessions',
     category: 'breathing',
-    title: { vi: 'Hít thở một phiên hôm nay', en: 'Do one breathing session today' },
+    title: {
+      vi: 'Hít thở một phiên hôm nay',
+      en: 'Do one breathing session today',
+    },
     description: {
       vi: 'Mỗi bài thở 2-5 phút giúp nhịp tim chậm lại rõ rệt.',
       en: 'Two to five minutes is enough to slow your heart-rate noticeably.',
@@ -141,7 +156,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 3,
     metric: 'breathing_sessions',
     category: 'breathing',
-    title: { vi: 'Hít thở 3 phiên trong tuần', en: '3 breathing sessions this week' },
+    title: {
+      vi: 'Hít thở 3 phiên trong tuần',
+      en: '3 breathing sessions this week',
+    },
     description: {
       vi: 'Bài tập dễ làm nhất khi bạn cảm thấy quá tải.',
       en: 'The easiest exercise to reach for when you feel overloaded.',
@@ -153,7 +171,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 10,
     metric: 'sound_minutes',
     category: 'sound',
-    title: { vi: 'Nghe 10 phút âm thanh thư giãn', en: 'Listen to 10 min of ambient sound' },
+    title: {
+      vi: 'Nghe 10 phút âm thanh thư giãn',
+      en: 'Listen to 10 min of ambient sound',
+    },
     description: {
       vi: 'Mở mưa rơi, lofi hoặc tiếng mèo trong lúc làm việc cũng tính.',
       en: 'Rain, lofi or cat purrs in the background while you work all count.',
@@ -165,7 +186,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 1,
     metric: 'relax_sessions',
     category: 'breathing',
-    title: { vi: 'Hoàn thành một phiên thư giãn', en: 'Finish one relax session today' },
+    title: {
+      vi: 'Hoàn thành một phiên thư giãn',
+      en: 'Finish one relax session today',
+    },
     description: {
       vi: 'Bắt đầu → kết thúc một phiên ở trang Nghỉ ngơi để hệ thống ghi nhận.',
       en: 'Start → finish a session on the Breaks page so it counts.',
@@ -177,7 +201,10 @@ export const QUEST_TEMPLATES: QuestTemplate[] = [
     target: 1,
     metric: 'companion_interactions',
     category: 'companion',
-    title: { vi: 'Tương tác với linh thú hôm nay', en: 'Greet your companion today' },
+    title: {
+      vi: 'Tương tác với linh thú hôm nay',
+      en: 'Greet your companion today',
+    },
     description: {
       vi: 'Vuốt ve, cho ăn hoặc chơi — chọn cái nào cũng được.',
       en: 'Pet, feed or play — any of the three keeps the bond up.',

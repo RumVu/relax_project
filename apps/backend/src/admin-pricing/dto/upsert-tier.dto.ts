@@ -40,7 +40,10 @@ export class CreateTierDto {
   @Length(0, 500)
   description?: string;
 
-  @ApiProperty({ description: 'List price in the smallest visible unit (e.g. VND).', example: 49000 })
+  @ApiProperty({
+    description: 'List price in the smallest visible unit (e.g. VND).',
+    example: 49000,
+  })
   @Type(() => Number)
   @Min(0)
   price!: number;
@@ -53,7 +56,10 @@ export class CreateTierDto {
   @Min(0)
   salePrice?: number;
 
-  @ApiPropertyOptional({ description: 'Short label shown beside the sale price, e.g. "BLACK FRIDAY -20%".' })
+  @ApiPropertyOptional({
+    description:
+      'Short label shown beside the sale price, e.g. "BLACK FRIDAY -20%".',
+  })
   @IsOptional()
   @IsString()
   @Length(0, 60)
@@ -79,7 +85,10 @@ export class CreateTierDto {
   @IsEnum(BillingCycle)
   billingCycle!: BillingCycle;
 
-  @ApiPropertyOptional({ description: 'Display order, low to high.', default: 0 })
+  @ApiPropertyOptional({
+    description: 'Display order, low to high.',
+    default: 0,
+  })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

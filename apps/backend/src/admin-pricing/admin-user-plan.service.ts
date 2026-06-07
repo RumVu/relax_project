@@ -36,7 +36,12 @@ export class AdminUserPlanService {
       userId,
       subscription:
         subscription ??
-        ({ planName: 'FREE', status: 'ACTIVE', price: 0, currency: 'VND' } as const),
+        ({
+          planName: 'FREE',
+          status: 'ACTIVE',
+          price: 0,
+          currency: 'VND',
+        } as const),
     };
   }
 
@@ -100,7 +105,10 @@ export class AdminUserPlanService {
     return user;
   }
 
-  private computePeriodEnd(start: Date, cycle: BillingCycle | null): Date | null {
+  private computePeriodEnd(
+    start: Date,
+    cycle: BillingCycle | null,
+  ): Date | null {
     if (cycle == null) return null;
     // Schema only enumerates MONTHLY / ANNUAL today. Free tier still goes
     // through here and gets a MONTHLY rollover by default — that's

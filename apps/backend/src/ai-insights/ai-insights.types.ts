@@ -49,7 +49,11 @@ export interface InsightProviderContext {
   aggregate: MoodAggregate;
   /** Catalog snippet the provider can pick recommendations from. */
   catalog: {
-    breathing: Array<{ id: string; title: string; description?: string | null }>;
+    breathing: Array<{
+      id: string;
+      title: string;
+      description?: string | null;
+    }>;
     ambient: Array<{ id: string; title: string; category?: string | null }>;
   };
 }

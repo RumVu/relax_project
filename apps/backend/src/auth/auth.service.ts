@@ -421,9 +421,13 @@ export class AuthService {
         token: token.plainToken,
         ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
       })
-      .catch((err) =>
+      .catch((err: unknown) =>
         // Provider already logs internally — swallow so the API stays 200.
-        ({ provider: 'unknown', delivered: false, error: err?.message }),
+        ({
+          provider: 'unknown',
+          delivered: false,
+          error: err instanceof Error ? err.message : String(err),
+        }),
       );
 
     return {
@@ -486,10 +490,10 @@ export class AuthService {
         token: token.plainToken,
         ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
       })
-      .catch((err) => ({
+      .catch((err: unknown) => ({
         provider: 'unknown',
         delivered: false,
-        error: err?.message,
+        error: err instanceof Error ? err.message : String(err),
       }));
 
     return {

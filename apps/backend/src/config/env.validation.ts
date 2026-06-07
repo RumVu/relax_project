@@ -32,7 +32,10 @@ export function validateEnv(config: Env) {
     );
   }
 
-  if (mergedConfig.JWT_SECRET && mergedConfig.JWT_SECRET.length < MIN_JWT_SECRET_LENGTH) {
+  if (
+    mergedConfig.JWT_SECRET &&
+    mergedConfig.JWT_SECRET.length < MIN_JWT_SECRET_LENGTH
+  ) {
     throw new Error(
       `${ErrorCode.CONFIG_MISSING_REQUIRED_ENV}: JWT_SECRET must be at least ${MIN_JWT_SECRET_LENGTH} characters`,
     );

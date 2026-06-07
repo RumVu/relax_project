@@ -47,9 +47,10 @@ export class SendGridEmailProvider implements EmailProvider {
         delivered: true,
         messageId: res.headers.get('x-message-id') ?? undefined,
       };
-    } catch (err: any) {
-      this.logger.error(`SendGrid network error: ${err?.message}`);
-      return { provider: this.name, delivered: false, error: err?.message };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`SendGrid network error: ${msg}`);
+      return { provider: this.name, delivered: false, error: msg };
     }
   }
 }

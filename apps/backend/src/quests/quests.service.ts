@@ -44,7 +44,10 @@ export class QuestsService {
    * Read the active quest slate for a user. If they don't have ACTIVE_QUEST_COUNT
    * active rows, fill the deficit with fresh random templates.
    */
-  async getMine(userId: string, locale: Locale = 'vi'): Promise<QuestStateView[]> {
+  async getMine(
+    userId: string,
+    locale: Locale = 'vi',
+  ): Promise<QuestStateView[]> {
     await this.ensureActive(userId);
     const rows = await this.prisma.userQuest.findMany({
       where: { userId },
@@ -59,7 +62,9 @@ export class QuestsService {
 
     // Persist `completedAt` for any rows that crossed the threshold during
     // this read so subsequent reads can short-circuit.
-    const newlyCompleted = views.filter((v, i) => v.completed && !rows[i].completedAt);
+    const newlyCompleted = views.filter(
+      (v, i) => v.completed && !rows[i].completedAt,
+    );
     if (newlyCompleted.length > 0) {
       await this.prisma.userQuest.updateMany({
         where: { id: { in: newlyCompleted.map((v) => v.id) } },
@@ -139,7 +144,10 @@ export class QuestsService {
     );
   }
 
-  private async evaluate(row: UserQuest, locale: Locale): Promise<QuestStateView> {
+  private async evaluate(
+    row: UserQuest,
+    locale: Locale,
+  ): Promise<QuestStateView> {
     const tmpl = pickQuestTemplate(row.templateCode);
     if (!tmpl) {
       // Orphaned row pointing at a deleted template — surface a sentinel
@@ -173,7 +181,8 @@ export class QuestsService {
       progress: Math.min(progress, tmpl.target),
       completed,
       completedAt:
-        row.completedAt?.toISOString() ?? (completed ? new Date().toISOString() : null),
+        row.completedAt?.toISOString() ??
+        (completed ? new Date().toISOString() : null),
       assignedAt: row.assignedAt.toISOString(),
     };
   }

@@ -12,6 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { DeterministicInsightProvider } from './providers/deterministic.provider';
 import { GeminiInsightProvider } from './providers/gemini.provider';
 import {
+  InsightGenerationResult,
   InsightProvider,
   InsightProviderContext,
   MoodAggregate,
@@ -70,9 +71,11 @@ export class AiInsightsService {
       Date.now() - latestInsight.createdAt.getTime() > FRESH_TTL_MS;
 
     if (stale) {
-      await this.generateForUser(userId).catch((err) =>
+      await this.generateForUser(userId).catch((err: unknown) =>
         this.logger.warn(
-          `Auto-generate insights for ${userId} failed: ${err?.message}`,
+          `Auto-generate insights for ${userId} failed: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
         ),
       );
     }
@@ -147,13 +150,14 @@ export class AiInsightsService {
       catalog,
     };
 
-    const provider = await this.pickProvider();
-    let result;
+    const provider = this.pickProvider();
+    let result: InsightGenerationResult;
     try {
       result = await provider.generate(ctx);
-    } catch (err: any) {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
       this.logger.warn(
-        `Provider ${provider.name} failed (${err?.message}); falling back to deterministic`,
+        `Provider ${provider.name} failed (${msg}); falling back to deterministic`,
       );
       result = await this.deterministic.generate(ctx);
     }
@@ -190,7 +194,7 @@ export class AiInsightsService {
     return result;
   }
 
-  private async pickProvider(): Promise<InsightProvider> {
+  private pickProvider(): InsightProvider {
     return this.geminiProvider ?? this.deterministic;
   }
 
@@ -199,7 +203,9 @@ export class AiInsightsService {
     days: number,
   ): Promise<MoodAggregate> {
     const windowEnd = new Date();
-    const windowStart = new Date(windowEnd.getTime() - days * 24 * 60 * 60 * 1000);
+    const windowStart = new Date(
+      windowEnd.getTime() - days * 24 * 60 * 60 * 1000,
+    );
 
     const rows = await this.prisma.moodCheckin.findMany({
       where: { userId, createdAt: { gte: windowStart, lte: windowEnd } },

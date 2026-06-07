@@ -31,9 +31,10 @@ export class ResendEmailProvider implements EmailProvider {
           tags: [{ name: 'purpose', value: payload.purpose }],
         }),
       });
-      const body = (await res.json().catch(() => null)) as
-        | { id?: string; message?: string }
-        | null;
+      const body = (await res.json().catch(() => null)) as {
+        id?: string;
+        message?: string;
+      } | null;
       if (!res.ok) {
         const message = body?.message ?? `HTTP ${res.status}`;
         this.logger.warn(`Resend send failed: ${message}`);
@@ -44,9 +45,10 @@ export class ResendEmailProvider implements EmailProvider {
         delivered: true,
         messageId: body?.id,
       };
-    } catch (err: any) {
-      this.logger.error(`Resend network error: ${err?.message}`);
-      return { provider: this.name, delivered: false, error: err?.message };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Resend network error: ${msg}`);
+      return { provider: this.name, delivered: false, error: msg };
     }
   }
 }

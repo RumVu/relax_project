@@ -14,12 +14,10 @@ import {
 export class DeterministicInsightProvider implements InsightProvider {
   readonly name = 'deterministic';
 
-  async generate(
-    ctx: InsightProviderContext,
-  ): Promise<InsightGenerationResult> {
+  generate(ctx: InsightProviderContext): Promise<InsightGenerationResult> {
     const insights = this.buildInsights(ctx);
     const recommendations = this.buildRecommendations(ctx);
-    return { provider: this.name, insights, recommendations };
+    return Promise.resolve({ provider: this.name, insights, recommendations });
   }
 
   private buildInsights(ctx: InsightProviderContext): InsightDraft[] {
@@ -122,8 +120,9 @@ export class DeterministicInsightProvider implements InsightProvider {
           ? ['LOFI', 'PIANO']
           : ['FOCUS', 'LOFI'];
     return (
-      list.find((s) => preferred.includes(String(s.category ?? '').toUpperCase())) ??
-      list[0]
+      list.find((s) =>
+        preferred.includes(String(s.category ?? '').toUpperCase()),
+      ) ?? list[0]
     );
   }
 

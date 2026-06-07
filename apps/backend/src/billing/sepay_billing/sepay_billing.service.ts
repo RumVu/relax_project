@@ -1,9 +1,7 @@
-import { HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PaymentStatus } from '@prisma/client';
 import { SePayPgClient } from 'sepay-pg-node';
-import { AppException } from '../../common/errors/app.exception';
-import { ErrorCode } from '../../common/errors/error-code';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BillingService } from '../billing.service';
 
@@ -21,7 +19,6 @@ export interface SePayWebhookPayload {
   id?: number | string;
   [key: string]: unknown;
 }
-
 
 @Injectable()
 export class SepayBillingService {
@@ -121,10 +118,7 @@ export class SepayBillingService {
     for (const candidate of candidates) {
       payment = await this.prisma.payment.findFirst({
         where: {
-          OR: [
-            { id: candidate },
-            { externalPaymentId: candidate },
-          ],
+          OR: [{ id: candidate }, { externalPaymentId: candidate }],
         },
       });
       if (payment) {
@@ -150,9 +144,10 @@ export class SepayBillingService {
 
         for (const candidate of candidates) {
           try {
-            const orderRes = await client.order.retrieve(candidate);
-            const orderData = orderRes.data?.data;
-            const invoiceNumber = orderData?.order_invoice_number;
+            const orderRes = (await client.order.retrieve(candidate)) as {
+              data?: { data?: { order_invoice_number?: string } };
+            };
+            const invoiceNumber = orderRes.data?.data?.order_invoice_number;
             if (invoiceNumber) {
               this.logger.log(
                 `SePay API mapped ${candidate} → ${invoiceNumber}`,
@@ -162,9 +157,12 @@ export class SepayBillingService {
               });
               if (payment) break;
             }
-          } catch (err: any) {
+          } catch (err: unknown) {
+            const status = (err as { response?: { status?: number } })?.response
+              ?.status;
+            const msg = err instanceof Error ? err.message : String(err);
             this.logger.warn(
-              `SePay API retrieve("${candidate}") failed: ${err?.response?.status} ${err?.message}`,
+              `SePay API retrieve("${candidate}") failed: ${status} ${msg}`,
             );
           }
         }

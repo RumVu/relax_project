@@ -110,7 +110,8 @@ export class BillingService {
       const now = new Date();
       return tiers.map((tier) => {
         const onSale = this.isOnSale(tier, now);
-        const effectivePrice = onSale && tier.salePrice != null ? tier.salePrice : tier.price;
+        const effectivePrice =
+          onSale && tier.salePrice != null ? tier.salePrice : tier.price;
         return {
           id: tier.id,
           name: tier.name,
@@ -127,7 +128,9 @@ export class BillingService {
                 endsAt: tier.saleEndsAt,
                 percentOff:
                   tier.price > 0 && tier.salePrice != null
-                    ? Math.round(((tier.price - tier.salePrice) / tier.price) * 100)
+                    ? Math.round(
+                        ((tier.price - tier.salePrice) / tier.price) * 100,
+                      )
                     : 0,
               }
             : null,
@@ -150,7 +153,11 @@ export class BillingService {
 
   /** True when `now` is inside [saleStartsAt, saleEndsAt] and salePrice is set. */
   private isOnSale(
-    tier: { salePrice: number | null; saleStartsAt: Date | null; saleEndsAt: Date | null },
+    tier: {
+      salePrice: number | null;
+      saleStartsAt: Date | null;
+      saleEndsAt: Date | null;
+    },
     now: Date,
   ): boolean {
     if (tier.salePrice == null) return false;

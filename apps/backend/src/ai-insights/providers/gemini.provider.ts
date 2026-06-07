@@ -111,15 +111,23 @@ export class GeminiInsightProvider implements InsightProvider {
     recommendations?: unknown[];
   } | null {
     try {
-      return JSON.parse(raw);
+      return JSON.parse(raw) as {
+        insights?: unknown[];
+        recommendations?: unknown[];
+      };
     } catch {
       // Try to extract the first {...} block.
       const match = raw.match(/\{[\s\S]*\}/);
       if (!match) return null;
       try {
-        return JSON.parse(match[0]);
+        return JSON.parse(match[0]) as {
+          insights?: unknown[];
+          recommendations?: unknown[];
+        };
       } catch (err) {
-        this.logger.warn(`Failed to parse Gemini JSON: ${(err as Error).message}`);
+        this.logger.warn(
+          `Failed to parse Gemini JSON: ${(err as Error).message}`,
+        );
         return null;
       }
     }
@@ -155,13 +163,15 @@ export class GeminiInsightProvider implements InsightProvider {
         const r = item as Record<string, unknown>;
         const contentType =
           typeof r.contentType === 'string' ? r.contentType : null;
-        const contentId =
-          typeof r.contentId === 'string' ? r.contentId : null;
+        const contentId = typeof r.contentId === 'string' ? r.contentId : null;
         const reason = typeof r.reason === 'string' ? r.reason : null;
         const score = typeof r.score === 'number' ? r.score : 0.5;
         if (!contentType || !contentId || !reason) return null;
         // Drop hallucinated ids.
-        if (contentType === 'BreathingExercise' && !validBreathingIds.has(contentId))
+        if (
+          contentType === 'BreathingExercise' &&
+          !validBreathingIds.has(contentId)
+        )
           return null;
         if (contentType === 'AmbientSound' && !validAmbientIds.has(contentId))
           return null;

@@ -4,15 +4,8 @@ import { LogEmailProvider } from './providers/log.provider';
 import { ResendEmailProvider } from './providers/resend.provider';
 import { SendGridEmailProvider } from './providers/sendgrid.provider';
 import { SmtpEmailProvider } from './providers/smtp.provider';
-import {
-  EmailPayload,
-  EmailProvider,
-  EmailSendResult,
-} from './email.types';
-import {
-  resetPasswordTemplate,
-  verifyEmailTemplate,
-} from './email-templates';
+import { EmailPayload, EmailProvider, EmailSendResult } from './email.types';
+import { resetPasswordTemplate, verifyEmailTemplate } from './email-templates';
 
 /**
  * EmailService — picks a provider at boot and renders templates.

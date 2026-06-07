@@ -19,7 +19,9 @@ export class AdminPricingController {
   constructor(private readonly service: AdminPricingService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List every subscription tier (active + inactive).' })
+  @ApiOperation({
+    summary: 'List every subscription tier (active + inactive).',
+  })
   list() {
     return this.service.list();
   }
@@ -46,7 +48,9 @@ export class AdminPricingController {
   }
 
   @Patch(':id/clear-sale')
-  @ApiOperation({ summary: 'Drop the active sale window without touching the regular price.' })
+  @ApiOperation({
+    summary: 'Drop the active sale window without touching the regular price.',
+  })
   clearSale(@Param('id') id: string) {
     return this.service.clearSale(id);
   }

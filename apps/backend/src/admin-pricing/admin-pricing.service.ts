@@ -51,7 +51,9 @@ export class AdminPricingService {
           isActive: dto.isActive ?? true,
         },
       });
-      this.logger.log(`Tier created: ${tier.name} @ ${tier.price} ${tier.currency}`);
+      this.logger.log(
+        `Tier created: ${tier.name} @ ${tier.price} ${tier.currency}`,
+      );
       return tier;
     } catch (err) {
       if (
@@ -69,13 +71,15 @@ export class AdminPricingService {
 
   async update(id: string, dto: UpdateTierDto) {
     const existing = await this.requireTier(id);
-    const merged = { ...existing, ...dto } as Partial<SubscriptionTier> & UpdateTierDto;
+    const merged = { ...existing, ...dto } as Partial<SubscriptionTier> &
+      UpdateTierDto;
     this.validateSaleWindow(merged);
 
     const data: Prisma.SubscriptionTierUpdateInput = {};
     if (dto.name !== undefined) data.name = dto.name;
     if (dto.title !== undefined) data.title = dto.title || null;
-    if (dto.description !== undefined) data.description = dto.description || null;
+    if (dto.description !== undefined)
+      data.description = dto.description || null;
     if (dto.price !== undefined) data.price = dto.price;
     if (dto.salePrice !== undefined) data.salePrice = dto.salePrice;
     if (dto.saleLabel !== undefined) data.saleLabel = dto.saleLabel || null;
@@ -127,7 +131,9 @@ export class AdminPricingService {
   }
 
   private async requireTier(id: string) {
-    const tier = await this.prisma.subscriptionTier.findUnique({ where: { id } });
+    const tier = await this.prisma.subscriptionTier.findUnique({
+      where: { id },
+    });
     if (!tier) {
       throw new NotFoundException({
         code: ErrorCode.DATABASE_RECORD_NOT_FOUND,
@@ -137,12 +143,14 @@ export class AdminPricingService {
     return tier;
   }
 
-  private validateSaleWindow(dto: Partial<{
-    salePrice: number | null;
-    saleStartsAt: string | Date | null;
-    saleEndsAt: string | Date | null;
-    price: number;
-  }>) {
+  private validateSaleWindow(
+    dto: Partial<{
+      salePrice: number | null;
+      saleStartsAt: string | Date | null;
+      saleEndsAt: string | Date | null;
+      price: number;
+    }>,
+  ) {
     const hasSalePrice = dto.salePrice !== null && dto.salePrice !== undefined;
     const hasStart = Boolean(dto.saleStartsAt);
     const hasEnd = Boolean(dto.saleEndsAt);

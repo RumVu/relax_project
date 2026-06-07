@@ -11,11 +11,15 @@ export class LogEmailProvider implements EmailProvider {
   readonly name = 'log';
   private readonly logger = new Logger('Email:log');
 
-  async send(payload: EmailPayload): Promise<EmailSendResult> {
+  send(payload: EmailPayload): Promise<EmailSendResult> {
     this.logger.log(
       `[${payload.purpose}] to=${payload.to} subject="${payload.subject}"`,
     );
     this.logger.debug(payload.text);
-    return { provider: this.name, delivered: true, messageId: 'log-only' };
+    return Promise.resolve({
+      provider: this.name,
+      delivered: true,
+      messageId: 'log-only',
+    });
   }
 }

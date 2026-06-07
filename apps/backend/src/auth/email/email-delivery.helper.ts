@@ -28,9 +28,10 @@ export function buildEmailDelivery(
   plainToken?: string,
   emailService?: EmailService,
 ): EmailDeliveryDescriptor {
-  const provider = emailService?.providerName()
-    ?? configService.get<string>('EMAIL_PROVIDER')
-    ?? 'unknown';
+  const provider =
+    emailService?.providerName() ??
+    configService.get<string>('EMAIL_PROVIDER') ??
+    'unknown';
   const configured = emailService
     ? emailService.isConfigured()
     : Boolean(configService.get<string>('RESEND_API_KEY')) ||
