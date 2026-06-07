@@ -45,6 +45,17 @@ export default function DashboardPage() {
   });
   const summary = data.overview.summaryCards;
   const displayName = data.settings.profile.displayName;
+  // Defensive: bất kỳ field nào pass thẳng vào recharts MUST là array.
+  // Nếu data merge từ API/mock trả shape khác (object thay array), recharts
+  // internal `.filter()` sẽ crash → error boundary → "Something went wrong"
+  // → CI e2e fail. Coerce mọi field về [] khi không phải array.
+  const safeTimeline = Array.isArray(data.timeline) ? data.timeline : [];
+  const safeDistribution = Array.isArray(data.distribution) ? data.distribution : [];
+  const safeWeeklyStats = Array.isArray(data.weeklyStats) ? data.weeklyStats : [];
+  const safeRelaxActivities = Array.isArray(data.relaxActivities) ? data.relaxActivities : [];
+  const safeRecentMoments = Array.isArray(data.overview?.relax?.recentMoments)
+    ? data.overview.relax.recentMoments
+    : [];
   const title = displayName
     ? t('dashboard.titleWithName', { name: displayName })
     : t('dashboard.title');
@@ -140,7 +151,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
-        <MoodAreaDashboardChart data={data.timeline} />
+        <MoodAreaDashboardChart data={safeTimeline} />
         <Card>
           <SectionTitle
             title={t('dashboard.section.moodTracking')}
@@ -148,14 +159,14 @@ export default function DashboardPage() {
             action={<BarChart3 className="h-5 w-5 text-violet" />}
           />
           <div className="mt-5">
-            <ProgressList items={data.distribution} />
+            <ProgressList items={safeDistribution} />
           </div>
         </Card>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <RelaxActivityChart data={data.relaxActivities} />
-        <WeeklyStatsChart data={data.weeklyStats} />
+        <RelaxActivityChart data={safeRelaxActivities} />
+        <WeeklyStatsChart data={safeWeeklyStats} />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]">
@@ -173,7 +184,7 @@ export default function DashboardPage() {
                 t('dashboard.table.duration'),
                 t('dashboard.table.relief'),
               ]}
-              rows={data.overview.relax.recentMoments.map((moment) => [
+              rows={safeRecentMoments.map((moment) => [
                 moment.title,
                 moment.time,
                 moment.duration,
@@ -184,7 +195,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <DistributionChart data={data.distribution} />
+      <DistributionChart data={safeDistribution} />
     </DashboardShell>
   );
 }

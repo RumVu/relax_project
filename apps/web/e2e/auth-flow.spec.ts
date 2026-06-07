@@ -29,6 +29,19 @@ test.describe('Auth flow + guarded routes', () => {
     ).toBeVisible();
   });
 
+  test('register form enforces the backend password rule', async ({ page }) => {
+    await page.goto('/auth/register');
+    await page.getByPlaceholder('Full name').fill('Weak Password User');
+    await page.getByPlaceholder('Email').fill('weak-password@example.com');
+    await page.getByPlaceholder('Password').fill('weakpass12');
+    await page.getByRole('button', { name: /^register$/i }).click();
+
+    await expect(
+      page.getByText(/at least 10 characters with uppercase/i).last(),
+    ).toBeVisible();
+    await expect(page).toHaveURL(/\/auth\/register/);
+  });
+
   test('dashboard requires an authenticated session', async ({ page }) => {
     await page.goto('/dashboard');
     // The web app's auth guard either redirects to /auth/login or renders a
