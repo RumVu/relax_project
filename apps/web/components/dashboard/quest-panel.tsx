@@ -77,8 +77,19 @@ export function QuestPanel({ heading }: { heading?: string }) {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const list = await apiFetch<Quest[]>(`/quests/me?locale=${locale}`);
-      setQuests(list);
+      const list = await apiFetch<Quest[] | { items?: Quest[] }>(
+        `/quests/me?locale=${locale}`,
+      );
+      // Defensive: backend có thể trả `{items: [...]}` hoặc bare array.
+      // Mock test trong e2e trả default `{items:[], total:0}` → nếu set thẳng
+      // object vào state → `.filter()` xuống dưới crash → error boundary →
+      // "Something went wrong" → CI fail.
+      const arr = Array.isArray(list)
+        ? list
+        : Array.isArray((list as { items?: Quest[] } | null)?.items)
+          ? ((list as { items: Quest[] }).items)
+          : [];
+      setQuests(arr);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       pushToast({
