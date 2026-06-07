@@ -271,7 +271,7 @@ describe('Billing checkout and activation (e2e)', () => {
       expect(response.body.message).toContain('Ignored');
     });
 
-    it('rejects webhook requests with amount less than payment amount', async () => {
+    it('acks webhook with success:false when amount is less than payment amount', async () => {
       const checkout = await request(app.getHttpServer())
         .post('/billing/me/checkout-session')
         .set('Authorization', `Bearer ${accessToken}`)
@@ -280,6 +280,8 @@ describe('Billing checkout and activation (e2e)', () => {
 
       const paymentId = checkout.body.payment.id;
 
+      // Service ack 200 (để SePay khỏi retry mòn endpoint) nhưng body
+      // báo success:false + message rõ ràng cho admin track lệch tiền.
       await request(app.getHttpServer())
         .post('/billing/sepay/webhook')
         .set('Authorization', 'Apikey test-sepay-key')
@@ -291,9 +293,11 @@ describe('Billing checkout and activation (e2e)', () => {
           transactionContent: `RELAX${paymentId}`,
           code: `RELAX${paymentId}`,
         })
-        .expect(400)
+        .expect(200)
         .expect(({ body }) => {
-          expect(body.code).toBe(ErrorCode.PAYMENT_PLAN_MISMATCH);
+          expect(body.success).toBe(false);
+          expect(body.paymentId).toBe(paymentId);
+          expect(body.message).toMatch(/less than required/i);
         });
     });
   });
