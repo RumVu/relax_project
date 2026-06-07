@@ -270,6 +270,9 @@ const VI_SETTINGS_COPY = {
   intentRecorded: 'Backend đã ghi nhận checkout intent cho gói này.',
   upgradeFailed: 'Không hoàn tất được nâng cấp',
   upgradeFailedMessage: 'Kiểm tra backend billing rồi thử lại.',
+  upgradeFailedReason: (reason: string) => `Lỗi từ server: ${reason}`,
+  missingPaymentId:
+    'Backend không trả về ID thanh toán — không thể kích hoạt gói. Báo dev kiểm tra /v1/billing/me/checkout-session.',
   show: 'Hiển thị',
   sessionsPerPage: 'phiên / trang',
   previousPage: 'Trang trước',
@@ -424,6 +427,9 @@ const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
   intentRecorded: 'Backend recorded the checkout intent for this plan.',
   upgradeFailed: 'Could not complete upgrade',
   upgradeFailedMessage: 'Check backend billing and try again.',
+  upgradeFailedReason: (reason: string) => `Server error: ${reason}`,
+  missingPaymentId:
+    'Backend did not return a payment id — cannot activate plan. Ask dev to check /v1/billing/me/checkout-session.',
   show: 'Show',
   sessionsPerPage: 'sessions / page',
   previousPage: 'Previous page',
@@ -2386,25 +2392,52 @@ export default function SettingsPage() {
             setCheckoutResult(null);
             try {
               const redirectOrigin = window.location.origin;
+              // FREE plan → MANUAL provider (no real payment). Mọi plan khác
+              // → SEPAY (production). Downgrade từ ANNUAL → MONTHLY cũng
+              // dùng SEPAY vì backend sẽ resolve plan từ planName.
+              const isDowngradeToFree = checkoutPlan.name === 'FREE';
               const result = (await apiFetch('/billing/me/checkout-session', {
                 method: 'POST',
                 body: JSON.stringify({
                   planName: checkoutPlan.name,
-                  provider: checkoutPlan.name === 'FREE' ? 'MANUAL' : 'SEPAY',
-                  description: checkoutPlan.name === 'FREE' ? `Downgrade to ${checkoutPlan.title}` : `Upgrade intent from dashboard to ${checkoutPlan.title}`,
-                  successUrl: `${redirectOrigin}/dashboard/settings?payment=success`,
+                  provider: isDowngradeToFree ? 'MANUAL' : 'SEPAY',
+                  description: isDowngradeToFree
+                    ? `Downgrade to ${checkoutPlan.title}`
+                    : `Upgrade intent from dashboard to ${checkoutPlan.title}`,
+                  successUrl: `${redirectOrigin}/dashboard/settings?payment=success&plan=${encodeURIComponent(checkoutPlan.name)}`,
                   errorUrl: `${redirectOrigin}/dashboard/settings?payment=error`,
                   cancelUrl: `${redirectOrigin}/dashboard/settings?payment=cancel`,
                 }),
-              })) as CheckoutResult;
+              })) as CheckoutResult & { checkout?: { url?: string } };
               setCheckoutResult(result);
 
-              // No external payment provider is wired yet, so settle the
-              // pending payment through the manual confirmation endpoint to
-              // actually activate the subscription instead of leaving it
-              // PENDING forever.
               const paymentId = result.payment?.id;
-              if ((!result.configured || checkoutPlan.name === 'FREE') && paymentId) {
+              if (!paymentId) {
+                triggerRefresh();
+                pushToast({
+                  tone: 'error',
+                  title: copy.upgradeFailed,
+                  message: copy.missingPaymentId,
+                });
+                return;
+              }
+
+              // Path A: Backend trả checkout.url (SePay QR page / Stripe / ...).
+              // Redirect user tới đó. Đây là production path khi SEPAY env wired.
+              const externalUrl = result.checkout?.url;
+              if (externalUrl && !isDowngradeToFree) {
+                pushToast({
+                  tone: 'info',
+                  title: copy.intentCreated(checkoutPlan.title),
+                  message: result.checkout?.note ?? copy.intentRecorded,
+                });
+                window.location.href = externalUrl;
+                return;
+              }
+
+              // Path B: Không có URL HOẶC downgrade-to-FREE. Auto-confirm
+              // qua /confirm endpoint để activate subscription.
+              try {
                 const activated = (await apiFetch(
                   `/billing/me/payments/${paymentId}/confirm`,
                   {
@@ -2434,21 +2467,32 @@ export default function SettingsPage() {
                   title: copy.activatedTitle(checkoutPlan.title),
                   message: copy.activatedMessage,
                 });
-              } else {
+              } catch (confirmErr) {
+                const reason =
+                  confirmErr instanceof Error
+                    ? confirmErr.message
+                    : String(confirmErr);
+                // eslint-disable-next-line no-console
+                console.error('[billing] confirm failed', confirmErr);
                 triggerRefresh();
                 pushToast({
-                  tone: 'info',
-                  title: copy.intentCreated(checkoutPlan.title),
-                  message:
-                    result.checkout?.note ??
-                    copy.intentRecorded,
+                  tone: 'error',
+                  title: copy.upgradeFailed,
+                  message: copy.upgradeFailedReason(reason),
                 });
               }
-            } catch {
+            } catch (checkoutErr) {
+              // Surface real error message thay vì generic "Kiểm tra backend".
+              const reason =
+                checkoutErr instanceof Error
+                  ? checkoutErr.message
+                  : String(checkoutErr);
+              // eslint-disable-next-line no-console
+              console.error('[billing] checkout session failed', checkoutErr);
               pushToast({
                 tone: 'error',
                 title: copy.upgradeFailed,
-                message: copy.upgradeFailedMessage,
+                message: copy.upgradeFailedReason(reason),
               });
             } finally {
               setBillingState(null);
