@@ -34,6 +34,8 @@ class HomeScreen extends StatefulWidget {
     this.onOpenNotifications,
     this.onOpenSearch,
     this.onOpenInsights,
+    this.onOpenQuickRelief,
+    this.onOpenChat,
     this.hasAccentTheme = false,
   });
 
@@ -64,6 +66,12 @@ class HomeScreen extends StatefulWidget {
 
   /// "Xem hành trình" → push InsightsScreen.
   final VoidCallback? onOpenInsights;
+
+  /// SOS button — push QuickReliefScreen (60s breathing).
+  final VoidCallback? onOpenQuickRelief;
+
+  /// Companion chat với Thi Ái.
+  final VoidCallback? onOpenChat;
 
   /// Để inbox biết có nên show "Customs theme đã sẵn" notification không.
   final bool hasAccentTheme;
@@ -295,7 +303,29 @@ class _HomeScreenState extends State<HomeScreen> {
           // ── Daily affirmation hero — rotate theo ngày
           const DailyAffirmationCard(compact: true),
           const SizedBox(height: 10),
-          // ── Quick actions: Search + Insights (chip row)
+          // ── Quick actions: 4 chips (SOS / Chat / Tìm kiếm / Hành trình)
+          Row(
+            children: [
+              Expanded(
+                child: _QuickActionChip(
+                  icon: Icons.bolt_rounded,
+                  label: 'SOS 60s',
+                  color: const Color(0xFFE85A6A),
+                  onTap: widget.onOpenQuickRelief,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _QuickActionChip(
+                  icon: Icons.chat_bubble_rounded,
+                  label: 'Trò chuyện',
+                  color: const Color(0xFF48D3A8),
+                  onTap: widget.onOpenChat,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
@@ -306,12 +336,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTap: widget.onOpenSearch,
                 ),
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Expanded(
                 child: _QuickActionChip(
                   icon: Icons.insights_rounded,
                   label: 'Hành trình',
-                  color: const Color(0xFFE85A6A),
+                  color: const Color(0xFFFFC96E),
                   onTap: widget.onOpenInsights,
                 ),
               ),

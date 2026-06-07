@@ -55,6 +55,11 @@ class SetupScreen extends StatefulWidget {
     this.onOpenInsights,
     this.onOpenSearch,
     this.onOpenNotifications,
+    this.onOpenCalendar,
+    this.onOpenGoals,
+    this.onOpenHelp,
+    this.onOpenChat,
+    this.onOpenQuickRelief,
   });
 
   final ThemeMode themeMode;
@@ -70,12 +75,17 @@ class SetupScreen extends StatefulWidget {
   final VoidCallback onRefreshContent;
   final List<dynamic> moodHistory; // type kept loose to avoid import cycle
 
-  /// Shell-injected launchers cho 5 màn extra.
+  /// Shell-injected launchers cho 10 màn extra.
   final VoidCallback? onOpenAbout;
   final VoidCallback? onOpenCrisis;
   final VoidCallback? onOpenInsights;
   final VoidCallback? onOpenSearch;
   final VoidCallback? onOpenNotifications;
+  final VoidCallback? onOpenCalendar;
+  final VoidCallback? onOpenGoals;
+  final VoidCallback? onOpenHelp;
+  final VoidCallback? onOpenChat;
+  final VoidCallback? onOpenQuickRelief;
 
   @override
   State<SetupScreen> createState() => _SetupScreenState();
@@ -468,6 +478,30 @@ class _SetupScreenState extends State<SetupScreen> {
                     color: RelaxTheme.lavender.withValues(alpha: .14),
                   ),
                 ],
+                if (widget.onOpenQuickRelief != null) ...[
+                  _TapRow(
+                    icon: Icons.bolt_rounded,
+                    title: 'Quick Relief 60s',
+                    subtitle: 'Nhịp thở 4-7-8 khi stress đột ngột',
+                    onTap: widget.onOpenQuickRelief!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenChat != null) ...[
+                  _TapRow(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    title: 'Trò chuyện với Thi Ái',
+                    subtitle: 'Một chỗ để gọi tên cảm xúc',
+                    onTap: widget.onOpenChat!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
                 if (widget.onOpenInsights != null) ...[
                   _TapRow(
                     icon: Icons.insights_rounded,
@@ -480,12 +514,48 @@ class _SetupScreenState extends State<SetupScreen> {
                     color: RelaxTheme.lavender.withValues(alpha: .14),
                   ),
                 ],
+                if (widget.onOpenCalendar != null) ...[
+                  _TapRow(
+                    icon: Icons.calendar_month_rounded,
+                    title: 'Lịch cảm xúc',
+                    subtitle: 'Xem mood mỗi ngày trong tháng',
+                    onTap: widget.onOpenCalendar!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenGoals != null) ...[
+                  _TapRow(
+                    icon: Icons.flag_outlined,
+                    title: 'Mục tiêu tuần',
+                    subtitle: 'Đặt kim chỉ nam mềm cho tuần',
+                    onTap: widget.onOpenGoals!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
                 if (widget.onOpenNotifications != null) ...[
                   _TapRow(
                     icon: Icons.notifications_outlined,
                     title: 'Hộp thư thông báo',
                     subtitle: 'Welcome, streak, gợi ý feature',
                     onTap: widget.onOpenNotifications!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenHelp != null) ...[
+                  _TapRow(
+                    icon: Icons.help_outline_rounded,
+                    title: 'Trợ giúp & FAQ',
+                    subtitle: '8 câu hỏi thường gặp + liên hệ',
+                    onTap: widget.onOpenHelp!,
                   ),
                   Divider(
                     height: 1,

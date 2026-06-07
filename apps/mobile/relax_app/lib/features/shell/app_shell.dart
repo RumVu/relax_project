@@ -10,12 +10,17 @@ import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
 import '../about/about_screen.dart';
 import '../auth/login_screen.dart';
+import '../calendar/calendar_mood_screen.dart';
 import '../challenge/challenge_screen.dart';
+import '../chat/companion_chat_screen.dart';
 import '../crisis/crisis_support_screen.dart';
+import '../goals/goals_screen.dart';
+import '../help/help_screen.dart';
 import '../home/home_screen.dart';
 import '../insights/insights_screen.dart';
 import '../journey/journey_screen.dart';
 import '../notifications/notifications_screen.dart';
+import '../quick_relief/quick_relief_screen.dart';
 import '../relax/relax_screen.dart';
 import '../search/search_screen.dart';
 import '../setup/setup_screen.dart';
@@ -329,6 +334,8 @@ class _RelaxShellState extends State<RelaxShell> {
         onOpenNotifications: _openNotifications,
         onOpenSearch: _openSearch,
         onOpenInsights: _openInsights,
+        onOpenQuickRelief: _openQuickRelief,
+        onOpenChat: _openChat,
         hasAccentTheme: widget.onAccentChanged != null,
       ),
       RelaxScreen(
@@ -355,6 +362,11 @@ class _RelaxShellState extends State<RelaxShell> {
         onOpenInsights: _openInsights,
         onOpenSearch: _openSearch,
         onOpenNotifications: _openNotifications,
+        onOpenCalendar: _openCalendar,
+        onOpenGoals: _openGoals,
+        onOpenHelp: _openHelp,
+        onOpenChat: _openChat,
+        onOpenQuickRelief: _openQuickRelief,
       ),
     ];
 
@@ -486,6 +498,38 @@ class _RelaxShellState extends State<RelaxShell> {
   void _openCrisis() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const CrisisSupportScreen()),
+    );
+  }
+
+  void _openQuickRelief() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const QuickReliefScreen()),
+    );
+  }
+
+  void _openChat() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CompanionChatScreen()),
+    );
+  }
+
+  void _openCalendar() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CalendarMoodScreen(moodHistory: _moodHistory),
+      ),
+    );
+  }
+
+  void _openGoals() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const GoalsScreen()),
+    );
+  }
+
+  void _openHelp() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const HelpScreen()),
     );
   }
 
