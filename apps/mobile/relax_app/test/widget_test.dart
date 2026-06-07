@@ -15,10 +15,10 @@ void main() {
 
     expect(find.text('Thi Ai Chill'), findsOneWidget);
 
-    // Splash gate: min 900ms + chờ session bootstrap (hoặc max 2.5s).
+    // Splash gate: min 3s + chờ session bootstrap (hoặc max 3.8s).
     // Trong test, secure storage có thể chưa init ngay → cần advance fake
     // clock đủ lâu để max wait kick in.
-    for (var i = 0; i < 8; i++) {
+    for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 500));
     }
 

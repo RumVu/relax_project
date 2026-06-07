@@ -44,14 +44,14 @@ class _SplashGateState extends State<SplashGate> {
   void initState() {
     super.initState();
     _loadPrefs();
-    // Min splash duration để cat scene kịp animate vào
-    Future<void>.delayed(const Duration(milliseconds: 900), () {
+    // Min splash 3s — đủ thời gian để user nhận diện brand "Thi Ái Chill"
+    // (cat scene + title + tagline + linear progress).
+    Future<void>.delayed(const Duration(milliseconds: 3000), () {
       if (mounted) setState(() => _minSplashElapsed = true);
     });
-    // Max wait — nếu session bootstrap không xong sau 2.5s (offline, network
-    // timeout, secure storage block trong test...) → vẫn route đi tiếp với
-    // cached state để user không kẹt ở splash.
-    Future<void>.delayed(const Duration(milliseconds: 2500), () {
+    // Max wait — fallback nếu session bootstrap không xong sau 3.8s (offline,
+    // network timeout, secure storage block trong test...) → route đi tiếp.
+    Future<void>.delayed(const Duration(milliseconds: 3800), () {
       if (mounted) setState(() => _maxSplashElapsed = true);
     });
   }
@@ -88,9 +88,9 @@ class _SplashGateState extends State<SplashGate> {
   }
 
   /// Splash chỉ tắt khi:
-  ///   1. Min duration (900ms) đã trôi qua VÀ
+  ///   1. Min duration (3s) đã trôi qua VÀ
   ///   2. (AppPreferences load + SessionState bootstrap xong) HOẶC max wait
-  ///      (2.5s) đã trôi qua như safety net.
+  ///      (3.8s) đã trôi qua như safety net.
   /// Tránh race: trước đây splash tắt sau 1250ms cứng → nếu session bootstrap
   /// chậm hơn → user logged-in vẫn bị đá về Login screen. Max wait handles
   /// offline + test env nơi method channels không có platform mock.

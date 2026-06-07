@@ -261,6 +261,14 @@ const VI_SETTINGS_COPY = {
   intentRecorded: 'Backend đã ghi nhận checkout intent cho gói này.',
   upgradeFailed: 'Không hoàn tất được nâng cấp',
   upgradeFailedMessage: 'Kiểm tra backend billing rồi thử lại.',
+  upgradeFailedReason: (reason: string) => `Lỗi từ server: ${reason}`,
+  missingPaymentId:
+    'Backend không trả về ID thanh toán — không thể kích hoạt gói. '
+    + 'Báo dev kiểm tra /v1/billing/me/checkout-session.',
+  awaitingProvider:
+    'Provider được cấu hình nhưng chưa trả URL checkout. Backend cần '
+    + 'wire Stripe SDK để tạo session thực sự.',
+  manualActivateOk: 'Đã kích hoạt thử nghiệm (chế độ DEV — chưa có thanh toán thật).',
   show: 'Hiển thị',
   sessionsPerPage: 'phiên / trang',
   previousPage: 'Trang trước',
@@ -400,6 +408,14 @@ const EN_SETTINGS_COPY: typeof VI_SETTINGS_COPY = {
   intentRecorded: 'Backend recorded the checkout intent for this plan.',
   upgradeFailed: 'Could not complete upgrade',
   upgradeFailedMessage: 'Check backend billing and try again.',
+  upgradeFailedReason: (reason: string) => `Server error: ${reason}`,
+  missingPaymentId:
+    'Backend did not return a payment id — cannot activate plan. '
+    + 'Ask dev to check /v1/billing/me/checkout-session.',
+  awaitingProvider:
+    'Provider is configured but no checkout URL was returned. Backend '
+    + 'needs to wire the Stripe SDK to create a real session.',
+  manualActivateOk: 'Activated for testing (DEV mode — no real payment).',
   show: 'Show',
   sessionsPerPage: 'sessions / page',
   previousPage: 'Previous page',
@@ -2019,15 +2035,43 @@ export default function SettingsPage() {
                   provider: 'MANUAL',
                   description: `Upgrade intent from dashboard to ${checkoutPlan.title}`,
                 }),
-              })) as CheckoutResult;
+              })) as CheckoutResult & {
+                checkout?: { url?: string };
+              };
               setCheckoutResult(result);
 
-              // No external payment provider is wired yet, so settle the
-              // pending payment through the manual confirmation endpoint to
-              // actually activate the subscription instead of leaving it
-              // PENDING forever.
               const paymentId = result.payment?.id;
-              if (!result.configured && paymentId) {
+
+              // Guard: backend không trả paymentId → flow bị gãy ở nguồn,
+              // không có gì để confirm. Báo cụ thể thay vì silent.
+              if (!paymentId) {
+                triggerRefresh();
+                pushToast({
+                  tone: 'error',
+                  title: copy.upgradeFailed,
+                  message: copy.missingPaymentId,
+                });
+                return;
+              }
+
+              // Path A: provider có URL checkout thật → redirect ra Stripe/SePay/...
+              const externalUrl = result.checkout?.url;
+              if (externalUrl && typeof window !== 'undefined') {
+                pushToast({
+                  tone: 'info',
+                  title: copy.intentCreated(checkoutPlan.title),
+                  message: result.checkout?.note ?? copy.intentRecorded,
+                });
+                window.location.href = externalUrl;
+                return;
+              }
+
+              // Path B: KHÔNG có URL checkout — bất kể configured flag.
+              // Trước đây chỉ auto-activate khi configured=false. Sửa: nếu
+              // backend không trả URL = không có cách nào thanh toán thật,
+              // auto-activate cho test/dev. Tránh để user click "Thanh toán"
+              // mà không có hành động nào → "không nhận thanh toán".
+              try {
                 const activated = (await apiFetch(
                   `/billing/me/payments/${paymentId}/confirm`,
                   {
@@ -2045,33 +2089,48 @@ export default function SettingsPage() {
                   },
                   checkout: {
                     status: 'ACTIVATED',
-                    note: copy.activatedNote(
-                      activated.subscription?.planName ?? checkoutPlan.title,
-                      activated.subscription?.status ?? 'ACTIVE',
-                    ),
+                    note: result.configured
+                      ? copy.manualActivateOk
+                      : copy.activatedNote(
+                          activated.subscription?.planName ??
+                            checkoutPlan.title,
+                          activated.subscription?.status ?? 'ACTIVE',
+                        ),
                   },
                 });
                 triggerRefresh();
                 pushToast({
                   tone: 'success',
                   title: copy.activatedTitle(checkoutPlan.title),
-                  message: copy.activatedMessage,
+                  message: result.configured
+                    ? copy.awaitingProvider
+                    : copy.activatedMessage,
                 });
-              } else {
+              } catch (confirmErr) {
+                // Confirm fail riêng — payment vẫn PENDING, không kích hoạt.
+                const reason =
+                  confirmErr instanceof Error
+                    ? confirmErr.message
+                    : 'Unknown error during confirm';
+                console.error('[billing] confirm failed', confirmErr);
                 triggerRefresh();
                 pushToast({
-                  tone: 'info',
-                  title: copy.intentCreated(checkoutPlan.title),
-                  message:
-                    result.checkout?.note ??
-                    copy.intentRecorded,
+                  tone: 'error',
+                  title: copy.upgradeFailed,
+                  message: copy.upgradeFailedReason(reason),
                 });
               }
-            } catch {
+            } catch (checkoutErr) {
+              // Surface real error message thay vì generic "Check backend".
+              const reason =
+                checkoutErr instanceof Error
+                  ? checkoutErr.message
+                  : 'Unknown error during checkout';
+              console.error('[billing] checkout session failed', checkoutErr);
               pushToast({
                 tone: 'error',
                 title: copy.upgradeFailed,
-                message: copy.upgradeFailedMessage,
+                message: copy.upgradeFailedReason(reason),
               });
             } finally {
               setBillingState(null);
