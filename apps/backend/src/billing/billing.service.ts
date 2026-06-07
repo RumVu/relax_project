@@ -234,11 +234,30 @@ export class BillingService {
         Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
 
       if (!sepayConfigured) {
-        throw new AppException(
-          ErrorCode.VALIDATION_FAILED,
-          'Cổng thanh toán SePay chưa được cấu hình đầy đủ trên hệ thống.',
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        // Trước đây throw 500 → dashboard fail tất cả checkout. Fix: fallback
+        // sang MANUAL silently — backend trả response shape không có
+        // checkoutUrl, dashboard sẽ rơi vào Path B (auto-confirm endpoint)
+        // để activate plan ngay. Đây là dev/staging mode, hợp lý vì SEPAY
+        // env chỉ có production. Frontend nhận `configured:false +
+        // simulated:true` để optionally hiển thị banner "DEV mode".
+        return {
+          configured: false,
+          provider: 'MANUAL',
+          tier: plan.tier,
+          plan: {
+            name: plan.name,
+            title: plan.title,
+            price: plan.price,
+            currency: plan.currency,
+            source: plan.source,
+          },
+          payment,
+          checkout: {
+            status: 'SEPAY_NOT_CONFIGURED_FALLBACK_MANUAL',
+            note: 'SePay chưa cấu hình production env. Backend fallback MANUAL — dashboard sẽ auto-activate qua /confirm endpoint.',
+            simulated: true,
+          },
+        };
       }
 
       const client = new SePayPgClient({
