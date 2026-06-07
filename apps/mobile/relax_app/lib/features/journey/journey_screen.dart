@@ -42,6 +42,7 @@ class JourneyScreen extends StatefulWidget {
     this.allActivities = const [],
     this.onChainNext,
     this.onGoHome,
+    this.prefilledMood,
   });
 
   final Activity activity;
@@ -52,6 +53,11 @@ class JourneyScreen extends StatefulWidget {
   /// → shell pops journey + switch về Home tab. Nếu null → fallback
   /// `popUntil(isFirst)` (chỉ pop route, tab có thể vẫn ở Relax).
   final VoidCallback? onGoHome;
+
+  /// Khi user đã chọn mood ở Relax mood quick-pick → pass code vào, Journey
+  /// SKIP Threshold chapter (tránh hỏi mood lần 2) và vào thẳng Whisper.
+  /// Mood vẫn được POST background giống _selectMood.
+  final String? prefilledMood;
 
   @override
   State<JourneyScreen> createState() => _JourneyScreenState();
@@ -65,6 +71,32 @@ class _JourneyScreenState extends State<JourneyScreen> {
   bool _submitting = false;
   String? _error;
   int _reductionPercent = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill mood → skip Threshold, vào thẳng Whisper. Log mood
+    // background (fire-and-forget) sau frame đầu để context.sessionOrNull
+    // có sẵn.
+    if (widget.prefilledMood != null) {
+      _moodBefore = widget.prefilledMood;
+      _chapter = _Chapter.whisper;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final session = context.sessionOrNull;
+        if (session != null && session.isLoggedIn) {
+          MoodService()
+              .log(
+                accessToken: session.accessToken!,
+                mood: widget.prefilledMood!,
+                intensity: 3,
+                tags: const ['journey-before', 'from-relax-quickpick'],
+              )
+              .then((_) {}, onError: (_) {});
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {

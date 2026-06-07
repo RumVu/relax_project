@@ -4,9 +4,12 @@ import '../../app/app_copy.dart';
 import '../../core/session.dart';
 import '../../data/models/app_models.dart';
 import '../../data/models/backend_models.dart';
+import '../../data/services/journal_service.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
+import '../../data/services/push_token_service.dart';
 import '../../data/services/relax_catalog_service.dart';
+import '../../data/services/relax_session_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
 import '../about/about_screen.dart';
 import '../auth/login_screen.dart';
@@ -55,6 +58,9 @@ class _RelaxShellState extends State<RelaxShell> {
   late final MobileContentRepository _contentRepo =
       widget.contentRepository ?? MobileContentService();
   final _moodSvc = MoodService();
+  final _pushTokenSvc = PushTokenService();
+  final _relaxSessionSvc = RelaxSessionService();
+  final _journalSvc = JournalService();
 
   // ── Catalog ──────────────────────────────────────────────────────────────
   List<BackendRelaxActivity> _activities = const [];
@@ -70,6 +76,10 @@ class _RelaxShellState extends State<RelaxShell> {
   List<MoodCheckin> _moodHistory = const [];
   bool _moodHistoryLoading = false; // false until we know logged-in
 
+  // ── Goals progress (weekly counts, auth-gated) ──────────────────────
+  int _weeklyRelaxCount = 0;
+  int _weeklyJournalCount = 0;
+
   SessionState? _watchedSession;
   bool _wasLoggedIn = false;
 
@@ -82,6 +92,8 @@ class _RelaxShellState extends State<RelaxShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadMoodHistory();
       _attachSessionListener();
+      _registerPushToken(); // non-critical — lỗi không ảnh hưởng UI
+      _loadWeeklyProgress(); // for Goals progress bars
     });
   }
 
@@ -117,9 +129,11 @@ class _RelaxShellState extends State<RelaxShell> {
         (route) => false,
       );
     } else if (!_wasLoggedIn && loggedIn) {
-      // Login lại trong app (hiếm) → reload data
+      // Login lại trong app (hiếm) → reload data + re-register push token
       _wasLoggedIn = true;
       _loadMoodHistory();
+      _loadWeeklyProgress();
+      _registerPushToken();
     }
   }
 
@@ -194,10 +208,69 @@ class _RelaxShellState extends State<RelaxShell> {
     }
   }
 
+  /// Đăng ký (hoặc refresh) push token với backend — fire-and-forget.
+  /// Chỉ thực thi khi user đã login; lỗi được bắt trong service nên app
+  /// không bị crash.
+  void _registerPushToken() {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) return;
+    _pushTokenSvc.registerIfNeeded(accessToken: session.accessToken!);
+    // unawaited intentionally — non-blocking, non-critical
+  }
+
+  /// Fetch số phiên relax + journal trong 7 ngày qua — dùng cho Goals progress.
+  /// Fire-and-forget, không hiển thị lỗi.
+  Future<void> _loadWeeklyProgress() async {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) return;
+    try {
+      final results = await Future.wait<Object?>([
+        _relaxSessionSvc.recent(
+          accessToken: session.accessToken!,
+          limit: 30,
+        ).then<Object?>((list) => list).catchError((_) => <RelaxSession>[]),
+        _journalSvc.list(
+          accessToken: session.accessToken!,
+          limit: 30,
+        ).then<Object?>((page) => page).catchError((_) => null),
+      ]);
+      if (!mounted) return;
+
+      final now = DateTime.now();
+      final weekAgo = now.subtract(const Duration(days: 7));
+
+      // Count relax sessions in last 7 days
+      int relaxCount = 0;
+      final sessions = results[0];
+      if (sessions is List<RelaxSession>) {
+        relaxCount = sessions
+            .where((s) => s.startedAt.isAfter(weekAgo))
+            .length;
+      }
+
+      // Count journal entries in last 7 days
+      int journalCount = 0;
+      final journalPage = results[1];
+      if (journalPage is JournalPage) {
+        journalCount = journalPage.entries
+            .where((e) => e.createdAt.isAfter(weekAgo))
+            .length;
+      }
+
+      setState(() {
+        _weeklyRelaxCount = relaxCount;
+        _weeklyJournalCount = journalCount;
+      });
+    } catch (_) {
+      // Non-critical — Goals vẫn hiển thị, chỉ thiếu progress bar
+    }
+  }
+
   void _refresh() {
     _loadCatalog();
     _loadContent();
     _loadMoodHistory();
+    _loadWeeklyProgress();
   }
 
   Activity _activityForMethod(MethodOption method) {
@@ -296,12 +369,22 @@ class _RelaxShellState extends State<RelaxShell> {
   /// JourneyScreen.State được tạo lại từ đầu, không leak _rating / _moodBefore
   /// / _noteCtrl từ phiên trước.
   void _pushPracticeFor(Activity activity) {
+    _pushPracticeForCore(activity, null);
+  }
+
+  /// Variant với pre-filled mood — Journey skip Threshold tránh hỏi 2 lần.
+  void _pushPracticeForWithMood(Activity activity, String moodCode) {
+    _pushPracticeForCore(activity, moodCode);
+  }
+
+  void _pushPracticeForCore(Activity activity, String? prefilledMood) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => JourneyScreen(
           key: UniqueKey(),
           activity: activity,
           allActivities: _allActivities,
+          prefilledMood: prefilledMood,
           onChainNext: (next) {
             Navigator.of(context).pop();
             _pushPracticeFor(next);
@@ -345,6 +428,7 @@ class _RelaxShellState extends State<RelaxShell> {
         onRefreshCatalog: _refresh,
         onBack: () => setState(() => _tab = 0),
         onStartJourney: _pushPracticeFor,
+        onStartJourneyWithMood: _pushPracticeForWithMood,
       ),
       ChallengeScreen(onJumpToHome: () => setState(() => _tab = 0)),
       SetupScreen(
@@ -484,7 +568,10 @@ class _RelaxShellState extends State<RelaxShell> {
   void _openInsights() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => InsightsScreen(moodHistory: _moodHistory),
+        builder: (_) => InsightsScreen(
+          moodHistory: _moodHistory,
+          journalEntryCount: _weeklyJournalCount,
+        ),
       ),
     );
   }
@@ -522,8 +609,21 @@ class _RelaxShellState extends State<RelaxShell> {
   }
 
   void _openGoals() {
+    // Tính số mood check-in trong 7 ngày qua từ _moodHistory
+    final now = DateTime.now();
+    final weekAgo = now.subtract(const Duration(days: 7));
+    final weeklyMoodCount = _moodHistory
+        .where((c) => c.createdAt.isAfter(weekAgo))
+        .length;
+
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const GoalsScreen()),
+      MaterialPageRoute(
+        builder: (_) => GoalsScreen(
+          progressMoodCount: weeklyMoodCount,
+          progressRelaxCount: _weeklyRelaxCount,
+          progressJournalCount: _weeklyJournalCount,
+        ),
+      ),
     );
   }
 

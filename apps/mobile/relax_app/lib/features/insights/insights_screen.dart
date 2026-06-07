@@ -21,9 +21,12 @@ class InsightsScreen extends StatelessWidget {
   const InsightsScreen({
     super.key,
     required this.moodHistory,
+    this.journalEntryCount = 0,
   });
 
   final List<MoodCheckin> moodHistory;
+  /// Số entries nhật ký đã viết — dùng để unlock badge "🌸 Tự lắng nghe".
+  final int journalEntryCount;
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +213,7 @@ class InsightsScreen extends StatelessWidget {
           title: 'HUY HIỆU ĐÃ ĐẠT',
           icon: Icons.workspace_premium_rounded,
         ),
-        _AchievementGrid(stats: stats),
+        _AchievementGrid(stats: stats, journalEntryCount: journalEntryCount),
         const SizedBox(height: 22),
         Center(
           child: Text(
@@ -668,8 +671,9 @@ class _MoodBar extends StatelessWidget {
 }
 
 class _AchievementGrid extends StatelessWidget {
-  const _AchievementGrid({required this.stats});
+  const _AchievementGrid({required this.stats, this.journalEntryCount = 0});
   final _Stats stats;
+  final int journalEntryCount;
 
   @override
   Widget build(BuildContext context) {
@@ -707,8 +711,9 @@ class _AchievementGrid extends StatelessWidget {
       _Badge(
         emoji: '🌸',
         name: 'Tự lắng nghe',
-        desc: 'Đã ghi nhật ký',
-        unlocked: false, // wire khi có journal count
+        desc: 'Đã viết nhật ký',
+        // Unlock khi có ít nhất 1 entry nhật ký (từ shell)
+        unlocked: journalEntryCount > 0,
       ),
     ];
     return GridView.builder(

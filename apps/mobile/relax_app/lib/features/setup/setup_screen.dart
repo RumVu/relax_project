@@ -233,6 +233,8 @@ class _SetupScreenState extends State<SetupScreen> {
       context: context,
       backgroundColor: Theme.of(context).colorScheme.surface,
       showDragHandle: true,
+      useSafeArea: true, // tránh tràn dưới home indicator
+      isScrollControlled: true, // cho phép sheet cao tự nhiên + nội dung scroll
       builder: (ctx) => _SoundPicker(current: _soundChoice),
     );
     if (picked == null || !mounted) return;
@@ -1990,8 +1992,15 @@ class _SoundPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+    // SingleChildScrollView + Padding bottom tự thêm viewInsets để tránh
+    // tràn khỏi sheet khi nội dung > sheet height (6 options + info note).
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        24 + MediaQuery.of(context).padding.bottom,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,

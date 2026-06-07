@@ -26,6 +26,7 @@ class RelaxScreen extends StatelessWidget {
     required this.onRefreshCatalog,
     this.onBack,
     required this.onStartJourney,
+    required this.onStartJourneyWithMood,
   });
 
   final List<BackendRelaxActivity> backendActivities;
@@ -34,9 +35,13 @@ class RelaxScreen extends StatelessWidget {
   final VoidCallback onRefreshCatalog;
   final VoidCallback? onBack;
 
-  /// Khi user chọn 1 activity (tap card hoặc qua mood quick-pick) →
-  /// shell push JourneyScreen 5 chương cho activity đó.
+  /// Khi user tap activity card → push Journey không pre-fill mood
+  /// (Threshold sẽ hỏi mood như bình thường).
   final ValueChanged<Activity> onStartJourney;
+
+  /// Khi user tap mood quick-pick → push Journey với mood đã chọn,
+  /// Journey SKIP Threshold chapter để tránh hỏi mood lần 2.
+  final void Function(Activity activity, String moodCode) onStartJourneyWithMood;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +79,7 @@ class RelaxScreen extends StatelessWidget {
           if (displayActivities.isNotEmpty)
             _MoodQuickPick(
               activities: displayActivities,
-              onStartJourney: onStartJourney,
+              onStartJourneyWithMood: onStartJourneyWithMood,
             ),
           const SizedBox(height: 14),
           _SectionDivider(label: 'Chọn nhịp nghỉ của bạn'),
@@ -166,9 +171,10 @@ class _NarrativeIntro extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 14),
-          // 5 chapter mini-pills horizontal
+          // 5 chapter mini-pills horizontal — height 88 cho subtitle 2 dòng
+          // không bị tràn (trước đây 68 → tràn 7px theo screenshot).
           SizedBox(
-            height: 68,
+            height: 88,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: EdgeInsets.zero,
@@ -240,13 +246,16 @@ class _ChapterMiniPill extends StatelessWidget {
               fontSize: 12,
             ),
           ),
-          Text(
-            subtitle,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: 10,
-              color: context.relax.muted,
+          Expanded(
+            child: Text(
+              subtitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontSize: 9.5,
+                color: context.relax.muted,
+                height: 1.2,
+              ),
             ),
           ),
         ],
@@ -262,11 +271,11 @@ class _ChapterMiniPill extends StatelessWidget {
 class _MoodQuickPick extends StatelessWidget {
   const _MoodQuickPick({
     required this.activities,
-    required this.onStartJourney,
+    required this.onStartJourneyWithMood,
   });
 
   final List<Activity> activities;
-  final ValueChanged<Activity> onStartJourney;
+  final void Function(Activity activity, String moodCode) onStartJourneyWithMood;
 
   /// Map mood → ưu tiên activity type. Nếu không có match → trả về activity[0].
   Activity _recommend(String mood) {
@@ -305,17 +314,20 @@ class _MoodQuickPick extends StatelessWidget {
                 color: RelaxTheme.lavender,
               ),
               const SizedBox(width: 6),
-              Text(
-                'Bạn cảm thấy thế nào lúc này?',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w900,
+              Expanded(
+                child: Text(
+                  'Mood → mình dẫn bạn vào nhịp nghỉ hợp nhất',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 4),
           Text(
-            'Tap 1 mood, mình sẽ gợi ý nhịp nghỉ hợp nhất và dẫn bạn vào ngay.',
+            'Tap mood — mình log cảm xúc + dẫn thẳng vào phiên thư giãn '
+            '(không hỏi mood lại ở chương 1 nữa).',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: context.relax.muted,
               fontSize: 12,
@@ -329,7 +341,10 @@ class _MoodQuickPick extends StatelessWidget {
                   child: _MoodQuickChip(
                     emoji: m.$1,
                     label: m.$2,
-                    onTap: () => onStartJourney(_recommend(m.$3)),
+                    onTap: () => onStartJourneyWithMood(
+                      _recommend(m.$3),
+                      m.$3,
+                    ),
                   ),
                 ),
             ],

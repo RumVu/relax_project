@@ -5,6 +5,7 @@ import '../../core/session.dart';
 import '../../data/services/journal_service.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
+import 'journal_write_screen.dart';
 
 /// Journal history — list các entries đã lưu, group theo ngày.
 /// Tap entry → mở detail sheet với edit + delete + favorite toggle + full
@@ -113,8 +114,16 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
 
   String _friendlyError(Object e) {
     final raw = e.toString();
-    if (raw.contains('Socket') || raw.contains('Timeout')) {
-      return 'Mạng yếu quá — kiểm tra kết nối rồi thử lại nha ~';
+    if (raw.contains('Socket') ||
+        raw.contains('Timeout') ||
+        raw.contains('TimeoutException')) {
+      return 'Mạng yếu quá hoặc server chưa phản hồi. Kéo xuống làm mới nha ~';
+    }
+    if (raw.contains('404')) {
+      return 'Endpoint nhật ký chưa được wire. Báo dev hỗ trợ giúp.';
+    }
+    if (raw.contains('401') || raw.contains('Unauthorized')) {
+      return 'Phiên đăng nhập hết hạn. Đăng nhập lại rồi quay lại nha.';
     }
     return raw.replaceFirst(RegExp(r'^Exception:\s*'), '');
   }
@@ -129,6 +138,20 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
           .map((e) => e.id == updated.id ? updated : e)
           .toList(growable: false);
     });
+  }
+
+  /// Mở màn viết nhật ký mới. Khi lưu thành công → insert entry vào đầu list.
+  Future<void> _openWrite() async {
+    final entry = await Navigator.of(context).push<JournalEntry>(
+      MaterialPageRoute(builder: (_) => const JournalWriteScreen()),
+    );
+    if (entry == null || !mounted) return;
+    setState(() {
+      _entries = [entry, ..._entries];
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Đã lưu nhật ký mới ✦')),
+    );
   }
 
   Map<String, List<JournalEntry>> get _groupedByDate {
@@ -168,6 +191,16 @@ class _JournalHistoryScreenState extends State<JournalHistoryScreen> {
             onPressed: _loading ? null : () => _load(reset: true),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openWrite,
+        backgroundColor: RelaxTheme.purple,
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.edit_note_rounded),
+        label: const Text(
+          'Viết mới',
+          style: TextStyle(fontWeight: FontWeight.w900),
+        ),
       ),
       body: RefreshIndicator(
         onRefresh: () => _load(reset: true),

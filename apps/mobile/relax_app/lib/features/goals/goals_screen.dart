@@ -6,8 +6,24 @@ import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_button.dart';
 
 /// Goals screen — đặt mục tiêu tuần mềm cho 3 hoạt động chính.
+/// Nhận progress thực tế từ shell (mood check-in, relax session, journal entry)
+/// để hiển thị tiến độ so với mục tiêu.
 class GoalsScreen extends StatefulWidget {
-  const GoalsScreen({super.key});
+  const GoalsScreen({
+    super.key,
+    this.progressMoodCount = 0,
+    this.progressRelaxCount = 0,
+    this.progressJournalCount = 0,
+  });
+
+  /// Số check-in mood trong tuần hiện tại (tính từ shell).
+  final int progressMoodCount;
+
+  /// Số phiên thư giãn hoàn thành trong tuần hiện tại.
+  final int progressRelaxCount;
+
+  /// Số entries nhật ký viết trong tuần hiện tại.
+  final int progressJournalCount;
 
   @override
   State<GoalsScreen> createState() => _GoalsScreenState();
@@ -82,6 +98,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   min: 1,
                   max: 21,
                   desc: 'Đề xuất: 3-5 lần/tuần. Mỗi sáng + tối là lý tưởng.',
+                  progress: widget.progressMoodCount,
                   onChanged: (v) => setState(() =>
                       _goals = g.copyWith(moodCheckinsWeek: v.round())),
                 ),
@@ -94,6 +111,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   min: 1,
                   max: 14,
                   desc: 'Đề xuất: 2-3 phiên/tuần — đủ để xây thói quen.',
+                  progress: widget.progressRelaxCount,
                   onChanged: (v) => setState(() =>
                       _goals = g.copyWith(relaxSessionsWeek: v.round())),
                 ),
@@ -106,6 +124,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   min: 0,
                   max: 7,
                   desc: 'Đề xuất: 1-2 entry/tuần khi cảm thấy nhiều quá.',
+                  progress: widget.progressJournalCount,
                   onChanged: (v) => setState(() =>
                       _goals = g.copyWith(journalEntriesWeek: v.round())),
                 ),
@@ -162,6 +181,7 @@ class _GoalSlider extends StatelessWidget {
     required this.max,
     required this.desc,
     required this.onChanged,
+    this.progress = 0,
   });
   final String emoji;
   final String title;
@@ -171,15 +191,26 @@ class _GoalSlider extends StatelessWidget {
   final int max;
   final String desc;
   final ValueChanged<double> onChanged;
+  /// Progress thực tế trong tuần (từ API), 0 nếu chưa có.
+  final int progress;
 
   @override
   Widget build(BuildContext context) {
+    final progressFraction = value > 0
+        ? (progress / value).clamp(0.0, 1.0)
+        : 0.0;
+    final achieved = progress >= value && value > 0;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.relax.border),
+        border: Border.all(
+          color: achieved
+              ? RelaxTheme.lavender.withValues(alpha: .5)
+              : context.relax.border,
+          width: achieved ? 1.5 : 1,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,11 +230,13 @@ class _GoalSlider extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: RelaxTheme.purple,
+                  color: achieved ? RelaxTheme.lavender : RelaxTheme.purple,
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
-                  '$value $unit',
+                  achieved
+                      ? '✦ Đạt!'
+                      : '$value $unit',
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w900,
@@ -220,6 +253,40 @@ class _GoalSlider extends StatelessWidget {
               fontSize: 11.5,
             ),
           ),
+          // Progress bar thực tế (nếu có dữ liệu)
+          if (progress > 0 || value > 0) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(999),
+                    child: LinearProgressIndicator(
+                      value: progressFraction,
+                      minHeight: 6,
+                      backgroundColor: context.relax.surfaceSoft,
+                      valueColor: AlwaysStoppedAnimation(
+                        achieved
+                            ? RelaxTheme.lavender
+                            : RelaxTheme.purple.withValues(alpha: .7),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '$progress / $value',
+                  style: TextStyle(
+                    color: achieved
+                        ? RelaxTheme.lavender
+                        : context.relax.muted,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 11,
+                  ),
+                ),
+              ],
+            ),
+          ],
           Slider(
             value: value.toDouble().clamp(min.toDouble(), max.toDouble()),
             min: min.toDouble(),
