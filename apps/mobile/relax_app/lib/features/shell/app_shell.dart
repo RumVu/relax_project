@@ -8,6 +8,7 @@ import '../../data/services/journal_service.dart';
 import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
 import '../../data/services/push_token_service.dart';
+import '../../data/services/realtime_service.dart';
 import '../../data/services/relax_catalog_service.dart';
 import '../../data/services/relax_session_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
@@ -94,6 +95,23 @@ class _RelaxShellState extends State<RelaxShell> {
       _attachSessionListener();
       _registerPushToken(); // non-critical — lỗi không ảnh hưởng UI
       _loadWeeklyProgress(); // for Goals progress bars
+      _connectRealtime(); // socket.io live events
+    });
+  }
+
+  void _connectRealtime() {
+    final session = context.sessionOrNull;
+    if (session == null || !session.isLoggedIn) return;
+    RealtimeService.instance.connect(session.accessToken!);
+    // Subscribe events trigger UI updates không cần pull-to-refresh
+    RealtimeService.instance.on('mood.logged', (_) => _loadMoodHistory());
+    RealtimeService.instance.on(
+      'relax_session.completed',
+      (_) => _loadWeeklyProgress(),
+    );
+    RealtimeService.instance.on('subscription.activated', (_) {
+      // Sau khi backend confirm payment → refresh content để UI mới
+      _refresh();
     });
   }
 
@@ -130,16 +148,19 @@ class _RelaxShellState extends State<RelaxShell> {
       );
     } else if (!_wasLoggedIn && loggedIn) {
       // Login lại trong app (hiếm) → reload data + re-register push token
+      // + reconnect realtime với token mới.
       _wasLoggedIn = true;
       _loadMoodHistory();
       _loadWeeklyProgress();
       _registerPushToken();
+      _connectRealtime();
     }
   }
 
   @override
   void dispose() {
     _watchedSession?.removeListener(_onSessionChanged);
+    RealtimeService.instance.disconnect();
     super.dispose();
   }
 

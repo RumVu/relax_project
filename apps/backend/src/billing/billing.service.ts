@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { ConfirmPaymentDto } from './dto/confirm-payment.dto';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { SepayService } from './sepay.service';
 
 const MONTHLY_PERIOD_DAYS = 30;
 const ANNUAL_PERIOD_DAYS = 365;
@@ -21,12 +22,14 @@ export class BillingService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly configService: ConfigService,
+    private readonly sepayService: SepayService,
   ) {}
 
   getProviderStatus() {
     const stripeConfigured = Boolean(
       this.configService.get<string>('STRIPE_SECRET_KEY'),
     );
+    const sepayConfigured = this.sepayService.isConfigured;
     const appStoreConfigured =
       Boolean(this.configService.get<string>('APPLE_SHARED_SECRET')) ||
       Boolean(this.configService.get<string>('APP_STORE_CONNECT_API_KEY'));
@@ -36,13 +39,27 @@ export class BillingService {
 
     return {
       configured:
-        stripeConfigured || appStoreConfigured || googlePlayConfigured,
+        stripeConfigured ||
+        appStoreConfigured ||
+        googlePlayConfigured ||
+        sepayConfigured,
       providers: {
         STRIPE: {
           configured: stripeConfigured,
           missingKeys: this.missingKeys([
             ['STRIPE_SECRET_KEY', this.configService.get('STRIPE_SECRET_KEY')],
           ]),
+        },
+        SEPAY: {
+          configured: sepayConfigured,
+          missingKeys: this.missingKeys([
+            [
+              'SEPAY_ACCOUNT_NUMBER',
+              this.configService.get('SEPAY_ACCOUNT_NUMBER'),
+            ],
+            ['SEPAY_BANK_CODE', this.configService.get('SEPAY_BANK_CODE')],
+          ]),
+          note: 'SePay QR-based payment cho Việt Nam. Webhook secret optional nhưng khuyến nghị.',
         },
         APP_STORE: {
           configured: appStoreConfigured,
@@ -185,7 +202,12 @@ export class BillingService {
       this.configService.get<string>('PUBLIC_BACKEND_URL') ??
       this.configService.get<string>('APP_BASE_URL') ??
       'http://localhost:6823';
-    const url = new URL(`${base.replace(/\/$/, '')}/v1/billing/mock-checkout`);
+    // Khi SePay configured → trỏ tới /sepay-checkout page (QR + bank info).
+    // Khi chưa → fallback /mock-checkout dev page.
+    const route = this.sepayService.isConfigured
+      ? '/v1/billing/sepay-checkout'
+      : '/v1/billing/mock-checkout';
+    const url = new URL(`${base.replace(/\/$/, '')}${route}`);
     url.searchParams.set('paymentId', params.paymentId);
     url.searchParams.set('planName', params.planName);
     if (params.successUrl)
@@ -193,6 +215,231 @@ export class BillingService {
     if (params.cancelUrl) url.searchParams.set('cancelUrl', params.cancelUrl);
     if (params.errorUrl) url.searchParams.set('errorUrl', params.errorUrl);
     return url.toString();
+  }
+
+  /// Render trang SePay QR — user scan QR + chuyển khoản với memo reference.
+  async renderSepayCheckoutPage(params: {
+    paymentId: string;
+    planName: string;
+    successUrl?: string;
+    cancelUrl?: string;
+  }): Promise<string> {
+    const esc = (s: string | undefined) =>
+      (s ?? '').replace(/[<>&"']/g, (c) =>
+        c === '<'
+          ? '&lt;'
+          : c === '>'
+            ? '&gt;'
+            : c === '&'
+              ? '&amp;'
+              : c === '"'
+                ? '&quot;'
+                : '&#39;',
+      );
+
+    const plan = await this.resolvePlan(params.planName);
+    const amount = this.toPaymentAmount(plan.price);
+    const reference = this.sepayService.buildReferenceCode(
+      params.paymentId,
+      plan.name,
+    );
+    // Persist reference vào payment description để webhook match được.
+    await this.attachSepayReference(params.paymentId, reference);
+
+    const qrUrl = this.sepayService.buildQrImageUrl({
+      amount,
+      reference,
+    });
+    const cfg = this.sepayService.getConfig()!;
+    const formattedPrice = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: plan.currency,
+    }).format(plan.price);
+
+    const successUrl = esc(params.successUrl);
+    const cancelUrl = esc(params.cancelUrl);
+
+    return `<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thanh toán SePay — Thi Ái Chill</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: linear-gradient(135deg, #f7f5ff 0%, #ede8ff 100%); min-height: 100vh;
+      display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .card { background: white; border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(108, 77, 230, .18);
+      max-width: 480px; width: 100%; padding: 28px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px;
+      background: #dcfce7; color: #166534; font-size: 11px; font-weight: 900;
+      letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 16px; }
+    h1 { margin: 0 0 8px; font-size: 24px; color: #28225b; font-weight: 900; }
+    p.lead { margin: 0 0 22px; color: #746d9b; font-size: 14px; line-height: 1.55; }
+    .qr-wrap { background: #fafaff; border-radius: 14px; padding: 18px;
+      text-align: center; margin: 0 0 18px; border: 1.5px dashed #c9bfff; }
+    .qr-wrap img { max-width: 280px; width: 100%; height: auto; border-radius: 8px; }
+    .qr-wrap .hint { margin-top: 12px; font-size: 12px; color: #746d9b; font-weight: 600; }
+    .row { display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid #f0ecff; }
+    .row:last-of-type { border: 0; }
+    .row .label { color: #746d9b; font-size: 12px; font-weight: 600; }
+    .row .val { color: #28225b; font-weight: 800; font-size: 13px; font-family: monospace; }
+    .row.price .val { color: #6c4de6; font-size: 16px; font-family: inherit; }
+    .row .copy { background: transparent; border: none; cursor: pointer; color: #6c4de6;
+      font-size: 11px; padding: 4px 8px; margin-left: 6px; font-weight: 900; }
+    .row .copy:hover { background: #ede8ff; border-radius: 6px; }
+    .status-poll {
+      margin: 18px 0; padding: 14px; border-radius: 10px;
+      background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 700;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .spinner { width: 14px; height: 14px; border: 2px solid #fbbf24;
+      border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .actions { display: flex; gap: 10px; margin-top: 14px; }
+    button { flex: 1; padding: 12px 16px; border-radius: 12px; font-size: 14px;
+      font-weight: 900; cursor: pointer; border: none; }
+    button.cancel { background: transparent; color: #6c4de6; border: 1.5px solid #c9bfff; }
+    .footer { text-align: center; margin-top: 18px; font-size: 11px; color: #a8a2ca; font-style: italic; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <span class="badge">✦ SePay · Live</span>
+    <h1>Thanh toán qua SePay</h1>
+    <p class="lead">Mở app ngân hàng → scan QR → chuyển khoản với nội dung
+      tự động điền. SePay sẽ tự xác nhận trong ~30 giây.</p>
+    <div class="qr-wrap">
+      <img src="${esc(qrUrl)}" alt="SePay QR" />
+      <div class="hint">Scan bằng app ngân hàng / VietQR</div>
+    </div>
+    <div class="row price"><span class="label">Số tiền</span><span class="val">${formattedPrice}</span></div>
+    <div class="row">
+      <span class="label">Nội dung CK</span>
+      <span class="val">${esc(reference)}
+        <button class="copy" onclick="navigator.clipboard.writeText('${esc(reference)}'); this.textContent='✓'">copy</button>
+      </span>
+    </div>
+    <div class="row"><span class="label">Ngân hàng</span><span class="val">${esc(cfg.bankCode)}</span></div>
+    <div class="row"><span class="label">Tài khoản</span><span class="val">${esc(cfg.accountNumber)}
+        <button class="copy" onclick="navigator.clipboard.writeText('${esc(cfg.accountNumber)}'); this.textContent='✓'">copy</button>
+      </span></div>
+    <div class="status-poll">
+      <div class="spinner"></div>
+      <span>Đang chờ webhook SePay xác nhận thanh toán...</span>
+    </div>
+    <div class="actions">
+      ${
+        cancelUrl
+          ? `<button type="button" class="cancel" onclick="location.href='${cancelUrl}'">Hủy</button>`
+          : `<button type="button" class="cancel" onclick="history.back()">Quay lại</button>`
+      }
+    </div>
+    <div class="footer">Powered by Thi Ái Chill · SePay QR payment</div>
+  </div>
+  <script>
+    // Poll payment status every 5s; redirect khi COMPLETED.
+    const paymentId = ${JSON.stringify(params.paymentId)};
+    const successUrl = ${JSON.stringify(params.successUrl ?? '')};
+    let attempts = 0;
+    async function poll() {
+      attempts++;
+      if (attempts > 60) return; // ~5 phút
+      try {
+        const res = await fetch('/v1/billing/payments/' + paymentId + '/status');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.status === 'COMPLETED' && successUrl) {
+            location.href = successUrl;
+            return;
+          }
+        }
+      } catch {}
+      setTimeout(poll, 5000);
+    }
+    setTimeout(poll, 5000);
+  </script>
+</body>
+</html>`;
+  }
+
+  /// Public payment status — dùng cho SePay QR page polling. KHÔNG cần auth
+  /// vì payment ID là token (UUID không đoán được).
+  async getPaymentStatus(paymentId: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+      select: {
+        id: true,
+        status: true,
+        amount: true,
+        currency: true,
+        createdAt: true,
+      },
+    });
+    if (!payment) {
+      throw new AppException(
+        ErrorCode.PAYMENT_NOT_FOUND,
+        'Payment not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return payment;
+  }
+
+  /// Save reference code vào payment description để webhook có thể lookup
+  /// payment khi SePay confirm transfer. Reference code unique per payment.
+  async attachSepayReference(paymentId: string, reference: string) {
+    await this.prisma.payment.update({
+      where: { id: paymentId },
+      data: { description: `SEPAY_REF:${reference}` },
+    });
+  }
+
+  /// Match SePay webhook content → payment by reference code.
+  async findPaymentBySepayReference(content: string) {
+    // SePay webhook content thường là full memo user nhập. Tìm SEPAY_REF
+    // trong content hoặc match exact reference.
+    const match = content.match(/[A-Z0-9]{8}/);
+    if (!match) return null;
+    const shortRef = match[0];
+    // Search payments có description chứa shortRef
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        status: PaymentStatus.PENDING,
+        description: { contains: shortRef },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    });
+    return payments[0] ?? null;
+  }
+
+  /// Settle payment khi SePay webhook confirm — match plan từ payment record.
+  async settleBySepayWebhook(payment: {
+    id: string;
+    userId: string;
+    amount: number;
+  }) {
+    // Lookup current pending subscription tier để match plan name
+    const tiers = await this.prisma.subscriptionTier.findMany({
+      where: { isActive: true },
+    });
+    const tier = tiers.find(
+      (t) => this.toPaymentAmount(t.price) === payment.amount,
+    );
+    if (!tier) {
+      throw new AppException(
+        ErrorCode.PAYMENT_PLAN_MISMATCH,
+        `No tier matches paid amount ${payment.amount}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return this.confirmPayment(payment.userId, payment.id, {
+      planName: tier.name,
+    });
   }
 
   async renderMockCheckoutPage(params: {
