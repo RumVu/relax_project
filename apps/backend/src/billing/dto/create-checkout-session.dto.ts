@@ -29,4 +29,16 @@ export class CreateCheckoutSessionDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsString()
+  successUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  cancelUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  errorUrl?: string;
 }

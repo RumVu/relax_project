@@ -86,8 +86,10 @@ describe('Billing checkout and activation (e2e)', () => {
         expect(body.payment.status).toBe('COMPLETED');
         expect(body.subscription.status).toBe('ACTIVE');
         expect(body.subscription.planName).toBe(planName);
-        expect(new Date(body.subscription.endDate).getTime()).toBeGreaterThan(
-          new Date(body.subscription.startDate).getTime(),
+        expect(
+          new Date(body.subscription.endDate as string).getTime(),
+        ).toBeGreaterThan(
+          new Date(body.subscription.startDate as string).getTime(),
         );
       });
 
@@ -168,5 +170,54 @@ describe('Billing checkout and activation (e2e)', () => {
       .post('/billing/me/payments/some-id/confirm')
       .send({ planName: 'CHILL_PLUS' })
       .expect(401);
+  });
+
+  it('renders simulated checkout page (DEV) successfully', async () => {
+    const checkout = await request(app.getHttpServer())
+      .post('/billing/me/checkout-session')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ planName: 'CHILL_PLUS' })
+      .expect(201);
+    const paymentId: string = checkout.body.payment.id;
+    const planName: string = checkout.body.plan.name;
+
+    const response = await request(app.getHttpServer())
+      .get(`/billing/mock-checkout?paymentId=${paymentId}&planName=${planName}`)
+      .expect(200);
+
+    expect(response.headers['content-type']).toContain('text/html');
+    expect(response.text).toContain('Thanh toán giả lập');
+    expect(response.text).toContain(paymentId);
+  });
+
+  it('settles simulated checkout and redirects to successUrl', async () => {
+    const checkout = await request(app.getHttpServer())
+      .post('/billing/me/checkout-session')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ planName: 'CHILL_PLUS' })
+      .expect(201);
+    const paymentId: string = checkout.body.payment.id;
+    const planName: string = checkout.body.plan.name;
+
+    await request(app.getHttpServer())
+      .post('/billing/mock-checkout/settle')
+      .send({
+        paymentId,
+        planName,
+        successUrl: 'http://example.com/success',
+        errorUrl: 'http://example.com/error',
+      })
+      .expect(302)
+      .expect('Location', 'http://example.com/success');
+
+    // Confirm that the user's subscription is now active as CHILL_PLUS
+    await request(app.getHttpServer())
+      .get('/billing/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200)
+      .expect(({ body }) => {
+        expect(body.subscription.status).toBe('ACTIVE');
+        expect(body.subscription.planName).toBe(planName);
+      });
   });
 });

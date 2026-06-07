@@ -2,7 +2,12 @@
  * Build dashboard recommendation cards (Meditation/Breathing/Journal/Music).
  * Pure: nhận action + mood + 3 resource records (đã fetch sẵn) → trả card object.
  */
-import { AmbientSound, BreathingExercise, CozyQuote, MoodType } from '@prisma/client';
+import {
+  AmbientSound,
+  BreathingExercise,
+  CozyQuote,
+  MoodType,
+} from '@prisma/client';
 import { MoodActionType } from '../mood-options';
 
 const TITLES: Record<MoodActionType, string> = {
@@ -77,7 +82,9 @@ export function getRecommendationDeepLink(
   action: MoodActionType,
   resourceId?: string,
 ): string {
-  return resourceId ? `${BASE_LINKS[action]}/${resourceId}` : BASE_LINKS[action];
+  return resourceId
+    ? `${BASE_LINKS[action]}/${resourceId}`
+    : BASE_LINKS[action];
 }
 
 /**

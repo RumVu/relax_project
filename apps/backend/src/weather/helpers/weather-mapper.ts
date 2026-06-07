@@ -6,10 +6,7 @@ import {
   OpenMeteoCurrentPayload,
   OpenMeteoForecastPayload,
 } from '../clients/open-meteo.client';
-import {
-  buildForecastTitle,
-  describeWeather,
-} from './weather-description';
+import { buildForecastTitle, describeWeather } from './weather-description';
 
 export interface WeatherCurrentSnapshot {
   temperature: number | null;

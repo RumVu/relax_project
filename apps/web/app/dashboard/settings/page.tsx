@@ -2028,12 +2028,22 @@ export default function SettingsPage() {
             setBillingState(checkoutPlan.name);
             setCheckoutResult(null);
             try {
+              // Build success/cancel URLs trỏ về dashboard để backend mock
+              // checkout có thể redirect user về sau khi settle.
+              const baseUrl =
+                typeof window !== 'undefined' ? window.location.origin : '';
+              const successUrl = `${baseUrl}/dashboard/settings?upgrade=success&plan=${encodeURIComponent(checkoutPlan.name)}`;
+              const cancelUrl = `${baseUrl}/dashboard/settings?upgrade=cancel`;
+              const errorUrl = `${baseUrl}/dashboard/settings?upgrade=error`;
               const result = (await apiFetch('/billing/me/checkout-session', {
                 method: 'POST',
                 body: JSON.stringify({
                   planName: checkoutPlan.name,
                   provider: 'MANUAL',
                   description: `Upgrade intent from dashboard to ${checkoutPlan.title}`,
+                  successUrl,
+                  cancelUrl,
+                  errorUrl,
                 }),
               })) as CheckoutResult & {
                 checkout?: { url?: string };

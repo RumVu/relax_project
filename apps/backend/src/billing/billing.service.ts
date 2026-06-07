@@ -141,6 +141,14 @@ export class BillingService {
       },
     });
 
+    const checkoutUrl = this.buildCheckoutUrl({
+      paymentId: payment.id,
+      planName: plan.name,
+      successUrl: dto.successUrl,
+      cancelUrl: dto.cancelUrl,
+      errorUrl: dto.errorUrl,
+    });
+
     return {
       configured: providerStatus.configured,
       provider,
@@ -153,16 +161,383 @@ export class BillingService {
         source: plan.source,
       },
       payment,
-      checkout: providerStatus.configured
-        ? {
-            status: 'READY_TO_CREATE_PROVIDER_SESSION',
-            note: 'Provider key is configured; wire SDK session creation here.',
-          }
-        : {
-            status: 'PROVIDER_NOT_CONFIGURED',
-            note: 'Backend đã tạo payment pending. Cần cấu hình Stripe/App Store/Google Play để lấy checkout URL thật.',
-          },
+      checkout: {
+        url: checkoutUrl,
+        simulated: !providerStatus.configured,
+        status: providerStatus.configured
+          ? 'READY_TO_REDIRECT'
+          : 'SIMULATED_DEV_CHECKOUT',
+        note: providerStatus.configured
+          ? 'Provider key configured. URL points to simulated page until SDK wired.'
+          : 'Simulated checkout (DEV mode). User confirms via /v1/billing/mock-checkout HTML page.',
+      },
     };
+  }
+
+  private buildCheckoutUrl(params: {
+    paymentId: string;
+    planName: string;
+    successUrl?: string;
+    cancelUrl?: string;
+    errorUrl?: string;
+  }) {
+    const base =
+      this.configService.get<string>('PUBLIC_BACKEND_URL') ??
+      this.configService.get<string>('APP_BASE_URL') ??
+      'http://localhost:6823';
+    const url = new URL(`${base.replace(/\/$/, '')}/v1/billing/mock-checkout`);
+    url.searchParams.set('paymentId', params.paymentId);
+    url.searchParams.set('planName', params.planName);
+    if (params.successUrl)
+      url.searchParams.set('successUrl', params.successUrl);
+    if (params.cancelUrl) url.searchParams.set('cancelUrl', params.cancelUrl);
+    if (params.errorUrl) url.searchParams.set('errorUrl', params.errorUrl);
+    return url.toString();
+  }
+
+  async renderMockCheckoutPage(params: {
+    paymentId: string;
+    planName: string;
+    successUrl?: string;
+    cancelUrl?: string;
+    errorUrl?: string;
+  }): Promise<string> {
+    const plan = await this.resolvePlan(params.planName);
+    const formattedPrice = new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: plan.currency,
+    }).format(plan.price);
+
+    const featuresList = plan.features
+      .map(
+        (f) => `
+      <li class="feature-item">
+        <span class="feature-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </span>
+        ${f}
+      </li>
+    `,
+      )
+      .join('');
+
+    return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thanh toán giả lập - Thi Ái Chill</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #0b0f19 0%, #111827 100%);
+      --card-bg: rgba(17, 24, 39, 0.7);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --accent-color: #8b5cf6;
+      --accent-hover: #7c3aed;
+      --text-primary: #f3f4f6;
+      --text-secondary: #9ca3af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow-x: hidden;
+    }
+
+    .background-glow {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-55%, -55%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .checkout-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      z-index: 1;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-color) 0%, #ec4899 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      font-size: 20px;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .brand-name {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f3f4f6 0%, #9ca3af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .plan-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.8px;
+    }
+
+    .plan-price {
+      font-size: 24px;
+      font-weight: 600;
+      color: #38bdf8;
+      margin-bottom: 24px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 24px 0;
+    }
+
+    .features-list {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 15px;
+      color: var(--text-secondary);
+    }
+
+    .feature-icon {
+      color: #34d399;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-color) 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      margin-bottom: 12px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.45), 0 0 0 2px rgba(139, 92, 246, 0.2);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      margin-left: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dev-badge {
+      background: #f59e0b;
+      color: #1e1b4b;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+  <div class="background-glow"></div>
+  <div class="checkout-card">
+    <div class="brand">
+      <div class="brand-logo">✦</div>
+      <div class="brand-name">Thi Ái Chill <span class="dev-badge">DEV</span></div>
+    </div>
+    
+    <div class="badge">Simulated Checkout</div>
+    <h1 class="plan-title">${plan.title}</h1>
+    <div class="plan-price">${formattedPrice}</div>
+    
+    <div class="divider"></div>
+    
+    <ul class="features-list">
+      ${featuresList}
+    </ul>
+    
+    <button id="pay-btn" class="btn btn-primary" onclick="handlePayment()">
+      <span>Xác nhận thanh toán</span>
+      <div id="spinner" class="loading-spinner"></div>
+    </button>
+    
+    <a href="${params.cancelUrl || '#'}" class="btn btn-secondary">Quay lại</a>
+  </div>
+
+  <script>
+    async function handlePayment() {
+      const payBtn = document.getElementById('pay-btn');
+      const spinner = document.getElementById('spinner');
+      const btnText = payBtn.querySelector('span');
+      
+      payBtn.disabled = true;
+      spinner.style.display = 'block';
+      btnText.textContent = 'Đang xử lý...';
+
+      const paymentId = "${params.paymentId}";
+      const planName = "${params.planName}";
+      const successUrl = ${params.successUrl ? `"${params.successUrl}"` : 'undefined'};
+      const errorUrl = ${params.errorUrl ? `"${params.errorUrl}"` : 'undefined'};
+
+      try {
+        const response = await fetch('/v1/billing/mock-checkout/settle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ paymentId, planName, successUrl, errorUrl })
+        });
+
+        if (response.redirected) {
+          window.location.href = response.url;
+        } else if (response.ok) {
+          if (successUrl) {
+            window.location.href = successUrl;
+          } else {
+            alert('Thanh toán thành công!');
+          }
+        } else {
+          const err = await response.json();
+          alert('Lỗi thanh toán: ' + (err.message || 'Không rõ nguyên nhân'));
+          if (errorUrl) {
+            window.location.href = errorUrl;
+          }
+        }
+      } catch (error) {
+        alert('Lỗi kết nối: ' + error.message);
+        if (errorUrl) {
+          window.location.href = errorUrl;
+        }
+      } finally {
+        payBtn.disabled = false;
+        spinner.style.display = 'none';
+        btnText.textContent = 'Xác nhận thanh toán';
+      }
+    }
+  </script>
+</body>
+</html>`;
+  }
+
+  async settleMockCheckout(paymentId: string, planName: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id: paymentId },
+    });
+    if (!payment) {
+      throw new AppException(
+        ErrorCode.PAYMENT_NOT_FOUND,
+        'Payment not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return this.confirmPayment(payment.userId, payment.id, { planName });
   }
 
   /**
@@ -284,6 +659,15 @@ export class BillingService {
   private async resolvePlan(planName: string) {
     const tier = await this.findTierByPlanName(planName);
     if (tier) {
+      const fullTier = await this.prisma.subscriptionTier.findUnique({
+        where: { id: tier.id },
+        include: { features: { orderBy: { name: 'asc' } } },
+      });
+      const features =
+        fullTier?.features
+          .filter((feature) => feature.included)
+          .map((feature) => feature.description ?? feature.name) ?? [];
+
       return {
         source: 'subscription_tier' as const,
         tier,
@@ -291,6 +675,7 @@ export class BillingService {
         title: this.toPlanTitle(tier.name),
         price: tier.price,
         currency: tier.currency,
+        features,
       };
     }
 
@@ -309,6 +694,7 @@ export class BillingService {
         title: fallback.title,
         price: fallback.price,
         currency: fallback.currency,
+        features: fallback.features,
       };
     }
 

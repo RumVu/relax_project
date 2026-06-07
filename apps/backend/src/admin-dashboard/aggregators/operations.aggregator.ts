@@ -5,9 +5,7 @@
 import { Injectable } from '@nestjs/common';
 import { PaymentStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  AdminDashboardPeriod,
-} from '../dto/admin-dashboard-query.dto';
+import { AdminDashboardPeriod } from '../dto/admin-dashboard-query.dto';
 import { DateRange } from '../helpers/date-range.helper';
 import { round2 } from '../helpers/admin-math.helper';
 import {

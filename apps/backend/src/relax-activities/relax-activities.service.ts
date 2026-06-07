@@ -24,10 +24,7 @@ import {
   RELAX_ACTIVITY_OPTIONS,
 } from './relax-activity-options';
 
-import {
-  getNextSuggestion,
-  toSessionPayload,
-} from './helpers/relax-mapper';
+import { getNextSuggestion, toSessionPayload } from './helpers/relax-mapper';
 import {
   getStressReliefPercent,
   resolveDurationSeconds,

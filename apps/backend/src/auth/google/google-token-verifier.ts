@@ -27,9 +27,7 @@ export async function verifyGoogleIdToken(
   idToken: string,
   clientIds: string | string[],
 ): Promise<GoogleIdTokenPayload> {
-  const audiences = (
-    Array.isArray(clientIds) ? clientIds : [clientIds]
-  )
+  const audiences = (Array.isArray(clientIds) ? clientIds : [clientIds])
     .map((c) => c.trim())
     .filter((c) => c.length > 0);
 
