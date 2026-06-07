@@ -8,11 +8,16 @@ import '../../data/services/mobile_content_service.dart';
 import '../../data/services/mood_service.dart';
 import '../../data/services/relax_catalog_service.dart';
 import '../../shared/widgets/navigation/pixel_bottom_nav.dart';
+import '../about/about_screen.dart';
 import '../auth/login_screen.dart';
 import '../challenge/challenge_screen.dart';
+import '../crisis/crisis_support_screen.dart';
 import '../home/home_screen.dart';
+import '../insights/insights_screen.dart';
 import '../journey/journey_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../relax/relax_screen.dart';
+import '../search/search_screen.dart';
 import '../setup/setup_screen.dart';
 
 class RelaxShell extends StatefulWidget {
@@ -320,7 +325,11 @@ class _RelaxShellState extends State<RelaxShell> {
         onMethodSelected: _openPractice,
         moodHistory: _moodHistory,
         moodHistoryLoading: _moodHistoryLoading,
-        onMoodLogged: _loadMoodHistory, // re-fetch ngay sau khi log mood
+        onMoodLogged: _loadMoodHistory,
+        onOpenNotifications: _openNotifications,
+        onOpenSearch: _openSearch,
+        onOpenInsights: _openInsights,
+        hasAccentTheme: widget.onAccentChanged != null,
       ),
       RelaxScreen(
         backendActivities: _activities,
@@ -341,6 +350,11 @@ class _RelaxShellState extends State<RelaxShell> {
         contentError: _contentError,
         onRefreshContent: _refresh,
         moodHistory: _moodHistory,
+        onOpenAbout: _openAbout,
+        onOpenCrisis: _openCrisis,
+        onOpenInsights: _openInsights,
+        onOpenSearch: _openSearch,
+        onOpenNotifications: _openNotifications,
       ),
     ];
 
@@ -366,6 +380,112 @@ class _RelaxShellState extends State<RelaxShell> {
           onSelected: (index) => setState(() => _tab = index),
         ),
       ),
+    );
+  }
+
+  // ── New screen launchers ──────────────────────────────────────────────────
+
+  /// Tính streak hiện tại từ moodHistory để pass cho Notifications inbox.
+  int get _currentStreak {
+    if (_moodHistory.isEmpty) return 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayKeys = _moodHistory
+        .map((c) => DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day))
+        .toSet();
+    int streak = 0;
+    var cursor = today;
+    while (dayKeys.contains(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    if (streak == 0 &&
+        dayKeys.contains(today.subtract(const Duration(days: 1)))) {
+      cursor = today.subtract(const Duration(days: 1));
+      while (dayKeys.contains(cursor)) {
+        streak++;
+        cursor = cursor.subtract(const Duration(days: 1));
+      }
+    }
+    return streak;
+  }
+
+  void _openNotifications() {
+    final session = context.sessionOrNull;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => NotificationsScreen(
+          isLoggedIn: session?.isLoggedIn ?? false,
+          moodHistoryCount: _moodHistory.length,
+          streakDays: _currentStreak,
+          hasAccentTheme: widget.onAccentChanged != null,
+          lastMoodAt: _moodHistory.isEmpty ? null : _moodHistory.first.createdAt,
+          onAction: _handleNotificationAction,
+        ),
+      ),
+    );
+  }
+
+  void _handleNotificationAction(String payload) {
+    Navigator.of(context).pop(); // close notifications screen first
+    switch (payload) {
+      case 'home':
+        setState(() => _tab = 0);
+        break;
+      case 'relax':
+        setState(() => _tab = 1);
+        break;
+      case 'challenge':
+        setState(() => _tab = 2);
+        break;
+      case 'setup':
+        setState(() => _tab = 3);
+        break;
+      case 'insights':
+        _openInsights();
+        break;
+      case 'crisis':
+        _openCrisis();
+        break;
+      case 'search':
+        _openSearch();
+        break;
+      case 'login':
+        // Đẩy về Login — kick session.logout sẽ trigger session listener
+        context.sessionOrNull?.logout();
+        break;
+    }
+  }
+
+  void _openSearch() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SearchScreen(
+          content: _content,
+          activities: _activities,
+          onActivityTap: _pushPracticeFor,
+        ),
+      ),
+    );
+  }
+
+  void _openInsights() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => InsightsScreen(moodHistory: _moodHistory),
+      ),
+    );
+  }
+
+  void _openAbout() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const AboutScreen()),
+    );
+  }
+
+  void _openCrisis() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const CrisisSupportScreen()),
     );
   }
 

@@ -50,6 +50,11 @@ class SetupScreen extends StatefulWidget {
     required this.contentError,
     required this.onRefreshContent,
     this.moodHistory = const [],
+    this.onOpenAbout,
+    this.onOpenCrisis,
+    this.onOpenInsights,
+    this.onOpenSearch,
+    this.onOpenNotifications,
   });
 
   final ThemeMode themeMode;
@@ -64,6 +69,13 @@ class SetupScreen extends StatefulWidget {
   final String? contentError;
   final VoidCallback onRefreshContent;
   final List<dynamic> moodHistory; // type kept loose to avoid import cycle
+
+  /// Shell-injected launchers cho 5 màn extra.
+  final VoidCallback? onOpenAbout;
+  final VoidCallback? onOpenCrisis;
+  final VoidCallback? onOpenInsights;
+  final VoidCallback? onOpenSearch;
+  final VoidCallback? onOpenNotifications;
 
   @override
   State<SetupScreen> createState() => _SetupScreenState();
@@ -430,6 +442,76 @@ class _SetupScreenState extends State<SetupScreen> {
                     MaterialPageRoute(builder: (_) => const LegalScreen()),
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 10),
+          const _SectionLabel(
+            icon: Icons.explore_outlined,
+            label: 'Khám phá thêm',
+          ),
+          const SizedBox(height: 8),
+          _SectionCard(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+            child: Column(
+              children: [
+                if (widget.onOpenSearch != null) ...[
+                  _TapRow(
+                    icon: Icons.search_rounded,
+                    title: 'Tìm kiếm',
+                    subtitle: 'Tìm hoạt động, nhật ký, lời nhắn',
+                    onTap: widget.onOpenSearch!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenInsights != null) ...[
+                  _TapRow(
+                    icon: Icons.insights_rounded,
+                    title: 'Hành trình của bạn',
+                    subtitle: 'Streak, mood breakdown, huy hiệu',
+                    onTap: widget.onOpenInsights!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenNotifications != null) ...[
+                  _TapRow(
+                    icon: Icons.notifications_outlined,
+                    title: 'Hộp thư thông báo',
+                    subtitle: 'Welcome, streak, gợi ý feature',
+                    onTap: widget.onOpenNotifications!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenAbout != null) ...[
+                  _TapRow(
+                    icon: Icons.auto_awesome_outlined,
+                    title: 'Về Thi Ái Chill',
+                    subtitle: 'Câu chuyện, triết lý, cam kết dữ liệu',
+                    onTap: widget.onOpenAbout!,
+                  ),
+                  Divider(
+                    height: 1,
+                    color: RelaxTheme.lavender.withValues(alpha: .14),
+                  ),
+                ],
+                if (widget.onOpenCrisis != null)
+                  _TapRow(
+                    icon: Icons.health_and_safety_outlined,
+                    title: 'Hỗ trợ khẩn cấp',
+                    subtitle: 'Hotline + grounding khi khó khăn',
+                    danger: true,
+                    onTap: widget.onOpenCrisis!,
+                  ),
               ],
             ),
           ),

@@ -10,11 +10,13 @@ import '../../shared/widgets/common/speech_bubble.dart';
 import '../../shared/widgets/layout/app_scroll.dart';
 import '../../shared/widgets/layout/header_bar.dart';
 import '../../shared/widgets/charts/mood_line_chart.dart';
+import '../../shared/widgets/home/daily_affirmation_card.dart';
 import '../../shared/widgets/mood/method_chip.dart';
 import '../../shared/widgets/mood/mood_progress.dart';
 import '../../shared/widgets/mood/mood_tile.dart';
 import '../../shared/widgets/pixel/cat_widgets.dart';
 import '../../shared/widgets/pixel/pixel_panel.dart';
+import '../../data/services/inbox/inbox_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -29,6 +31,10 @@ class HomeScreen extends StatefulWidget {
     this.moodHistory = const [],
     this.moodHistoryLoading = false,
     this.onMoodLogged,
+    this.onOpenNotifications,
+    this.onOpenSearch,
+    this.onOpenInsights,
+    this.hasAccentTheme = false,
   });
 
   final MobileContentSnapshot content;
@@ -50,6 +56,18 @@ class HomeScreen extends StatefulWidget {
   /// & chart 7-day sync ngay không cần restart app hay reopen tab.
   final VoidCallback? onMoodLogged;
 
+  /// Bell icon → push NotificationsScreen (real inbox).
+  final VoidCallback? onOpenNotifications;
+
+  /// Search icon → push SearchScreen.
+  final VoidCallback? onOpenSearch;
+
+  /// "Xem hành trình" → push InsightsScreen.
+  final VoidCallback? onOpenInsights;
+
+  /// Để inbox biết có nên show "Customs theme đã sẵn" notification không.
+  final bool hasAccentTheme;
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -60,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String? _activeMoodCode;
   String? _pendingMoodCode;
-  bool _notificationsOpen = false;
+  int _unreadInbox = 0;
 
   WeatherSnapshot? _weatherSnapshot;
   bool _weatherTried = false;
@@ -69,6 +87,51 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadWeather();
+    _refreshUnread();
+  }
+
+  @override
+  void didUpdateWidget(HomeScreen old) {
+    super.didUpdateWidget(old);
+    // Khi shell refresh moodHistory hoặc session đổi → cập nhật badge bell.
+    if (old.moodHistory.length != widget.moodHistory.length ||
+        old.session?.isLoggedIn != widget.session?.isLoggedIn) {
+      _refreshUnread();
+    }
+  }
+
+  Future<void> _refreshUnread() async {
+    final session = widget.session;
+    final loggedIn = session?.isLoggedIn ?? false;
+    final lastMood = widget.moodHistory.isEmpty
+        ? null
+        : widget.moodHistory.first.createdAt;
+    final streak = _calcStreak(widget.moodHistory);
+    final count = await InboxService.instance.unreadCount(
+      isLoggedIn: loggedIn,
+      moodHistoryCount: widget.moodHistory.length,
+      streakDays: streak,
+      hasAccentTheme: widget.hasAccentTheme,
+      lastMoodAt: lastMood,
+    );
+    if (!mounted) return;
+    setState(() => _unreadInbox = count);
+  }
+
+  int _calcStreak(List<MoodCheckin> history) {
+    if (history.isEmpty) return 0;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final dayKeys = history
+        .map((c) => DateTime(c.createdAt.year, c.createdAt.month, c.createdAt.day))
+        .toSet();
+    int streak = 0;
+    var cursor = today;
+    while (dayKeys.contains(cursor)) {
+      streak++;
+      cursor = cursor.subtract(const Duration(days: 1));
+    }
+    return streak;
   }
 
   Future<void> _loadWeather() async {
@@ -206,7 +269,14 @@ class _HomeScreenState extends State<HomeScreen> {
         ? Icons.wb_sunny_outlined
         : Icons.nights_stay_outlined;
 
-    return AppScroll(
+    return RefreshIndicator(
+      color: RelaxTheme.purple,
+      onRefresh: () async {
+        widget.onRefreshContent();
+        await _loadWeather();
+        await _refreshUnread();
+      },
+      child: AppScroll(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -214,41 +284,38 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: wxIcon,
             title: copy.homeTitle,
             subtitle: subtitle,
+            bellHasBadge: _unreadInbox > 0,
             onBellTap: () {
-              setState(() => _notificationsOpen = !_notificationsOpen);
+              widget.onOpenNotifications?.call();
+              // delay refresh để khi user back → mark-as-read effect visible
+              Future.delayed(const Duration(milliseconds: 600), _refreshUnread);
             },
           ),
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 260),
-            transitionBuilder: (child, animation) {
-              final curved = CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeOutCubic,
-                reverseCurve: Curves.easeInCubic,
-              );
-              return SizeTransition(
-                sizeFactor: curved,
-                axisAlignment: -1,
-                child: FadeTransition(opacity: curved, child: child),
-              );
-            },
-            child: _notificationsOpen
-                ? Padding(
-                    key: const ValueKey('home-notifications'),
-                    padding: const EdgeInsets.only(top: 12),
-                    child: _HomeNotificationPanel(
-                      loadingContent: widget.loadingContent,
-                      contentError: widget.contentError,
-                      weather: _weatherSnapshot,
-                      loggedIn: isLoggedIn,
-                      moodHistoryLoading: histLoading,
-                      historyCount: history.length,
-                      onRefresh: _refreshHomeData,
-                    ),
-                  )
-                : const SizedBox.shrink(
-                    key: ValueKey('home-notifications-off'),
-                  ),
+          const SizedBox(height: 12),
+          // ── Daily affirmation hero — rotate theo ngày
+          const DailyAffirmationCard(compact: true),
+          const SizedBox(height: 10),
+          // ── Quick actions: Search + Insights (chip row)
+          Row(
+            children: [
+              Expanded(
+                child: _QuickActionChip(
+                  icon: Icons.search_rounded,
+                  label: 'Tìm kiếm',
+                  color: RelaxTheme.lavender,
+                  onTap: widget.onOpenSearch,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _QuickActionChip(
+                  icon: Icons.insights_rounded,
+                  label: 'Hành trình',
+                  color: const Color(0xFFE85A6A),
+                  onTap: widget.onOpenInsights,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           PixelPanel(
@@ -365,6 +432,53 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    ),
+    );
+  }
+}
+
+class _QuickActionChip extends StatelessWidget {
+  const _QuickActionChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: .08),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withValues(alpha: .3)),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 13,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
