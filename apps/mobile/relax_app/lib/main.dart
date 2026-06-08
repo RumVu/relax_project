@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
+import 'core/page_transitions.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'screens/analytics_screen.dart';
@@ -76,70 +77,102 @@ GoRouter _buildRouter(AuthState auth) {
       return null;
     },
     routes: [
-      GoRoute(path: '/', builder: (context, state) => const _Splash()),
+      // Tất cả routes dùng softPage() để có cùng cảm giác đầm thắm:
+      // fade + slight rise + slow easeOutCubic 360ms.
+      GoRoute(
+        path: '/',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const _Splash()),
+      ),
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const OnboardingScreen()),
       ),
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(
+        path: '/login',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const LoginScreen()),
+      ),
       GoRoute(
         path: '/register',
-        builder: (context, state) => const RegisterScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const RegisterScreen()),
       ),
       GoRoute(
         path: '/home',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final tabParam = state.uri.queryParameters['tab'];
           final tab = int.tryParse(tabParam ?? '') ?? 0;
-          return AppShell(initialTab: tab);
+          return softPage(
+            key: state.pageKey,
+            child: AppShell(initialTab: tab),
+          );
         },
       ),
       GoRoute(
         path: '/settings',
-        builder: (context, state) => const SettingsScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const SettingsScreen()),
       ),
       GoRoute(
         path: '/weather',
-        builder: (context, state) => const WeatherScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const WeatherScreen()),
       ),
       GoRoute(
         path: '/companion',
-        builder: (context, state) => const CompanionScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const CompanionScreen()),
       ),
       GoRoute(
         path: '/breathing',
-        builder: (context, state) => const _PushedScreen(
-          title: 'Hít thở',
-          child: BreathingScreen(),
+        pageBuilder: (context, state) => softPage(
+          key: state.pageKey,
+          child: const _PushedScreen(
+            title: 'Hít thở',
+            child: BreathingScreen(),
+          ),
         ),
       ),
       GoRoute(
         path: '/journal',
-        builder: (context, state) => const _PushedScreen(
-          title: 'Nhật ký',
-          child: JournalScreen(),
+        pageBuilder: (context, state) => softPage(
+          key: state.pageKey,
+          child: const _PushedScreen(
+            title: 'Nhật ký',
+            child: JournalScreen(),
+          ),
         ),
       ),
       GoRoute(
         path: '/sounds',
-        builder: (context, state) => const SoundsScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const SoundsScreen()),
       ),
       GoRoute(
         path: '/podcast',
-        builder: (context, state) => const SoundsScreen(category: 'PODCAST'),
+        pageBuilder: (context, state) => softPage(
+          key: state.pageKey,
+          child: const SoundsScreen(category: 'PODCAST'),
+        ),
       ),
       GoRoute(
         path: '/meditation',
-        builder: (context, state) =>
-            const SoundsScreen(category: 'MEDITATION'),
+        pageBuilder: (context, state) => softPage(
+          key: state.pageKey,
+          child: const SoundsScreen(category: 'MEDITATION'),
+        ),
       ),
       GoRoute(
         path: '/analytics',
-        builder: (context, state) => const AnalyticsScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const AnalyticsScreen()),
       ),
       GoRoute(
         path: '/legal',
-        builder: (context, state) => const LegalScreen(),
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const LegalScreen()),
       ),
     ],
   );

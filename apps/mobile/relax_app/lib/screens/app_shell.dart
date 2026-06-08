@@ -32,6 +32,7 @@ class _AppShellState extends State<AppShell> {
   static const _tabCount = 4;
   late int _index = widget.initialTab.clamp(0, _tabCount - 1);
   final _built = <int, Widget>{};
+  double _veilOpacity = 0;
 
   Widget _screen(int i) {
     return _built.putIfAbsent(i, () {
@@ -62,9 +63,28 @@ class _AppShellState extends State<AppShell> {
         body: Column(
           children: [
             Expanded(
-              child: IndexedStack(
-                index: _index,
-                children: List.generate(_tabCount, _screen),
+              // Stack: IndexedStack giữ state (scroll, controllers) +
+              // một lớp overlay fade trắng khi đổi tab cho cảm giác
+              // dịu dàng (không reset state như AnimatedSwitcher).
+              child: Stack(
+                children: [
+                  IndexedStack(
+                    index: _index,
+                    children: List.generate(_tabCount, _screen),
+                  ),
+                  // Hiệu ứng fade veil — opacity 0.0 ổn định, sẽ
+                  // animate qua _veil khi tab change.
+                  IgnorePointer(
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOut,
+                      opacity: _veilOpacity,
+                      child: Container(
+                        color: context.surface,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             const _MiniPlayer(),
@@ -72,7 +92,19 @@ class _AppShellState extends State<AppShell> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
+          onDestinationSelected: (i) {
+            if (i == _index) return;
+            // Flash veil 0 → 0.6 → 0 trong ~440ms để có cảm giác
+            // "chớp mắt" dịu dàng khi đổi tab — không reset state
+            // của tab cũ.
+            setState(() {
+              _veilOpacity = 0.6;
+              _index = i;
+            });
+            Future.delayed(const Duration(milliseconds: 220), () {
+              if (mounted) setState(() => _veilOpacity = 0);
+            });
+          },
           backgroundColor: context.surface,
           indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
           destinations: const [
