@@ -29,14 +29,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: 'Thư giãn, hít thở và tận hưởng những khoảnh khắc bình yên.',
     ),
     _Slide(
-      emoji: '💗',
-      title: 'Đồng hành mỗi ngày',
-      body: 'Nhận lời nhắc, động viên và những gợi ý hữu ích cho bạn.',
+      emoji: '🫶',
+      title: 'Chọn phương thức\nyêu thích',
+      body:
+          'Nhạc, thiền, hít thở, viết nhật ký — pick cách bạn thấy dễ chịu nhất.',
     ),
     _Slide(
-      emoji: '🎵',
-      title: 'Đơn giản và dễ dùng',
-      body: 'Giao diện dễ thương, tối giản để bạn sử dụng mỗi ngày.',
+      emoji: '📈',
+      title: 'Theo dõi cảm xúc\n& tiến độ',
+      body:
+          'Mood check-in mỗi ngày, biểu đồ tuần — hiểu rõ nhịp bên trong mình.',
+    ),
+    _Slide(
+      emoji: '✦',
+      title: 'Sẵn sàng\nbắt đầu chưa?',
+      body: 'Đăng nhập để Thi Ái nâng niu trút bỏ nỗi buồn của bạn nha ~',
     ),
   ];
 

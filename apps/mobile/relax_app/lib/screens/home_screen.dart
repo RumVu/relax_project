@@ -396,8 +396,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final methods = [
       ('Thiền định', Icons.self_improvement, '/meditation'),
       ('Hít thở', Icons.air, '/breathing'),
-      ('Viết nhật ký', Icons.edit_note, '/journal'),
-      ('Nghe nhạc', Icons.headphones, '/sounds'),
+      ('Nhật ký', Icons.edit_note, '/journal'),
+      ('Nhạc', Icons.headphones, '/sounds'),
+      ('Podcast', Icons.mic_none, '/podcast'),
     ];
     return Container(
       padding: const EdgeInsets.all(16),
