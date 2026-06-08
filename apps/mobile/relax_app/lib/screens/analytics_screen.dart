@@ -8,7 +8,11 @@ import '../widgets/mood_line_chart.dart';
 /// Màn phân tích cảm xúc: biểu đồ 7 ngày, phân bố theo loại cảm xúc, và vài
 /// chỉ số tổng quan — tính từ check-in cảm xúc.
 class AnalyticsScreen extends StatefulWidget {
-  const AnalyticsScreen({super.key});
+  /// [embedded] = true → screen này nằm trong AppShell IndexedStack (tab
+  /// Insights), ẩn nút back vì đã có bottom nav.
+  const AnalyticsScreen({super.key, this.embedded = false});
+
+  final bool embedded;
 
   @override
   State<AnalyticsScreen> createState() => _AnalyticsScreenState();
@@ -104,10 +108,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: context.appText),
-          onPressed: () => context.pop(),
-        ),
+        automaticallyImplyLeading: false,
+        leading: widget.embedded
+            ? null
+            : IconButton(
+                icon: Icon(Icons.arrow_back, color: context.appText),
+                onPressed: () => context.pop(),
+              ),
         title: Text(
           'Phân tích cảm xúc',
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),

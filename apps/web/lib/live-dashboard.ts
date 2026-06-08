@@ -1021,6 +1021,12 @@ function mapPushDevices(items: Array<Record<string, unknown>> | undefined) {
       'Device',
     platform: asString(item.platform)?.toLowerCase() ?? 'unknown',
     active: asBoolean(item.enabled) ?? false,
+    deviceId: asString(item.deviceId) ?? undefined,
+    appVersion: asString(item.appVersion) ?? undefined,
+    timezone: asString(item.timezone) ?? undefined,
+    provider: asString(item.provider)?.toLowerCase() ?? undefined,
+    lastSeenAt: asString(item.lastSeenAt) ?? undefined,
+    createdAt: asString(item.createdAt) ?? undefined,
   }));
 }
 

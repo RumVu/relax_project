@@ -86,7 +86,14 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
-      GoRoute(path: '/home', builder: (context, state) => const AppShell()),
+      GoRoute(
+        path: '/home',
+        builder: (context, state) {
+          final tabParam = state.uri.queryParameters['tab'];
+          final tab = int.tryParse(tabParam ?? '') ?? 0;
+          return AppShell(initialTab: tab);
+        },
+      ),
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),

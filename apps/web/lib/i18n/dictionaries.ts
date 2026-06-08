@@ -585,6 +585,13 @@ const vi = {
   'settings.reminders.time': 'Thời gian',
   'settings.reminders.label': 'Nhãn',
   'settings.reminders.empty': 'Chưa có nhắc nhở nào.',
+  'settings.devices.empty':
+    'Chưa có thiết bị di động nào đăng nhập. Mở app Thi Ái trên điện thoại để tự động hiện ở đây ✦',
+  'settings.devices.appVersion': 'Phiên bản',
+  'settings.devices.timezone': 'Múi giờ',
+  'settings.devices.provider': 'Kênh đẩy',
+  'settings.devices.lastSeen': 'Lần cuối truy cập',
+  'settings.devices.firstSeen': 'đăng ký từ',
 
   // ===== Mood page extras =====
   'mood.page.title': 'Theo dõi cảm xúc',
@@ -1823,6 +1830,13 @@ const en: Record<keyof typeof vi, string> = {
   'settings.reminders.time': 'Time',
   'settings.reminders.label': 'Label',
   'settings.reminders.empty': 'No reminders yet.',
+  'settings.devices.empty':
+    'No mobile devices signed in yet. Open the Thi Ái app on your phone to see it appear here ✦',
+  'settings.devices.appVersion': 'App version',
+  'settings.devices.timezone': 'Timezone',
+  'settings.devices.provider': 'Push provider',
+  'settings.devices.lastSeen': 'Last seen',
+  'settings.devices.firstSeen': 'first seen',
 
   // ===== Mood page extras =====
   'mood.page.title': 'Mood tracking',

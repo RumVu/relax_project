@@ -4,22 +4,33 @@ import 'package:provider/provider.dart';
 
 import '../core/audio_controller.dart';
 import '../core/theme.dart';
+import 'analytics_screen.dart';
 import 'home_screen.dart';
 import 'relax_screen.dart';
 import 'settings_screen.dart';
 
-/// Khung chính sau khi đăng nhập. 3 tab theo mockup: Trang chủ / Khu thư
-/// giãn / Setup. IndexedStack giữ state mỗi tab, lazy build để tránh gọi
-/// API thừa.
+/// Khung chính sau khi đăng nhập. 4 tab:
+///   0. Trang chủ — daily snapshot (weather, mood check-in, companion)
+///   1. Khu thư giãn — content discovery (nhạc, hít thở, nhật ký)
+///   2. Cảm xúc — phân tích mood (Analytics)
+///   3. Setup — settings
+///
+/// IndexedStack giữ state mỗi tab, lazy build để tránh gọi API thừa.
+/// Tab có thể được preselect khi push qua route `/home?tab=N`.
 class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+  const AppShell({super.key, this.initialTab = 0});
+
+  /// Tab muốn mở khi shell vừa mount. Dùng cho deeplink (vd: noti dẫn
+  /// thẳng vào Insights tab).
+  final int initialTab;
 
   @override
   State<AppShell> createState() => _AppShellState();
 }
 
 class _AppShellState extends State<AppShell> {
-  int _index = 0;
+  static const _tabCount = 4;
+  late int _index = widget.initialTab.clamp(0, _tabCount - 1);
   final _built = <int, Widget>{};
 
   Widget _screen(int i) {
@@ -30,6 +41,8 @@ class _AppShellState extends State<AppShell> {
         case 1:
           return const RelaxScreen();
         case 2:
+          return const AnalyticsScreen(embedded: true);
+        case 3:
         default:
           return const SettingsScreen();
       }
@@ -38,40 +51,53 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: IndexedStack(
-              index: _index,
-              children: List.generate(3, _screen),
+    return PopScope(
+      // Bấm back trên Android khi đang ở tab phụ → về Home thay vì thoát.
+      canPop: _index == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || _index == 0) return;
+        setState(() => _index = 0);
+      },
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(
+              child: IndexedStack(
+                index: _index,
+                children: List.generate(_tabCount, _screen),
+              ),
             ),
-          ),
-          const _MiniPlayer(),
-        ],
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: (i) => setState(() => _index = i),
-        backgroundColor: context.surface,
-        indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home, color: RelaxColors.violet),
-            label: 'Trang chủ',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.spa_outlined),
-            selectedIcon: Icon(Icons.spa, color: RelaxColors.violet),
-            label: 'Khu thư giãn',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings, color: RelaxColors.violet),
-            label: 'Setup',
-          ),
-        ],
+            const _MiniPlayer(),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _index,
+          onDestinationSelected: (i) => setState(() => _index = i),
+          backgroundColor: context.surface,
+          indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
+          destinations: const [
+            NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home, color: RelaxColors.violet),
+              label: 'Trang chủ',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.spa_outlined),
+              selectedIcon: Icon(Icons.spa, color: RelaxColors.violet),
+              label: 'Thư giãn',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.insights_outlined),
+              selectedIcon: Icon(Icons.insights, color: RelaxColors.violet),
+              label: 'Cảm xúc',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(Icons.settings, color: RelaxColors.violet),
+              label: 'Setup',
+            ),
+          ],
+        ),
       ),
     );
   }

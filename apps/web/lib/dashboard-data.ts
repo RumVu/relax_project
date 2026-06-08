@@ -186,6 +186,12 @@ export type UserDashboardData = {
       label: string;
       platform: string;
       active: boolean;
+      deviceId?: string;
+      appVersion?: string;
+      timezone?: string;
+      provider?: string;
+      lastSeenAt?: string;
+      createdAt?: string;
     }>;
     reminders: Array<{
       id: string;
