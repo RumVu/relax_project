@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/audio_controller.dart';
 import '../core/theme.dart';
+import '../widgets/journey_prompt.dart';
 import 'analytics_screen.dart';
 import 'home_screen.dart';
 import 'relax_screen.dart';
@@ -33,6 +37,52 @@ class _AppShellState extends State<AppShell> {
   late int _index = widget.initialTab.clamp(0, _tabCount - 1);
   final _built = <int, Widget>{};
   double _veilOpacity = 0;
+  StreamSubscription<Map<String, dynamic>>? _audioCompletionSub;
+
+  @override
+  void initState() {
+    super.initState();
+    // Listen audio completion ở shell level → JourneyPrompt fire dù
+    // user đang ở tab nào. AppShell sống suốt session sau login.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final audio = context.read<AudioController>();
+      _audioCompletionSub = audio.onTrackCompleted.listen(_onAudioFinished);
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioCompletionSub?.cancel();
+    super.dispose();
+  }
+
+  void _onAudioFinished(Map<String, dynamic> track) {
+    if (!mounted) return;
+    final title = (track['title'] as String?) ?? 'Phiên nghe';
+    showJourneyPrompt(
+      context,
+      title: 'Phiên "$title" đã xong 🎧',
+      subtitle:
+          'Cảm thấy dịu hơn chưa? Mình đi tiếp một bước nhẹ nha — hoặc nghe thêm bài khác cũng được.',
+      suggestions: const [
+        JourneySuggestion(
+          icon: Icons.playlist_play,
+          label: 'Nghe danh sách khác',
+          route: '/sounds',
+        ),
+        JourneySuggestion(
+          icon: Icons.edit_note,
+          label: 'Ghi cảm giác vào nhật ký',
+          route: '/journal',
+        ),
+        JourneySuggestion(
+          icon: Icons.mood,
+          label: 'Cập nhật cảm xúc',
+          route: '/home?tab=2',
+        ),
+      ],
+    );
+  }
 
   Widget _screen(int i) {
     return _built.putIfAbsent(i, () {
@@ -94,6 +144,8 @@ class _AppShellState extends State<AppShell> {
           selectedIndex: _index,
           onDestinationSelected: (i) {
             if (i == _index) return;
+            // Haptic nhẹ cho tap chính xác — không rung mạnh, chỉ nhỏ.
+            HapticFeedback.selectionClick();
             // Flash veil 0 → 0.6 → 0 trong ~440ms để có cảm giác
             // "chớp mắt" dịu dàng khi đổi tab — không reset state
             // của tab cũ.

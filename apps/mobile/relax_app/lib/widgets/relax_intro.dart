@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
@@ -62,7 +63,8 @@ class _RelaxIntroState extends State<RelaxIntro>
   }
 
   Future<void> _prefetchLatestMood() async {
-    // Lấy mood mới nhất để skip step pick nếu user vừa ghi gần đây.
+    // Lấy mood mới nhất. Nếu trong 2h gần đây → dùng luôn, sẽ skip
+    // thẳng từ breathing → suggest, bỏ qua bước mood pick.
     try {
       final res = await RelaxApi.instance
           .get('/mood-checkins/me', query: {'limit': 1});
@@ -71,9 +73,21 @@ class _RelaxIntroState extends State<RelaxIntro>
       if (items is List && items.isNotEmpty) {
         final latest = items.first as Map?;
         final mood = latest?['mood'] as String?;
-        if (mood != null) _selectedMood = mood;
+        final createdAtStr = latest?['createdAt'] as String?;
+        if (mood == null) return;
+        DateTime? createdAt;
+        if (createdAtStr != null) {
+          createdAt = DateTime.tryParse(createdAtStr);
+        }
+        final isFresh = createdAt != null &&
+            DateTime.now().difference(createdAt).inHours < 2;
+        if (isFresh) {
+          _selectedMood = mood;
+        }
       }
-    } catch (_) {/* ignore — không block intro */}
+    } catch (_) {
+      // Không block intro — chỉ là gợi ý nice-to-have.
+    }
   }
 
   /// 3 chu kỳ thở 4-2-4 = 30s. Mỗi giây cập nhật label + animate scale.
@@ -95,7 +109,11 @@ class _RelaxIntroState extends State<RelaxIntro>
           duration: const Duration(seconds: 4), curve: Curves.easeInOut);
     }
     if (!mounted) return;
-    setState(() => _phase = _IntroPhase.moodPick);
+    // Nếu prefetch đã tìm thấy mood mới ghi gần đây → bỏ qua step pick,
+    // vào thẳng suggest. Hơn nữa thật, user không cần làm lại.
+    setState(() => _phase = _selectedMood != null
+        ? _IntroPhase.suggest
+        : _IntroPhase.moodPick);
   }
 
   @override
@@ -106,6 +124,7 @@ class _RelaxIntroState extends State<RelaxIntro>
   }
 
   void _selectMood(String mood) {
+    HapticFeedback.selectionClick();
     setState(() {
       _selectedMood = mood;
       _phase = _IntroPhase.suggest;

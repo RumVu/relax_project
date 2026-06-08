@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -6,11 +8,23 @@ import 'package:just_audio/just_audio.dart';
 /// SoundsScreen đều đọc/điều khiển qua đây.
 class AudioController extends ChangeNotifier {
   AudioController() {
-    // Cập nhật UI mỗi khi trạng thái phát đổi.
-    _player.playerStateStream.listen((_) => notifyListeners());
+    // Cập nhật UI mỗi khi trạng thái phát đổi + detect completion.
+    _playerStateSub = _player.playerStateStream.listen((state) {
+      notifyListeners();
+      if (state.processingState == ProcessingState.completed) {
+        _onTrackCompleted();
+      }
+    });
   }
 
   final AudioPlayer _player = AudioPlayer();
+  StreamSubscription<PlayerState>? _playerStateSub;
+
+  /// Broadcast emit khi MỘT track phát xong. Sounds screen / mini-player
+  /// có thể listen để hiện JourneyPrompt "Nghe bài khác?". Broadcast
+  /// để nhiều listener cùng nghe được.
+  final _completionCtrl = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get onTrackCompleted => _completionCtrl.stream;
 
   List<Map<String, dynamic>> _queue = [];
   int _index = -1;
@@ -76,8 +90,26 @@ class AudioController extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Track end handler: nếu còn track tiếp theo thì auto-advance (không
+  /// emit, không làm phiền), chỉ emit khi hết hẳn queue → UI dùng để
+  /// hiện JourneyPrompt "Nghe bài khác?" cuối session.
+  void _onTrackCompleted() {
+    if (hasNext) {
+      next();
+      return;
+    }
+    final finished = current;
+    _player.stop();
+    notifyListeners();
+    if (finished != null) {
+      _completionCtrl.add(Map<String, dynamic>.from(finished));
+    }
+  }
+
   @override
   void dispose() {
+    _playerStateSub?.cancel();
+    _completionCtrl.close();
     _player.dispose();
     super.dispose();
   }

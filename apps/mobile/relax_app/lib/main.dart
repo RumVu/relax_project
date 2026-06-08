@@ -16,6 +16,7 @@ import 'screens/legal_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/register_screen.dart';
+import 'screens/relax_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/sounds_screen.dart';
 import 'screens/weather_screen.dart';
@@ -31,7 +32,15 @@ class RelaxApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthState()),
+        ChangeNotifierProvider(
+          create: (_) {
+            final state = AuthState();
+            // Đăng ký cleanup hooks cho logout — reset các per-session
+            // flag để user kế tiếp không kế thừa state user cũ.
+            state.onLogoutCleanup = RelaxScreen.resetIntroForLogout;
+            return state;
+          },
+        ),
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => AudioController()),
       ],

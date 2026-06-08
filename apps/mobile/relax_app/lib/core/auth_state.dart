@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
 import 'api_client.dart';
+import 'device_registration.dart';
 
 /// State giữ thông tin user đăng nhập + giúp các màn hình
 /// gọi login/register/logout mà không phải tự call API trực tiếp.
@@ -99,6 +103,9 @@ class AuthState extends ChangeNotifier {
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)
               : null;
+          // Register device để dashboard Settings → Push devices hiện
+          // máy này. Best-effort, không chặn login.
+          unawaited(DeviceRegistration.register());
           notifyListeners();
           return true;
         }
@@ -132,6 +139,7 @@ class AuthState extends ChangeNotifier {
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)
               : null;
+          unawaited(DeviceRegistration.register());
           notifyListeners();
           return true;
         }
@@ -145,6 +153,8 @@ class AuthState extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    // Unregister device trước khi token bị clear — nếu không sẽ 401.
+    await DeviceRegistration.unregister();
     try {
       await RelaxApi.instance.post('/auth/logout');
     } catch (_) {
@@ -152,6 +162,13 @@ class AuthState extends ChangeNotifier {
     }
     await RelaxApi.instance.clearTokens();
     _user = null;
+    _onLogoutCleanup?.call();
     notifyListeners();
   }
+
+  /// Callback đăng ký từ main.dart để reset các per-session state
+  /// (vd RelaxScreen intro flag) khi user logout. Tránh dùng import
+  /// chéo screens ↔ core.
+  void Function()? _onLogoutCleanup;
+  set onLogoutCleanup(void Function()? fn) => _onLogoutCleanup = fn;
 }

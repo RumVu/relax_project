@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/theme.dart';
 import '../widgets/journey_prompt.dart';
@@ -162,6 +163,8 @@ class _BreathingScreenState extends State<BreathingScreen>
           _phase = _Phase.finished;
           _ticker?.cancel();
           _scaleCtrl.animateTo(0.7, duration: const Duration(milliseconds: 600));
+          // Haptic nhẹ báo hoàn thành — không rung mạnh.
+          HapticFeedback.lightImpact();
           // Đợi 600ms cho animation kết thúc rồi mời tiếp. Primary CTA
           // là "Tập 1 vòng nữa" → restart ngay tại chỗ, không phải hỏi
           // user pick lại pattern.

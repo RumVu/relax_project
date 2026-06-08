@@ -21,6 +21,12 @@ class RelaxScreen extends StatefulWidget {
   /// Reset khi app restart — đảm bảo intro chỉ hiện lần đầu mỗi session.
   static bool _introSeenThisSession = false;
 
+  /// Reset từ ngoài (vd auth_state.logout()) — user kế tiếp sẽ thấy
+  /// intro lại từ đầu, không kế thừa state user cũ.
+  static void resetIntroForLogout() {
+    _introSeenThisSession = false;
+  }
+
   @override
   State<RelaxScreen> createState() => _RelaxScreenState();
 }
