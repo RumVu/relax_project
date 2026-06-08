@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/api_client.dart';
 import '../core/theme.dart';
 import '../widgets/journey_prompt.dart';
+import '../widgets/soft_toast.dart';
 
 /// Màn ghi cảm xúc: chọn 1 trong các mood lấy từ /mood-checkins/options,
 /// kéo cường độ 1-5, viết ghi chú, gửi POST /mood-checkins/me. Bên dưới
@@ -80,10 +81,11 @@ class _MoodScreenState extends State<MoodScreen> {
       if (res.statusCode == 200 || res.statusCode == 201) {
         final savedMood = _selectedMood!;
         _noteCtrl.clear();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: RelaxColors.mint,
-          content: Text('Đã ghi lại cảm xúc của bạn.'),
-        ));
+        showSoftToast(
+          context,
+          message: 'Đã ghi lại cảm xúc của bạn ✦',
+          tone: SoftToastTone.success,
+        );
         await _load();
         if (!mounted) return;
         // Dẫn dắt user sang bước tiếp theo dựa trên mood vừa ghi.
@@ -95,17 +97,12 @@ class _MoodScreenState extends State<MoodScreen> {
         );
       } else {
         final msg = (res.data?['message'] as String?) ?? 'Không lưu được cảm xúc';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(msg),
-        ));
+        showSoftToast(context, message: msg, tone: SoftToastTone.error);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/api_client.dart';
 import '../core/theme.dart';
 import '../widgets/journey_prompt.dart';
+import '../widgets/soft_toast.dart';
 
 /// Màn nhật ký: viết entry mới (POST /journals/me) + xem danh sách gần đây
 /// (GET /journals/me). Cho phép đánh dấu yêu thích và xoá entry.
@@ -79,10 +80,11 @@ class _JournalScreenState extends State<JournalScreen> {
         _titleCtrl.clear();
         _bodyCtrl.clear();
         FocusScope.of(context).unfocus();
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          backgroundColor: RelaxColors.mint,
-          content: Text('Đã lưu nhật ký.'),
-        ));
+        showSoftToast(
+          context,
+          message: 'Đã lưu nhật ký 🌿',
+          tone: SoftToastTone.success,
+        );
         await _load();
         if (!mounted) return;
         // Dẫn dắt: vừa trút lòng xong → mời khoá lại bằng hơi thở /
@@ -112,17 +114,12 @@ class _JournalScreenState extends State<JournalScreen> {
         );
       } else {
         final msg = (res.data?['message'] as String?) ?? 'Không lưu được nhật ký';
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(msg),
-        ));
+        showSoftToast(context, message: msg, tone: SoftToastTone.error);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -138,10 +135,8 @@ class _JournalScreenState extends State<JournalScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     }
   }
@@ -173,10 +168,8 @@ class _JournalScreenState extends State<JournalScreen> {
       await _load();
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     }
   }

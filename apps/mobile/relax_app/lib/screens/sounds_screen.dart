@@ -89,17 +89,35 @@ class _SoundsScreenState extends State<SoundsScreen> {
                 : Column(
                     children: [
                       Expanded(
-                        child: _tracks.isEmpty
-                            ? Center(
-                                child: Text(
-                                  'Chưa có bản nào.',
-                                  style: TextStyle(color: context.mutedText),
-                                ),
-                              )
-                            : ListView.builder(
-                                padding:
-                                    const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                itemCount: _tracks.length,
+                        child: RefreshIndicator(
+                          color: RelaxColors.violet,
+                          onRefresh: _load,
+                          child: _tracks.isEmpty
+                              ? ListView(
+                                  // ListView để pull-to-refresh hoạt động
+                                  // ngay cả khi list trống.
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  children: [
+                                    SizedBox(
+                                      height: 320,
+                                      child: Center(
+                                        child: Text(
+                                          'Chưa có bản nào.\nKéo xuống để tải lại.',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                              color: context.mutedText),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  physics:
+                                      const AlwaysScrollableScrollPhysics(),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                  itemCount: _tracks.length,
                                 itemBuilder: (context, i) {
                                   final t = _tracks[i];
                                   final playing = identical(
@@ -156,6 +174,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                   );
                                 },
                               ),
+                        ),
                       ),
                       if (audio.hasTrack) _nowPlayingBar(context, audio),
                     ],
