@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import '../widgets/journey_prompt.dart';
 
 /// Màn nhật ký: viết entry mới (POST /journals/me) + xem danh sách gần đây
 /// (GET /journals/me). Cho phép đánh dấu yêu thích và xoá entry.
@@ -83,6 +84,32 @@ class _JournalScreenState extends State<JournalScreen> {
           content: Text('Đã lưu nhật ký.'),
         ));
         await _load();
+        if (!mounted) return;
+        // Dẫn dắt: vừa trút lòng xong → mời khoá lại bằng hơi thở /
+        // âm thanh, hoặc xem nhịp cảm xúc tuần này.
+        await showJourneyPrompt(
+          context,
+          title: 'Đã trút bỏ rồi 🌿',
+          subtitle:
+              'Giờ là lúc khép lại nhẹ nhàng. Mình đi tiếp một bước êm nhé?',
+          suggestions: const [
+            JourneySuggestion(
+              icon: Icons.air,
+              label: 'Hít thở 3 phút để khoá lại',
+              route: '/breathing',
+            ),
+            JourneySuggestion(
+              icon: Icons.headphones,
+              label: 'Nghe nhạc êm',
+              route: '/sounds',
+            ),
+            JourneySuggestion(
+              icon: Icons.insights,
+              label: 'Xem nhịp tuần này',
+              route: '/home?tab=2',
+            ),
+          ],
+        );
       } else {
         final msg = (res.data?['message'] as String?) ?? 'Không lưu được nhật ký';
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../core/theme.dart';
+import '../widgets/journey_prompt.dart';
 
 /// Một nhịp thở: bao nhiêu giây cho từng pha + số chu kỳ.
 class _Pattern {
@@ -161,6 +162,33 @@ class _BreathingScreenState extends State<BreathingScreen>
           _phase = _Phase.finished;
           _ticker?.cancel();
           _scaleCtrl.animateTo(0.7, duration: const Duration(milliseconds: 600));
+          // Đợi 600ms cho animation kết thúc rồi mời tiếp.
+          Future.delayed(const Duration(milliseconds: 700), () {
+            if (!mounted) return;
+            showJourneyPrompt(
+              context,
+              title: 'Đã hít thở xong 🌬️',
+              subtitle:
+                  'Nhẹ nhõm hơn rồi nhỉ? Ghi lại cảm giác này hoặc đi tiếp một bước êm nha.',
+              suggestions: const [
+                JourneySuggestion(
+                  icon: Icons.mood,
+                  label: 'Ghi lại cảm xúc bây giờ',
+                  route: '/home?tab=2',
+                ),
+                JourneySuggestion(
+                  icon: Icons.edit_note,
+                  label: 'Viết một dòng vào nhật ký',
+                  route: '/journal',
+                ),
+                JourneySuggestion(
+                  icon: Icons.headphones,
+                  label: 'Nghe nhạc êm',
+                  route: '/sounds',
+                ),
+              ],
+            );
+          });
           return;
         }
       }

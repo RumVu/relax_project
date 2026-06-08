@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import '../widgets/journey_prompt.dart';
 
 /// Màn ghi cảm xúc: chọn 1 trong các mood lấy từ /mood-checkins/options,
 /// kéo cường độ 1-5, viết ghi chú, gửi POST /mood-checkins/me. Bên dưới
@@ -77,12 +78,21 @@ class _MoodScreenState extends State<MoodScreen> {
       });
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
+        final savedMood = _selectedMood!;
         _noteCtrl.clear();
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           backgroundColor: RelaxColors.mint,
           content: Text('Đã ghi lại cảm xúc của bạn.'),
         ));
         await _load();
+        if (!mounted) return;
+        // Dẫn dắt user sang bước tiếp theo dựa trên mood vừa ghi.
+        await showJourneyPrompt(
+          context,
+          title: 'Đã ghi cảm xúc 🌸',
+          subtitle: subtitleForMood(savedMood),
+          suggestions: suggestionsForMood(savedMood),
+        );
       } else {
         final msg = (res.data?['message'] as String?) ?? 'Không lưu được cảm xúc';
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
