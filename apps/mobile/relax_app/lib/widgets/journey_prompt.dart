@@ -9,15 +9,21 @@ class JourneySuggestion {
   const JourneySuggestion({
     required this.icon,
     required this.label,
-    required this.route,
-  });
+    this.route,
+    this.onTap,
+  }) : assert(route != null || onTap != null,
+            'Suggestion phải có route hoặc onTap');
 
   final IconData icon;
   final String label;
 
   /// GoRouter path, vd `/breathing`, `/journal`, `/sounds`, hoặc
   /// `/home?tab=2` để chuyển sang tab Insights.
-  final String route;
+  final String? route;
+
+  /// Custom action thay vì navigation — vd "Tập 1 vòng nữa" restart
+  /// session ngay tại chỗ, không pop sheet.
+  final VoidCallback? onTap;
 }
 
 /// Hiển thị bottom sheet dẫn dắt sau khi hoàn thành một hành động.
@@ -171,7 +177,11 @@ class _PrimaryCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         onTap: () {
           Navigator.pop(context);
-          context.push(suggestion.route);
+          if (suggestion.onTap != null) {
+            suggestion.onTap!();
+          } else if (suggestion.route != null) {
+            context.push(suggestion.route!);
+          }
         },
         child: Ink(
           decoration: BoxDecoration(
@@ -226,7 +236,11 @@ class _SecondaryChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         onTap: () {
           Navigator.pop(context);
-          context.push(suggestion.route);
+          if (suggestion.onTap != null) {
+            suggestion.onTap!();
+          } else if (suggestion.route != null) {
+            context.push(suggestion.route!);
+          }
         },
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),

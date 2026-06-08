@@ -162,26 +162,43 @@ class _BreathingScreenState extends State<BreathingScreen>
           _phase = _Phase.finished;
           _ticker?.cancel();
           _scaleCtrl.animateTo(0.7, duration: const Duration(milliseconds: 600));
-          // Đợi 600ms cho animation kết thúc rồi mời tiếp.
+          // Đợi 600ms cho animation kết thúc rồi mời tiếp. Primary CTA
+          // là "Tập 1 vòng nữa" → restart ngay tại chỗ, không phải hỏi
+          // user pick lại pattern.
           Future.delayed(const Duration(milliseconds: 700), () {
             if (!mounted) return;
             showJourneyPrompt(
               context,
               title: 'Đã hít thở xong 🌬️',
               subtitle:
-                  'Nhẹ nhõm hơn rồi nhỉ? Ghi lại cảm giác này hoặc đi tiếp một bước êm nha.',
-              suggestions: const [
+                  'Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?',
+              suggestions: [
                 JourneySuggestion(
+                  icon: Icons.refresh,
+                  label: 'Tập thêm 1 vòng nữa',
+                  onTap: () {
+                    if (!mounted) return;
+                    // Reset state + bắt đầu lại session ngay tức thì.
+                    setState(() {
+                      _cyclesDone = 0;
+                      _phase = _Phase.idle;
+                      _phaseRemaining = 0;
+                      _running = false;
+                    });
+                    _start();
+                  },
+                ),
+                const JourneySuggestion(
                   icon: Icons.mood,
                   label: 'Ghi lại cảm xúc bây giờ',
                   route: '/home?tab=2',
                 ),
-                JourneySuggestion(
+                const JourneySuggestion(
                   icon: Icons.edit_note,
-                  label: 'Viết một dòng vào nhật ký',
+                  label: 'Viết vào nhật ký',
                   route: '/journal',
                 ),
-                JourneySuggestion(
+                const JourneySuggestion(
                   icon: Icons.headphones,
                   label: 'Nghe nhạc êm',
                   route: '/sounds',

@@ -6,12 +6,27 @@ import 'package:go_router/go_router.dart';
 import '../core/api_client.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
+import '../widgets/relax_intro.dart';
 
 /// Khu thư giãn — dựng theo mockup: danh sách hoạt động (Nhạc / Podcast /
 /// Viết nhật ký / Hít thở / Bí ẩn) với nút Play (mở hoạt động) và Finish
 /// (mở popup check-in "Bạn ổn chứ?").
-class RelaxScreen extends StatelessWidget {
+///
+/// Lần đầu user vào tab trong session sẽ chạy [RelaxIntro] flow:
+/// thở dịu → chọn mood → đề xuất hoạt động. Static flag để intro chỉ
+/// chạy 1 lần/session, không ép user mỗi lần ghé.
+class RelaxScreen extends StatefulWidget {
   const RelaxScreen({super.key});
+
+  /// Reset khi app restart — đảm bảo intro chỉ hiện lần đầu mỗi session.
+  static bool _introSeenThisSession = false;
+
+  @override
+  State<RelaxScreen> createState() => _RelaxScreenState();
+}
+
+class _RelaxScreenState extends State<RelaxScreen> {
+  late bool _showIntro = !RelaxScreen._introSeenThisSession;
 
   static const _activities = [
     _Activity(
@@ -51,8 +66,22 @@ class RelaxScreen extends StatelessWidget {
     ),
   ];
 
+  void _dismissIntro() {
+    RelaxScreen._introSeenThisSession = true;
+    if (mounted) setState(() => _showIntro = false);
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_showIntro) {
+      return RelaxIntro(
+        onDone: _dismissIntro,
+        onPick: (route) {
+          _dismissIntro();
+          context.push(route);
+        },
+      );
+    }
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
