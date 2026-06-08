@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../widgets/soft_toast.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -44,10 +45,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (ok) {
       context.go('/home');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        backgroundColor: RelaxColors.coral,
-        content: Text(auth.error ?? 'Đăng ký thất bại'),
-      ));
+      showSoftToast(context,
+          message: auth.error ?? 'Đăng ký thất bại',
+          tone: SoftToastTone.error);
     }
   }
 

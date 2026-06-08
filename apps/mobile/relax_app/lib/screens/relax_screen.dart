@@ -7,6 +7,7 @@ import '../core/api_client.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/relax_intro.dart';
+import '../widgets/soft_toast.dart';
 
 /// Khu thư giãn — dựng theo mockup: danh sách hoạt động (Nhạc / Podcast /
 /// Viết nhật ký / Hít thở / Bí ẩn) với nút Play (mở hoạt động) và Finish
@@ -320,16 +321,13 @@ class _CheckInSheetState extends State<_CheckInSheet> {
       });
       if (!mounted) return;
       Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        backgroundColor: RelaxColors.mint,
-        content: Text('Cảm ơn bạn đã chia sẻ ❤'),
-      ));
+      showSoftToast(context,
+          message: 'Cảm ơn bạn đã chia sẻ ❤',
+          tone: SoftToastTone.success);
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _saving = false);

@@ -6,6 +6,7 @@ import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
+import '../widgets/soft_toast.dart';
 
 /// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
 /// thoại, lưới cảm xúc, thanh theo dõi cảm xúc, và các phương thức phù hợp.
@@ -88,10 +89,9 @@ class _HomeScreenState extends State<HomeScreen> {
       });
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.mint,
-          content: Text('Đã ghi cảm xúc: $label'),
-        ));
+        showSoftToast(context,
+            message: 'Đã ghi cảm xúc: $label',
+            tone: SoftToastTone.success);
         await _loadAll();
       }
     } catch (_) {

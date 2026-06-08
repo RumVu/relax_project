@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import '../widgets/soft_toast.dart';
 
 /// Màn linh thú: xem trạng thái (level / độ thân thiết / năng lượng) và
 /// tương tác (Vuốt ve / Cho ăn / Chơi) qua POST /user-companions/me/interactions.
@@ -63,23 +64,18 @@ class _CompanionScreenState extends State<CompanionScreen>
           .post('/user-companions/me/interactions', body: {'type': type});
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.mint,
-          content: Text(successMsg),
-        ));
+        showSoftToast(context,
+            message: successMsg, tone: SoftToastTone.success);
         await _load();
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text((res.data?['message'] as String?) ?? 'Có lỗi xảy ra'),
-        ));
+        showSoftToast(context,
+            message: (res.data?['message'] as String?) ?? 'Có lỗi xảy ra',
+            tone: SoftToastTone.error);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          backgroundColor: RelaxColors.coral,
-          content: Text(e.toString()),
-        ));
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _busy = false);

@@ -8,6 +8,7 @@ import '../core/api_client.dart';
 import '../core/theme_controller.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/mood_line_chart.dart';
+import '../widgets/soft_toast.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -158,10 +159,9 @@ class SettingsScreen extends StatelessWidget {
   }
 
   void _showNotImplemented(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      backgroundColor: RelaxColors.violet,
-      content: Text('Tính năng đang được hoàn thiện ở phiên bản kế.'),
-    ));
+    showSoftToast(context,
+        message: 'Tính năng đang được hoàn thiện ở phiên bản kế.',
+        tone: SoftToastTone.info);
   }
 
   void _showAboutDialog(BuildContext context) {
@@ -635,10 +635,9 @@ class _ProfileHero extends StatelessWidget {
     if (!context.mounted) return;
     final ok = await context.read<AuthState>().updateDisplayName(newName);
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      backgroundColor: ok ? RelaxColors.mint : RelaxColors.coral,
-      content: Text(ok ? 'Đã đổi tên hiển thị' : 'Không đổi được tên'),
-    ));
+    showSoftToast(context,
+        message: ok ? 'Đã đổi tên hiển thị' : 'Không đổi được tên',
+        tone: ok ? SoftToastTone.success : SoftToastTone.error);
   }
 }
 
