@@ -32,29 +32,3 @@ CustomTransitionPage<T> softPage<T>({
     },
   );
 }
-
-/// Biến đổi nội dung tab (IndexedStack) bằng AnimatedSwitcher fade —
-/// soft hơn switch instant. Dùng trong AppShell.
-class SoftCrossFade extends StatelessWidget {
-  const SoftCrossFade({super.key, required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 280),
-      switchInCurve: Curves.easeOutCubic,
-      switchOutCurve: Curves.easeInCubic,
-      transitionBuilder: (child, animation) {
-        return FadeTransition(
-          opacity: animation,
-          child: ScaleTransition(
-            scale: Tween<double>(begin: 0.985, end: 1.0).animate(animation),
-            child: child,
-          ),
-        );
-      },
-      child: child,
-    );
-  }
-}
