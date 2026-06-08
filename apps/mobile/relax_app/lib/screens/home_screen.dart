@@ -224,7 +224,21 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 14),
-          const CatMascot(size: 130, emoji: '😺'),
+          // Tap vào mascot để mở màn linh thú — biến mascot từ trang
+          // trí thành cổng vào /companion (vốn là dead route).
+          GestureDetector(
+            onTap: () => context.push('/companion'),
+            child: const CatMascot(size: 130, emoji: '😺'),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Chạm vào mèo để thăm linh thú ✦',
+            style: TextStyle(
+              color: context.mutedText,
+              fontSize: 11,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
         ],
       ),
     );

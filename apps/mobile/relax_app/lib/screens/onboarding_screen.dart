@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 
@@ -47,7 +49,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _finish() async {
     await const FlutterSecureStorage()
         .write(key: OnboardingScreen.seenKey, value: '1');
-    if (mounted) context.go('/login');
+    if (!mounted) return;
+    // Cập nhật in-memory state + notify router refreshListenable, nếu
+    // không sẽ kẹt loop: storage đã '1' nhưng auth.onboardingSeen vẫn
+    // false → redirect /login → /onboarding.
+    context.read<AuthState>().markOnboardingSeen();
+    context.go('/login');
   }
 
   @override

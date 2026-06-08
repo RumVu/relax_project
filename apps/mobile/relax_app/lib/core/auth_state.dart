@@ -15,7 +15,10 @@ class AuthState extends ChangeNotifier {
 
   Map<String, dynamic>? _user;
   bool _checking = true;
-  bool _onboardingSeen = true;
+  // Mặc định FALSE — đảm bảo user mới install (storage chưa có key)
+  // sẽ được dẫn vào onboarding. Sau khi _bootstrap đọc storage, giá
+  // trị này sẽ overwrite chính xác.
+  bool _onboardingSeen = false;
   String? _error;
 
   Map<String, dynamic>? get user => _user;
@@ -171,4 +174,14 @@ class AuthState extends ChangeNotifier {
   /// chéo screens ↔ core.
   void Function()? _onLogoutCleanup;
   set onLogoutCleanup(void Function()? fn) => _onLogoutCleanup = fn;
+
+  /// Đánh dấu user đã hoàn thành onboarding — cập nhật in-memory flag
+  /// và notify router refreshListenable để redirect logic tính lại,
+  /// tránh kẹt loop /onboarding khi storage đã ghi nhưng state chưa
+  /// biết. Gọi từ OnboardingScreen._finish() sau khi write storage.
+  void markOnboardingSeen() {
+    if (_onboardingSeen) return;
+    _onboardingSeen = true;
+    notifyListeners();
+  }
 }
