@@ -27,7 +27,12 @@ class AuthState extends ChangeNotifier {
   bool get onboardingSeen => _onboardingSeen;
   String? get error => _error;
 
+  /// Minimum thời gian giữ splash để brand "Thi Ái" hiển thị đủ lâu
+  /// — không bị flash quá nhanh trên máy nhanh.
+  static const _minSplashDuration = Duration(seconds: 3);
+
   Future<void> _bootstrap() async {
+    final startedAt = DateTime.now();
     // Đọc cờ đã xem onboarding chưa (key trùng với OnboardingScreen.seenKey).
     const storage = FlutterSecureStorage();
     _onboardingSeen =
@@ -35,6 +40,7 @@ class AuthState extends ChangeNotifier {
 
     final token = await RelaxApi.instance.accessToken;
     if (token == null || token.isEmpty) {
+      await _enforceMinSplash(startedAt);
       _checking = false;
       notifyListeners();
       return;
@@ -50,8 +56,20 @@ class AuthState extends ChangeNotifier {
     } catch (_) {
       await RelaxApi.instance.clearTokens();
     } finally {
+      await _enforceMinSplash(startedAt);
       _checking = false;
       notifyListeners();
+    }
+  }
+
+  /// Nếu bootstrap quá nhanh (máy mạnh, token cached), delay cho đủ
+  /// [_minSplashDuration] kể từ [startedAt] để brand splash hiển thị
+  /// đủ lâu. Không kéo dài nếu đã chạy quá thời gian này.
+  Future<void> _enforceMinSplash(DateTime startedAt) async {
+    final elapsed = DateTime.now().difference(startedAt);
+    final remaining = _minSplashDuration - elapsed;
+    if (remaining > Duration.zero) {
+      await Future.delayed(remaining);
     }
   }
 

@@ -214,36 +214,106 @@ class _PushedScreen extends StatelessWidget {
   }
 }
 
-class _Splash extends StatelessWidget {
+/// Splash brand: logo gradient + tên + tagline + spinner. Fade-in mềm
+/// để cảm giác "wake up" dịu thay vì flash. Hiển thị tối thiểu 3s do
+/// AuthState._minSplashDuration enforce.
+class _Splash extends StatefulWidget {
   const _Splash();
+
+  @override
+  State<_Splash> createState() => _SplashState();
+}
+
+class _SplashState extends State<_Splash> with SingleTickerProviderStateMixin {
+  late final AnimationController _ctrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..forward();
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 88,
-              width: 88,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [RelaxColors.violet, RelaxColors.plum],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
+        child: FadeTransition(
+          opacity: CurvedAnimation(parent: _ctrl, curve: Curves.easeOutCubic),
+          child: SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, 0.06),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: _ctrl,
+              curve: Curves.easeOutCubic,
+            )),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 96,
+                  width: 96,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [RelaxColors.violet, RelaxColors.plum],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: [
+                      BoxShadow(
+                        color: RelaxColors.violet.withValues(alpha: 0.32),
+                        blurRadius: 32,
+                        spreadRadius: 4,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.spa_outlined,
+                    color: Colors.white,
+                    size: 52,
+                  ),
                 ),
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: const Icon(
-                Icons.spa_outlined,
-                color: Colors.white,
-                size: 48,
-              ),
+                const SizedBox(height: 22),
+                Text(
+                  'Thi Ái',
+                  style: TextStyle(
+                    color: context.appText,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Một góc nhỏ để bạn nghỉ nhẹ ✦',
+                  style: TextStyle(
+                    color: context.appText.withValues(alpha: 0.65),
+                    fontSize: 13,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    color: RelaxColors.violet,
+                    strokeWidth: 2.5,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
-            const CircularProgressIndicator(color: RelaxColors.violet),
-          ],
+          ),
         ),
       ),
     );
