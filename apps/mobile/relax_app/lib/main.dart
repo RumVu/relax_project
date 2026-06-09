@@ -4,16 +4,20 @@ import 'package:provider/provider.dart';
 
 import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
+import 'core/locale_controller.dart';
 import 'core/page_transitions.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/billing_screen.dart';
 import 'screens/app_shell.dart';
+import 'screens/billing_screen.dart';
 import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
+import 'screens/device_info_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/legal_screen.dart';
+import 'screens/location_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/mood_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -55,19 +59,24 @@ class _RelaxAppState extends State<RelaxApp> {
         ChangeNotifierProvider.value(value: _auth),
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => AudioController()),
+        ChangeNotifierProvider(create: (_) => LocaleController()),
       ],
-      child: Consumer<ThemeController>(
-        builder: (context, theme, child) {
-          return MaterialApp.router(
+      child: Builder(builder: (context) {
+        final theme = context.watch<ThemeController>();
+        final loc = context.watch<LocaleController>();
+        return LocaleScope(
+          lang: loc.code,
+          child: MaterialApp.router(
             title: 'Relax',
             debugShowCheckedModeBanner: false,
-            theme: buildRelaxTheme(),
-            darkTheme: buildRelaxDarkTheme(),
+            theme: buildRelaxTheme(accent: theme.accent),
+            darkTheme: buildRelaxDarkTheme(accent: theme.accent),
             themeMode: theme.mode,
+            locale: loc.locale,
             routerConfig: _router,
-          );
-        },
-      ),
+          ),
+        );
+      }),
     );
   }
 }
@@ -209,6 +218,18 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/legal',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const LegalScreen()),
+      ),
+      GoRoute(
+        path: '/billing',
+        builder: (context, state) => const BillingScreen(),
+      ),
+      GoRoute(
+        path: '/location',
+        builder: (context, state) => const LocationScreen(),
+      ),
+      GoRoute(
+        path: '/device-info',
+        builder: (context, state) => const DeviceInfoScreen(),
       ),
     ],
   );

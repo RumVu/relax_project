@@ -8,6 +8,7 @@ import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/journey_prompt.dart';
+import '../widgets/mood_background.dart';
 import '../widgets/notification_sheet.dart';
 import '../widgets/soft_toast.dart';
 
@@ -125,7 +126,31 @@ class _HomeScreenState extends State<HomeScreen> {
         (user?['email'] as String?)?.split('@').first ??
         'bạn';
 
-    return SafeArea(
+    // Mood chủ đạo = mood được log nhiều nhất gần đây, fallback 'calm'.
+    String dominant = 'calm';
+    if (_moodCounts.isNotEmpty) {
+      final top = _moodCounts.entries
+          .reduce((a, b) => a.value >= b.value ? a : b)
+          .key
+          .toLowerCase();
+      const map = {
+        'happy': 'happy',
+        'joyful': 'happy',
+        'sad': 'sad',
+        'down': 'sad',
+        'angry': 'energetic',
+        'anxious': 'energetic',
+        'stressed': 'energetic',
+        'calm': 'calm',
+        'relaxed': 'calm',
+        'neutral': 'neutral',
+        'okay': 'neutral',
+      };
+      dominant = map[top] ?? 'calm';
+    }
+    return MoodBackground(
+      mood: dominant,
+      child: SafeArea(
       child: RefreshIndicator(
         color: RelaxColors.violet,
         onRefresh: _loadAll,
@@ -174,6 +199,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ],
         ),
+      ),
       ),
     );
   }

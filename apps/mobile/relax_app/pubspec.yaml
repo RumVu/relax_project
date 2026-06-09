@@ -44,6 +44,9 @@ dependencies:
   just_audio: ^0.9.42
   image_picker: ^1.2.2
   google_sign_in: ^6.2.1
+  webview_flutter: ^4.10.0
+  device_info_plus: ^11.2.0
+  geolocator: ^13.0.2
 
 dev_dependencies:
   flutter_test:
