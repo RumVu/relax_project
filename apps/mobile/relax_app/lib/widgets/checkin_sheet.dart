@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import 'cat_mascot.dart';
 import 'soft_toast.dart';
@@ -45,7 +47,9 @@ class _CheckInSheetState extends State<CheckInSheet> {
     super.dispose();
   }
 
-  Future<void> _continue() async {
+  Future<void> _continue({bool goToAnalytics = false}) async {
+    final errorMsg = context.t('Không thể hoàn thành phiên thư giãn.');
+    final successMsg = context.t('Cảm ơn bạn đã chia sẻ ❤');
     setState(() => _saving = true);
     try {
       if (widget.sessionId != null) {
@@ -58,7 +62,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
           note: _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
         );
         if (!ok) {
-          throw Exception('Không thể hoàn thành phiên thư giãn.');
+          throw Exception(errorMsg);
         }
       } else {
         // Fallback: direct mood check-in
@@ -73,8 +77,12 @@ class _CheckInSheetState extends State<CheckInSheet> {
       if (!mounted) return;
       Navigator.pop(context);
       showSoftToast(context,
-          message: 'Cảm ơn bạn đã chia sẻ ❤',
+          message: successMsg,
           tone: SoftToastTone.success);
+
+      if (goToAnalytics && mounted) {
+        context.go('/home?tab=2');
+      }
     } catch (e) {
       if (mounted) {
         showSoftToast(context,
@@ -105,7 +113,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
               children: [
                 const Spacer(),
                 Text(
-                  '❤  Bạn ổn chứ?  ❤',
+                  context.t('❤  Bạn ổn chứ?  ❤'),
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 18,
@@ -123,7 +131,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
             const CatMascot(size: 80, emoji: '😺', glow: false),
             const SizedBox(height: 12),
             Text(
-              'Hoạt động vừa rồi giúp bạn thế nào?',
+              context.t('Hoạt động vừa rồi giúp bạn thế nào?'),
               style: TextStyle(color: context.mutedText, fontSize: 13),
             ),
             const SizedBox(height: 14),
@@ -150,7 +158,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
                         Text(_emojis[i], style: const TextStyle(fontSize: 22)),
                         const SizedBox(height: 2),
                         Text(
-                          _labels[i],
+                          context.t(_labels[i]),
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w600,
@@ -169,8 +177,8 @@ class _CheckInSheetState extends State<CheckInSheet> {
               controller: _noteCtrl,
               maxLines: 2,
               maxLength: 120,
-              decoration: const InputDecoration(
-                hintText: 'Viết vài dòng cho linh thú nghe nè…',
+              decoration: InputDecoration(
+                hintText: context.t('Viết vài dòng cho linh thú nghe nè…'),
               ),
             ),
             const SizedBox(height: 4),
@@ -178,7 +186,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _saving ? null : _continue,
+                onPressed: _saving ? null : () => _continue(goToAnalytics: false),
                 child: _saving
                     ? const SizedBox(
                         height: 20,
@@ -186,15 +194,15 @@ class _CheckInSheetState extends State<CheckInSheet> {
                         child: CircularProgressIndicator(
                             strokeWidth: 2.4, color: Colors.white),
                       )
-                    : const Text('Tiếp tục'),
+                    : Text(context.t('Tiếp tục')),
               ),
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                'Mình ổn, quay lại làm việc thôi',
-                style: TextStyle(color: RelaxColors.violet),
+              onPressed: _saving ? null : () => _continue(goToAnalytics: true),
+              child: Text(
+                context.t('Mình ổn, quay lại làm việc thôi'),
+                style: const TextStyle(color: RelaxColors.violet),
               ),
             ),
           ],

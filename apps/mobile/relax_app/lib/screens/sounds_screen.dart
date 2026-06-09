@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/api_client.dart';
 import '../core/audio_controller.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Trình phát âm thanh nền / podcast. Phát qua AudioController dùng chung
@@ -75,7 +76,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          widget.category == 'PODCAST' ? 'Podcast' : 'Nhạc thư giãn',
+          widget.category == 'PODCAST' ? context.t('Podcast') : context.t('Nhạc thư giãn'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -112,7 +113,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                       height: 320,
                                       child: Center(
                                         child: Text(
-                                          'Chưa có bản nào.\nKéo xuống để tải lại.',
+                                          context.t('Chưa có bản nào.\nKéo xuống để tải lại.'),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: context.mutedText),
@@ -176,7 +177,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                         ),
                                       ),
                                       title: Text(
-                                        (t['title'] as String?) ?? 'Không tên',
+                                        context.t((t['title'] as String?) ?? 'Không tên'),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
@@ -185,7 +186,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                         ),
                                       ),
                                       subtitle: Text(
-                                        (t['category'] as String?) ?? '',
+                                        context.t((t['category'] as String?) ?? ''),
                                         style: TextStyle(
                                             color: context.mutedText,
                                             fontSize: 12),
@@ -249,7 +250,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                       ),
                     ),
                     Text(
-                      (t['category'] as String?) ?? 'Đang phát',
+                      context.t((t['category'] as String?) ?? 'Đang phát'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.8),
                         fontSize: 12,

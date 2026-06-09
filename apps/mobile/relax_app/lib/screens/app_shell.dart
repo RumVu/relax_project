@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../core/audio_controller.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
@@ -70,7 +71,7 @@ class _AppShellState extends State<AppShell> {
 
   void _onAudioFinished(Map<String, dynamic> track) {
     if (!mounted) return;
-    final title = (track['title'] as String?) ?? 'Phiên nghe';
+    final title = context.t((track['title'] as String?) ?? 'Phiên nghe');
     final auth = context.read<AuthState>();
     final activeId = auth.activeSessionId;
     final activeType = auth.activeActivityType;
@@ -91,23 +92,23 @@ class _AppShellState extends State<AppShell> {
   void _showAudioJourneyPrompt(String title) {
     showJourneyPrompt(
       context,
-      title: 'Phiên "$title" đã xong 🎧',
+      title: '${context.t('Phiên')} "$title" ${context.t('đã xong 🎧')}',
       subtitle:
-          'Cảm thấy dịu hơn chưa? Mình đi tiếp một bước nhẹ nha — hoặc nghe thêm bài khác cũng được.',
-      suggestions: const [
+          context.t('Cảm thấy dịu hơn chưa? Mình đi tiếp một bước nhẹ nha — hoặc nghe thêm bài khác cũng được.'),
+      suggestions: [
         JourneySuggestion(
           icon: Icons.playlist_play,
-          label: 'Nghe danh sách khác',
+          label: context.t('Nghe danh sách khác'),
           route: '/sounds',
         ),
         JourneySuggestion(
           icon: Icons.edit_note,
-          label: 'Ghi cảm giác vào nhật ký',
+          label: context.t('Ghi cảm giác vào nhật ký'),
           route: '/journal',
         ),
         JourneySuggestion(
           icon: Icons.mood,
-          label: 'Cập nhật cảm xúc',
+          label: context.t('Cập nhật cảm xúc'),
           route: '/mood',
         ),
       ],
@@ -189,26 +190,26 @@ class _AppShellState extends State<AppShell> {
           },
           backgroundColor: context.surface,
           indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
-          destinations: const [
+          destinations: [
             NavigationDestination(
-              icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home, color: RelaxColors.violet),
-              label: 'Trang chủ',
+              icon: const Icon(Icons.home_outlined),
+              selectedIcon: const Icon(Icons.home, color: RelaxColors.violet),
+              label: context.t('Trang chủ'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.spa_outlined),
-              selectedIcon: Icon(Icons.spa, color: RelaxColors.violet),
-              label: 'Thư giãn',
+              icon: const Icon(Icons.spa_outlined),
+              selectedIcon: const Icon(Icons.spa, color: RelaxColors.violet),
+              label: context.t('Thư giãn'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights, color: RelaxColors.violet),
-              label: 'Cảm xúc',
+              icon: const Icon(Icons.insights_outlined),
+              selectedIcon: const Icon(Icons.insights, color: RelaxColors.violet),
+              label: context.t('Cảm xúc'),
             ),
             NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings, color: RelaxColors.violet),
-              label: 'Setup',
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings, color: RelaxColors.violet),
+              label: context.t('Setup'),
             ),
           ],
         ),
@@ -246,7 +247,7 @@ class _MiniPlayer extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                (t['title'] as String?) ?? 'Đang phát',
+                context.t((t['title'] as String?) ?? 'Đang phát'),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(

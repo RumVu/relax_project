@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/env.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/soft_toast.dart';
 
@@ -32,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: EMAIL LÀM BẰNG TAY] ===');
+    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: EMAIL LÀM BẰNG TAY] ===');
     debugPrint('Tiến hành đăng nhập bằng email: ${_emailCtrl.text}');
     setState(() => _busy = true);
     final auth = context.read<AuthState>();
@@ -41,22 +42,22 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _busy = false);
     if (ok) {
       final token = await RelaxApi.instance.accessToken;
-      debugPrint('=== [ĐĂNG NHẬP EMAIL THÀNH CÔNG] ===');
+      debugPrint('=== [ĐĂNG NHẬP EMAIL THÀNH CÔNG] ===');
       debugPrint('Backend Access Token: $token');
       if (mounted) {
         debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
         context.go('/home');
       }
     } else {
-      debugPrint('=== [ĐĂNG NHẬP EMAIL THẤT BẠI]: ${auth.error} ===');
+      debugPrint('=== [ĐĂNG NHẬP EMAIL THẤT BẠI]: ${auth.error} ===');
       showSoftToast(context,
-          message: auth.error ?? 'Đăng nhập thất bại',
+          message: context.t(auth.error ?? 'Đăng nhập thất bại'),
           tone: SoftToastTone.error);
     }
   }
 
   Future<void> _loginWithGoogle() async {
-    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GOOGLE SIGN-IN] ===');
+    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GOOGLE SIGN-IN] ===');
     setState(() => _busy = true);
     try {
       final googleSignIn = GoogleSignIn(
@@ -66,10 +67,10 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('Đang kích hoạt Google Sign-In SDK...');
       final GoogleSignInAccount? account = await googleSignIn.signIn();
       if (account == null) {
-        debugPrint('=== [GOOGLE SIGN-IN BỊ HỦY BỞI NGƯỜI DÙNG] ===');
+        debugPrint('=== [GOOGLE SIGN-IN BỊ HỦY BỞI NGƯỜI DÙNG] ===');
         if (!mounted) return;
         showSoftToast(context,
-            message: 'Đăng nhập Google bị hủy bởi người dùng',
+            message: context.t('Đăng nhập Google bị hủy bởi người dùng'),
             tone: SoftToastTone.info);
         setState(() => _busy = false);
         return;
@@ -85,10 +86,10 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('Google Access Token lấy được: $accessToken');
 
       if (idToken == null) {
-        debugPrint('=== [GOOGLE SIGN-IN THẤT BẠI]: Không lấy được ID Token ===');
+        debugPrint('=== [GOOGLE SIGN-IN THẤT BẠI]: Không lấy được ID Token ===');
         if (mounted) {
           showSoftToast(context,
-              message: 'Không lấy được Google ID Token',
+              message: context.t('Không lấy được Google ID Token'),
               tone: SoftToastTone.error);
         }
         setState(() => _busy = false);
@@ -105,43 +106,43 @@ class _LoginScreenState extends State<LoginScreen> {
         if (ok) {
           final token = await RelaxApi.instance.accessToken;
           if (!mounted) return;
-          debugPrint('=== [ĐĂNG NHẬP GOOGLE THÀNH CÔNG] ===');
+          debugPrint('=== [ĐĂNG NHẬP GOOGLE THÀNH CÔNG] ===');
           debugPrint('Backend Access Token: $token');
           debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
           context.go('/home');
         } else {
-          debugPrint('=== [ĐĂNG NHẬP GOOGLE THẤT BẠI]: ${auth.error} ===');
+          debugPrint('=== [ĐĂNG NHẬP GOOGLE THẤT BẠI]: ${auth.error} ===');
           showSoftToast(context,
-              message: auth.error ?? 'Đăng nhập Google thất bại',
+              message: context.t(auth.error ?? 'Đăng nhập Google thất bại'),
               tone: SoftToastTone.error);
         }
       }
     } catch (e) {
-      debugPrint('=== [GOOGLE SIGN-IN GẶP NGOẠI LỆ]: $e ===');
+      debugPrint('=== [GOOGLE SIGN-IN GẶP NGOẠI LỆ]: $e ===');
       if (mounted) {
         setState(() => _busy = false);
         showSoftToast(context,
-            message: 'Lỗi đăng nhập Google: $e',
+            message: '${context.t('Lỗi đăng nhập Google:')} $e',
             tone: SoftToastTone.error);
       }
     }
   }
 
   Future<void> _simulateGoogleLogin() async {
-    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GIẢ LẬP GOOGLE BYPASS] ===');
+    debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GIẢ LẬP GOOGLE BYPASS] ===');
     setState(() => _busy = true);
     final auth = context.read<AuthState>();
     final ok = await auth.login('dashboard.demo@relax.local', 'Relax123!@#');
     if (!mounted) return;
     setState(() => _busy = false);
     if (ok) {
-      debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THÀNH CÔNG] ===');
+      debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THÀNH CÔNG] ===');
       debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
       context.go('/home');
     } else {
-      debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THẤT BẠI]: ${auth.error} ===');
+      debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THẤT BẠI]: ${auth.error} ===');
       showSoftToast(context,
-          message: auth.error ?? 'Đăng nhập giả lập thất bại',
+          message: context.t(auth.error ?? 'Đăng nhập giả lập thất bại'),
           tone: SoftToastTone.error);
     }
   }
@@ -187,18 +188,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         size: 44,
                       ),
                     ),
-                    const Center(
+                    Center(
                       child: Text(
-                        'Chào mừng tới Relax',
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                        context.t('Chào mừng tới Relax'),
+                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Center(
+                    Center(
                       child: Text(
-                        'Đăng nhập để xem cảm xúc và nhiệm vụ hôm nay của bạn.',
+                        context.t('Đăng nhập để xem cảm xúc và nhiệm vụ hôm nay của bạn.'),
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: RelaxColors.slate,
                           fontSize: 14,
                           height: 1.4,
@@ -210,14 +211,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.alternate_email),
+                      decoration: InputDecoration(
+                        labelText: context.t('Email'),
+                        prefixIcon: const Icon(Icons.alternate_email),
                       ),
                       validator: (value) {
                         final v = value?.trim() ?? '';
-                        if (v.isEmpty) return 'Hãy nhập email';
-                        if (!v.contains('@')) return 'Email chưa đúng định dạng';
+                        if (v.isEmpty) return context.t('Hãy nhập email');
+                        if (!v.contains('@')) return context.t('Email chưa đúng định dạng');
                         return null;
                       },
                     ),
@@ -227,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       obscureText: _hidePassword,
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
-                        labelText: 'Mật khẩu',
+                        labelText: context.t('Mật khẩu'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -240,7 +241,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                       validator: (value) {
-                        if ((value ?? '').isEmpty) return 'Hãy nhập mật khẩu';
+                        if ((value ?? '').isEmpty) return context.t('Hãy nhập mật khẩu');
                         return null;
                       },
                     ),
@@ -258,15 +259,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Đăng nhập'),
+                            : Text(context.t('Đăng nhập')),
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Row(
+                    Row(
                       children: [
-                        Expanded(child: Divider(color: RelaxColors.slate, endIndent: 8, indent: 8)),
-                        Text('Hoặc', style: TextStyle(color: RelaxColors.slate, fontSize: 13)),
-                        Expanded(child: Divider(color: RelaxColors.slate, endIndent: 8, indent: 8)),
+                        const Expanded(child: Divider(color: RelaxColors.slate, endIndent: 8, indent: 8)),
+                        Text(context.t('Hoặc'), style: const TextStyle(color: RelaxColors.slate, fontSize: 13)),
+                        const Expanded(child: Divider(color: RelaxColors.slate, endIndent: 8, indent: 8)),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -295,9 +296,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            const Text(
-                              'Đăng nhập bằng Google',
-                              style: TextStyle(
+                            Text(
+                              context.t('Đăng nhập bằng Google'),
+                              style: const TextStyle(
                                 color: Colors.black87,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -310,15 +311,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Chưa có tài khoản? ',
-                          style: TextStyle(color: RelaxColors.slate),
+                        Text(
+                          context.t('Chưa có tài khoản? '),
+                          style: const TextStyle(color: RelaxColors.slate),
                         ),
                         GestureDetector(
                           onTap: () => context.go('/register'),
-                          child: const Text(
-                            'Đăng ký',
-                            style: TextStyle(
+                          child: Text(
+                            context.t('Đăng ký'),
+                            style: const TextStyle(
                               color: RelaxColors.violet,
                               fontWeight: FontWeight.w700,
                             ),

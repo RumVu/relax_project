@@ -260,7 +260,7 @@ class _PushedScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          title,
+          context.t(title),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -350,7 +350,7 @@ class _SplashState extends State<_Splash> with SingleTickerProviderStateMixin {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Một góc nhỏ để bạn nghỉ nhẹ ✦',
+                  context.t('Một góc nhỏ để bạn nghỉ nhẹ ✦'),
                   style: TextStyle(
                     color: context.appText.withValues(alpha: 0.65),
                     fontSize: 13,

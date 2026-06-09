@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import 'soft_toast.dart';
 
@@ -77,28 +78,28 @@ class _NotificationSheetState extends State<NotificationSheet> {
         });
         widget.onRefreshCount();
         if (mounted) {
-          showSoftToast(context, message: 'Đã đọc tất cả thông báo', tone: SoftToastTone.success);
+          showSoftToast(context, message: context.t('Đã đọc tất cả thông báo'), tone: SoftToastTone.success);
         }
       }
     } catch (e) {
       if (mounted) {
-        showSoftToast(context, message: 'Lỗi: ${e.toString()}', tone: SoftToastTone.error);
+        showSoftToast(context, message: '${context.t('Lỗi:')} ${e.toString()}', tone: SoftToastTone.error);
       }
     }
   }
 
-  String _formatDateTime(String? dateStr) {
+  String _formatDateTime(BuildContext context, String? dateStr) {
     if (dateStr == null) return '';
     try {
       final dt = DateTime.parse(dateStr).toLocal();
       final now = DateTime.now();
       final diff = now.difference(dt);
       if (diff.inSeconds < 30) {
-        return 'Vừa xong';
+        return context.t('Vừa xong');
       } else if (diff.inMinutes < 60) {
-        return '${diff.inMinutes} phút trước';
+        return context.t('{count} phút trước', {'count': '${diff.inMinutes}'});
       } else if (diff.inHours < 24) {
-        return '${diff.inHours} giờ trước';
+        return context.t('{count} giờ trước', {'count': '${diff.inHours}'});
       } else {
         final day = dt.day.toString().padLeft(2, '0');
         final month = dt.month.toString().padLeft(2, '0');
@@ -156,7 +157,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
             child: Row(
               children: [
                 Text(
-                  'Thông báo',
+                  context.t('Thông báo'),
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
@@ -172,9 +173,9 @@ class _NotificationSheetState extends State<NotificationSheet> {
                     ),
                     onPressed: _markAllRead,
                     icon: const Icon(Icons.done_all, size: 16),
-                    label: const Text(
-                      'Đã đọc hết',
-                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    label: Text(
+                      context.t('Đã đọc hết'),
+                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
                     ),
                   ),
               ],
@@ -194,7 +195,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                           child: Padding(
                             padding: const EdgeInsets.all(20),
                             child: Text(
-                              'Lỗi: $_error',
+                              context.t('Lỗi: {error}', {'error': '$_error'}),
                               style: const TextStyle(color: RelaxColors.coral, fontSize: 13),
                               textAlign: TextAlign.center,
                             ),
@@ -212,7 +213,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
-                                    'Không có thông báo nào.',
+                                    context.t('Không có thông báo nào.'),
                                     style: TextStyle(color: context.mutedText, fontSize: 13),
                                   ),
                                 ],
@@ -229,9 +230,9 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                   final item = _items[index];
                                   final isRead = item['isRead'] == true;
                                   final id = item['id'] as String;
-                                  final title = (item['title'] as String?) ?? 'Thông báo';
+                                  final title = context.t((item['title'] as String?) ?? 'Thông báo');
                                   final message = (item['message'] as String?) ?? '';
-                                  final date = _formatDateTime(item['createdAt'] as String?);
+                                  final date = _formatDateTime(context, item['createdAt'] as String?);
                                   final type = item['type'] as String?;
 
                                   return GestureDetector(

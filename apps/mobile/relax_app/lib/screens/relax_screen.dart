@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/checkin_sheet.dart';
@@ -109,7 +110,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Thư giãn ✨',
+                      context.t('Thư giãn ✨'),
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w800,
@@ -118,7 +119,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Chọn một cách để thư giãn nhé ~',
+                      context.t('Chọn một cách để thư giãn nhé ~'),
                       style: TextStyle(color: context.mutedText, fontSize: 13),
                     ),
                   ],
@@ -250,7 +251,7 @@ class _ActivityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${activity.no}. ${activity.title}',
+                    '${activity.no}. ${context.t(activity.title)}',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 16,
@@ -259,7 +260,7 @@ class _ActivityCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    activity.desc,
+                    context.t(activity.desc),
                     style: TextStyle(
                       color: context.mutedText,
                       fontSize: 12,
@@ -274,7 +275,7 @@ class _ActivityCard extends StatelessWidget {
               children: [
                 _SmallButton(
                   icon: isRunning ? Icons.arrow_forward : Icons.play_arrow,
-                  label: isRunning ? 'Chạy tiếp' : 'Play',
+                  label: isRunning ? context.t('Chạy tiếp') : context.t('Bắt đầu'),
                   filled: true,
                   color: isRunning ? RelaxColors.mint : RelaxColors.violet,
                   onTap: () {
@@ -289,13 +290,13 @@ class _ActivityCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 _SmallButton(
                   icon: Icons.flag_outlined,
-                  label: 'Finish',
+                  label: context.t('Hoàn thành'),
                   filled: isRunning,
                   color: isRunning ? RelaxColors.coral : null,
                   onTap: () {
                     HapticFeedback.selectionClick();
                     final activeId = isRunning ? auth.activeSessionId : null;
-                    showCheckInSheet(context, activity.title, sessionId: activeId);
+                    showCheckInSheet(context, context.t(activity.title), sessionId: activeId);
                   },
                 ),
               ],
@@ -347,7 +348,7 @@ class _PreActivitySheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Bắt đầu ${activity.title} ✨',
+            '${context.t('Bắt đầu')} ${context.t(activity.title)} ✨',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               fontSize: 18,
@@ -356,7 +357,7 @@ class _PreActivitySheet extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            'Hãy xác nhận cảm xúc lúc này của bạn nhé ~',
+            context.t('Hãy xác nhận cảm xúc lúc này của bạn nhé ~'),
             style: TextStyle(color: context.mutedText, fontSize: 13),
           ),
           const SizedBox(height: 20),
@@ -369,7 +370,7 @@ class _PreActivitySheet extends StatelessWidget {
             childAspectRatio: 1.0,
             children: _moods.map((m) {
               final mood = m['mood']!;
-              final label = m['label']!;
+              final label = context.t(m['label']!);
               final emoji = m['emoji']!;
               return GestureDetector(
                 onTap: () {
@@ -405,7 +406,7 @@ class _PreActivitySheet extends StatelessWidget {
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Đóng',
+              context.t('Đóng'),
               style: TextStyle(color: context.mutedText, fontWeight: FontWeight.w600),
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Cho phép user chia sẻ vị trí GPS để app gợi ý thời tiết / phòng tập / quán
@@ -66,12 +67,12 @@ class _LocationScreenState extends State<LocationScreen> {
       });
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Đã lưu vị trí của bạn 💜')),
+        SnackBar(content: Text(context.t('Đã lưu vị trí của bạn 💜'))),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Không lưu được: $e')),
+        SnackBar(content: Text('${context.t('Không lưu được:')} $e')),
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -89,7 +90,7 @@ class _LocationScreenState extends State<LocationScreen> {
           icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () => context.pop(),
         ),
-        title: Text('Vị trí của bạn',
+        title: Text(context.t('Vị trí của bạn'),
             style:
                 TextStyle(color: context.appText, fontWeight: FontWeight.w800)),
       ),
@@ -112,13 +113,13 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.place_outlined,
+                        const Icon(Icons.place_outlined,
                             color: Colors.white, size: 28),
-                        SizedBox(width: 8),
-                        Text('Vì sao cần vị trí?',
-                            style: TextStyle(
+                        const SizedBox(width: 8),
+                        Text(context.t('Vì sao cần vị trí?'),
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w800)),
@@ -126,9 +127,7 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Để gợi ý thời tiết, quán cà phê yên tĩnh và phòng tập '
-                      'thiền gần bạn. Chúng tôi chỉ lưu toạ độ, không theo dõi '
-                      'di chuyển.',
+                      context.t('Để gợi ý thời tiết, quán cà phê yên tĩnh và phòng tập thiền gần bạn. Chúng tôi chỉ lưu toạ độ, không theo dõi di chuyển.'),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
                         height: 1.5,
@@ -149,14 +148,27 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Trạng thái',
+                    Text(context.t('Trạng thái'),
                         style: TextStyle(
                             color: context.mutedText, fontSize: 12)),
                     const SizedBox(height: 4),
-                    Text(_status,
-                        style: TextStyle(
+                    Builder(
+                      builder: (ctx) {
+                        String displayStatus;
+                        if (_status.startsWith('Lỗi: ')) {
+                          displayStatus = '${ctx.t('Lỗi:')} ${_status.substring(5)}';
+                        } else {
+                          displayStatus = ctx.t(_status);
+                        }
+                        return Text(
+                          displayStatus,
+                          style: TextStyle(
                             color: context.appText,
-                            fontWeight: FontWeight.w700)),
+                            fontWeight: FontWeight.w700,
+                          ),
+                        );
+                      },
+                    ),
                     if (p != null) ...[
                       const SizedBox(height: 12),
                       _kv(context, 'Vĩ độ', p.latitude.toStringAsFixed(5)),
@@ -183,8 +195,8 @@ class _LocationScreenState extends State<LocationScreen> {
                         width: 18,
                         child: CircularProgressIndicator(
                             color: Colors.white, strokeWidth: 2))
-                    : const Text('Lấy vị trí hiện tại',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
+                    : Text(context.t('Lấy vị trí hiện tại'),
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
               const SizedBox(height: 10),
               OutlinedButton(
@@ -201,8 +213,8 @@ class _LocationScreenState extends State<LocationScreen> {
                         height: 18,
                         width: 18,
                         child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Lưu vào hồ sơ',
-                        style: TextStyle(fontWeight: FontWeight.w800)),
+                    : Text(context.t('Lưu vào hồ sơ'),
+                        style: const TextStyle(fontWeight: FontWeight.w800)),
               ),
             ],
           ),
@@ -216,7 +228,7 @@ class _LocationScreenState extends State<LocationScreen> {
       padding: const EdgeInsets.only(top: 4),
       child: Row(
         children: [
-          Text(k, style: TextStyle(color: c.mutedText, fontSize: 12)),
+          Text(c.t(k), style: TextStyle(color: c.mutedText, fontSize: 12)),
           const Spacer(),
           Text(v,
               style: TextStyle(

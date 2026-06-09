@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/weather_chart.dart';
 
@@ -70,7 +71,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Thời tiết',
+          context.t('Thời tiết'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -94,7 +95,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           border: Border.all(color: RelaxColors.coral),
                         ),
                         child: Text(
-                          'Không tải được thời tiết: $_error',
+                          context.t('Không tải được thời tiết: {error}', {'error': '$_error'}),
                           style: const TextStyle(
                               color: RelaxColors.coral, fontSize: 12),
                         ),
@@ -139,7 +140,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           ),
                           if (feels != null)
                             Text(
-                              'Cảm giác như $feels°',
+                              context.t('Cảm giác như {temp}°', {'temp': '$feels'}),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
@@ -153,7 +154,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         Expanded(
                           child: _MiniStat(
                             icon: Icons.water_drop_outlined,
-                            label: 'Độ ẩm',
+                            label: context.t('Độ ẩm'),
                             value: humidity != null ? '$humidity%' : '—',
                           ),
                         ),
@@ -161,7 +162,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         Expanded(
                           child: _MiniStat(
                             icon: Icons.air,
-                            label: 'Gió',
+                            label: context.t('Gió'),
                             value: wind != null ? '$wind km/h' : '—',
                           ),
                         ),
@@ -170,17 +171,17 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     const SizedBox(height: 24),
                     WeatherForecastChart(forecast: _forecast),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Dự báo 7 ngày',
-                      style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                    Text(
+                      context.t('Dự báo 7 ngày'),
+                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
                     if (_forecast.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          'Chưa có dữ liệu dự báo.',
-                          style: TextStyle(color: RelaxColors.slate),
+                          context.t('Chưa có dữ liệu dự báo.'),
+                          style: const TextStyle(color: RelaxColors.slate),
                         ),
                       )
                     else

@@ -59,6 +59,10 @@ const TRACKS = {
     ['hip-hop-03', 'Hip Hop 03', 739, 112],
     ['baileys', 'Baileys', 476, 97],
     ['try-me', 'Try Me', 235, 110],
+    ['summertime-sadness-lana', 'Summertime Sadness (Lofi)', 'generated:lofi:lana01', 120],
+    ['young-and-beautiful-lana', 'Young and Beautiful (Lofi)', 'generated:lofi:lana02', 150],
+    ['born-to-die-lana', 'Born to Die (Ambient)', 'generated:lofi:lana03', 140],
+    ['video-games-lana', 'Video Games (Piano)', 'generated:lofi:lana04', 160],
   ],
   CHILL: [
     ['curiosity', 'Curiosity', 480, 100],
@@ -143,6 +147,8 @@ const TRACKS = {
     ['tinh-yeu', 'Podcast tình yêu', 'generated:podcast:base-04', 100],
     ['vuc-day-ban-than', 'Podcast vực dậy bản thân', 'generated:podcast:base-05', 116],
     ['nguoi-ke-ben', 'Podcast người kề bên', 'generated:podcast:base-06', 96],
+    ['queen-of-sadcore-lana', 'Lana Del Rey - Queen of Sadcore', 'generated:podcast:lana01', 180],
+    ['poetry-of-lana-del-rey', 'The Poetry of Lana Del Rey', 'generated:podcast:lana02', 200],
   ],
   MEDITATION: [
     ['buddha-dawn-bell', 'Buddha Dawn Bell', 'generated:buddha:01', 126],

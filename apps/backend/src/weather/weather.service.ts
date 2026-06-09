@@ -230,6 +230,7 @@ export class WeatherService {
     const weather = describeWeather(
       payload.current?.weather_code ?? (isDay ? 1 : 0),
       isDay,
+      hour,
     );
 
     return {
@@ -294,6 +295,7 @@ export class WeatherService {
         payload.daily?.weather_code?.[0] ??
         (isDay ? 1 : 0),
       isDay,
+      hour,
     );
 
     return {

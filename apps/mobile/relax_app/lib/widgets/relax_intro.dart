@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import '../core/locale_controller.dart';
 import 'journey_prompt.dart';
 
 /// Phase của intro: 3 nhịp thở → chọn cảm xúc → gợi ý hoạt động.
@@ -164,7 +165,7 @@ class _RelaxIntroState extends State<RelaxIntro>
       case _IntroPhase.breathing:
         return _BreathingStep(
           controller: _breathCtrl,
-          label: _breathLabel,
+          label: context.t(_breathLabel),
           cycle: _breathCycle,
           onSkip: () {
             // Skip → đi thẳng vào pick mood (hoặc gợi ý nếu đã có mood)
@@ -183,7 +184,7 @@ class _RelaxIntroState extends State<RelaxIntro>
         final suggestions = suggestionsForMood(mood);
         final moodLabel = _moodLabel(mood);
         return _SuggestStep(
-          moodLabel: moodLabel,
+          moodLabel: context.t(moodLabel),
           subtitle: subtitleForMood(mood),
           suggestions: suggestions,
           onPick: (route) {
@@ -226,7 +227,7 @@ class _BreathingStep extends StatelessWidget {
             child: TextButton(
               onPressed: onSkip,
               child: Text(
-                'Bỏ qua →',
+                context.t('Bỏ qua →'),
                 style: TextStyle(
                   color: context.appText.withValues(alpha: 0.55),
                   fontWeight: FontWeight.w600,
@@ -236,7 +237,7 @@ class _BreathingStep extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Cùng thở một chút trước nha ✦',
+            context.t('Cùng thở một chút trước nha ✦'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText,
@@ -246,7 +247,7 @@ class _BreathingStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Nhịp $cycle / 3',
+            '${context.t('Nhịp')} $cycle / 3',
             style: TextStyle(
               color: context.appText.withValues(alpha: 0.55),
               fontWeight: FontWeight.w600,
@@ -288,7 +289,7 @@ class _BreathingStep extends StatelessWidget {
           ),
           const Spacer(),
           Text(
-            'Theo nhịp tròn, mọi thứ đợi được mà.',
+            context.t('Theo nhịp tròn, mọi thứ đợi được mà.'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText.withValues(alpha: 0.6),
@@ -319,7 +320,7 @@ class _MoodPickStep extends StatelessWidget {
             child: TextButton(
               onPressed: onSkip,
               child: Text(
-                'Bỏ qua →',
+                context.t('Bỏ qua →'),
                 style: TextStyle(
                   color: context.appText.withValues(alpha: 0.55),
                   fontWeight: FontWeight.w600,
@@ -329,7 +330,7 @@ class _MoodPickStep extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           Text(
-            'Bây giờ bạn thấy thế nào?',
+            context.t('Bây giờ bạn thấy thế nào?'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText,
@@ -339,7 +340,7 @@ class _MoodPickStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Chọn một cảm xúc gần nhất với bạn lúc này — để Thi Ái đề xuất hoạt động phù hợp.',
+            context.t('Chọn một cảm xúc gần nhất với bạn lúc này — để Thi Ái đề xuất hoạt động phù hợp.'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText.withValues(alpha: 0.6),
@@ -357,7 +358,7 @@ class _MoodPickStep extends StatelessWidget {
               children: _moods
                   .map((m) => _MoodChip(
                         code: m.$1,
-                        label: m.$2,
+                        label: context.t(m.$2),
                         icon: m.$3,
                         color: m.$4,
                         onTap: () => onPick(m.$1),
@@ -453,7 +454,7 @@ class _SuggestStep extends StatelessWidget {
         children: [
           const SizedBox(height: 24),
           Text(
-            'Bạn đang $moodLabel 🌿',
+            '${context.t('Bạn đang')} $moodLabel 🌿',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText,
@@ -463,7 +464,7 @@ class _SuggestStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            subtitle,
+            context.t(subtitle),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText.withValues(alpha: 0.65),
@@ -485,7 +486,7 @@ class _SuggestStep extends StatelessWidget {
             child: TextButton(
               onPressed: onSeeAll,
               child: Text(
-                'Xem tất cả hoạt động →',
+                context.t('Xem tất cả hoạt động →'),
                 style: TextStyle(
                   color: context.appText.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w700,
@@ -535,7 +536,7 @@ class _SuggestCard extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
-                  suggestion.label,
+                  context.t(suggestion.label),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,

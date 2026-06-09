@@ -46,7 +46,7 @@ export function buildFallbackGreeting(
 
   if (hour >= 21 || hour < 5) {
     return buildGreeting(
-      describeWeather(0, false), // night
+      describeWeather(0, false, hour), // night
       displayName,
     );
   }

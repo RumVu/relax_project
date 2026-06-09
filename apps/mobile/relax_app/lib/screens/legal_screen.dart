@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 
@@ -44,7 +45,7 @@ class LegalScreen extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Quy định & bản quyền',
+          context.t('Quy định & bản quyền'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -52,7 +53,7 @@ class LegalScreen extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
           children: [
-            ..._terms.map((t) => _Section(title: t.$1, body: t.$2)),
+            ..._terms.map((t) => _Section(title: context.t(t.$1), body: context.t(t.$2))),
             const SizedBox(height: 8),
             // Giấy phép nguồn mở — dùng trang built-in của Flutter.
             Container(
@@ -64,14 +65,14 @@ class LegalScreen extends StatelessWidget {
               child: ListTile(
                 leading: const Icon(Icons.code, color: RelaxColors.violet),
                 title: Text(
-                  'Giấy phép nguồn mở',
+                  context.t('Giấy phép nguồn mở'),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: context.appText,
                   ),
                 ),
                 subtitle: Text(
-                  'Các thư viện được dùng trong ứng dụng',
+                  context.t('Các thư viện được dùng trong ứng dụng'),
                   style: TextStyle(color: context.mutedText, fontSize: 12),
                 ),
                 trailing: Icon(Icons.chevron_right, color: context.mutedText),
@@ -98,11 +99,10 @@ class LegalScreen extends StatelessWidget {
                 children: [
                   const CatMascot(size: 72, emoji: '😻', glow: false),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Chúc các stress-er có những trải nghiệm '
-                    'tốt ở sản phẩm của chúng tôi 💜',
+                  Text(
+                    context.t('Chúc các stress-er có những trải nghiệm tốt ở sản phẩm của chúng tôi 💜'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
                       fontSize: 15,
@@ -111,7 +111,7 @@ class LegalScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    '© 2026 Relax. Mọi quyền được bảo lưu.',
+                    context.t('© 2026 Relax. Mọi quyền được bảo lưu.'),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.75),
                       fontSize: 12,

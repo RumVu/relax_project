@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Một "nhánh tiếp theo" cho user — gợi ý nhẹ nhàng sau khi vừa hoàn
@@ -119,7 +120,7 @@ class _JourneySheet extends StatelessWidget {
               ),
             ),
             Text(
-              title,
+              context.t(title),
               style: TextStyle(
                 color: context.appText,
                 fontSize: 18,
@@ -128,7 +129,7 @@ class _JourneySheet extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             Text(
-              subtitle,
+              context.t(subtitle),
               style: TextStyle(
                 color: context.appText.withValues(alpha: 0.72),
                 fontSize: 13,
@@ -150,7 +151,7 @@ class _JourneySheet extends StatelessWidget {
               child: TextButton(
                 onPressed: () => Navigator.pop(context),
                 child: Text(
-                  dismissLabel,
+                  context.t(dismissLabel),
                   style: TextStyle(
                     color: context.appText.withValues(alpha: 0.55),
                     fontWeight: FontWeight.w600,
@@ -207,7 +208,7 @@ class _PrimaryCard extends StatelessWidget {
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
-                  suggestion.label,
+                  context.t(suggestion.label),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 15,
@@ -257,7 +258,7 @@ class _SecondaryChip extends StatelessWidget {
               Icon(suggestion.icon, color: RelaxColors.violet, size: 18),
               const SizedBox(width: 8),
               Text(
-                suggestion.label,
+                context.t(suggestion.label),
                 style: const TextStyle(
                   color: RelaxColors.violet,
                   fontSize: 13,

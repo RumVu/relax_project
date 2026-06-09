@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/soft_toast.dart';
 
@@ -38,48 +39,29 @@ class _BillingScreenState extends State<BillingScreen> {
       _error = null;
     });
     try {
-      // Tải song song subscription hiện tại + danh sách gói.
-      final results = await Future.wait([
-        RelaxApi.instance.get('/billing/me'),
-        RelaxApi.instance.get('/billing/plans'),
-      ]);
+      final res = await RelaxApi.instance.get('/billing/me');
+      _subscription = res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null;
 
-      final subRes = results[0];
-      final plansRes = results[1];
-
-      Map<String, dynamic>? sub;
-      if (subRes.statusCode == 200 && subRes.data is Map) {
-        sub = Map<String, dynamic>.from(subRes.data as Map);
-      }
-
-      final plansList = <Map<String, dynamic>>[];
-      if (plansRes.statusCode == 200 && plansRes.data is List) {
-        for (final p in plansRes.data as List) {
-          if (p is Map) plansList.add(Map<String, dynamic>.from(p));
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _subscription = sub;
-          _plans = plansList;
-          _loading = false;
-        });
-      }
+      final resPlans = await RelaxApi.instance.get('/billing/plans');
+      final plansData = resPlans.data;
+      final plansList = plansData is Map ? plansData['items'] ?? plansData : plansData;
+      _plans = (plansList is List)
+          ? plansList
+              .whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList()
+          : [];
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _error = e.toString();
-          _loading = false;
-        });
-      }
+      _error = e.toString();
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   String _formatPrice(dynamic price) {
-    if (price == null) return 'Miễn phí';
+    if (price == null) return context.t('Miễn phí');
     final n = (price is num) ? price.toInt() : int.tryParse('$price') ?? 0;
-    if (n == 0) return 'Miễn phí';
+    if (n == 0) return context.t('Miễn phí');
     // Format VND with dot separator
     final s = n.toString();
     final buf = StringBuffer();
@@ -95,13 +77,13 @@ class _BillingScreenState extends State<BillingScreen> {
       case 'CHILL_PLUS':
         return 'Chill+';
       case 'CHILL_PLUS_ANNUAL':
-        return 'Chill+ Năm';
+        return context.t('Chill+ Năm');
       case 'PREMIUM':
         return 'Premium';
       case 'FREE':
-        return 'Miễn phí';
+        return context.t('Miễn phí');
       default:
-        return tier ?? 'Miễn phí';
+        return tier ?? context.t('Miễn phí');
     }
   }
 
@@ -118,7 +100,7 @@ class _BillingScreenState extends State<BillingScreen> {
     if (_isCurrentPlan(plan)) {
       if (mounted) {
         showSoftToast(context,
-            message: 'Bạn đang dùng gói này rồi!', tone: SoftToastTone.info);
+            message: context.t('Bạn đang dùng gói này rồi!'), tone: SoftToastTone.info);
       }
       return;
     }
@@ -157,14 +139,14 @@ class _BillingScreenState extends State<BillingScreen> {
             (res.data is Map ? res.data['message'] as String? : null) ??
                 'Không tạo được phiên thanh toán.';
         if (context.mounted) {
-          showSoftToast(context, message: msg, tone: SoftToastTone.error);
+          showSoftToast(context, message: context.t(msg), tone: SoftToastTone.error);
         }
       }
     } catch (e) {
       if (context.mounted) {
         nav.pop(); // Close loading
         showSoftToast(context,
-            message: 'Lỗi: $e', tone: SoftToastTone.error);
+            message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
     }
   }
@@ -207,7 +189,7 @@ class _BillingScreenState extends State<BillingScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Thanh toán gói ${_tierDisplayName(planSlug)}',
+              context.t('Thanh toán gói {tier}', {'tier': _tierDisplayName(planSlug)}),
               style: TextStyle(
                 color: ctx.appText,
                 fontWeight: FontWeight.w800,
@@ -216,22 +198,22 @@ class _BillingScreenState extends State<BillingScreen> {
             ),
             const SizedBox(height: 20),
             if (bankName != null)
-              _InfoRow(label: 'Ngân hàng', value: bankName),
+              _InfoRow(label: context.t('Ngân hàng'), value: bankName),
             if (bankAccount != null)
               _InfoRow(
-                label: 'Số tài khoản',
+                label: context.t('Số tài khoản'),
                 value: bankAccount,
                 copyValue: bankAccount,
               ),
             if (amount != null)
               _InfoRow(
-                label: 'Số tiền',
+                label: context.t('Số tiền'),
                 value: _formatPrice(amount),
                 copyValue: amount.toString(),
               ),
             if (transferContent != null)
               _InfoRow(
-                label: 'Nội dung CK',
+                label: context.t('Nội dung CK'),
                 value: transferContent,
                 copyValue: transferContent,
               ),
@@ -247,7 +229,7 @@ class _BillingScreenState extends State<BillingScreen> {
             ],
             const SizedBox(height: 24),
             Text(
-              'Sau khi chuyển khoản, hệ thống sẽ tự xác nhận trong vài phút.',
+              context.t('Sau khi chuyển khoản, hệ thống sẽ tự xác nhận trong vài phút.'),
               style: TextStyle(color: ctx.mutedText, fontSize: 12),
             ),
             const SizedBox(height: 16),
@@ -262,8 +244,8 @@ class _BillingScreenState extends State<BillingScreen> {
                         borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () => _confirmPayment(ctx, paymentId, isSepayActive),
-                  child: const Text('Tôi đã chuyển khoản',
-                      style: TextStyle(
+                  child: Text(context.t('Tôi đã chuyển khoản'),
+                      style: const TextStyle(
                           color: Colors.white, fontWeight: FontWeight.w700)),
                 ),
               ),
@@ -273,7 +255,7 @@ class _BillingScreenState extends State<BillingScreen> {
               height: 48,
               child: TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('Đóng',
+                child: Text(context.t('Đóng'),
                     style: TextStyle(
                         color: ctx.mutedText, fontWeight: FontWeight.w600)),
               ),
@@ -287,24 +269,30 @@ class _BillingScreenState extends State<BillingScreen> {
 
   Future<void> _confirmPayment(BuildContext sheetCtx, String paymentId, bool isSepayActive) async {
     final parentCtx = context;
+    final successMsg = parentCtx.t('Thanh toán thành công! Gói đã được kích hoạt.');
+    final confirmDevMsg = parentCtx.t('Đã xác nhận! Gói (DEV) đã được kích hoạt.');
+    final errorMsgPrefix = parentCtx.t('Lỗi:');
+    final notReceivedMsgTitle = parentCtx.t('Chưa nhận được giao dịch');
+    final notReceivedMsgContent = parentCtx.t('Hệ thống chưa ghi nhận được khoản chuyển của bạn. Vui lòng kiểm tra lại số tài khoản, số tiền và nội dung chuyển khoản thô đã đúng chưa.\n\nNếu bạn đã chuyển khoản thành công, vui lòng chờ 1-2 phút hoặc liên hệ với admin để được hỗ trợ.');
+    final closeBtnText = parentCtx.t('Đóng');
 
     if (isSepayActive) {
       // Show verification loading dialog
       showDialog(
         context: parentCtx,
         barrierDismissible: false,
-        builder: (_) => const Center(
+        builder: (_) => Center(
           child: Card(
             child: Padding(
-              padding: EdgeInsets.all(24.0),
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: RelaxColors.violet),
-                  SizedBox(height: 16),
+                  const CircularProgressIndicator(color: RelaxColors.violet),
+                  const SizedBox(height: 16),
                   Text(
-                    'Đang kiểm tra giao dịch...',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                    context.t('Đang kiểm tra giao dịch...'),
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
               ),
@@ -341,7 +329,7 @@ class _BillingScreenState extends State<BillingScreen> {
         }
         if (parentCtx.mounted) {
           showSoftToast(parentCtx,
-              message: 'Thanh toán thành công! Gói đã được kích hoạt.',
+              message: successMsg,
               tone: SoftToastTone.success);
           parentCtx.read<AuthState>().refreshUser();
         }
@@ -351,14 +339,12 @@ class _BillingScreenState extends State<BillingScreen> {
           showDialog(
             context: parentCtx,
             builder: (ctx) => AlertDialog(
-              title: const Text('Chưa nhận được giao dịch'),
-              content: const Text(
-                'Hệ thống chưa ghi nhận được khoản chuyển của bạn. Vui lòng kiểm tra lại số tài khoản, số tiền và nội dung chuyển khoản thô đã đúng chưa.\n\nNếu bạn đã chuyển khoản thành công, vui lòng chờ 1-2 phút hoặc liên hệ với admin để được hỗ trợ.',
-              ),
+              title: Text(notReceivedMsgTitle),
+              content: Text(notReceivedMsgContent),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Đóng'),
+                  child: Text(closeBtnText),
                 ),
               ],
             ),
@@ -383,12 +369,10 @@ class _BillingScreenState extends State<BillingScreen> {
         Navigator.pop(sheetCtx);
 
         if (res.statusCode == 200 || res.statusCode == 201) {
-          if (mounted) {
+          if (parentCtx.mounted) {
             showSoftToast(parentCtx,
-                message: 'Đã xác nhận! Gói (DEV) đã được kích hoạt.',
+                message: confirmDevMsg,
                 tone: SoftToastTone.success);
-          }
-          if (mounted) {
             parentCtx.read<AuthState>().refreshUser();
           }
           _load();
@@ -396,17 +380,15 @@ class _BillingScreenState extends State<BillingScreen> {
           final msg =
               (res.data is Map ? res.data['message'] as String? : null) ??
                   'Chưa xác nhận được — hệ thống sẽ tự kiểm tra.';
-          if (mounted) {
-            showSoftToast(parentCtx, message: msg, tone: SoftToastTone.info);
+          if (parentCtx.mounted) {
+            showSoftToast(parentCtx, message: parentCtx.t(msg), tone: SoftToastTone.info);
           }
         }
       } catch (e) {
         if (parentCtx.mounted) {
           Navigator.pop(parentCtx);
-        }
-        if (mounted) {
           showSoftToast(parentCtx,
-              message: 'Lỗi: $e', tone: SoftToastTone.error);
+              message: '$errorMsgPrefix $e', tone: SoftToastTone.error);
         }
       }
     }
@@ -423,7 +405,7 @@ class _BillingScreenState extends State<BillingScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Nâng cấp ✨',
+          context.t('Nâng cấp ✨'),
           style: TextStyle(
             color: context.appText,
             fontWeight: FontWeight.w800,
@@ -438,15 +420,15 @@ class _BillingScreenState extends State<BillingScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.error_outline,
+                      const Icon(Icons.error_outline,
                           color: RelaxColors.coral, size: 48),
                       const SizedBox(height: 12),
-                      Text('Không tải được thông tin gói',
+                      Text(context.t('Không tải được thông tin gói'),
                           style: TextStyle(color: context.mutedText)),
                       const SizedBox(height: 12),
                       TextButton(
                         onPressed: _load,
-                        child: const Text('Thử lại'),
+                        child: Text(context.t('Thử lại')),
                       ),
                     ],
                   ),
@@ -464,8 +446,8 @@ class _BillingScreenState extends State<BillingScreen> {
                       const SizedBox(height: 28),
                       // Available plans
                       Text(
-                        'CHỌN GÓI',
-                        style: TextStyle(
+                        context.t('CHỌN GÓI'),
+                        style: const TextStyle(
                           color: RelaxColors.slate,
                           fontWeight: FontWeight.w800,
                           fontSize: 11,
@@ -482,11 +464,11 @@ class _BillingScreenState extends State<BillingScreen> {
                             plan['features'] is List ? plan['features'] as List : [];
                         return _PlanCard(
                           name: _tierDisplayName(name),
-                          description: desc,
+                          description: context.t(desc),
                           price: _formatPrice(price),
                           isCurrent: isCurrent,
                           features: features
-                              .map((f) => f is String ? f : '$f')
+                              .map((f) => f is String ? context.t(f) : '$f')
                               .toList(),
                           onTap: () => _checkout(plan),
                         );
@@ -497,8 +479,8 @@ class _BillingScreenState extends State<BillingScreen> {
                         onPressed: () => _showPaymentHistory(context),
                         icon: const Icon(Icons.receipt_long_outlined,
                             color: RelaxColors.violet),
-                        label: const Text('Lịch sử thanh toán',
-                            style: TextStyle(color: RelaxColors.violet)),
+                        label: Text(context.t('Lịch sử thanh toán'),
+                            style: const TextStyle(color: RelaxColors.violet)),
                       ),
                     ],
                   ),
@@ -507,6 +489,7 @@ class _BillingScreenState extends State<BillingScreen> {
   }
 
   Future<void> _showPaymentHistory(BuildContext ctx) async {
+    final errorMsgPrefix = ctx.t('Lỗi:');
     showDialog(
       context: ctx,
       barrierDismissible: false,
@@ -556,7 +539,7 @@ class _BillingScreenState extends State<BillingScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Lịch sử thanh toán',
+                sheetCtx.t('Lịch sử thanh toán'),
                 style: TextStyle(
                   color: sheetCtx.appText,
                   fontWeight: FontWeight.w800,
@@ -567,7 +550,7 @@ class _BillingScreenState extends State<BillingScreen> {
               if (payments.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Text('Chưa có giao dịch nào.',
+                  child: Text(sheetCtx.t('Chưa có giao dịch nào.'),
                       style: TextStyle(color: sheetCtx.mutedText)),
                 )
               else
@@ -626,9 +609,9 @@ class _BillingScreenState extends State<BillingScreen> {
                           ),
                           child: Text(
                             status == 'COMPLETED'
-                                ? 'Thành công'
+                                ? sheetCtx.t('Thành công')
                                 : status == 'PENDING'
-                                    ? 'Đang chờ'
+                                    ? sheetCtx.t('Đang chờ')
                                     : status,
                             style: TextStyle(
                               fontSize: 11,
@@ -653,7 +636,7 @@ class _BillingScreenState extends State<BillingScreen> {
     } catch (e) {
       if (ctx.mounted) {
         Navigator.pop(ctx);
-        showSoftToast(ctx, message: 'Lỗi: $e', tone: SoftToastTone.error);
+        showSoftToast(ctx, message: '$errorMsgPrefix $e', tone: SoftToastTone.error);
       }
     }
   }
@@ -709,7 +692,7 @@ class _CurrentPlanCard extends StatelessWidget {
               ),
               const SizedBox(width: 10),
               Text(
-                'Gói hiện tại',
+                context.t('Gói hiện tại'),
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.8),
                   fontSize: 13,
@@ -729,7 +712,7 @@ class _CurrentPlanCard extends StatelessWidget {
           if (expDate != null) ...[
             const SizedBox(height: 6),
             Text(
-              'Hết hạn: ${expDate.day}/${expDate.month}/${expDate.year}',
+              '${context.t('Hết hạn:')} ${expDate.day}/${expDate.month}/${expDate.year}',
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.8),
                 fontSize: 12,
@@ -739,7 +722,7 @@ class _CurrentPlanCard extends StatelessWidget {
           if (isFree) ...[
             const SizedBox(height: 10),
             Text(
-              'Nâng cấp để mở khóa toàn bộ tính năng!',
+              context.t('Nâng cấp để mở khóa toàn bộ tính năng!'),
               style: TextStyle(
                 color: Colors.white.withValues(alpha: 0.85),
                 fontSize: 13,
@@ -806,9 +789,9 @@ class _PlanCard extends StatelessWidget {
                     color: RelaxColors.violet.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Đang dùng',
-                    style: TextStyle(
+                  child: Text(
+                    context.t('Đang dùng'),
+                    style: const TextStyle(
                       color: RelaxColors.violet,
                       fontWeight: FontWeight.w700,
                       fontSize: 11,
@@ -865,7 +848,7 @@ class _PlanCard extends StatelessWidget {
               ),
               onPressed: onTap,
               child: Text(
-                isCurrent ? 'Gói hiện tại' : 'Chọn gói này',
+                isCurrent ? context.t('Gói hiện tại') : context.t('Chọn gói này'),
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
             ),
@@ -921,7 +904,7 @@ class _InfoRow extends StatelessWidget {
                 Clipboard.setData(ClipboardData(text: copyValue!));
                 showSoftToast(
                   context,
-                  message: 'Đã sao chép $label',
+                  message: context.t('Đã sao chép {label}', {'label': label}),
                   tone: SoftToastTone.success,
                 );
               },

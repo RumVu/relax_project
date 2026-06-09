@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/locale_controller.dart';
 import '../core/api_client.dart';
 import '../core/theme.dart';
 import '../widgets/journey_prompt.dart';
@@ -83,7 +84,7 @@ class _MoodScreenState extends State<MoodScreen> {
         _noteCtrl.clear();
         showSoftToast(
           context,
-          message: 'Đã ghi lại cảm xúc của bạn ✦',
+          message: context.t('Đã ghi lại cảm xúc của bạn ✦'),
           tone: SoftToastTone.success,
         );
         await _load();
@@ -91,12 +92,12 @@ class _MoodScreenState extends State<MoodScreen> {
         // Dẫn dắt user sang bước tiếp theo dựa trên mood vừa ghi.
         await showJourneyPrompt(
           context,
-          title: 'Đã ghi cảm xúc 🌸',
+          title: context.t('Đã ghi cảm xúc 🌸'),
           subtitle: subtitleForMood(savedMood),
           suggestions: suggestionsForMood(savedMood),
         );
       } else {
-        final msg = (res.data?['message'] as String?) ?? 'Không lưu được cảm xúc';
+        final msg = (res.data?['message'] as String?) ?? context.t('Không lưu được cảm xúc');
         showSoftToast(context, message: msg, tone: SoftToastTone.error);
       }
     } catch (e) {
@@ -118,14 +119,14 @@ class _MoodScreenState extends State<MoodScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            const Text(
-              'Hôm nay bạn thấy thế nào?',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            Text(
+              context.t('Hôm nay bạn thấy thế nào?'),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.appText),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Chọn cảm xúc gần nhất với bạn lúc này.',
-              style: TextStyle(color: RelaxColors.slate),
+            Text(
+              context.t('Chọn cảm xúc gần nhất với bạn lúc này.'),
+              style: TextStyle(color: context.mutedText),
             ),
             const SizedBox(height: 20),
             if (_loading)
@@ -153,8 +154,8 @@ class _MoodScreenState extends State<MoodScreen> {
                 controller: _noteCtrl,
                 maxLines: 3,
                 maxLength: 120,
-                decoration: const InputDecoration(
-                  hintText: 'Thêm vài dòng ghi chú (không bắt buộc)…',
+                decoration: InputDecoration(
+                  hintText: context.t('Thêm vài dòng ghi chú (không bắt buộc)…'),
                 ),
               ),
               const SizedBox(height: 8),
@@ -172,17 +173,17 @@ class _MoodScreenState extends State<MoodScreen> {
                           ),
                         )
                       : const Icon(Icons.favorite),
-                  label: Text(_saving ? 'Đang lưu…' : 'Ghi lại cảm xúc'),
+                  label: Text(_saving ? context.t('Đang lưu…') : context.t('Ghi lại cảm xúc')),
                 ),
               ),
               const SizedBox(height: 28),
               if (_history.isNotEmpty) ...[
-                const Text(
-                  'Gần đây',
+                Text(
+                  context.t('Gần đây'),
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 16,
-                    color: RelaxColors.ink,
+                    color: context.appText,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -229,7 +230,7 @@ class _MoodScreenState extends State<MoodScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  (opt['label'] as String?) ?? '',
+                  context.t((opt['label'] as String?) ?? ''),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: context.appText,
@@ -293,7 +294,7 @@ class _MoodGrid extends StatelessWidget {
               ),
             ),
             child: Text(
-              label,
+              context.t(label),
               style: TextStyle(
                 color: isSel ? Colors.white : context.appText,
                 fontWeight: FontWeight.w700,
@@ -321,7 +322,7 @@ class _IntensitySlider extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Cường độ',
+              context.t('Cường độ'),
               style: TextStyle(
                 fontWeight: FontWeight.w700,
                 color: context.appText,
@@ -368,9 +369,9 @@ class _ErrorBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Không tải được dữ liệu',
-            style: TextStyle(fontWeight: FontWeight.w800, color: RelaxColors.coral),
+          Text(
+            context.t('Không tải được dữ liệu'),
+            style: const TextStyle(fontWeight: FontWeight.w800, color: RelaxColors.coral),
           ),
           const SizedBox(height: 4),
           Text(message,
@@ -379,7 +380,7 @@ class _ErrorBox extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Thử lại'),
+            label: Text(context.t('Thử lại')),
           ),
         ],
       ),

@@ -4,6 +4,7 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Hiển thị thông tin thiết bị (model, OS, version) và phiên bản app — dùng
@@ -65,7 +66,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Thông tin thiết bị',
+          context.t('Thông tin thiết bị'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -92,7 +93,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
                                 indent: 16,
                                 endIndent: 16),
                           ListTile(
-                            title: Text(_rows[i].$1,
+                            title: Text(context.t(_rows[i].$1),
                                 style: TextStyle(
                                     color: context.mutedText, fontSize: 12)),
                             subtitle: Text(_rows[i].$2,
@@ -106,8 +107,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Khi cần báo lỗi, hãy gửi kèm thông tin này để bộ phận hỗ '
-                    'trợ chẩn đoán nhanh hơn nha 💜',
+                    context.t('Khi cần báo lỗi, hãy gửi kèm thông tin này để bộ phận hỗ trợ chẩn đoán nhanh hơn nha 💜'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.mutedText, fontSize: 12),
                   ),

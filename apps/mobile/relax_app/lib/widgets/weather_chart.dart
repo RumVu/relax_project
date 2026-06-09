@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Biểu đồ xu hướng nhiệt độ 7 ngày (Cao nhất / Thấp nhất).
@@ -33,7 +34,7 @@ class WeatherForecastChart extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Xu hướng nhiệt độ 7 ngày 📊',
+          context.t('Xu hướng nhiệt độ 7 ngày 📊'),
           style: TextStyle(
             fontWeight: FontWeight.w800,
             fontSize: 15,
@@ -93,7 +94,7 @@ class WeatherForecastChart extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Cao nhất',
+                    context.t('Cao nhất'),
                     style: TextStyle(fontSize: 11, color: context.mutedText),
                   ),
                   const SizedBox(width: 24),
@@ -107,7 +108,7 @@ class WeatherForecastChart extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    'Thấp nhất',
+                    context.t('Thấp nhất'),
                     style: TextStyle(fontSize: 11, color: context.mutedText),
                   ),
                 ],

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/soft_toast.dart';
 
@@ -33,9 +35,9 @@ class _CompanionScreenState extends State<CompanionScreen>
     super.initState();
     _bounce = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
-      lowerBound: 0.92,
-      upperBound: 1.0,
+      duration: const Duration(milliseconds: 320),
+      lowerBound: 0.9,
+      upperBound: 1.1,
       value: 1.0,
     );
     _load();
@@ -54,9 +56,20 @@ class _CompanionScreenState extends State<CompanionScreen>
     });
     try {
       final res = await RelaxApi.instance.get('/user-companions/me');
-      _companion = res.data is Map ? Map<String, dynamic>.from(res.data) : null;
-      await _loadOptions();
-      await _loadCustomAssets();
+      _companion = res.data is Map ? Map<String, dynamic>.from(res.data as Map) : null;
+
+      final resOpts = await RelaxApi.instance.get('/user-companions/me/personalization-options');
+      _personalizationOptions = resOpts.data is Map ? Map<String, dynamic>.from(resOpts.data as Map) : null;
+
+      final resAssets = await RelaxApi.instance.get('/ambient-sounds/companion-assets');
+      final assetData = resAssets.data;
+      final assetList = assetData is Map ? assetData['items'] : assetData;
+      _customAssets = (assetList is List)
+          ? assetList
+              .whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList()
+          : [];
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -64,56 +77,18 @@ class _CompanionScreenState extends State<CompanionScreen>
     }
   }
 
-  Future<void> _loadOptions() async {
-    try {
-      final res = await RelaxApi.instance
-          .get('/user-companions/me/personalization-options');
-      if (res.statusCode == 200 && res.data is Map) {
-        if (mounted) {
-          setState(() {
-            _personalizationOptions = Map<String, dynamic>.from(res.data);
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Load options failed: $e');
-    }
-  }
-
-  Future<void> _loadCustomAssets() async {
-    try {
-      final res = await RelaxApi.instance.get('/companion-assets');
-      if (res.statusCode == 200 && res.data is Map) {
-        final items = res.data['items'] as List?;
-        if (items != null) {
-          final filtered = items
-              .whereType<Map>()
-              .where((a) =>
-                  a['zodiacSign'] == null &&
-                  a['chineseZodiac'] == null &&
-                  a['isDefault'] != true &&
-                  a['isActive'] == true)
-              .map((e) => Map<String, dynamic>.from(e))
-              .toList();
-          if (mounted) {
-            setState(() {
-              _customAssets = filtered;
-            });
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Load custom assets failed: $e');
-    }
-  }
-
   Future<void> _interact(String type, String successMsg) async {
-    HapticFeedback.mediumImpact();
+    if (_busy) return;
     setState(() => _busy = true);
-    _bounce.reverse().then((_) => _bounce.forward());
+    HapticFeedback.mediumImpact();
+    // Bắt đầu nhún nhảy nhẹ
+    unawaited(_bounce.forward().then((_) => _bounce.reverse()));
+
     try {
-      final res = await RelaxApi.instance
-          .post('/user-companions/me/interactions', body: {'type': type});
+      final res = await RelaxApi.instance.post(
+        '/user-companions/me/interactions',
+        body: {'type': type},
+      );
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
         showSoftToast(context,
@@ -121,7 +96,7 @@ class _CompanionScreenState extends State<CompanionScreen>
         await _load();
       } else {
         showSoftToast(context,
-            message: (res.data?['message'] as String?) ?? 'Có lỗi xảy ra',
+            message: context.t((res.data?['message'] as String?) ?? 'Có lỗi xảy ra'),
             tone: SoftToastTone.error);
       }
     } catch (e) {
@@ -139,21 +114,21 @@ class _CompanionScreenState extends State<CompanionScreen>
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Đổi tên linh thú'),
+        title: Text(context.t('Đổi tên linh thú')),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           maxLength: 30,
-          decoration: const InputDecoration(hintText: 'Tên linh thú của bạn'),
+          decoration: InputDecoration(hintText: context.t('Tên linh thú của bạn')),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: Text(context.t('Hủy')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Lưu'),
+            child: Text(context.t('Lưu')),
           ),
         ],
       ),
@@ -170,17 +145,17 @@ class _CompanionScreenState extends State<CompanionScreen>
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
         showSoftToast(context,
-            message: 'Đổi tên linh thú thành công!',
+            message: context.t('Đổi tên linh thú thành công!'),
             tone: SoftToastTone.success);
         await _load();
       } else {
         showSoftToast(context,
-            message: 'Đổi tên linh thú thất bại.',
+            message: context.t('Đổi tên linh thú thất bại.'),
             tone: SoftToastTone.error);
       }
     } catch (e) {
       if (mounted) {
-        showSoftToast(context, message: 'Lỗi: $e', tone: SoftToastTone.error);
+        showSoftToast(context, message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -199,7 +174,7 @@ class _CompanionScreenState extends State<CompanionScreen>
         initialDate: DateTime.now().subtract(const Duration(days: 365 * 20)),
         firstDate: DateTime(1900),
         lastDate: DateTime.now(),
-        helpText: 'Chọn ngày sinh để tính Cung hoàng đạo & Con giáp',
+        helpText: context.t('Chọn ngày sinh để tính Cung hoàng đạo & Con giáp'),
         builder: (context, child) {
           return Theme(
             data: Theme.of(context).copyWith(
@@ -226,14 +201,14 @@ class _CompanionScreenState extends State<CompanionScreen>
         if (!mounted) return;
         if (res.statusCode != 200 && res.statusCode != 201) {
           showSoftToast(context,
-              message: 'Cập nhật ngày sinh thất bại.',
+              message: context.t('Cập nhật ngày sinh thất bại.'),
               tone: SoftToastTone.error);
           setState(() => _busy = false);
           return;
         }
       } catch (e) {
         if (mounted) {
-          showSoftToast(context, message: 'Lỗi: $e', tone: SoftToastTone.error);
+          showSoftToast(context, message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
           setState(() => _busy = false);
         }
         return;
@@ -259,18 +234,18 @@ class _CompanionScreenState extends State<CompanionScreen>
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
         showSoftToast(context,
-            message: 'Đổi chế độ linh thú thành công!',
+            message: context.t('Đổi chế độ linh thú thành công!'),
             tone: SoftToastTone.success);
         await _load();
       } else {
-        final msg = (res.data is Map ? res.data['message'] as String? : null) ?? 'Đổi chế độ linh thú thất bại.';
+        final msg = context.t((res.data is Map ? res.data['message'] as String? : null) ?? 'Đổi chế độ linh thú thất bại.');
         showSoftToast(context,
             message: msg,
             tone: SoftToastTone.error);
       }
     } catch (e) {
       if (mounted) {
-        showSoftToast(context, message: 'Lỗi: $e', tone: SoftToastTone.error);
+        showSoftToast(context, message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -300,7 +275,7 @@ class _CompanionScreenState extends State<CompanionScreen>
 
   @override
   Widget build(BuildContext context) {
-    final name = (_companion?['name'] as String?) ?? 'Linh thú';
+    final name = (_companion?['name'] as String?) ?? context.t('Linh thú');
     final level = (_companion?['level'] as num?)?.toInt() ?? 1;
     final affection = (_companion?['affection'] as num?)?.toInt() ?? 0;
     final energy = (_companion?['energy'] as num?)?.toInt() ?? 0;
@@ -321,7 +296,7 @@ class _CompanionScreenState extends State<CompanionScreen>
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Linh thú của bạn',
+          context.t('Linh thú của bạn'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -411,7 +386,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
-                                  'Cấp $level · $mood',
+                                  '${context.t('Cấp')} $level · ${context.t(mood)}',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,
@@ -424,22 +399,22 @@ class _CompanionScreenState extends State<CompanionScreen>
                         ),
                         const SizedBox(height: 24),
                         _StatBar(
-                          label: 'Độ thân thiết',
+                          label: context.t('Độ thân thiết'),
                           value: affection,
                           color: RelaxColors.coral,
                           icon: Icons.favorite,
                         ),
                         const SizedBox(height: 14),
                         _StatBar(
-                          label: 'Năng lượng',
+                          label: context.t('Năng lượng'),
                           value: energy,
                           color: RelaxColors.mint,
                           icon: Icons.bolt,
                         ),
                         const SizedBox(height: 28),
-                        const Text(
-                          'Tương tác',
-                          style: TextStyle(
+                        Text(
+                          context.t('Tương tác'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
                           ),
@@ -450,54 +425,54 @@ class _CompanionScreenState extends State<CompanionScreen>
                             Expanded(
                               child: _ActionButton(
                                 icon: Icons.pan_tool_alt_outlined,
-                                label: 'Vuốt ve',
+                                label: context.t('Vuốt ve'),
                                 onTap: _busy
                                     ? null
-                                    : () => _interact('PET', 'Linh thú thích lắm!'),
+                                    : () => _interact('PET', context.t('Linh thú thích lắm!')),
                               ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: _ActionButton(
                                 icon: Icons.restaurant,
-                                label: 'Cho ăn',
+                                label: context.t('Cho ăn'),
                                 onTap: _busy
                                     ? null
-                                    : () => _interact('FEED', 'Đã cho ăn ngon lành!'),
+                                    : () => _interact('FEED', context.t('Đã cho ăn ngon lành!')),
                               ),
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: _ActionButton(
                                 icon: Icons.sports_esports_outlined,
-                                label: 'Chơi',
+                                label: context.t('Chơi'),
                                 onTap: _busy
                                     ? null
-                                    : () => _interact('PLAY', 'Chơi vui quá!'),
+                                    : () => _interact('PLAY', context.t('Chơi vui quá!')),
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 32),
-                        const Text(
-                          'Chế độ hiển thị linh thú',
-                          style: TextStyle(
+                        Text(
+                          context.t('Chế độ hiển thị linh thú'),
+                          style: const TextStyle(
                             fontWeight: FontWeight.w800,
                             fontSize: 16,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Đồng bộ linh thú theo phong cách cá nhân của bạn.',
+                          context.t('Đồng bộ linh thú theo phong cách cá nhân của bạn.'),
                           style: TextStyle(color: context.mutedText, fontSize: 12),
                         ),
                         const SizedBox(height: 16),
                         _buildPersonalizationModes(currentMode),
                         if (currentMode == 'CUSTOM' && _customAssets.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          const Text(
-                            'Kho linh thú tự chọn',
-                            style: TextStyle(
+                          Text(
+                            context.t('Kho linh thú tự chọn'),
+                            style: const TextStyle(
                               fontWeight: FontWeight.w800,
                               fontSize: 15,
                             ),
@@ -523,7 +498,7 @@ class _CompanionScreenState extends State<CompanionScreen>
     return Column(
       children: modesList.map((m) {
         final mode = m['mode'] as String;
-        final label = m['label'] as String;
+        final label = context.t(m['label'] as String);
         final icon = m['icon'] as IconData;
         final isSelected = currentMode == mode;
 
@@ -562,7 +537,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                                 assetId: randomAsset['id'] as String);
                           } else {
                             showSoftToast(context,
-                                message: 'Kho linh thú tự chọn trống.',
+                                message: context.t('Kho linh thú tự chọn trống.'),
                                 tone: SoftToastTone.info);
                           }
                         } else {
@@ -766,7 +741,7 @@ class _ErrorBox extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Thử lại'),
+              label: Text(context.t('Thử lại')),
             ),
           ],
         ),

@@ -18,13 +18,23 @@ export interface WeatherDescription {
 export function describeWeather(
   code: number,
   isDay: boolean,
+  hour?: number,
 ): WeatherDescription {
   if (!isDay) {
-    return {
-      titleTemplate: 'Khuya rồi nè, {{name}} ơi',
-      subtitle: 'Đừng thức khuya quá đó nha ~',
-      iconKey: 'weather-night',
-    };
+    const activeHour = hour !== undefined ? hour : new Date().getHours();
+    if (activeHour >= 22 || activeHour < 5) {
+      return {
+        titleTemplate: 'Khuya rồi nè, {{name}} ơi',
+        subtitle: 'Đừng thức khuya quá đó nha ~',
+        iconKey: 'weather-night',
+      };
+    } else {
+      return {
+        titleTemplate: 'Tối rồi nè, {{name}} ơi',
+        subtitle: 'Một ngày đã đi qua, thả lỏng một chút nha ~',
+        iconKey: 'weather-night',
+      };
+    }
   }
 
   if (code === 0 || code === 1) {

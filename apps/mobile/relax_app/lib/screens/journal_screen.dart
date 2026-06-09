@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
@@ -33,7 +34,7 @@ class _JournalScreenState extends State<JournalScreen> {
       if (!mounted) return;
       final auth = context.read<AuthState>();
       if (auth.activeSessionId == null) {
-        auth.startRelaxSession('JOURNAL', 'Viết nhật ký');
+        auth.startRelaxSession('JOURNAL', context.t('Viết nhật ký'));
       }
     });
   }
@@ -92,41 +93,41 @@ class _JournalScreenState extends State<JournalScreen> {
         FocusScope.of(context).unfocus();
         showSoftToast(
           context,
-          message: 'Đã lưu nhật ký 🌿',
+          message: context.t('Đã lưu nhật ký 🌿'),
           tone: SoftToastTone.success,
         );
         await _load();
         if (!mounted) return;
         final auth = context.read<AuthState>();
         final activeId = auth.activeSessionId;
-        showCheckInSheet(context, 'Viết nhật ký', sessionId: activeId).then((_) {
+        showCheckInSheet(context, context.t('Viết nhật ký'), sessionId: activeId).then((_) {
           if (!mounted) return;
           showJourneyPrompt(
             context,
-            title: 'Đã trút bỏ rồi 🌿',
+            title: context.t('Đã trút bỏ rồi 🌿'),
             subtitle:
-                'Giờ là lúc khép lại nhẹ nhàng. Mình đi tiếp một bước êm nhé?',
-            suggestions: const [
+                context.t('Giờ là lúc khép lại nhẹ nhàng. Mình đi tiếp một bước êm nhé?'),
+            suggestions: [
               JourneySuggestion(
                 icon: Icons.air,
-                label: 'Hít thở 3 phút để khoá lại',
+                label: context.t('Hít thở 3 phút để khoá lại'),
                 route: '/breathing',
               ),
               JourneySuggestion(
                 icon: Icons.headphones,
-                label: 'Nghe nhạc êm',
+                label: context.t('Nghe nhạc êm'),
                 route: '/sounds',
               ),
               JourneySuggestion(
                 icon: Icons.insights,
-                label: 'Xem nhịp tuần này',
+                label: context.t('Xem nhịp tuần này'),
                 route: '/home?tab=2',
               ),
             ],
           );
         });
       } else {
-        final msg = (res.data?['message'] as String?) ?? 'Không lưu được nhật ký';
+        final msg = context.t((res.data?['message'] as String?) ?? 'Không lưu được nhật ký');
         showSoftToast(context, message: msg, tone: SoftToastTone.error);
       }
     } catch (e) {
@@ -160,17 +161,17 @@ class _JournalScreenState extends State<JournalScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xoá nhật ký?'),
-        content: const Text('Hành động này không thể hoàn tác.'),
+        title: Text(context.t('Xoá nhật ký?')),
+        content: Text(context.t('Hành động này không thể hoàn tác.')),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: Text(context.t('Hủy')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xoá'),
+            child: Text(context.t('Xoá')),
           ),
         ],
       ),
@@ -196,14 +197,14 @@ class _JournalScreenState extends State<JournalScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            const Text(
-              'Nhật ký của bạn',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+            Text(
+              context.t('Nhật ký của bạn'),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'Viết vài dòng để sau này nhìn lại.',
-              style: TextStyle(color: RelaxColors.slate),
+            Text(
+              context.t('Viết vài dòng để sau này nhìn lại.'),
+              style: const TextStyle(color: RelaxColors.slate),
             ),
             const SizedBox(height: 20),
             // Composer
@@ -218,8 +219,8 @@ class _JournalScreenState extends State<JournalScreen> {
                 children: [
                   TextField(
                     controller: _titleCtrl,
-                    decoration: const InputDecoration(
-                      hintText: 'Tiêu đề (không bắt buộc)',
+                    decoration: InputDecoration(
+                      hintText: context.t('Tiêu đề (không bắt buộc)'),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -236,8 +237,8 @@ class _JournalScreenState extends State<JournalScreen> {
                     controller: _bodyCtrl,
                     maxLines: 4,
                     maxLength: 600,
-                    decoration: const InputDecoration(
-                      hintText: 'Hôm nay có gì đáng nhớ?',
+                    decoration: InputDecoration(
+                      hintText: context.t('Hôm nay có gì đáng nhớ?'),
                       border: InputBorder.none,
                       focusedBorder: InputBorder.none,
                       enabledBorder: InputBorder.none,
@@ -259,16 +260,16 @@ class _JournalScreenState extends State<JournalScreen> {
                               ),
                             )
                           : const Icon(Icons.edit, size: 18),
-                      label: Text(_saving ? 'Đang lưu…' : 'Lưu nhật ký'),
+                      label: Text(_saving ? context.t('Đang lưu…') : context.t('Lưu nhật ký')),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'Gần đây',
-              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+            Text(
+              context.t('Gần đây'),
+              style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
             ),
             const SizedBox(height: 12),
             if (_loading)
@@ -292,12 +293,12 @@ class _JournalScreenState extends State<JournalScreen> {
                 ),
               )
             else if (_entries.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 24),
                 child: Text(
-                  'Chưa có nhật ký nào. Viết dòng đầu tiên đi nào!',
+                  context.t('Chưa có nhật ký nào. Viết dòng đầu tiên đi nào!'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: RelaxColors.slate),
+                  style: const TextStyle(color: RelaxColors.slate),
                 ),
               )
             else

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/journey_prompt.dart';
@@ -101,14 +102,14 @@ class _HomeScreenState extends State<HomeScreen> {
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
         showSoftToast(context,
-            message: 'Đã ghi cảm xúc: $label',
+            message: '${context.t('Đã ghi cảm xúc:')} ${context.t(label)}',
             tone: SoftToastTone.success);
         await _loadAll();
         if (!mounted) return;
         await showJourneyPrompt(
           context,
-          title: 'Đã ghi nhận cảm xúc 🌸',
-          subtitle: subtitleForMood(mood),
+          title: context.t('Đã ghi nhận cảm xúc 🌸'),
+          subtitle: subtitleForMood(mood), // subtitleForMood uses localized strings already
           suggestions: suggestionsForMood(mood),
         );
       }
@@ -124,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = context.watch<AuthState>().user;
     final name = (user?['name'] as String?) ??
         (user?['email'] as String?)?.split('@').first ??
-        'bạn';
+        context.t('bạn');
 
     // Mood chủ đạo = mood được log nhiều nhất gần đây, fallback 'calm'.
     String dominant = 'calm';
@@ -169,16 +170,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
             else ...[
-              _sectionTitle('Hôm nay $name đang cảm thấy:'),
+              _sectionTitle('${context.t('Hôm nay')} $name ${context.t('đang cảm thấy:')}'),
               const SizedBox(height: 12),
               _moodGrid(),
               const SizedBox(height: 12),
               GestureDetector(
                 onTap: () => context.push('/mood'),
-                child: const Text(
-                  'Chi tiết hơn với ghi chú & cường độ ➜',
+                child: Text(
+                  context.t('Chi tiết hơn với ghi chú & cường độ ➜'),
                   textAlign: TextAlign.center,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: RelaxColors.violet,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
@@ -263,8 +264,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _header(BuildContext context, String name) {
-    final title = (_greeting?['title'] as String?) ?? 'Đã trở lại rồi nè ~';
-    final subtitle = (_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.';
+    final template = (_greeting?['titleTemplate'] as String?) ?? (_greeting?['title'] as String?) ?? 'Đã trở lại rồi nè ~';
+    final cleanTemplate = template.replaceAll('{{name}}', '{name}');
+    final title = context.t(cleanTemplate, {'name': name});
+    final subtitle = context.t((_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.');
     return Row(
       children: [
         Expanded(
@@ -345,8 +348,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _speechBubble(BuildContext context, String name) {
-    final line = (_quote?['content'] as String?) ??
-        'Stress quá mới tìm đến toi hở? $name nói cho toi nghe đi nè!';
+    final line = _quote?['content'] != null
+        ? context.t(_quote!['content'] as String)
+        : context.t(
+            'Stress quá mới tìm đến toi hở? {name} nói cho toi nghe đi nè!',
+            {'name': name},
+          );
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -381,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Chạm vào mèo để thăm linh thú ✦',
+            context.t('Chạm vào mèo để thăm linh thú ✦'),
             style: TextStyle(
               color: context.mutedText,
               fontSize: 11,
@@ -447,7 +454,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             strokeWidth: 2, color: RelaxColors.violet),
                       )
                     : Text(
-                        label,
+                        context.t(label),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 12,
@@ -477,7 +484,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               Expanded(
                 child: Text(
-                  'Theo dõi cảm xúc của $name',
+                  '${context.t('Theo dõi cảm xúc của')} $name',
                   style: TextStyle(
                     fontWeight: FontWeight.w800,
                     color: context.appText,
@@ -489,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 14),
           if (_moodOptions.isEmpty)
-            Text('Chưa có dữ liệu cảm xúc.',
+            Text(context.t('Chưa có dữ liệu cảm xúc.'),
                 style: TextStyle(color: context.mutedText, fontSize: 12))
           else
             ..._moodOptions.map((o) {
@@ -505,7 +512,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       width: 90,
                       child: Text(
-                        label,
+                        context.t(label),
                         style: TextStyle(fontSize: 12, color: context.appText),
                       ),
                     ),
@@ -563,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Phương thức phù hợp cho $name',
+            '${context.t('Phương thức phù hợp cho')} $name',
             style: TextStyle(
               fontWeight: FontWeight.w800,
               color: context.appText,
@@ -591,7 +598,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Icon(m.$2, color: RelaxColors.violet),
                         const SizedBox(height: 6),
                         Text(
-                          m.$1,
+                          context.t(m.$1),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 10,

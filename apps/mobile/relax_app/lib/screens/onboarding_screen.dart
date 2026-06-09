@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/secure_storage.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
@@ -77,7 +78,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: TextButton(
                   onPressed: _finish,
                   child: Text(
-                    'Bỏ qua',
+                    context.t('Bỏ qua'),
                     style: TextStyle(color: context.mutedText),
                   ),
                 ),
@@ -98,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         CatMascot(size: 180, emoji: s.emoji),
                         const SizedBox(height: 40),
                         Text(
-                          s.title,
+                          context.t(s.title),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 26,
@@ -109,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          s.body,
+                          context.t(s.body),
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: context.mutedText,
@@ -160,7 +161,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }
                   },
                   child: Text(
-                    _page == _slides.length - 1 ? 'Bắt đầu nào' : 'Tiếp tục',
+                    _page == _slides.length - 1 ? context.t('Bắt đầu nào') : context.t('Tiếp tục'),
                   ),
                 ),
               ),

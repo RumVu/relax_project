@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/mood_line_chart.dart';
 
@@ -116,7 +117,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 onPressed: () => context.pop(),
               ),
         title: Text(
-          'Phân tích cảm xúc',
+          context.t('Phân tích cảm xúc'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -132,18 +133,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   children: [
                     Row(
                       children: [
-                        _statTile(context, '$_total', 'Lượt ghi', Icons.edit_note),
+                        _statTile(context, '$_total', context.t('Lượt ghi'), Icons.edit_note),
                         const SizedBox(width: 12),
-                        _statTile(context, '$_activeDays', 'Ngày hoạt động',
+                        _statTile(context, '$_activeDays', context.t('Ngày hoạt động'),
                             Icons.calendar_today),
                       ],
                     ),
                     const SizedBox(height: 12),
                     _card(
                       context,
-                      title: 'Cảm xúc nổi bật',
+                      title: context.t('Cảm xúc nổi bật'),
                       child: Text(
-                        _topMood,
+                        context.t(_topMood),
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -154,7 +155,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     const SizedBox(height: 16),
                     _card(
                       context,
-                      title: 'Biểu đồ cảm xúc 7 ngày qua',
+                      title: context.t('Biểu đồ cảm xúc 7 ngày qua'),
                       child: _total == 0
                           ? _empty(context)
                           : MoodLineChart(values: _daily),
@@ -162,7 +163,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     const SizedBox(height: 16),
                     _card(
                       context,
-                      title: 'Phân bố cảm xúc',
+                      title: context.t('Phân bố cảm xúc'),
                       child: _dist.isEmpty
                           ? _empty(context)
                           : Column(
@@ -177,7 +178,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                                       SizedBox(
                                         width: 90,
                                         child: Text(
-                                          _moodLabels[e.key] ?? e.key,
+                                          context.t(_moodLabels[e.key] ?? e.key),
                                           style: TextStyle(
                                               fontSize: 12,
                                               color: context.appText),
@@ -230,9 +231,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                         onPressed: () => context.push('/mood'),
                         icon: const Icon(Icons.edit_note, color: Colors.white),
-                        label: const Text(
-                          'Ghi chép cảm xúc chi tiết ➜',
-                          style: TextStyle(
+                        label: Text(
+                          context.t('Ghi chép cảm xúc chi tiết ➜'),
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
                             fontSize: 14,
@@ -307,7 +308,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   Widget _empty(BuildContext context) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Text(
-          'Chưa có dữ liệu. Ghi cảm xúc vài lần nhé!',
+          context.t('Chưa có dữ liệu. Ghi cảm xúc vài lần nhé!'),
           style: TextStyle(color: context.mutedText, fontSize: 12),
         ),
       );

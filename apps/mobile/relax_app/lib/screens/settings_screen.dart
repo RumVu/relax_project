@@ -48,7 +48,7 @@ class SettingsScreen extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Tùy chỉnh không gian của $name ~',
+                    context.t('Tùy chỉnh không gian của {name} ~', {'name': name}),
                     style: TextStyle(color: context.mutedText, fontSize: 13),
                   ),
                 ),
@@ -206,7 +206,7 @@ class SettingsScreen extends StatelessWidget {
       applicationName: 'Relax',
       applicationVersion: '1.0.0',
       applicationLegalese:
-          'Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.',
+          context.t('Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.'),
     );
   }
 
@@ -214,25 +214,23 @@ class SettingsScreen extends StatelessWidget {
     final mode = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Xóa tài khoản?'),
-        content: const Text(
-          'Chọn cách xóa:\n\n'
-          '• Ẩn danh: giữ lại dữ liệu thống kê nhưng xóa thông tin cá nhân.\n'
-          '• Xóa vĩnh viễn: xóa toàn bộ — không thể khôi phục.',
+        title: Text(context.t('Xóa tài khoản?')),
+        content: Text(
+          context.t('Chọn cách xóa:\n\n• Ẩn danh: giữ lại dữ liệu thống kê nhưng xóa thông tin cá nhân.\n• Xóa vĩnh viễn: xóa toàn bộ — không thể khôi phục.'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy bỏ'),
+            child: Text(context.t('Hủy bỏ')),
           ),
           OutlinedButton(
             onPressed: () => Navigator.pop(ctx, 'SOFT'),
-            child: const Text('Ẩn danh'),
+            child: Text(context.t('Ẩn danh')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
             onPressed: () => Navigator.pop(ctx, 'HARD'),
-            child: const Text('Xóa vĩnh viễn'),
+            child: Text(context.t('Xóa vĩnh viễn')),
           ),
         ],
       ),
@@ -244,22 +242,22 @@ class SettingsScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(mode == 'HARD' ? 'Xóa vĩnh viễn?' : 'Ẩn danh tài khoản?'),
+        title: Text(mode == 'HARD' ? context.t('Xóa vĩnh viễn?') : context.t('Ẩn danh tài khoản?')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               mode == 'HARD'
-                  ? 'Nhập mật khẩu để xác nhận. Tất cả dữ liệu sẽ bị xóa!'
-                  : 'Nhập mật khẩu để xác nhận ẩn danh hóa tài khoản.',
+                  ? context.t('Nhập mật khẩu để xác nhận. Tất cả dữ liệu sẽ bị xóa!')
+                  : context.t('Nhập mật khẩu để xác nhận ẩn danh hóa tài khoản.'),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: passwordCtrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Mật khẩu',
-                hintText: 'Để trống nếu dùng Google Sign-In',
+              decoration: InputDecoration(
+                labelText: context.t('Mật khẩu'),
+                hintText: context.t('Để trống nếu dùng Google Sign-In'),
               ),
             ),
           ],
@@ -267,7 +265,7 @@ class SettingsScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Hủy'),
+            child: Text(context.t('Hủy')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -275,7 +273,7 @@ class SettingsScreen extends StatelessWidget {
                   mode == 'HARD' ? RelaxColors.coral : RelaxColors.violet,
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Xác nhận'),
+            child: Text(context.t('Xác nhận')),
           ),
         ],
       ),
@@ -296,8 +294,8 @@ class SettingsScreen extends StatelessWidget {
         if (context.mounted) {
           showSoftToast(context,
               message: mode == 'HARD'
-                  ? 'Tài khoản đã bị xóa vĩnh viễn.'
-                  : 'Tài khoản đã được ẩn danh hóa.',
+                  ? context.t('Tài khoản đã bị xóa vĩnh viễn.')
+                  : context.t('Tài khoản đã được ẩn danh hóa.'),
               tone: SoftToastTone.success);
           context.go('/login');
         }
@@ -408,13 +406,13 @@ class _NotificationCardState extends State<_NotificationCard> {
         if (res.statusCode == 200 || res.statusCode == 201) {
           if (mounted) {
             showSoftToast(context,
-                message: 'Đã cập nhật giờ nhắc nhở thành công!',
+                message: context.t('Đã cập nhật giờ nhắc nhở thành công!'),
                 tone: SoftToastTone.success);
           }
         } else {
           if (mounted) {
             showSoftToast(context,
-                message: 'Cập nhật giờ nhắc nhở thất bại.',
+                message: context.t('Cập nhật giờ nhắc nhở thất bại.'),
                 tone: SoftToastTone.error);
           }
         }
@@ -431,7 +429,7 @@ class _NotificationCardState extends State<_NotificationCard> {
         if (res.statusCode == 200 || res.statusCode == 201) {
           if (mounted) {
             showSoftToast(context,
-                message: 'Đã cài đặt giờ nhắc nhở thành công!',
+                message: context.t('Đã cài đặt giờ nhắc nhở thành công!'),
                 tone: SoftToastTone.success);
             if (res.data is Map) {
               _reminderId = res.data['id'] as String?;
@@ -440,7 +438,7 @@ class _NotificationCardState extends State<_NotificationCard> {
         } else {
           if (mounted) {
             showSoftToast(context,
-                message: 'Cài đặt giờ nhắc nhở thất bại.',
+                message: context.t('Cài đặt giờ nhắc nhở thất bại.'),
                 tone: SoftToastTone.error);
           }
         }
@@ -534,7 +532,7 @@ class _NotificationCardState extends State<_NotificationCard> {
             ),
             const SizedBox(height: 20),
             Text(
-              'Chọn âm báo nhắc nhở 🔔',
+              context.t('Chọn âm báo nhắc nhở 🔔'),
               style: TextStyle(
                 color: sheetCtx.appText,
                 fontWeight: FontWeight.w800,
@@ -554,7 +552,7 @@ class _NotificationCardState extends State<_NotificationCard> {
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(
-                      name,
+                      context.t(name),
                       style: TextStyle(
                         color: sheetCtx.appText,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
@@ -577,7 +575,7 @@ class _NotificationCardState extends State<_NotificationCard> {
                       } catch (_) {}
                       if (!mounted) return;
                       showSoftToast(context,
-                          message: 'Đã thay đổi âm báo: $name',
+                          message: context.t('Đã thay đổi âm báo: {sound}', {'sound': context.t(name)}),
                           tone: SoftToastTone.success);
 
                       if (!sheetCtx.mounted) return;
@@ -606,7 +604,7 @@ class _NotificationCardState extends State<_NotificationCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Chọn khung giờ muốn nhận thông báo nhé ~',
+            context.t('Chọn khung giờ muốn nhận thông báo nhé ~'),
             style: TextStyle(color: context.mutedText, fontSize: 12),
           ),
           const SizedBox(height: 12),
@@ -687,7 +685,7 @@ class _NotificationCardState extends State<_NotificationCard> {
                           ] else ...[
                             Icon(Icons.add, color: context.mutedText, size: 18),
                             Text(
-                              'Mở rộng',
+                              context.t('Mở rộng'),
                               style: TextStyle(
                                   fontSize: 11, color: context.mutedText),
                             ),
@@ -719,7 +717,7 @@ class _NotificationCardState extends State<_NotificationCard> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Âm báo: $_selectedSound',
+                      context.t('Âm báo: {sound}', {'sound': context.t(_selectedSound)}),
                       style: TextStyle(
                         color: context.appText,
                         fontWeight: FontWeight.w600,
@@ -1010,20 +1008,20 @@ class _ProfileHeroState extends State<_ProfileHero> {
             _birthday = picked.toUtc().toIso8601String();
           });
           showSoftToast(context,
-              message: 'Cập nhật ngày sinh thành công!',
+              message: context.t('Cập nhật ngày sinh thành công!'),
               tone: SoftToastTone.success);
         }
       } else {
         if (mounted) {
           showSoftToast(context,
-              message: 'Cập nhật ngày sinh thất bại.',
+              message: context.t('Cập nhật ngày sinh thất bại.'),
               tone: SoftToastTone.error);
         }
       }
     } catch (e) {
       if (mounted) {
         showSoftToast(context,
-            message: 'Lỗi: $e', tone: SoftToastTone.error);
+            message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
     } finally {
       if (mounted) {
@@ -1053,11 +1051,11 @@ class _ProfileHeroState extends State<_ProfileHero> {
         setState(() => _uploading = false);
         if (success) {
           showSoftToast(context,
-              message: 'Cập nhật ảnh đại diện thành công!',
+              message: context.t('Cập nhật ảnh đại diện thành công!'),
               tone: SoftToastTone.success);
         } else {
           showSoftToast(context,
-              message: 'Cập nhật ảnh đại diện thất bại.',
+              message: context.t('Cập nhật ảnh đại diện thất bại.'),
               tone: SoftToastTone.error);
         }
       }
@@ -1065,7 +1063,7 @@ class _ProfileHeroState extends State<_ProfileHero> {
       if (mounted) {
         setState(() => _uploading = false);
         showSoftToast(context,
-            message: 'Lỗi: $e', tone: SoftToastTone.error);
+            message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
     }
   }
@@ -1203,7 +1201,7 @@ class _ProfileHeroState extends State<_ProfileHero> {
                             Text(
                               _birthday != null
                                   ? _formatBirthday(_birthday!)
-                                  : 'Thiết lập ngày sinh 🎂',
+                                  : context.t('Thiết lập ngày sinh 🎂'),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.85),
                                 fontSize: 12,
@@ -1288,21 +1286,21 @@ class _ProfileHeroState extends State<_ProfileHero> {
     final newName = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Đổi tên hiển thị'),
+        title: Text(context.t('Đổi tên hiển thị')),
         content: TextField(
           controller: ctrl,
           autofocus: true,
           maxLength: 50,
-          decoration: const InputDecoration(hintText: 'Tên hiển thị'),
+          decoration: InputDecoration(hintText: context.t('Tên hiển thị')),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Hủy'),
+            child: Text(context.t('Hủy')),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
-            child: const Text('Lưu'),
+            child: Text(context.t('Lưu')),
           ),
         ],
       ),
@@ -1312,7 +1310,7 @@ class _ProfileHeroState extends State<_ProfileHero> {
     final ok = await context.read<AuthState>().updateDisplayName(newName);
     if (!context.mounted) return;
     showSoftToast(context,
-        message: ok ? 'Đã đổi tên hiển thị' : 'Không đổi được tên',
+        message: ok ? context.t('Đã đổi tên hiển thị') : context.t('Không đổi được tên'),
         tone: ok ? SoftToastTone.success : SoftToastTone.error);
   }
 }
@@ -1518,18 +1516,18 @@ class _LogoutButton extends StatelessWidget {
           final confirm = await showDialog<bool>(
             context: context,
             builder: (ctx) => AlertDialog(
-              title: const Text('Đăng xuất?'),
-              content: const Text(
-                'Bạn sẽ phải đăng nhập lại để dùng app.',
+              title: Text(context.t('Đăng xuất?')),
+              content: Text(
+                context.t('Bạn sẽ phải đăng nhập lại để dùng app.'),
               ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('Hủy'),
+                  child: Text(context.t('Hủy')),
                 ),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(ctx, true),
-                  child: const Text('Đăng xuất'),
+                  child: Text(context.t('Đăng xuất')),
                 ),
               ],
             ),
@@ -1540,8 +1538,8 @@ class _LogoutButton extends StatelessWidget {
           }
         },
         icon: const Icon(Icons.logout),
-        label: const Text('Đăng xuất',
-            style: TextStyle(fontWeight: FontWeight.w700)),
+        label: Text(context.t('Đăng xuất'),
+            style: const TextStyle(fontWeight: FontWeight.w700)),
       ),
     );
   }
@@ -1568,7 +1566,7 @@ class _AccentPickerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Màu nhấn',
+            context.t('Màu nhấn'),
             style: TextStyle(
               color: context.appText,
               fontWeight: FontWeight.w800,
@@ -1576,7 +1574,7 @@ class _AccentPickerCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Chọn tông gần với cảm xúc bạn đang muốn nuôi dưỡng',
+            context.t('Chọn tông gần với cảm xúc bạn đang muốn nuôi dưỡng'),
             style: TextStyle(color: context.mutedText, fontSize: 12),
           ),
           const SizedBox(height: 12),

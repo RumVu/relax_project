@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
@@ -98,7 +99,7 @@ class _BreathingScreenState extends State<BreathingScreen>
       if (!mounted) return;
       final auth = context.read<AuthState>();
       if (auth.activeSessionId == null) {
-        auth.startRelaxSession('BREATHING', 'Hít thở không khí');
+        auth.startRelaxSession('BREATHING', context.t('Hít thở không khí'));
       }
     });
   }
@@ -182,17 +183,17 @@ class _BreathingScreenState extends State<BreathingScreen>
             if (!mounted) return;
             final auth = context.read<AuthState>();
             final activeId = auth.activeSessionId;
-            showCheckInSheet(context, 'Hít thở không khí', sessionId: activeId).then((_) {
+            showCheckInSheet(context, context.t('Hít thở không khí'), sessionId: activeId).then((_) {
               if (!mounted) return;
               showJourneyPrompt(
                 context,
-                title: 'Đã hít thở xong 🌬️',
+                title: context.t('Đã hít thở xong 🌬️'),
                 subtitle:
-                    'Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?',
+                    context.t('Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?'),
                 suggestions: [
                   JourneySuggestion(
                     icon: Icons.refresh,
-                    label: 'Tập thêm 1 vòng nữa',
+                    label: context.t('Tập thêm 1 vòng nữa'),
                     onTap: () {
                       if (!mounted) return;
                       // Reset state + bắt đầu lại session ngay tức thì.
@@ -204,24 +205,24 @@ class _BreathingScreenState extends State<BreathingScreen>
                       });
                       final authNew = context.read<AuthState>();
                       if (authNew.activeSessionId == null) {
-                        authNew.startRelaxSession('BREATHING', 'Hít thở không khí');
+                        authNew.startRelaxSession('BREATHING', context.t('Hít thở không khí'));
                       }
                       _start();
                     },
                   ),
-                  const JourneySuggestion(
+                  JourneySuggestion(
                     icon: Icons.mood,
-                    label: 'Ghi lại cảm xúc bây giờ',
+                    label: context.t('Ghi lại cảm xúc bây giờ'),
                     route: '/mood',
                   ),
-                  const JourneySuggestion(
+                  JourneySuggestion(
                     icon: Icons.edit_note,
-                    label: 'Viết vào nhật ký',
+                    label: context.t('Viết vào nhật ký'),
                     route: '/journal',
                   ),
-                  const JourneySuggestion(
+                  JourneySuggestion(
                     icon: Icons.headphones,
-                    label: 'Nghe nhạc êm',
+                    label: context.t('Nghe nhạc êm'),
                     route: '/sounds',
                   ),
                 ],
@@ -286,19 +287,19 @@ class _BreathingScreenState extends State<BreathingScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Hít thở cùng nhau',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                context.t('Hít thở cùng nhau'),
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 4),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Chọn nhịp thở rồi để vòng tròn dẫn bạn.',
-                style: TextStyle(color: RelaxColors.slate),
+                context.t('Chọn nhịp thở rồi để vòng tròn dẫn bạn.'),
+                style: const TextStyle(color: RelaxColors.slate),
               ),
             ),
             const SizedBox(height: 16),
@@ -324,7 +325,7 @@ class _BreathingScreenState extends State<BreathingScreen>
                       ),
                     ),
                     child: Text(
-                      _patterns[i].label,
+                      context.t(_patterns[i].label),
                       style: TextStyle(
                         color: sel ? Colors.white : context.appText,
                         fontWeight: FontWeight.w700,
@@ -374,7 +375,7 @@ class _BreathingScreenState extends State<BreathingScreen>
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  _phaseLabel.toUpperCase(),
+                                  context.t(_phaseLabel).toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.white.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w800,
@@ -407,7 +408,7 @@ class _BreathingScreenState extends State<BreathingScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'Chu kỳ $_cyclesDone / ${_pattern.cycles}',
+              context.t('Chu kỳ {done} / {total}', {'done': '$_cyclesDone', 'total': '${_pattern.cycles}'}),
               style: const TextStyle(
                 color: RelaxColors.slate,
                 fontWeight: FontWeight.w700,
@@ -415,7 +416,7 @@ class _BreathingScreenState extends State<BreathingScreen>
             ),
             const SizedBox(height: 6),
             Text(
-              'Nhịp ${_pattern.inhale}-${_pattern.hold}-${_pattern.exhale}-${_pattern.holdAfter} × ${_pattern.cycles} chu kỳ',
+              '${context.t('Nhịp')} ${_pattern.inhale}-${_pattern.hold}-${_pattern.exhale}-${_pattern.holdAfter} × ${_pattern.cycles} ${context.t('chu kỳ')}',
               style: const TextStyle(color: RelaxColors.slate, fontSize: 12),
             ),
             const SizedBox(height: 24),
@@ -427,7 +428,7 @@ class _BreathingScreenState extends State<BreathingScreen>
                     onPressed: _start,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(
-                      _phase == _Phase.finished ? 'Tập lại' : 'Bắt đầu',
+                      _phase == _Phase.finished ? context.t('Tập lại') : context.t('Bắt đầu'),
                     ),
                   )
                 else if (_running)
@@ -438,19 +439,19 @@ class _BreathingScreenState extends State<BreathingScreen>
                     ),
                     onPressed: _pause,
                     icon: const Icon(Icons.pause),
-                    label: const Text('Tạm dừng'),
+                    label: Text(context.t('Tạm dừng')),
                   )
                 else
                   ElevatedButton.icon(
                     onPressed: _resume,
                     icon: const Icon(Icons.play_arrow),
-                    label: const Text('Tiếp tục'),
+                    label: Text(context.t('Tiếp tục')),
                   ),
                 const SizedBox(width: 12),
                 OutlinedButton.icon(
                   onPressed: _reset,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Đặt lại'),
+                  label: Text(context.t('Đặt lại')),
                 ),
               ],
             ),

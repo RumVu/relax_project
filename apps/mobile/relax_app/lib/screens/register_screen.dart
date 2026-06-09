@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 import '../widgets/soft_toast.dart';
 
@@ -35,7 +36,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     showSoftToast(context,
-        message: 'Đang tiến hành tạo tài khoản...',
+        message: context.t('Đang tiến hành tạo tài khoản...'),
         tone: SoftToastTone.info);
     setState(() => _busy = true);
     final auth = context.read<AuthState>();
@@ -48,17 +49,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _busy = false);
     if (ok) {
       final token = await RelaxApi.instance.accessToken;
-      debugPrint('=== [ĐĂNG KÝ THÀNH CÔNG] ===');
+      debugPrint('=== [ĐĂNG KÝ THÀNH CÔNG] ===');
       debugPrint('Backend Access Token: $token');
       if (mounted) {
         showSoftToast(context,
-            message: 'Đăng ký thành công! Đang vào ứng dụng...',
+            message: context.t('Đăng ký thành công! Đang vào ứng dụng...'),
             tone: SoftToastTone.success);
         context.go('/home');
       }
     } else {
       showSoftToast(context,
-          message: auth.error ?? 'Đăng ký thất bại',
+          message: context.t(auth.error ?? 'Đăng ký thất bại'),
           tone: SoftToastTone.error);
     }
   }
@@ -85,26 +86,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Tạo tài khoản mới',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                    Text(
+                      context.t('Tạo tài khoản mới'),
+                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Vài giây thôi, không cần thẻ ngân hàng.',
-                      style: TextStyle(color: RelaxColors.slate, fontSize: 14),
+                    Text(
+                      context.t('Vài giây thôi, không cần thẻ ngân hàng.'),
+                      style: const TextStyle(color: RelaxColors.slate, fontSize: 14),
                     ),
                     const SizedBox(height: 28),
                     TextFormField(
                       controller: _nameCtrl,
                       autofillHints: const [AutofillHints.name],
-                      decoration: const InputDecoration(
-                        labelText: 'Tên hiển thị',
-                        prefixIcon: Icon(Icons.badge_outlined),
+                      decoration: InputDecoration(
+                        labelText: context.t('Tên hiển thị'),
+                        prefixIcon: const Icon(Icons.badge_outlined),
                       ),
                       validator: (value) {
                         if ((value ?? '').trim().isEmpty) {
-                          return 'Hãy nhập tên hiển thị';
+                          return context.t('Hãy nhập tên hiển thị');
                         }
                         return null;
                       },
@@ -114,14 +115,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       controller: _emailCtrl,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.alternate_email),
+                      decoration: InputDecoration(
+                        labelText: context.t('Email'),
+                        prefixIcon: const Icon(Icons.alternate_email),
                       ),
                       validator: (value) {
                         final v = value?.trim() ?? '';
-                        if (v.isEmpty) return 'Hãy nhập email';
-                        if (!v.contains('@')) return 'Email chưa đúng định dạng';
+                        if (v.isEmpty) return context.t('Hãy nhập email');
+                        if (!v.contains('@')) return context.t('Email chưa đúng định dạng');
                         return null;
                       },
                     ),
@@ -131,7 +132,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       obscureText: _hidePassword,
                       autofillHints: const [AutofillHints.newPassword],
                       decoration: InputDecoration(
-                        labelText: 'Mật khẩu',
+                        labelText: context.t('Mật khẩu'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -145,12 +146,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                       validator: (value) {
                         final v = value ?? '';
-                        if (v.length < 8) return 'Mật khẩu cần ít nhất 8 ký tự';
+                        if (v.length < 8) return context.t('Mật khẩu cần ít nhất 8 ký tự');
                         if (!RegExp(r'[A-Z]').hasMatch(v)) {
-                          return 'Cần ít nhất 1 chữ HOA';
+                          return context.t('Cần ít nhất 1 chữ HOA');
                         }
                         if (!RegExp(r'[0-9]').hasMatch(v)) {
-                          return 'Cần ít nhất 1 chữ số';
+                          return context.t('Cần ít nhất 1 chữ số');
                         }
                         return null;
                       },
@@ -159,13 +160,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     TextFormField(
                       controller: _confirmCtrl,
                       obscureText: _hidePassword,
-                      decoration: const InputDecoration(
-                        labelText: 'Nhập lại mật khẩu',
-                        prefixIcon: Icon(Icons.lock_outline),
+                      decoration: InputDecoration(
+                        labelText: context.t('Nhập lại mật khẩu'),
+                        prefixIcon: const Icon(Icons.lock_outline),
                       ),
                       validator: (value) {
                         if (value != _passwordCtrl.text) {
-                          return 'Hai mật khẩu chưa trùng nhau';
+                          return context.t('Hai mật khẩu chưa trùng nhau');
                         }
                         return null;
                       },
@@ -184,22 +185,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Tạo tài khoản'),
+                            : Text(context.t('Tạo tài khoản')),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
-                          'Đã có tài khoản? ',
-                          style: TextStyle(color: RelaxColors.slate),
+                        Text(
+                          context.t('Đã có tài khoản? '),
+                          style: const TextStyle(color: RelaxColors.slate),
                         ),
                         GestureDetector(
                           onTap: () => context.go('/login'),
-                          child: const Text(
-                            'Đăng nhập',
-                            style: TextStyle(
+                          child: Text(
+                            context.t('Đăng nhập'),
+                            style: const TextStyle(
                               color: RelaxColors.violet,
                               fontWeight: FontWeight.w700,
                             ),
