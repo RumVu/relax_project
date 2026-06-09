@@ -1,8 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Endpoint backend production. Đổi sang LAN URL khi chạy emulator local.
-const String kApiBase = 'https://relax-backend.tail3e0c74.ts.net/v1';
+import 'env.dart';
+import 'secure_storage.dart';
+
+/// API base URL — lấy từ [Env.apiBase] (hỗ trợ `--dart-define=API_BASE=...`).
+/// Mặc định: production Tailscale Funnel URL.
+final String kApiBase = Env.apiBase;
 
 /// Singleton Dio instance — gắn sẵn:
 ///   - baseUrl + 15s timeout.
@@ -22,7 +26,7 @@ class RelaxApi {
 
   static final RelaxApi instance = RelaxApi._();
   late final Dio _dio;
-  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final FlutterSecureStorage _storage = secureStorage;
 
   static const _accessKey = 'relax_access_token';
   static const _refreshKey = 'relax_refresh_token';
@@ -56,7 +60,8 @@ class RelaxApi {
     return _dio.patch(path, data: body);
   }
 
-  Future<Response<dynamic>> delete(String path) => _dio.delete(path);
+  Future<Response<dynamic>> delete(String path, {dynamic body}) =>
+      _dio.delete(path, data: body);
 
   Interceptor _authInterceptor() {
     return InterceptorsWrapper(

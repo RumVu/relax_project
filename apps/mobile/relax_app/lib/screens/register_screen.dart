@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/soft_toast.dart';
@@ -33,6 +34,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    showSoftToast(context,
+        message: 'Đang tiến hành tạo tài khoản...',
+        tone: SoftToastTone.info);
     setState(() => _busy = true);
     final auth = context.read<AuthState>();
     final ok = await auth.register(
@@ -43,7 +47,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
     setState(() => _busy = false);
     if (ok) {
-      context.go('/home');
+      final token = await RelaxApi.instance.accessToken;
+      debugPrint('=== [ĐĂNG KÝ THÀNH CÔNG] ===');
+      debugPrint('Backend Access Token: $token');
+      if (mounted) {
+        showSoftToast(context,
+            message: 'Đăng ký thành công! Đang vào ứng dụng...',
+            tone: SoftToastTone.success);
+        context.go('/home');
+      }
     } else {
       showSoftToast(context,
           message: auth.error ?? 'Đăng ký thất bại',

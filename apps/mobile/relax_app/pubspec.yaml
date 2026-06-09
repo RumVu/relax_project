@@ -42,6 +42,8 @@ dependencies:
   provider: ^6.1.2
   # Phát nhạc nền / podcast streaming từ URL.
   just_audio: ^0.9.42
+  image_picker: ^1.2.2
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

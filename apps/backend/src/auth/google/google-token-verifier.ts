@@ -38,13 +38,14 @@ export async function verifyGoogleIdToken(
   clientId: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
-    const client = new OAuth2Client(clientId);
-    const ticket = await client.verifyIdToken({ idToken, audience: clientId });
+    const clientIds = clientId.split(',').map(id => id.trim());
+    const client = new OAuth2Client(clientIds[0]);
+    const ticket = await client.verifyIdToken({ idToken, audience: clientIds });
     return ticket.getPayload() ?? {};
-  } catch {
+  } catch (error) {
     throw new UnauthorizedException({
       code: ErrorCode.AUTH_INVALID_CREDENTIALS,
-      message: 'Google ID token is invalid or expired.',
+      message: `Google ID token is invalid or expired. Details: ${error instanceof Error ? error.message : String(error)}`,
     });
   }
 }
@@ -58,6 +59,7 @@ export async function verifyGoogleAccessToken(
   clientId: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
+    const clientIds = clientId.split(',').map(id => id.trim());
     const tokenInfoResponse = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(
         accessToken,
@@ -69,7 +71,7 @@ export async function verifyGoogleAccessToken(
 
     const tokenInfo =
       (await tokenInfoResponse.json()) as GoogleTokenInfoResponse;
-    if (tokenInfo.aud !== clientId) {
+    if (!clientIds.includes(tokenInfo.aud ?? '')) {
       throw new Error('Google token audience mismatch');
     }
 
@@ -93,10 +95,10 @@ export async function verifyGoogleAccessToken(
       picture: userInfo.picture,
       sub: userInfo.sub,
     };
-  } catch {
+  } catch (error) {
     throw new UnauthorizedException({
       code: ErrorCode.AUTH_INVALID_CREDENTIALS,
-      message: 'Google access token is invalid or expired.',
+      message: `Google access token is invalid or expired. Details: ${error instanceof Error ? error.message : String(error)}`,
     });
   }
 }
@@ -108,13 +110,14 @@ export async function exchangeGoogleAuthorizationCode(
   redirectUri: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
-    const client = new OAuth2Client(clientId, clientSecret, redirectUri);
+    const clientIds = clientId.split(',').map(id => id.trim());
+    const client = new OAuth2Client(clientIds[0], clientSecret, redirectUri);
     const { tokens } = await client.getToken(authorizationCode);
     return resolveGoogleTokens(tokens, clientId);
-  } catch {
+  } catch (error) {
     throw new UnauthorizedException({
       code: ErrorCode.AUTH_INVALID_CREDENTIALS,
-      message: 'Google authorization code is invalid or expired.',
+      message: `Google authorization code is invalid or expired. Details: ${error instanceof Error ? error.message : String(error)}`,
     });
   }
 }

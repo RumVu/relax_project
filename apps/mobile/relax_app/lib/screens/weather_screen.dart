@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../core/api_client.dart';
 import '../core/theme.dart';
+import '../widgets/weather_chart.dart';
 
 /// Màn thời tiết: gọi /weather/me/current + /weather/me/forecast. Tách hai
 /// call để nếu forecast lỗi thì current vẫn hiện (rút kinh nghiệm từ bug
@@ -166,6 +167,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 24),
+                    WeatherForecastChart(forecast: _forecast),
                     const SizedBox(height: 24),
                     const Text(
                       'Dự báo 7 ngày',

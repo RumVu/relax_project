@@ -98,4 +98,14 @@ export class BillingController {
   getMyPayments(@CurrentUser() user: AuthUser) {
     return this.billingService.getMyPayments(user.id);
   }
+
+  @ApiOperation({ summary: 'Get a single payment status' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/payments/:id')
+  getPayment(
+    @CurrentUser() user: AuthUser,
+    @Param('id') id: string,
+  ) {
+    return this.billingService.getPayment(user.id, id);
+  }
 }

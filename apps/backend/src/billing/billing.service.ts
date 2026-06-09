@@ -240,6 +240,14 @@ export class BillingService {
         Boolean(secretKey) &&
         Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
 
+      const bankId = this.configService.get<string>('ADMIN_BANK_ID') || 'MB';
+      const accountNo = this.configService.get<string>('ADMIN_BANK_ACCOUNT') || '0969966969';
+      const accountName = this.configService.get<string>('ADMIN_BANK_HOLDER') || 'NGUYEN VAN A';
+      const bankName = this.configService.get<string>('ADMIN_BANK_NAME') || 'MB Bank';
+      const transferContent = `RELAX${payment.id}`;
+      const amount = planAmount;
+      const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${amount}&addInfo=${transferContent}&accountName=${encodeURIComponent(accountName)}`;
+
       if (!sepayConfigured) {
         // Trước đây throw 500 → dashboard fail tất cả checkout. Fix: fallback
         // sang MANUAL silently — backend trả response shape không có
@@ -263,6 +271,16 @@ export class BillingService {
             status: 'SEPAY_NOT_CONFIGURED_FALLBACK_MANUAL',
             note: 'SePay chưa cấu hình production env. Backend fallback MANUAL — dashboard sẽ auto-activate qua /confirm endpoint.',
             simulated: true,
+            amount,
+            qrCodeUrl: qrUrl,
+            qrUrl,
+            transferContent,
+            bankId,
+            bankName,
+            accountNo,
+            bankAccount: accountNo,
+            accountName,
+            paymentId: payment.id,
           },
         };
       }
@@ -274,7 +292,6 @@ export class BillingService {
       });
 
       const checkoutURL = client.checkout.initCheckoutUrl();
-      const amount = planAmount;
 
       const successUrl =
         dto.successUrl || 'http://localhost:3233/billing?status=success';
@@ -313,6 +330,15 @@ export class BillingService {
           checkoutUrl: checkoutURL,
           checkoutFormfields,
           amount,
+          qrCodeUrl: qrUrl,
+          qrUrl,
+          transferContent,
+          bankId,
+          bankName,
+          accountNo,
+          bankAccount: accountNo,
+          accountName,
+          paymentId: payment.id,
         },
       };
     }
@@ -352,6 +378,7 @@ export class BillingService {
     userId: string,
     paymentId: string,
     dto: ConfirmPaymentDto,
+    isAdminOrWebhook = false,
   ) {
     await this.usersService.findOne(userId);
 
@@ -363,6 +390,19 @@ export class BillingService {
         ErrorCode.PAYMENT_NOT_FOUND,
         'Payment not found',
         HttpStatus.NOT_FOUND,
+      );
+    }
+
+    const sepayConfigured =
+      Boolean(this.configService.get<string>('SEPAY_MERCHANT_ID')) &&
+      Boolean(this.configService.get<string>('SEPAY_SECRET_KEY')) &&
+      Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
+
+    if (payment.provider === 'SEPAY' && sepayConfigured && !isAdminOrWebhook) {
+      throw new AppException(
+        ErrorCode.AUTH_FORBIDDEN,
+        'Thanh toán qua SePay không thể xác nhận thủ công. Vui lòng chuyển khoản để hệ thống tự động kích hoạt.',
+        HttpStatus.FORBIDDEN,
       );
     }
     if (payment.status !== PaymentStatus.PENDING) {
@@ -594,6 +634,21 @@ export class BillingService {
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  async getPayment(userId: string, id: string) {
+    await this.usersService.findOne(userId);
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+    });
+    if (!payment || payment.userId !== userId) {
+      throw new AppException(
+        ErrorCode.PAYMENT_NOT_FOUND,
+        'Payment not found',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return payment;
   }
 
   private toPaymentAmount(value: number) {

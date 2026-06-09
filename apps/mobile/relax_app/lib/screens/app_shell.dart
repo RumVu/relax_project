@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/audio_controller.dart';
+import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
 import 'analytics_screen.dart';
 import 'home_screen.dart';
@@ -51,6 +53,16 @@ class _AppShellState extends State<AppShell> {
   }
 
   @override
+  void didUpdateWidget(AppShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialTab != oldWidget.initialTab) {
+      setState(() {
+        _index = widget.initialTab.clamp(0, _tabCount - 1);
+      });
+    }
+  }
+
+  @override
   void dispose() {
     _audioCompletionSub?.cancel();
     super.dispose();
@@ -59,6 +71,24 @@ class _AppShellState extends State<AppShell> {
   void _onAudioFinished(Map<String, dynamic> track) {
     if (!mounted) return;
     final title = (track['title'] as String?) ?? 'Phiên nghe';
+    final auth = context.read<AuthState>();
+    final activeId = auth.activeSessionId;
+    final activeType = auth.activeActivityType;
+
+    if (activeId != null &&
+        (activeType == 'MUSIC' ||
+            activeType == 'PODCAST' ||
+            activeType == 'MEDITATION')) {
+      showCheckInSheet(context, title, sessionId: activeId).then((_) {
+        if (!mounted) return;
+        _showAudioJourneyPrompt(title);
+      });
+    } else {
+      _showAudioJourneyPrompt(title);
+    }
+  }
+
+  void _showAudioJourneyPrompt(String title) {
     showJourneyPrompt(
       context,
       title: 'Phiên "$title" đã xong 🎧',
@@ -78,7 +108,7 @@ class _AppShellState extends State<AppShell> {
         JourneySuggestion(
           icon: Icons.mood,
           label: 'Cập nhật cảm xúc',
-          route: '/home?tab=2',
+          route: '/mood',
         ),
       ],
     );

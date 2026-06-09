@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
+import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
 import '../widgets/soft_toast.dart';
 
@@ -26,6 +29,13 @@ class _JournalScreenState extends State<JournalScreen> {
   void initState() {
     super.initState();
     _load();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = context.read<AuthState>();
+      if (auth.activeSessionId == null) {
+        auth.startRelaxSession('JOURNAL', 'Viết nhật ký');
+      }
+    });
   }
 
   @override
@@ -87,31 +97,34 @@ class _JournalScreenState extends State<JournalScreen> {
         );
         await _load();
         if (!mounted) return;
-        // Dẫn dắt: vừa trút lòng xong → mời khoá lại bằng hơi thở /
-        // âm thanh, hoặc xem nhịp cảm xúc tuần này.
-        await showJourneyPrompt(
-          context,
-          title: 'Đã trút bỏ rồi 🌿',
-          subtitle:
-              'Giờ là lúc khép lại nhẹ nhàng. Mình đi tiếp một bước êm nhé?',
-          suggestions: const [
-            JourneySuggestion(
-              icon: Icons.air,
-              label: 'Hít thở 3 phút để khoá lại',
-              route: '/breathing',
-            ),
-            JourneySuggestion(
-              icon: Icons.headphones,
-              label: 'Nghe nhạc êm',
-              route: '/sounds',
-            ),
-            JourneySuggestion(
-              icon: Icons.insights,
-              label: 'Xem nhịp tuần này',
-              route: '/home?tab=2',
-            ),
-          ],
-        );
+        final auth = context.read<AuthState>();
+        final activeId = auth.activeSessionId;
+        showCheckInSheet(context, 'Viết nhật ký', sessionId: activeId).then((_) {
+          if (!mounted) return;
+          showJourneyPrompt(
+            context,
+            title: 'Đã trút bỏ rồi 🌿',
+            subtitle:
+                'Giờ là lúc khép lại nhẹ nhàng. Mình đi tiếp một bước êm nhé?',
+            suggestions: const [
+              JourneySuggestion(
+                icon: Icons.air,
+                label: 'Hít thở 3 phút để khoá lại',
+                route: '/breathing',
+              ),
+              JourneySuggestion(
+                icon: Icons.headphones,
+                label: 'Nghe nhạc êm',
+                route: '/sounds',
+              ),
+              JourneySuggestion(
+                icon: Icons.insights,
+                label: 'Xem nhịp tuần này',
+                route: '/home?tab=2',
+              ),
+            ],
+          );
+        });
       } else {
         final msg = (res.data?['message'] as String?) ?? 'Không lưu được nhật ký';
         showSoftToast(context, message: msg, tone: SoftToastTone.error);

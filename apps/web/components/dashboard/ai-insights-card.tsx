@@ -97,7 +97,10 @@ export function AiInsightsCard() {
   }, [pushToast, t]);
 
   useEffect(() => {
-    void load(false);
+    const timer = setTimeout(() => {
+      void load(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [load]);
 
   const setFeedback = useCallback(

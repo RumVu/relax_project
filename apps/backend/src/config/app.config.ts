@@ -13,9 +13,16 @@ export default registerAs('app', () => ({
     process.env.AUTH_REFRESH_COOKIE_NAME ?? 'relax_refresh_token',
   authRefreshCookieSecure: process.env.AUTH_REFRESH_COOKIE_SECURE,
   authRefreshCookieSameSite: process.env.AUTH_REFRESH_COOKIE_SAME_SITE,
-  // Google OAuth web client. Client secret is backend-only and is used
-  // for the authorization-code callback flow.
-  googleClientId: process.env.GOOGLE_CLIENT_ID ?? '',
+  // Google OAuth client IDs. We can accept separate variables per environment
+  // and join them into a comma-separated string for the auth service to verify.
+  googleClientId: [
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_ID_ANDROID,
+    process.env.GOOGLE_CLIENT_ID_IOS,
+    process.env.GOOGLE_CLIENT_ID_WEB,
+  ]
+    .filter(Boolean)
+    .join(','),
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
   googleRedirectUri: process.env.GOOGLE_REDIRECT_URI ?? '',
 }));

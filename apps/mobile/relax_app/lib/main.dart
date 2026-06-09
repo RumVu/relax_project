@@ -8,12 +8,14 @@ import 'core/page_transitions.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
 import 'screens/analytics_screen.dart';
+import 'screens/billing_screen.dart';
 import 'screens/app_shell.dart';
 import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/legal_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/mood_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/relax_screen.dart';
@@ -25,38 +27,47 @@ void main() {
   runApp(const RelaxApp());
 }
 
-class RelaxApp extends StatelessWidget {
+class RelaxApp extends StatefulWidget {
   const RelaxApp({super.key});
+
+  @override
+  State<RelaxApp> createState() => _RelaxAppState();
+}
+
+class _RelaxAppState extends State<RelaxApp> {
+  late final AuthState _auth;
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _auth = AuthState();
+    // Đăng ký cleanup hooks cho logout — reset các per-session
+    // flag để user kế tiếp không kế thừa state user cũ.
+    _auth.onLogoutCleanup = RelaxScreen.resetIntroForLogout;
+    _router = _buildRouter(_auth);
+  }
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) {
-            final state = AuthState();
-            // Đăng ký cleanup hooks cho logout — reset các per-session
-            // flag để user kế tiếp không kế thừa state user cũ.
-            state.onLogoutCleanup = RelaxScreen.resetIntroForLogout;
-            return state;
-          },
-        ),
+        ChangeNotifierProvider.value(value: _auth),
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider(create: (_) => AudioController()),
       ],
-      child: Builder(builder: (context) {
-        final auth = context.watch<AuthState>();
-        final themeMode = context.watch<ThemeController>().mode;
-        final router = _buildRouter(auth);
-        return MaterialApp.router(
-          title: 'Relax',
-          debugShowCheckedModeBanner: false,
-          theme: buildRelaxTheme(),
-          darkTheme: buildRelaxDarkTheme(),
-          themeMode: themeMode,
-          routerConfig: router,
-        );
-      }),
+      child: Consumer<ThemeController>(
+        builder: (context, theme, child) {
+          return MaterialApp.router(
+            title: 'Relax',
+            debugShowCheckedModeBanner: false,
+            theme: buildRelaxTheme(),
+            darkTheme: buildRelaxDarkTheme(),
+            themeMode: theme.mode,
+            routerConfig: _router,
+          );
+        },
+      ),
     );
   }
 }
@@ -73,14 +84,15 @@ GoRouter _buildRouter(AuthState auth) {
       final path = state.matchedLocation;
       final atAuthScreen = path == '/login' || path == '/register';
       final atOnboarding = path == '/onboarding';
-      // Chưa đăng nhập + chưa xem onboarding → vào onboarding trước.
-      if (!loggedIn && !auth.onboardingSeen && !atOnboarding) {
-        return '/onboarding';
+
+      if (!loggedIn) {
+        if (!atAuthScreen && !atOnboarding) {
+          return auth.onboardingSeen ? '/login' : '/onboarding';
+        }
+        return null;
       }
-      if (!loggedIn && !atAuthScreen && !atOnboarding && path != '/') {
-        return '/login';
-      }
-      if (loggedIn && (atAuthScreen || atOnboarding || path == '/')) {
+
+      if (atAuthScreen || atOnboarding || path == '/') {
         return '/home';
       }
       return null;
@@ -135,6 +147,16 @@ GoRouter _buildRouter(AuthState auth) {
             softPage(key: state.pageKey, child: const CompanionScreen()),
       ),
       GoRoute(
+        path: '/mood',
+        pageBuilder: (context, state) => softPage(
+          key: state.pageKey,
+          child: const _PushedScreen(
+            title: 'Chi tiết cảm xúc',
+            child: MoodScreen(),
+          ),
+        ),
+      ),
+      GoRoute(
         path: '/breathing',
         pageBuilder: (context, state) => softPage(
           key: state.pageKey,
@@ -177,6 +199,11 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/analytics',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const AnalyticsScreen()),
+      ),
+      GoRoute(
+        path: '/billing',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const BillingScreen()),
       ),
       GoRoute(
         path: '/legal',

@@ -2,9 +2,9 @@ import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
+import 'secure_storage.dart';
 
 /// Đăng ký thiết bị di động với backend qua `/notifications/me/devices`
 /// để dashboard Settings → Push devices hiện đúng máy mà user đang dùng.
@@ -12,7 +12,7 @@ import 'api_client.dart';
 /// Token được sinh 1 lần và lưu trong SecureStorage — tái sử dụng giữa
 /// các lần login để backend nhận diện đúng (upsert by unique token).
 class DeviceRegistration {
-  static const _storage = FlutterSecureStorage();
+  static const _storage = secureStorage;
   static const _kDeviceToken = 'relax_device_token';
   static const _kDeviceId = 'relax_device_id';
 

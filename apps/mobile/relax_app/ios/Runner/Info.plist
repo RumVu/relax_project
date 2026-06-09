@@ -66,5 +66,24 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập thư viện ảnh để bạn chọn ảnh đại diện.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Ứng dụng cần quyền sử dụng máy ảnh để bạn chụp ảnh đại diện mới.</string>
+	<key>GIDClientID</key>
+	<string>884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.884741112800-vkq8svs2c4012n457uta7uva4n4mteii</string>
+				<string>com.googleusercontent.apps.884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5</string>
+				<string>com.googleusercontent.apps.884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

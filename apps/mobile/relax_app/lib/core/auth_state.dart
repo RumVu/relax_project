@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api_client.dart';
 import 'device_registration.dart';
+import 'secure_storage.dart';
 
 /// State giữ thông tin user đăng nhập + giúp các màn hình
 /// gọi login/register/logout mà không phải tự call API trực tiếp.
@@ -21,11 +22,16 @@ class AuthState extends ChangeNotifier {
   bool _onboardingSeen = false;
   String? _error;
 
+  String? _activeSessionId;
+  String? _activeActivityType;
+
   Map<String, dynamic>? get user => _user;
   bool get checking => _checking;
   bool get isLoggedIn => _user != null;
   bool get onboardingSeen => _onboardingSeen;
   String? get error => _error;
+  String? get activeSessionId => _activeSessionId;
+  String? get activeActivityType => _activeActivityType;
 
   /// Minimum thời gian giữ splash để brand "Thi Ái" hiển thị đủ lâu
   /// — không bị flash quá nhanh trên máy nhanh.
@@ -33,31 +39,57 @@ class AuthState extends ChangeNotifier {
 
   Future<void> _bootstrap() async {
     final startedAt = DateTime.now();
+    debugPrint('=== [BOOTSTRAP START] ===');
+    
     // Đọc cờ đã xem onboarding chưa (key trùng với OnboardingScreen.seenKey).
-    const storage = FlutterSecureStorage();
-    _onboardingSeen =
-        (await storage.read(key: 'relax_onboarding_done')) == '1';
+    const storage = secureStorage;
+    try {
+      debugPrint('Bootstrap: Đọc cờ onboarding...');
+      _onboardingSeen =
+          (await storage.read(key: 'relax_onboarding_done')) == '1';
+      debugPrint('Bootstrap: Cờ onboarding = $_onboardingSeen');
+    } catch (e) {
+      debugPrint('Bootstrap: Lỗi đọc cờ onboarding: $e');
+    }
 
-    final token = await RelaxApi.instance.accessToken;
+    String? token;
+    try {
+      debugPrint('Bootstrap: Đọc access token...');
+      token = await RelaxApi.instance.accessToken;
+      debugPrint('Bootstrap: Access token read = ${token != null && token.isNotEmpty ? "Có token" : "Không có token"}');
+    } catch (e) {
+      debugPrint('Bootstrap: Lỗi đọc access token: $e');
+    }
+
     if (token == null || token.isEmpty) {
+      debugPrint('Bootstrap: Không có token, chuyển sang màn hình Onboarding/Login sau khi giữ Splash...');
       await _enforceMinSplash(startedAt);
       _checking = false;
+      debugPrint('Bootstrap: Hoàn thành bootstrap (No Token), notifyListeners().');
       notifyListeners();
       return;
     }
+
     try {
+      debugPrint('Bootstrap: Có token, gọi API /users/me...');
       final res = await RelaxApi.instance.get('/users/me');
+      debugPrint('Bootstrap: Kết quả API /users/me = ${res.statusCode}');
       if (res.statusCode == 200 && res.data is Map) {
         _user = Map<String, dynamic>.from(res.data as Map);
+        debugPrint('Bootstrap: Đăng nhập tự động thành công cho user: ${_user?['email']}');
         await _mergeProfileName();
       } else {
+        debugPrint('Bootstrap: Token không hợp lệ, tiến hành xóa token...');
         await RelaxApi.instance.clearTokens();
       }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Bootstrap: Lỗi gọi API /users/me hoặc lỗi kết nối: $e');
       await RelaxApi.instance.clearTokens();
     } finally {
+      debugPrint('Bootstrap: Giữ Splash và hoàn tất...');
       await _enforceMinSplash(startedAt);
       _checking = false;
+      debugPrint('Bootstrap: Hoàn thành bootstrap (With Token), notifyListeners().');
       notifyListeners();
     }
   }
@@ -174,6 +206,8 @@ class AuthState extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    _activeSessionId = null;
+    _activeActivityType = null;
     // Unregister device trước khi token bị clear — nếu không sẽ 401.
     await DeviceRegistration.unregister();
     try {
@@ -201,5 +235,140 @@ class AuthState extends ChangeNotifier {
     if (_onboardingSeen) return;
     _onboardingSeen = true;
     notifyListeners();
+  }
+
+  /// Cập nhật ảnh đại diện của user qua POST /storage/me/avatar.
+  Future<bool> updateAvatar(String filePath) async {
+    try {
+      final file = await MultipartFile.fromFile(
+        filePath,
+        filename: filePath.split('/').last,
+      );
+      final formData = FormData.fromMap({
+        'file': file,
+      });
+
+      final res = await RelaxApi.instance.post(
+        '/storage/me/avatar',
+        body: formData,
+      );
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final publicUrl = res.data?['publicUrl'] as String?;
+        if (publicUrl != null && _user != null) {
+          _user!['avatar'] = publicUrl;
+          notifyListeners();
+          return true;
+        }
+      }
+    } catch (e) {
+      debugPrint('Update avatar failed: $e');
+    }
+    return false;
+  }
+
+  Future<void> refreshUser() async {
+    try {
+      final res = await RelaxApi.instance.get('/users/me');
+      if (res.statusCode == 200 && res.data is Map) {
+        _user = Map<String, dynamic>.from(res.data as Map);
+        await _mergeProfileName();
+        notifyListeners();
+      }
+    } catch (_) {}
+  }
+
+  Future<bool> loginWithGoogle({required String idToken, String? accessToken}) async {
+    debugPrint('AuthState.loginWithGoogle: Khởi chạy...');
+    _error = null;
+    notifyListeners();
+    try {
+      final body = <String, dynamic>{
+        'idToken': idToken,
+      };
+      if (accessToken != null) {
+        body['accessToken'] = accessToken;
+      }
+
+      debugPrint('AuthState.loginWithGoogle: Đang gửi POST /auth/google...');
+      final res = await RelaxApi.instance.post('/auth/google', body: body);
+      debugPrint('AuthState.loginWithGoogle: Backend phản hồi với HTTP Status = ${res.statusCode}');
+      debugPrint('AuthState.loginWithGoogle: Body data = ${res.data}');
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final access = res.data?['accessToken'] as String?;
+        final refresh = res.data?['refreshToken'] as String?;
+        if (access != null) {
+          debugPrint('AuthState.loginWithGoogle: Lưu tokens thành công!');
+          debugPrint('  - Access Token: $access');
+          debugPrint('  - Refresh Token: $refresh');
+          await RelaxApi.instance.saveTokens(access: access, refresh: refresh);
+          _user = res.data?['user'] is Map
+              ? Map<String, dynamic>.from(res.data['user'] as Map)
+              : null;
+          unawaited(DeviceRegistration.register());
+          await _mergeProfileName();
+          notifyListeners();
+          return true;
+        }
+      }
+      _error = (res.data?['message'] as String?) ?? 'Đăng nhập Google thất bại';
+      debugPrint('AuthState.loginWithGoogle: Thất bại. Lỗi: $_error');
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('AuthState.loginWithGoogle: Ngoại lệ xảy ra: $e');
+    }
+    notifyListeners();
+    return false;
+  }
+
+  /// Start a relax session in the background
+  Future<String?> startRelaxSession(String activityType, String title) async {
+    try {
+      final res = await RelaxApi.instance.post('/relax-activities/sessions/start', body: {
+        'activityType': activityType,
+        'title': title,
+        'moodBefore': 'NEUTRAL',
+      });
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final id = res.data?['id'] as String?;
+        if (id != null) {
+          _activeSessionId = id;
+          _activeActivityType = activityType;
+          notifyListeners();
+          return id;
+        }
+      }
+    } catch (e) {
+      debugPrint('Start relax session failed: $e');
+    }
+    return null;
+  }
+
+  /// Finish an active relax session, post-checkin mood, and refresh user stats
+  Future<bool> finishRelaxSession(
+    String sessionId, {
+    required String moodAfter,
+    required int reliefLevel,
+    String? note,
+  }) async {
+    try {
+      final res = await RelaxApi.instance.post('/relax-activities/sessions/$sessionId/finish', body: {
+        'moodAfter': moodAfter,
+        'reliefLevel': reliefLevel,
+        if (note != null && note.trim().isNotEmpty) 'note': note.trim(),
+      });
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (_activeSessionId == sessionId) {
+          _activeSessionId = null;
+          _activeActivityType = null;
+        }
+        await refreshUser(); // refresh user stats & info
+        return true;
+      }
+    } catch (e) {
+      debugPrint('Finish relax session failed: $e');
+    }
+    return false;
   }
 }

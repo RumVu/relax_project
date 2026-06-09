@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -6,6 +7,8 @@ import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../widgets/cat_mascot.dart';
+import '../widgets/journey_prompt.dart';
+import '../widgets/notification_sheet.dart';
 import '../widgets/soft_toast.dart';
 
 /// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
@@ -26,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, int> _moodCounts = {};
   int _moodTotal = 0;
   String? _savingMood;
+  int _unreadCount = 0;
 
   @override
   void initState() {
@@ -44,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
         RelaxApi.instance.get('/cozy-quotes/random'),
         RelaxApi.instance.get('/mood-checkins/options'),
         RelaxApi.instance.get('/mood-checkins/me', query: {'limit': 60}),
+        RelaxApi.instance.get('/notifications/me/unread-count'),
       ]);
       final w = results[0].data;
       _greeting = (w is Map && w['greeting'] is Map)
@@ -72,6 +77,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _moodTotal++;
         }
       }
+      final unreadRes = results[4].data;
+      _unreadCount = (unreadRes is Map && unreadRes['count'] is num)
+          ? (unreadRes['count'] as num).toInt()
+          : 0;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -80,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _logMood(String mood, String label) async {
+    HapticFeedback.lightImpact();
     setState(() => _savingMood = mood);
     try {
       final res = await RelaxApi.instance.post('/mood-checkins/me', body: {
@@ -93,6 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
             message: 'Đã ghi cảm xúc: $label',
             tone: SoftToastTone.success);
         await _loadAll();
+        if (!mounted) return;
+        await showJourneyPrompt(
+          context,
+          title: 'Đã ghi nhận cảm xúc 🌸',
+          subtitle: subtitleForMood(mood),
+          suggestions: suggestionsForMood(mood),
+        );
       }
     } catch (_) {
       // ignore — snackbar đủ
@@ -130,6 +147,19 @@ class _HomeScreenState extends State<HomeScreen> {
               _sectionTitle('Hôm nay $name đang cảm thấy:'),
               const SizedBox(height: 12),
               _moodGrid(),
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () => context.push('/mood'),
+                child: const Text(
+                  'Chi tiết hơn với ghi chú & cường độ ➜',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: RelaxColors.violet,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
               const SizedBox(height: 24),
               _trackingCard(context, name),
               const SizedBox(height: 24),
@@ -148,47 +178,140 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> _refreshUnreadCount() async {
+    try {
+      final res = await RelaxApi.instance.get('/notifications/me/unread-count');
+      final unreadRes = res.data;
+      if (unreadRes is Map && unreadRes['count'] is num) {
+        setState(() {
+          _unreadCount = (unreadRes['count'] as num).toInt();
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _showNotifications() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => NotificationSheet(
+        onRefreshCount: () {
+          _refreshUnreadCount();
+        },
+      ),
+    );
+  }
+
+  IconData _getWeatherIcon(String? iconKey) {
+    switch (iconKey) {
+      case 'weather-sunny':
+        return Icons.wb_sunny_outlined;
+      case 'weather-night':
+        return Icons.nightlight_round_outlined;
+      case 'weather-rain':
+        return Icons.umbrella_outlined;
+      case 'weather-storm':
+        return Icons.thunderstorm_outlined;
+      case 'weather-cloudy':
+        return Icons.cloud_outlined;
+      default:
+        return Icons.wb_sunny_outlined;
+    }
+  }
+
+  Color _getWeatherIconColor(String? iconKey) {
+    switch (iconKey) {
+      case 'weather-sunny':
+        return RelaxColors.sun;
+      case 'weather-night':
+        return RelaxColors.lilac;
+      case 'weather-rain':
+      case 'weather-storm':
+        return RelaxColors.violet;
+      case 'weather-cloudy':
+        return RelaxColors.slate;
+      default:
+        return RelaxColors.sun;
+    }
+  }
+
   Widget _header(BuildContext context, String name) {
     final title = (_greeting?['title'] as String?) ?? 'Đã trở lại rồi nè ~';
     final subtitle = (_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.';
     return Row(
       children: [
-        const Icon(Icons.wb_sunny_outlined, color: RelaxColors.sun, size: 30),
-        const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 17,
-                  color: context.appText,
+          child: GestureDetector(
+            onTap: () => context.push('/weather'),
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              children: [
+                Icon(
+                  _getWeatherIcon(_greeting?['iconKey']),
+                  color: _getWeatherIconColor(_greeting?['iconKey']),
+                  size: 30,
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              Text(
-                subtitle,
-                style: TextStyle(color: context.mutedText, fontSize: 12),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                          color: context.appText,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        subtitle,
+                        style: TextStyle(color: context.mutedText, fontSize: 12),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
+        const SizedBox(width: 12),
         Stack(
           children: [
             IconButton(
-              onPressed: () => context.push('/weather'),
+              onPressed: _showNotifications,
               icon: Icon(Icons.notifications_outlined, color: context.appText),
             ),
-            const Positioned(
-              right: 10,
-              top: 10,
-              child: CircleAvatar(radius: 4, backgroundColor: RelaxColors.coral),
-            ),
+            if (_unreadCount > 0)
+              Positioned(
+                right: 6,
+                top: 6,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: RelaxColors.coral,
+                    shape: BoxShape.circle,
+                  ),
+                  constraints: const BoxConstraints(
+                    minWidth: 16,
+                    minHeight: 16,
+                  ),
+                  child: Text(
+                    '$_unreadCount',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
           ],
         ),
       ],
@@ -249,12 +372,15 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Text('✦ ', style: TextStyle(color: RelaxColors.violet)),
-        Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            color: context.appText,
+        Flexible(
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 15,
+              color: context.appText,
+            ),
           ),
         ),
         const Text(' ✦', style: TextStyle(color: RelaxColors.violet)),
@@ -422,7 +548,10 @@ class _HomeScreenState extends State<HomeScreen> {
             children: methods.map((m) {
               return Expanded(
                 child: GestureDetector(
-                  onTap: () => context.push(m.$3),
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    context.push(m.$3);
+                  },
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     padding: const EdgeInsets.symmetric(vertical: 14),

@@ -163,8 +163,8 @@ export class AdminPricingService {
       );
     }
     if (hasStart && hasEnd) {
-      const start = new Date(dto.saleStartsAt as any).getTime();
-      const end = new Date(dto.saleEndsAt as any).getTime();
+      const start = new Date(dto.saleStartsAt as string | Date).getTime();
+      const end = new Date(dto.saleEndsAt as string | Date).getTime();
       if (Number.isFinite(start) && Number.isFinite(end) && end <= start) {
         throw new AppException(
           ErrorCode.VALIDATION_FAILED,

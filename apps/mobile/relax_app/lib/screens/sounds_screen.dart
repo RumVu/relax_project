@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/audio_controller.dart';
+import '../core/auth_state.dart';
 import '../core/theme.dart';
 
 /// Trình phát âm thanh nền / podcast. Phát qua AudioController dùng chung
@@ -47,6 +48,14 @@ class _SoundsScreenState extends State<SoundsScreen> {
           : <Map<String, dynamic>>[];
       if (widget.category != null) {
         list = list.where((e) => e['category'] == widget.category).toList();
+      } else {
+        // Lọc bỏ Podcast và Thiền khỏi danh mục nhạc thư giãn thông thường
+        list = list
+            .where((e) =>
+                e['category'] != 'PODCAST' &&
+                e['category'] != 'MEDITATION' &&
+                e['category'] != 'BUDDHA')
+            .toList();
       }
       _tracks = list;
       // Nạp queue vào controller dùng chung.
@@ -138,7 +147,24 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                       ),
                                     ),
                                     child: ListTile(
-                                      onTap: () => audio.playAt(i),
+                                      onTap: () {
+                                        if (!mounted) return;
+                                        final auth = context.read<AuthState>();
+                                        if (auth.activeSessionId == null) {
+                                          final cat = widget.category ?? 'MUSIC';
+                                          String type = 'MUSIC';
+                                          String title = 'Nhạc';
+                                          if (cat == 'PODCAST') {
+                                            type = 'PODCAST';
+                                            title = 'Podcast';
+                                          } else if (cat == 'MEDITATION') {
+                                            type = 'MEDITATION';
+                                            title = 'Thiền định';
+                                          }
+                                          auth.startRelaxSession(type, title);
+                                        }
+                                        audio.playAt(i);
+                                      },
                                       leading: CircleAvatar(
                                         backgroundColor: RelaxColors.violet
                                             .withValues(alpha: 0.15),

@@ -218,6 +218,47 @@ test-all: backend-test backend-test-e2e web-test-e2e ## Run every test suite
 clean: ## Remove build artefacts
 	rm -rf apps/backend/dist apps/web/.next apps/web/test-results
 
+# ---- Mobile (Flutter) ------------------------------------------------------
+
+FLUTTER_DIR := apps/mobile/relax_app
+# Use fvm if it is installed, otherwise fallback to flutter
+FLUTTER_BIN := $(shell command -v fvm >/dev/null 2>&1 && echo "fvm flutter" || echo "flutter")
+
+.PHONY: mobile-run
+mobile-run: ## Run Flutter app (production API)
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) run
+
+.PHONY: mobile-run-local
+mobile-run-local: ## Run Flutter app targeting localhost backend
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) run --dart-define=API_BASE=http://localhost:6823/v1
+
+.PHONY: mobile-run-lan
+mobile-run-lan: ## Run Flutter app targeting LAN backend (auto-detect IP)
+	@set -e; \
+	IP="$${SHARE_IP:-$$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || hostname -I 2>/dev/null | awk '{print $$1}')}"; \
+	if [ -z "$$IP" ]; then \
+	  echo "✗ Không tìm thấy LAN IP — set SHARE_IP=192.168.x.x make mobile-run-lan"; \
+	  exit 1; \
+	fi; \
+	echo "→ API: http://$$IP:6823/v1"; \
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) run --dart-define=API_BASE="http://$$IP:6823/v1"
+
+.PHONY: mobile-test
+mobile-test: ## Run Flutter unit & widget tests
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) test
+
+.PHONY: mobile-analyze
+mobile-analyze: ## Run Flutter static analysis
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) analyze
+
+.PHONY: mobile-build-apk
+mobile-build-apk: ## Build release APK (production API)
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) build apk --release
+
+.PHONY: mobile-build-ios
+mobile-build-ios: ## Build release iOS (production API)
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) build ios --release --no-codesign
+
 # ---- Help ------------------------------------------------------------------
 
 .PHONY: help

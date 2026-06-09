@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../core/auth_state.dart';
@@ -109,32 +111,42 @@ class SettingsScreen extends StatelessWidget {
             const _ThemeToggleCard(),
             const SizedBox(height: 24),
             const _SectionLabel('Nạp thẻ / Nâng cấp'),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.workspace_premium_outlined,
-                  title: 'Mở khóa tính năng nâng cao',
-                  subtitle: 'Phân tích sâu, companion theo cung & con giáp',
-                  trailing: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: RelaxColors.violet,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Text(
-                      'Nạp ngay',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+            (() {
+              final auth = context.watch<AuthState>();
+              final user = auth.user;
+              final subs = user?['subscriptions'] as List?;
+              final sub = (subs != null && subs.isNotEmpty) ? subs.first as Map? : null;
+              final planName = (sub?['planName'] as String?) ?? 'FREE';
+              final subStatus = (sub?['status'] as String?) ?? 'ACTIVE';
+              final isPremium = planName.toUpperCase() != 'FREE' && subStatus.toUpperCase() == 'ACTIVE';
+
+              return _Card(
+                children: [
+                  _Row(
+                    icon: Icons.workspace_premium_outlined,
+                    title: isPremium ? 'Gói của bạn: ${planName.toUpperCase().replaceAll('_', ' ')}' : 'Mở khóa tính năng nâng cao',
+                    subtitle: isPremium ? 'Cảm ơn bạn đã nâng cấp dịch vụ!' : 'Phân tích sâu, companion theo cung & con giáp',
+                    trailing: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isPremium ? RelaxColors.mint : RelaxColors.violet,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        isPremium ? 'Chi tiết' : 'Nạp ngay',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
+                    onTap: () => context.push('/billing'),
                   ),
-                  onTap: () => _showNotImplemented(context),
-                ),
-              ],
-            ),
+                ],
+              );
+            })(),
             const SizedBox(height: 24),
             const _SectionLabel('Tài khoản'),
             _Card(
@@ -158,11 +170,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showNotImplemented(BuildContext context) {
-    showSoftToast(context,
-        message: 'Tính năng đang được hoàn thiện ở phiên bản kế.',
-        tone: SoftToastTone.info);
-  }
+
 
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
@@ -175,36 +183,113 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
-    final ok = await showDialog<bool>(
+    final mode = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Xóa tài khoản?'),
         content: const Text(
-          'Bạn chắc chứ…? Mọi dữ liệu sẽ biến mất và sẽ không quay lại được đâu.',
+          'Chọn cách xóa:\n\n'
+          '• Ẩn danh: giữ lại dữ liệu thống kê nhưng xóa thông tin cá nhân.\n'
+          '• Xóa vĩnh viễn: xóa toàn bộ — không thể khôi phục.',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('Hủy bỏ'),
+          ),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx, 'SOFT'),
+            child: const Text('Ẩn danh'),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: () => Navigator.pop(ctx, 'HARD'),
             child: const Text('Xóa vĩnh viễn'),
           ),
         ],
       ),
     );
-    if (ok == true && context.mounted) {
-      // Backend chưa mở endpoint self-delete cho mobile — báo rõ thay vì
-      // giả vờ xóa.
-      _showNotImplemented(context);
+    if (mode == null || !context.mounted) return;
+
+    // Xác nhận lần nữa bằng mật khẩu (nếu tài khoản có mật khẩu).
+    final passwordCtrl = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(mode == 'HARD' ? 'Xóa vĩnh viễn?' : 'Ẩn danh tài khoản?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              mode == 'HARD'
+                  ? 'Nhập mật khẩu để xác nhận. Tất cả dữ liệu sẽ bị xóa!'
+                  : 'Nhập mật khẩu để xác nhận ẩn danh hóa tài khoản.',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: passwordCtrl,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Mật khẩu',
+                hintText: 'Để trống nếu dùng Google Sign-In',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  mode == 'HARD' ? RelaxColors.coral : RelaxColors.violet,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Xác nhận'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    // Gọi API DELETE /auth/me
+    try {
+      final body = <String, dynamic>{'mode': mode};
+      final pw = passwordCtrl.text.trim();
+      if (pw.isNotEmpty) body['password'] = pw;
+
+      final res = await RelaxApi.instance.delete('/auth/me', body: body);
+      if (!context.mounted) return;
+
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        await context.read<AuthState>().logout();
+        if (context.mounted) {
+          showSoftToast(context,
+              message: mode == 'HARD'
+                  ? 'Tài khoản đã bị xóa vĩnh viễn.'
+                  : 'Tài khoản đã được ẩn danh hóa.',
+              tone: SoftToastTone.success);
+          context.go('/login');
+        }
+      } else {
+        final msg =
+            (res.data is Map ? res.data['message'] as String? : null) ??
+                'Không xóa được tài khoản.';
+        showSoftToast(context, message: msg, tone: SoftToastTone.error);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        showSoftToast(context,
+            message: 'Lỗi: $e', tone: SoftToastTone.error);
+      }
     }
   }
 }
 
 /// Khung giờ nhận nhắc nhở — chip 17:00 / 19:00 / 21:00 + "Mở rộng" + âm báo,
-/// dựng theo mockup. Lựa chọn hiện lưu tại chỗ (chưa đẩy backend reminder).
+/// dựng theo mockup, đồng bộ với backend thông qua /reminders.
 class _NotificationCard extends StatefulWidget {
   const _NotificationCard();
 
@@ -215,6 +300,164 @@ class _NotificationCard extends StatefulWidget {
 class _NotificationCardState extends State<_NotificationCard> {
   final _times = ['17:00', '19:00', '21:00'];
   String _selected = '21:00';
+  String? _reminderId;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReminders();
+  }
+
+  Future<void> _loadReminders() async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    try {
+      final res = await RelaxApi.instance.get('/reminders/me');
+      if (res.statusCode == 200 && res.data is Map) {
+        final items = res.data['items'] as List?;
+        if (items != null && items.isNotEmpty) {
+          // Tìm nhắc nhở đầu tiên có loại JOURNAL (Nhắc nhở viết nhật ký / check-in)
+          final journalReminder = items.firstWhere(
+            (item) => item is Map && item['type'] == 'JOURNAL',
+            orElse: () => null,
+          );
+          if (journalReminder != null) {
+            _reminderId = journalReminder['id'] as String?;
+            final scheduledAtStr = journalReminder['scheduledAt'] as String?;
+            if (scheduledAtStr != null) {
+              final date = DateTime.parse(scheduledAtStr).toLocal();
+              final timeStr =
+                  "${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}";
+              if (mounted) {
+                setState(() {
+                  _selected = timeStr;
+                });
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Load reminders failed: $e');
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  Future<void> _saveReminder(int hour, int minute) async {
+    if (!mounted) return;
+    setState(() => _loading = true);
+    try {
+      final now = DateTime.now();
+      var scheduledDate = DateTime(now.year, now.month, now.day, hour, minute);
+      if (scheduledDate.isBefore(now)) {
+        scheduledDate = scheduledDate.add(const Duration(days: 1));
+      }
+      final repeatRule = '$minute $hour * * *';
+
+      if (_reminderId != null) {
+        // Cập nhật nhắc nhở cũ
+        final res = await RelaxApi.instance.patch('/reminders/$_reminderId', body: {
+          'scheduledAt': scheduledDate.toUtc().toIso8601String(),
+          'repeatRule': repeatRule,
+        });
+        if (res.statusCode == 200 || res.statusCode == 201) {
+          if (mounted) {
+            showSoftToast(context,
+                message: 'Đã cập nhật giờ nhắc nhở thành công!',
+                tone: SoftToastTone.success);
+          }
+        } else {
+          if (mounted) {
+            showSoftToast(context,
+                message: 'Cập nhật giờ nhắc nhở thất bại.',
+                tone: SoftToastTone.error);
+          }
+        }
+      } else {
+        // Tạo nhắc nhở mới
+        final res = await RelaxApi.instance.post('/reminders/me', body: {
+          'title': 'Nhắc nhở tự phản chiếu',
+          'message': 'Viết vài dòng cuối ngày để giữ tâm trạng cân bằng nhé.',
+          'type': 'JOURNAL',
+          'scheduledAt': scheduledDate.toUtc().toIso8601String(),
+          'repeatRule': repeatRule,
+          'isActive': true,
+        });
+        if (res.statusCode == 200 || res.statusCode == 201) {
+          if (mounted) {
+            showSoftToast(context,
+                message: 'Đã cài đặt giờ nhắc nhở thành công!',
+                tone: SoftToastTone.success);
+            if (res.data is Map) {
+              _reminderId = res.data['id'] as String?;
+            }
+          }
+        } else {
+          if (mounted) {
+            showSoftToast(context,
+                message: 'Cài đặt giờ nhắc nhở thất bại.',
+                tone: SoftToastTone.error);
+          }
+        }
+      }
+      await _loadReminders();
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context,
+            message: 'Lỗi: $e', tone: SoftToastTone.error);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _loading = false);
+      }
+    }
+  }
+
+  Future<void> _selectCustomTime() async {
+    var initialHour = 21;
+    var initialMinute = 0;
+    if (_selected.contains(':')) {
+      final parts = _selected.split(':');
+      initialHour = int.tryParse(parts[0]) ?? 21;
+      initialMinute = int.tryParse(parts[1]) ?? 0;
+    }
+
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: initialHour, minute: initialMinute),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: RelaxColors.violet,
+              onPrimary: Colors.white,
+              surface: context.surface,
+              onSurface: context.appText,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: RelaxColors.violet,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      final timeStr =
+          "${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}";
+      setState(() {
+        _selected = timeStr;
+      });
+      await _saveReminder(picked.hour, picked.minute);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,7 +482,16 @@ class _NotificationCardState extends State<_NotificationCard> {
                 final sel = _selected == t;
                 return Expanded(
                   child: GestureDetector(
-                    onTap: () => setState(() => _selected = t),
+                    onTap: _loading
+                        ? null
+                        : () async {
+                            if (sel) return;
+                            final parts = t.split(':');
+                            final hour = int.parse(parts[0]);
+                            final minute = int.parse(parts[1]);
+                            setState(() => _selected = t);
+                            await _saveReminder(hour, minute);
+                          },
                     child: Container(
                       margin: const EdgeInsets.only(right: 8),
                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -259,34 +511,59 @@ class _NotificationCardState extends State<_NotificationCard> {
                               color: sel ? Colors.white : context.appText,
                             ),
                           ),
-                          if (sel)
+                          if (sel) ...[
+                            const SizedBox(height: 4),
                             const Icon(Icons.check_circle,
                                 size: 14, color: Colors.white),
+                          ],
                         ],
                       ),
                     ),
                   ),
                 );
               }),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.fieldBorder),
-                  ),
-                  child: Column(
-                    children: [
-                      Icon(Icons.add, color: context.mutedText, size: 18),
-                      Text(
-                        'Mở rộng',
-                        style:
-                            TextStyle(fontSize: 11, color: context.mutedText),
+              (() {
+                final isPresetSelected = _times.contains(_selected);
+                final isCustomSelected = !isPresetSelected && _selected.isNotEmpty;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: _loading ? null : _selectCustomTime,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isCustomSelected ? RelaxColors.violet : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isCustomSelected ? RelaxColors.violet : context.fieldBorder,
+                        ),
                       ),
-                    ],
+                      child: Column(
+                        children: [
+                          if (isCustomSelected) ...[
+                            Text(
+                              _selected,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            const Icon(Icons.check_circle,
+                                size: 14, color: Colors.white),
+                          ] else ...[
+                            Icon(Icons.add, color: context.mutedText, size: 18),
+                            Text(
+                              'Mở rộng',
+                              style: TextStyle(
+                                  fontSize: 11, color: context.mutedText),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              ),
+                );
+              })(),
             ],
           ),
           const SizedBox(height: 12),
@@ -320,6 +597,7 @@ class _NotificationCardState extends State<_NotificationCard> {
     );
   }
 }
+
 
 /// Thống kê tình trạng — biểu đồ cảm xúc 7 ngày + ước lượng giảm stress,
 /// tính từ check-in cảm xúc gần nhất.
@@ -499,7 +777,7 @@ class _StatsCardState extends State<_StatsCard> {
   }
 }
 
-class _ProfileHero extends StatelessWidget {
+class _ProfileHero extends StatefulWidget {
   const _ProfileHero({
     required this.name,
     required this.email,
@@ -510,6 +788,147 @@ class _ProfileHero extends StatelessWidget {
   final String email;
   final String? avatar;
   final String role;
+
+  @override
+  State<_ProfileHero> createState() => _ProfileHeroState();
+}
+
+class _ProfileHeroState extends State<_ProfileHero> {
+  bool _uploading = false;
+  String? _birthday;
+  bool _loadingProfile = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final res = await RelaxApi.instance.get('/user-profiles/me/profile');
+      if (res.statusCode == 200 && res.data is Map) {
+        final birthdayStr = res.data['birthday'] as String?;
+        if (mounted) {
+          setState(() {
+            _birthday = birthdayStr;
+            _loadingProfile = false;
+          });
+        }
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loadingProfile = false);
+      }
+    }
+  }
+
+  String _formatBirthday(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr).toLocal();
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
+  Future<void> _editBirthday() async {
+    DateTime initial = DateTime.now();
+    if (_birthday != null) {
+      initial = DateTime.tryParse(_birthday!) ?? DateTime.now();
+    }
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: RelaxColors.violet,
+              onPrimary: Colors.white,
+              surface: context.surface,
+              onSurface: context.appText,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked == null) return;
+
+    setState(() => _uploading = true);
+    try {
+      final res = await RelaxApi.instance.patch(
+        '/user-profiles/me/profile',
+        body: {'birthday': picked.toUtc().toIso8601String()},
+      );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        if (mounted) {
+          setState(() {
+            _birthday = picked.toUtc().toIso8601String();
+          });
+          showSoftToast(context,
+              message: 'Cập nhật ngày sinh thành công!',
+              tone: SoftToastTone.success);
+        }
+      } else {
+        if (mounted) {
+          showSoftToast(context,
+              message: 'Cập nhật ngày sinh thất bại.',
+              tone: SoftToastTone.error);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context,
+            message: 'Lỗi: $e', tone: SoftToastTone.error);
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _uploading = false);
+      }
+    }
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? file = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 512,
+        maxHeight: 512,
+        imageQuality: 85,
+      );
+      if (file == null) return;
+
+      setState(() => _uploading = true);
+
+      if (!mounted) return;
+      final auth = context.read<AuthState>();
+      final success = await auth.updateAvatar(file.path);
+
+      if (mounted) {
+        setState(() => _uploading = false);
+        if (success) {
+          showSoftToast(context,
+              message: 'Cập nhật ảnh đại diện thành công!',
+              tone: SoftToastTone.success);
+        } else {
+          showSoftToast(context,
+              message: 'Cập nhật ảnh đại diện thất bại.',
+              tone: SoftToastTone.error);
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _uploading = false);
+        showSoftToast(context,
+            message: 'Lỗi: $e', tone: SoftToastTone.error);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -532,18 +951,61 @@ class _ProfileHero extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: Colors.white,
-            foregroundImage:
-                avatar != null ? NetworkImage(avatar!) : null,
-            child: Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: const TextStyle(
-                color: RelaxColors.violet,
-                fontWeight: FontWeight.w800,
-                fontSize: 24,
-              ),
+          GestureDetector(
+            onTap: _uploading ? null : _pickAndUploadAvatar,
+            child: Stack(
+              children: [
+                CircleAvatar(
+                  radius: 32,
+                  backgroundColor: Colors.white,
+                  foregroundImage:
+                      widget.avatar != null ? NetworkImage(widget.avatar!) : null,
+                  child: Text(
+                    widget.name.isNotEmpty ? widget.name[0].toUpperCase() : '?',
+                    style: const TextStyle(
+                      color: RelaxColors.violet,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24,
+                    ),
+                  ),
+                ),
+                if (_uploading)
+                  Positioned.fill(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black45,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        size: 12,
+                        color: RelaxColors.violet,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           const SizedBox(width: 14),
@@ -555,7 +1017,7 @@ class _ProfileHero extends StatelessWidget {
                   children: [
                     Flexible(
                       child: Text(
-                        name,
+                        widget.name,
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
@@ -566,7 +1028,7 @@ class _ProfileHero extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     GestureDetector(
-                      onTap: () => _editName(context, name),
+                      onTap: () => _editName(context, widget.name),
                       child: const Icon(Icons.edit_outlined,
                           color: Colors.white70, size: 16),
                     ),
@@ -574,30 +1036,104 @@ class _ProfileHero extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  email,
+                  widget.email,
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.85),
                     fontSize: 13,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
+                const SizedBox(height: 4),
+                _loadingProfile
+                    ? const SizedBox(
+                        height: 12,
+                        width: 12,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          color: Colors.white70,
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: _uploading ? null : _editBirthday,
+                        child: Row(
+                          children: [
+                            const Icon(Icons.cake_outlined,
+                                color: Colors.white70, size: 13),
+                            const SizedBox(width: 4),
+                            Text(
+                              _birthday != null
+                                  ? _formatBirthday(_birthday!)
+                                  : 'Thiết lập ngày sinh 🎂',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.85),
+                                fontSize: 12,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white70,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                 const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    role,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                      letterSpacing: 0.8,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        widget.role,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    (() {
+                      final auth = context.watch<AuthState>();
+                      final user = auth.user;
+                      final subs = user?['subscriptions'] as List?;
+                      final sub = (subs != null && subs.isNotEmpty) ? subs.first as Map? : null;
+                      final planName = (sub?['planName'] as String?) ?? 'FREE';
+                      final subStatus = (sub?['status'] as String?) ?? 'ACTIVE';
+                      final isPremium = planName.toUpperCase() != 'FREE' && subStatus.toUpperCase() == 'ACTIVE';
+
+                      return Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isPremium
+                              ? RelaxColors.sun.withValues(alpha: 0.8)
+                              : Colors.white.withValues(alpha: 0.18),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (isPremium) ...[
+                              const Icon(Icons.star, color: Colors.white, size: 10),
+                              const SizedBox(width: 4),
+                            ],
+                            Text(
+                              isPremium ? planName.toUpperCase().replaceAll('_', ' ') : 'GÓI FREE',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 10,
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    })(),
+                  ],
                 ),
               ],
             ),
@@ -691,7 +1227,10 @@ class _ThemeToggleCard extends StatelessWidget {
       final selected = mode == m;
       return Expanded(
         child: GestureDetector(
-          onTap: () => controller.setMode(m),
+          onTap: () {
+            HapticFeedback.selectionClick();
+            controller.setMode(m);
+          },
           child: Container(
             margin: const EdgeInsets.all(4),
             padding: const EdgeInsets.symmetric(vertical: 12),

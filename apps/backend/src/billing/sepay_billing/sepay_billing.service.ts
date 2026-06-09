@@ -234,9 +234,12 @@ export class SepayBillingService {
     const plan = await this.billingService.resolvePlanByAmount(payment.amount);
 
     // Confirm the payment
-    await this.billingService.confirmPayment(payment.userId, payment.id, {
-      planName: plan.name,
-    });
+    await this.billingService.confirmPayment(
+      payment.userId,
+      payment.id,
+      { planName: plan.name },
+      true, // isAdminOrWebhook = true
+    );
 
     // Save SePay transaction ID for auditing/traceability
     await this.prisma.payment.update({

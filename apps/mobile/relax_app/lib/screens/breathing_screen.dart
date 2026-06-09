@@ -2,8 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../core/auth_state.dart';
 import '../core/theme.dart';
+import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
 
 /// Một nhịp thở: bao nhiêu giây cho từng pha + số chu kỳ.
@@ -91,6 +94,13 @@ class _BreathingScreenState extends State<BreathingScreen>
       upperBound: 1.0,
       value: 0.55,
     );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final auth = context.read<AuthState>();
+      if (auth.activeSessionId == null) {
+        auth.startRelaxSession('BREATHING', 'Hít thở không khí');
+      }
+    });
   }
 
   @override
@@ -170,44 +180,53 @@ class _BreathingScreenState extends State<BreathingScreen>
           // user pick lại pattern.
           Future.delayed(const Duration(milliseconds: 700), () {
             if (!mounted) return;
-            showJourneyPrompt(
-              context,
-              title: 'Đã hít thở xong 🌬️',
-              subtitle:
-                  'Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?',
-              suggestions: [
-                JourneySuggestion(
-                  icon: Icons.refresh,
-                  label: 'Tập thêm 1 vòng nữa',
-                  onTap: () {
-                    if (!mounted) return;
-                    // Reset state + bắt đầu lại session ngay tức thì.
-                    setState(() {
-                      _cyclesDone = 0;
-                      _phase = _Phase.idle;
-                      _phaseRemaining = 0;
-                      _running = false;
-                    });
-                    _start();
-                  },
-                ),
-                const JourneySuggestion(
-                  icon: Icons.mood,
-                  label: 'Ghi lại cảm xúc bây giờ',
-                  route: '/home?tab=2',
-                ),
-                const JourneySuggestion(
-                  icon: Icons.edit_note,
-                  label: 'Viết vào nhật ký',
-                  route: '/journal',
-                ),
-                const JourneySuggestion(
-                  icon: Icons.headphones,
-                  label: 'Nghe nhạc êm',
-                  route: '/sounds',
-                ),
-              ],
-            );
+            final auth = context.read<AuthState>();
+            final activeId = auth.activeSessionId;
+            showCheckInSheet(context, 'Hít thở không khí', sessionId: activeId).then((_) {
+              if (!mounted) return;
+              showJourneyPrompt(
+                context,
+                title: 'Đã hít thở xong 🌬️',
+                subtitle:
+                    'Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?',
+                suggestions: [
+                  JourneySuggestion(
+                    icon: Icons.refresh,
+                    label: 'Tập thêm 1 vòng nữa',
+                    onTap: () {
+                      if (!mounted) return;
+                      // Reset state + bắt đầu lại session ngay tức thì.
+                      setState(() {
+                        _cyclesDone = 0;
+                        _phase = _Phase.idle;
+                        _phaseRemaining = 0;
+                        _running = false;
+                      });
+                      final authNew = context.read<AuthState>();
+                      if (authNew.activeSessionId == null) {
+                        authNew.startRelaxSession('BREATHING', 'Hít thở không khí');
+                      }
+                      _start();
+                    },
+                  ),
+                  const JourneySuggestion(
+                    icon: Icons.mood,
+                    label: 'Ghi lại cảm xúc bây giờ',
+                    route: '/mood',
+                  ),
+                  const JourneySuggestion(
+                    icon: Icons.edit_note,
+                    label: 'Viết vào nhật ký',
+                    route: '/journal',
+                  ),
+                  const JourneySuggestion(
+                    icon: Icons.headphones,
+                    label: 'Nghe nhạc êm',
+                    route: '/sounds',
+                  ),
+                ],
+              );
+            });
           });
           return;
         }

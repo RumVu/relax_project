@@ -41,7 +41,23 @@ export function mapCurrentSnapshot(
     precipitation: current?.precipitation ?? null,
     precipitationUnit: payload.current_units?.precipitation ?? 'mm',
     weatherCode: current?.weather_code ?? null,
-    isDay: current?.is_day !== 0,
+    isDay: current?.is_day !== undefined
+      ? current.is_day !== 0
+      : (() => {
+          const tz = payload.timezone ?? 'Asia/Ho_Chi_Minh';
+          try {
+            const hour = Number(
+              new Intl.DateTimeFormat('en-US', {
+                hour: '2-digit',
+                hourCycle: 'h23',
+                timeZone: tz,
+              }).format(new Date()),
+            );
+            return hour >= 6 && hour < 18;
+          } catch {
+            return true;
+          }
+        })(),
     observedAt: current?.time ?? null,
   };
 }

@@ -54,13 +54,14 @@ export function BirthdayInput({ label, value, onChange }: BirthdayInputProps) {
   const [month, setMonth] = useState(initial.month);
   const [year, setYear] = useState(initial.year);
 
-  // Re-sync local state whenever the parent prop changes (eg. server load).
-  useEffect(() => {
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
     const next = splitIso(value);
     setDay(next.day);
     setMonth(next.month);
     setYear(next.year);
-  }, [value]);
+  }
 
   const emit = (d: string, m: string, y: string) => {
     if (!onChange) return;

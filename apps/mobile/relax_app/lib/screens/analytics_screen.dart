@@ -216,6 +216,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               }).toList(),
                             ),
                     ),
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: RelaxColors.violet,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () => context.push('/mood'),
+                        icon: const Icon(Icons.edit_note, color: Colors.white),
+                        label: const Text(
+                          'Ghi chép cảm xúc chi tiết ➜',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),

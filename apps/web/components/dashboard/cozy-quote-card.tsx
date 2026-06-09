@@ -60,7 +60,10 @@ export function CozyQuoteCard({ currentMood }: { currentMood?: string | null }) 
   }, [currentMood]);
 
   useEffect(() => {
-    void fetchOne();
+    const timer = setTimeout(() => {
+      void fetchOne();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchOne]);
 
   const display = quote ?? FALLBACK;

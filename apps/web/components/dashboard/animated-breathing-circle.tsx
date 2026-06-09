@@ -86,7 +86,9 @@ export function AnimatedBreathingCircle({
   // Track current phase in a ref so the tick interval can read it without
   // re-subscribing on every render.
   const phaseRef = useRef<Phase>('idle');
-  phaseRef.current = phase;
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
 
   const phaseLength = useCallback(
     (p: Phase): number => {
@@ -127,10 +129,10 @@ export function AnimatedBreathingCircle({
     setCyclesDone(0);
   }, []);
 
-  // Reset whenever pattern changes so we don't carry stale phase counts.
-  useEffect(() => {
+  const selectPattern = useCallback((i: number) => {
+    setPatternIdx(i);
     reset();
-  }, [patternIdx, reset]);
+  }, [reset]);
 
   const start = useCallback(() => {
     const first = PHASE_ORDER.find((p) => phaseLength(p) > 0) ?? 'inhale';
@@ -219,7 +221,7 @@ export function AnimatedBreathingCircle({
                   : 'bg-white/10 text-mist/70 hover:bg-white/20'
               }`}
               key={p.code}
-              onClick={() => setPatternIdx(i)}
+              onClick={() => selectPattern(i)}
               type="button"
             >
               {p.label[locale === 'en' ? 'en' : 'vi']}

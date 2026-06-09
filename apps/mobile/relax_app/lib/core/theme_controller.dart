@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'secure_storage.dart';
 
 /// Giữ chế độ giao diện (sáng / tối / theo hệ thống) và lưu lựa chọn của
 /// người dùng vào secure storage để lần mở app sau vẫn nhớ.
@@ -9,7 +9,7 @@ class ThemeController extends ChangeNotifier {
   }
 
   static const _key = 'relax_theme_mode';
-  final _storage = const FlutterSecureStorage();
+  final _storage = secureStorage;
 
   ThemeMode _mode = ThemeMode.system;
   ThemeMode get mode => _mode;

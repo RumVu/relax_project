@@ -2587,6 +2587,7 @@ export default function SettingsPage() {
                   title: copy.intentCreated(checkoutPlan.title),
                   message: result.checkout?.note ?? copy.intentRecorded,
                 });
+                // eslint-disable-next-line @next/next/no-location-assign-relative-destination
                 window.location.href = externalUrl;
                 return;
               }
