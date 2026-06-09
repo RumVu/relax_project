@@ -173,11 +173,6 @@ class SettingsScreen extends StatelessWidget {
                 ],
               );
             })(),
-                  onTap: () => context.push('/billing'),
-                ),
-              ],
-            ),
->>>>>>> main
             const SizedBox(height: 24),
             _SectionLabel(context.t('Tài khoản')),
             _Card(

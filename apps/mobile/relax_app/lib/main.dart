@@ -11,7 +11,6 @@ import 'core/theme_controller.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/billing_screen.dart';
 import 'screens/app_shell.dart';
-import 'screens/billing_screen.dart';
 import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
 import 'screens/device_info_screen.dart';
