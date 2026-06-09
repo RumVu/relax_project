@@ -214,7 +214,8 @@ export class WeatherService {
       ),
       this.resolveReverseGeocode(input),
     ]);
-    const hasCurrent = payload.current && Object.keys(payload.current).length > 0;
+    const hasCurrent =
+      payload.current && Object.keys(payload.current).length > 0;
     const hour = Number(
       new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
@@ -222,9 +223,10 @@ export class WeatherService {
         timeZone: input.timezone,
       }).format(new Date()),
     );
-    const isDay = hasCurrent && payload.current?.is_day !== undefined
-      ? payload.current.is_day !== 0
-      : (hour >= 6 && hour < 18);
+    const isDay =
+      hasCurrent && payload.current?.is_day !== undefined
+        ? payload.current.is_day !== 0
+        : hour >= 6 && hour < 18;
     const weather = describeWeather(
       payload.current?.weather_code ?? (isDay ? 1 : 0),
       isDay,
@@ -274,7 +276,8 @@ export class WeatherService {
       ),
       this.resolveReverseGeocode(input),
     ]);
-    const hasCurrent = payload.current && Object.keys(payload.current).length > 0;
+    const hasCurrent =
+      payload.current && Object.keys(payload.current).length > 0;
     const hour = Number(
       new Intl.DateTimeFormat('en-US', {
         hour: '2-digit',
@@ -282,11 +285,14 @@ export class WeatherService {
         timeZone: input.timezone,
       }).format(new Date()),
     );
-    const isDay = hasCurrent && payload.current?.is_day !== undefined
-      ? payload.current.is_day !== 0
-      : (hour >= 6 && hour < 18);
+    const isDay =
+      hasCurrent && payload.current?.is_day !== undefined
+        ? payload.current.is_day !== 0
+        : hour >= 6 && hour < 18;
     const weather = describeWeather(
-      payload.current?.weather_code ?? payload.daily?.weather_code?.[0] ?? (isDay ? 1 : 0),
+      payload.current?.weather_code ??
+        payload.daily?.weather_code?.[0] ??
+        (isDay ? 1 : 0),
       isDay,
     );
 
@@ -323,14 +329,19 @@ export class WeatherService {
       timezone,
     ].join(':');
 
-    const cached = await this.redisService.getJson<OpenMeteoCurrentPayload>(key);
+    const cached =
+      await this.redisService.getJson<OpenMeteoCurrentPayload>(key);
     if (cached !== null) {
       return cached;
     }
 
     const value = await fetchCurrentWeather(latitude, longitude, timezone);
     if (value.current && value.current.temperature_2m !== undefined) {
-      await this.redisService.setJson(key, value, CURRENT_WEATHER_CACHE_TTL_SECONDS);
+      await this.redisService.setJson(
+        key,
+        value,
+        CURRENT_WEATHER_CACHE_TTL_SECONDS,
+      );
     } else {
       await this.redisService.setJson(key, value, 5);
     }
@@ -352,12 +363,18 @@ export class WeatherService {
       forecastDays,
     ].join(':');
 
-    const cached = await this.redisService.getJson<OpenMeteoForecastPayload>(key);
+    const cached =
+      await this.redisService.getJson<OpenMeteoForecastPayload>(key);
     if (cached !== null) {
       return cached;
     }
 
-    const value = await fetchForecast(latitude, longitude, timezone, forecastDays);
+    const value = await fetchForecast(
+      latitude,
+      longitude,
+      timezone,
+      forecastDays,
+    );
     if (value.current && value.current.temperature_2m !== undefined) {
       await this.redisService.setJson(key, value, FORECAST_CACHE_TTL_SECONDS);
     } else {

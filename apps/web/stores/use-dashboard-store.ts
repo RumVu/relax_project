@@ -9,6 +9,7 @@ export type AccountProfile = {
   displayName?: string | null;
   avatar?: string | null;
   role?: string;
+  authProvider?: string;
 };
 
 type DashboardStore = {

@@ -44,6 +44,7 @@ interface MeResponse {
   name?: string | null;
   avatar?: string | null;
   role?: string;
+  authProvider?: string;
   profile?: { displayName?: string | null } | null;
 }
 
@@ -86,6 +87,7 @@ export function AccountMenu() {
           displayName: data?.profile?.displayName ?? data?.name ?? null,
           avatar: data?.avatar ?? cachedAvatar,
           role: data?.role,
+          authProvider: data?.authProvider,
         });
       })
       .catch(() => undefined);

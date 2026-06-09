@@ -39,16 +39,28 @@ class RelaxApp extends StatefulWidget {
 
 class _RelaxAppState extends State<RelaxApp> {
   late final AuthState _auth;
+  late final AudioController _audio;
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _auth = AuthState();
+    _audio = AudioController();
     // Đăng ký cleanup hooks cho logout — reset các per-session
     // flag để user kế tiếp không kế thừa state user cũ.
-    _auth.onLogoutCleanup = RelaxScreen.resetIntroForLogout;
+    _auth.onLogoutCleanup = () {
+      RelaxScreen.resetIntroForLogout();
+      _audio.stop();
+    };
     _router = _buildRouter(_auth);
+  }
+
+  @override
+  void dispose() {
+    _auth.dispose();
+    _audio.dispose();
+    super.dispose();
   }
 
   @override
@@ -57,7 +69,7 @@ class _RelaxAppState extends State<RelaxApp> {
       providers: [
         ChangeNotifierProvider.value(value: _auth),
         ChangeNotifierProvider(create: (_) => ThemeController()),
-        ChangeNotifierProvider(create: (_) => AudioController()),
+        ChangeNotifierProvider.value(value: _audio),
         ChangeNotifierProvider(create: (_) => LocaleController()),
       ],
       child: Builder(builder: (context) {
@@ -217,10 +229,6 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/legal',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const LegalScreen()),
-      ),
-      GoRoute(
-        path: '/billing',
-        builder: (context, state) => const BillingScreen(),
       ),
       GoRoute(
         path: '/location',

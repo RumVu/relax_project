@@ -38,7 +38,7 @@ export async function verifyGoogleIdToken(
   clientId: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
-    const clientIds = clientId.split(',').map(id => id.trim());
+    const clientIds = clientId.split(',').map((id) => id.trim());
     const client = new OAuth2Client(clientIds[0]);
     const ticket = await client.verifyIdToken({ idToken, audience: clientIds });
     return ticket.getPayload() ?? {};
@@ -59,7 +59,7 @@ export async function verifyGoogleAccessToken(
   clientId: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
-    const clientIds = clientId.split(',').map(id => id.trim());
+    const clientIds = clientId.split(',').map((id) => id.trim());
     const tokenInfoResponse = await fetch(
       `https://oauth2.googleapis.com/tokeninfo?access_token=${encodeURIComponent(
         accessToken,
@@ -110,7 +110,7 @@ export async function exchangeGoogleAuthorizationCode(
   redirectUri: string,
 ): Promise<GoogleIdTokenPayload> {
   try {
-    const clientIds = clientId.split(',').map(id => id.trim());
+    const clientIds = clientId.split(',').map((id) => id.trim());
     const client = new OAuth2Client(clientIds[0], clientSecret, redirectUri);
     const { tokens } = await client.getToken(authorizationCode);
     return resolveGoogleTokens(tokens, clientId);
