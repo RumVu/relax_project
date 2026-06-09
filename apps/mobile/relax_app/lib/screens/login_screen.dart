@@ -44,9 +44,6 @@ class _LoginScreenState extends State<LoginScreen> {
       debugPrint('=== [ĐĂNG NHẬP EMAIL THÀNH CÔNG] ===');
       debugPrint('Backend Access Token: $token');
       if (mounted) {
-        showSoftToast(context,
-            message: 'Đăng nhập thành công! Đang vào ứng dụng...',
-            tone: SoftToastTone.success);
         debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
         context.go('/home');
       }
@@ -110,9 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
           if (!mounted) return;
           debugPrint('=== [ĐĂNG NHẬP GOOGLE THÀNH CÔNG] ===');
           debugPrint('Backend Access Token: $token');
-          showSoftToast(context,
-              message: 'Đăng nhập Google thành công! Đang vào ứng dụng...',
-              tone: SoftToastTone.success);
           debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
           context.go('/home');
         } else {
@@ -143,9 +137,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (ok) {
       debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THÀNH CÔNG] ===');
       debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
-      showSoftToast(context,
-          message: 'Bypass: Đăng nhập giả lập Google thành công!',
-          tone: SoftToastTone.success);
       context.go('/home');
     } else {
       debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THẤT BẠI]: ${auth.error} ===');
