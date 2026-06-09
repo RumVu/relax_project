@@ -9,6 +9,7 @@ import '../core/theme.dart';
 import '../core/api_client.dart';
 import '../core/locale_controller.dart';
 import '../core/theme_controller.dart';
+import '../core/secure_storage.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/mood_line_chart.dart';
 import '../widgets/soft_toast.dart';
@@ -329,11 +330,24 @@ class _NotificationCardState extends State<_NotificationCard> {
   String _selected = '21:00';
   String? _reminderId;
   bool _loading = false;
+  String _selectedSound = 'Tiếng mèo con kêu 🐱';
 
   @override
   void initState() {
     super.initState();
     _loadReminders();
+    _loadSoundPreference();
+  }
+
+  Future<void> _loadSoundPreference() async {
+    try {
+      final savedSound = await secureStorage.read(key: 'relax_reminder_sound');
+      if (savedSound != null && mounted) {
+        setState(() {
+          _selectedSound = savedSound;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _loadReminders() async {
@@ -486,6 +500,99 @@ class _NotificationCardState extends State<_NotificationCard> {
     }
   }
 
+  void _showSoundSelectorSheet() {
+    final sounds = [
+      {'name': 'Tiếng mèo con kêu 🐱', 'key': 'cat_meow'},
+      {'name': 'Chuông gió mùa xuân 🎐', 'key': 'wind_chimes'},
+      {'name': 'Tiếng mưa rơi tí tách 🌧️', 'key': 'rain'},
+      {'name': 'Sóng biển rì rào 🌊', 'key': 'ocean'},
+      {'name': 'Tiếng chuông thiền 🔔', 'key': 'bell'},
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetCtx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: sheetCtx.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: sheetCtx.fieldBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Chọn âm báo nhắc nhở 🔔',
+              style: TextStyle(
+                color: sheetCtx.appText,
+                fontWeight: FontWeight.w800,
+                fontSize: 18,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: sounds.length,
+                itemBuilder: (ctx, index) {
+                  final s = sounds[index];
+                  final name = s['name']!;
+                  final isSelected = _selectedSound == name;
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(
+                      name,
+                      style: TextStyle(
+                        color: sheetCtx.appText,
+                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(Icons.check_circle, color: RelaxColors.violet)
+                        : null,
+                    onTap: () async {
+                      HapticFeedback.lightImpact();
+                      setState(() {
+                        _selectedSound = name;
+                      });
+                      try {
+                        await secureStorage.write(
+                          key: 'relax_reminder_sound',
+                          value: name,
+                        );
+                      } catch (_) {}
+                      if (!mounted) return;
+                      showSoftToast(context,
+                          message: 'Đã thay đổi âm báo: $name',
+                          tone: SoftToastTone.success);
+
+                      if (!sheetCtx.mounted) return;
+                      Navigator.pop(sheetCtx);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -594,29 +701,35 @@ class _NotificationCardState extends State<_NotificationCard> {
             ],
           ),
           const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            decoration: BoxDecoration(
-              color: context.surfaceAlt,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const Icon(Icons.volume_up_outlined,
-                    color: RelaxColors.violet, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Âm báo: Tiếng mèo con kêu 🐱',
-                    style: TextStyle(
-                      color: context.appText,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
+          GestureDetector(
+            onTap: () {
+              HapticFeedback.selectionClick();
+              _showSoundSelectorSheet();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              decoration: BoxDecoration(
+                color: context.surfaceAlt,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.volume_up_outlined,
+                      color: RelaxColors.violet, size: 20),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      'Âm báo: $_selectedSound',
+                      style: TextStyle(
+                        color: context.appText,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
-                ),
-                Icon(Icons.chevron_right, color: context.mutedText),
-              ],
+                  Icon(Icons.chevron_right, color: context.mutedText),
+                ],
+              ),
             ),
           ),
         ],
