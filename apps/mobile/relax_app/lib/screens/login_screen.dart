@@ -32,9 +32,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-    showSoftToast(context,
-        message: 'Đã chọn đăng nhập bằng Email. Đang tiến hành...',
-        tone: SoftToastTone.info);
     debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: EMAIL LÀM BẰNG TAY] ===');
     debugPrint('Tiến hành đăng nhập bằng email: ${_emailCtrl.text}');
     setState(() => _busy = true);
@@ -62,9 +59,6 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _loginWithGoogle() async {
-    showSoftToast(context,
-        message: 'Đã chọn đăng nhập bằng Google. Đang kết nối...',
-        tone: SoftToastTone.info);
     debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GOOGLE SIGN-IN] ===');
     setState(() => _busy = true);
     try {
@@ -85,11 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       debugPrint('Google Sign-In thành công cho tài khoản: ${account.email}');
-      if (mounted) {
-        showSoftToast(context,
-            message: 'Đăng nhập Google thành công. Đang lấy xác thực...',
-            tone: SoftToastTone.info);
-      }
       debugPrint('Đang lấy Google Authentication details...');
       final GoogleSignInAuthentication authDetails = await account.authentication;
       final idToken = authDetails.idToken;
@@ -112,9 +101,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
       final auth = context.read<AuthState>();
       debugPrint('Đang gửi ID Token lên backend để xác thực...');
-      showSoftToast(context,
-          message: 'Đang gửi ID Token xác thực với máy chủ...',
-          tone: SoftToastTone.info);
       final ok = await auth.loginWithGoogle(idToken: idToken, accessToken: accessToken);
 
       if (mounted) {
