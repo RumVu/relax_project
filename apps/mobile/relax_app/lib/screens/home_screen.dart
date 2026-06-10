@@ -33,19 +33,33 @@ class _HomeScreenState extends State<HomeScreen> {
   String? _savingMood;
   int _unreadCount = 0;
 
+  String? _lastLang;
+
   @override
   void initState() {
     super.initState();
-    _loadAll();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (mounted) {
+      final lang = LocaleScope.of(context);
+      if (lang != _lastLang) {
+        _lastLang = lang;
+        _loadAll();
+      }
+    }
   }
 
   Future<void> _loadAll() async {
+    if (!mounted) return;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final lang = mounted ? LocaleScope.of(context) : 'vi';
+      final lang = _lastLang ?? 'vi';
       final results = await Future.wait([
         RelaxApi.instance.get('/weather/me/current'),
         RelaxApi.instance.get('/cozy-quotes/random', query: {'lang': lang}),
