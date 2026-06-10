@@ -49,7 +49,11 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
       }
       _rows.add(('Phiên bản app', '1.0.0 (build 1)'));
     } catch (e) {
-      _rows.add(('Lỗi', e.toString()));
+      if (e.toString().contains('MissingPluginException')) {
+        _rows.add(('Lỗi', 'MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.'));
+      } else {
+        _rows.add(('Lỗi', e.toString()));
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -96,7 +100,7 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
                             title: Text(context.t(_rows[i].$1),
                                 style: TextStyle(
                                     color: context.mutedText, fontSize: 12)),
-                            subtitle: Text(_rows[i].$2,
+                            subtitle: Text(context.t(_rows[i].$2),
                                 style: TextStyle(
                                     color: context.appText,
                                     fontWeight: FontWeight.w700)),

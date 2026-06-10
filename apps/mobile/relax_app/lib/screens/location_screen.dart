@@ -47,7 +47,11 @@ class _LocationScreenState extends State<LocationScreen> {
         _status = 'Đã lấy vị trí thành công';
       });
     } catch (e) {
-      setState(() => _status = 'Lỗi: $e');
+      if (e.toString().contains('MissingPluginException')) {
+        setState(() => _status = 'Lỗi: MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.');
+      } else {
+        setState(() => _status = 'Lỗi: $e');
+      }
     } finally {
       if (mounted) setState(() => _loading = false);
     }
