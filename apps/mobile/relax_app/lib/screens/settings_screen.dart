@@ -833,7 +833,7 @@ class _StatsCardState extends State<_StatsCard> {
             children: [
               Expanded(
                 child: Text(
-                  'Xem lại hành trình cảm xúc của bạn',
+                  context.t('Xem lại hành trình cảm xúc của bạn'),
                   style: TextStyle(color: context.mutedText, fontSize: 12),
                 ),
               ),
@@ -845,7 +845,7 @@ class _StatsCardState extends State<_StatsCard> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  'Theo tuần',
+                  context.t('Theo tuần'),
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
@@ -868,7 +868,7 @@ class _StatsCardState extends State<_StatsCard> {
               height: 100,
               child: Center(
                 child: Text(
-                  'Chưa có dữ liệu cảm xúc.\nGhi vài lần để xem biểu đồ nhé!',
+                  context.t('Chưa có dữ liệu cảm xúc.\nGhi vài lần để xem biểu đồ nhé!'),
                   textAlign: TextAlign.center,
                   style: TextStyle(color: context.mutedText, fontSize: 12),
                 ),
@@ -896,8 +896,8 @@ class _StatsCardState extends State<_StatsCard> {
                   Expanded(
                     child: Text(
                       _stressDelta >= 0
-                          ? 'Giảm stress $_stressDelta% so với đầu tuần'
-                          : 'Stress tăng ${-_stressDelta}% — nhớ nghỉ ngơi nhé',
+                          ? context.t('Giảm stress {percent}% so với đầu tuần', {'percent': '$_stressDelta'})
+                          : context.t('Stress tăng {percent}% — nhớ nghỉ ngơi nhé', {'percent': '${-_stressDelta}'}),
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: context.appText,
@@ -1385,7 +1385,7 @@ class _ThemeToggleCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  label,
+                  context.t(label),
                   style: TextStyle(
                     color: selected ? Colors.white : context.mutedText,
                     fontWeight: FontWeight.w700,

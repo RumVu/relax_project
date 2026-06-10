@@ -27,20 +27,36 @@ export class CozyQuotesService {
     return buildPage(items, total, query);
   }
 
-  async findRandom() {
+  async findRandom(lang?: string) {
+    const where: Prisma.CozyQuoteWhereInput = { isActive: true };
+    if (lang === 'en' || lang === 'vi') {
+      where.lang = lang;
+    }
+
     const count = await this.prisma.cozyQuote.count({
-      where: { isActive: true },
+      where,
     });
 
     if (count === 0) {
-      throw AppException.notFound(
-        ErrorCode.CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND,
-        'Active cozy quote not found',
-      );
+      const fallbackCount = await this.prisma.cozyQuote.count({
+        where: { isActive: true },
+      });
+      if (fallbackCount === 0) {
+        throw AppException.notFound(
+          ErrorCode.CATALOG_ACTIVE_COZY_QUOTE_NOT_FOUND,
+          'Active cozy quote not found',
+        );
+      }
+      const [quote] = await this.prisma.cozyQuote.findMany({
+        where: { isActive: true },
+        skip: Math.floor(Math.random() * fallbackCount),
+        take: 1,
+      });
+      return quote;
     }
 
     const [quote] = await this.prisma.cozyQuote.findMany({
-      where: { isActive: true },
+      where,
       skip: Math.floor(Math.random() * count),
       take: 1,
     });

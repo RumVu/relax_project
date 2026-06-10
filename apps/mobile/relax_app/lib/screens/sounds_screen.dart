@@ -241,7 +241,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      (t['title'] as String?) ?? '',
+                      context.t((t['title'] as String?) ?? ''),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

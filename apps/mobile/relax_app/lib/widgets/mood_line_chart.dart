@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 /// Biểu đồ đường cảm xúc 7 ngày — tự vẽ bằng CustomPainter, không cần
@@ -36,7 +37,7 @@ class MoodLineChart extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: labels
               .map((l) => Text(
-                    l,
+                    context.t(l),
                     style: TextStyle(fontSize: 10, color: context.mutedText),
                   ))
               .toList(),

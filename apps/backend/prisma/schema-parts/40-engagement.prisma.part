@@ -528,6 +528,7 @@ model CozyQuote {
   author  String?
   mood    MoodType?
   imageUrl String?
+  lang     String    @default("vi")
 
   isActive Boolean @default(true)
 
@@ -536,5 +537,6 @@ model CozyQuote {
 
   @@index([mood])
   @@index([isActive])
+  @@index([lang])
   @@map("cozy_quotes")
 }

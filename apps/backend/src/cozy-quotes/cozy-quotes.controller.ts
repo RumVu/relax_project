@@ -47,8 +47,8 @@ export class CozyQuotesController {
     description: 'Random cozy quote.',
   })
   @Get('random')
-  findRandom() {
-    return this.cozyQuotesService.findRandom();
+  findRandom(@Query('lang') lang?: string) {
+    return this.cozyQuotesService.findRandom(lang);
   }
 
   @ApiOperation({ summary: 'List cozy quotes by mood' })

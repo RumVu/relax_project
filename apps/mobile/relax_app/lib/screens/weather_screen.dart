@@ -221,7 +221,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
               ),
               if (title.isNotEmpty)
                 Text(
-                  title,
+                  context.t(title),
                   style: const TextStyle(
                       color: RelaxColors.slate, fontSize: 11),
                 ),

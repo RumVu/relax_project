@@ -7,6 +7,7 @@ export class CozyQuoteResponseDto {
   author!: string | null;
   mood!: MoodType | null;
   imageUrl!: string | null;
+  lang!: string;
   isActive!: boolean;
   createdAt!: Date;
   updatedAt!: Date;

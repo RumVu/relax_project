@@ -25,6 +25,10 @@ export class CreateCozyQuoteDto {
   imageUrl?: string;
 
   @IsOptional()
+  @IsString()
+  lang?: string;
+
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 }

@@ -45,9 +45,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _error = null;
     });
     try {
+      final lang = mounted ? LocaleScope.of(context) : 'vi';
       final results = await Future.wait([
         RelaxApi.instance.get('/weather/me/current'),
-        RelaxApi.instance.get('/cozy-quotes/random'),
+        RelaxApi.instance.get('/cozy-quotes/random', query: {'lang': lang}),
         RelaxApi.instance.get('/mood-checkins/options'),
         RelaxApi.instance.get('/mood-checkins/me', query: {'limit': 60}),
         RelaxApi.instance.get('/notifications/me/unread-count'),

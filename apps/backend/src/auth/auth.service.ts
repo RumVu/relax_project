@@ -605,13 +605,28 @@ export class AuthService {
     userAgent?: string,
     ipAddress?: string,
   ) {
-    const deviceLabel = summariseUserAgent(userAgent);
-    const ipLabel = ipAddress ? ` từ IP ${ipAddress}` : '';
-    await this.notifications.createForUser(userId, {
-      title: 'Đã tìm thấy thiết bị đăng nhập mới',
-      message: `Phát hiện đăng nhập từ ${deviceLabel}${ipLabel}. Nếu không phải anh, hãy đổi mật khẩu ngay.`,
-      type: NotificationType.IN_APP,
+    const userPref = await this.prisma.userPreference.findUnique({
+      where: { userId },
+      select: { language: true },
     });
+    const lang = userPref?.language || 'vi';
+
+    const deviceLabel = summariseUserAgent(userAgent);
+    if (lang === 'en') {
+      const ipLabel = ipAddress ? ` from IP ${ipAddress}` : '';
+      await this.notifications.createForUser(userId, {
+        title: 'New login device detected',
+        message: `Detected login from ${deviceLabel}${ipLabel}. If this wasn't you, change your password immediately.`,
+        type: NotificationType.IN_APP,
+      });
+    } else {
+      const ipLabel = ipAddress ? ` từ IP ${ipAddress}` : '';
+      await this.notifications.createForUser(userId, {
+        title: 'Đã tìm thấy thiết bị đăng nhập mới',
+        message: `Phát hiện đăng nhập từ ${deviceLabel}${ipLabel}. Nếu không phải anh, hãy đổi mật khẩu ngay.`,
+        type: NotificationType.IN_APP,
+      });
+    }
   }
 }
 

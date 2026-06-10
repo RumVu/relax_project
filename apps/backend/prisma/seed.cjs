@@ -1270,21 +1270,27 @@ async function seedCozyQuotes() {
     },
   ];
 
+  const viQuotes = quotes.map((q) => ({ ...q, lang: 'vi' }));
+
   const extraQuotes = EXTRA_COZY_QUOTES.map(([content, mood], index) => ({
     content,
     author: index % 5 === 0 ? 'Mồn Lèo' : 'Thì Ai Chill',
     mood: MoodType[mood] ?? MoodType.NEUTRAL,
     imageUrl: `${ASSET_BASE}/quotes/extra-${String(index + 1).padStart(2, '0')}.png`,
     isActive: true,
-  }));  const englishQuotes = ENGLISH_COZY_QUOTES.map(([content, mood], index) => ({
+    lang: 'vi',
+  }));
+
+  const englishQuotes = ENGLISH_COZY_QUOTES.map(([content, mood], index) => ({
     content,
     author: index % 5 === 0 ? 'Mồn Lèo' : 'Thì Ai Chill',
     mood: MoodType[mood] ?? MoodType.NEUTRAL,
     imageUrl: `${ASSET_BASE}/quotes/en-${String(index + 1).padStart(2, '0')}.png`,
     isActive: true,
+    lang: 'en',
   }));
 
-  for (const quote of [...quotes, ...extraQuotes, ...englishQuotes]) {
+  for (const quote of [...viQuotes, ...extraQuotes, ...englishQuotes]) {
     await upsertByField(prisma.cozyQuote, 'content', quote.content, quote);
   }
 }

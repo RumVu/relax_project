@@ -231,7 +231,7 @@ class _NotificationSheetState extends State<NotificationSheet> {
                                   final isRead = item['isRead'] == true;
                                   final id = item['id'] as String;
                                   final title = context.t((item['title'] as String?) ?? 'Thông báo');
-                                  final message = (item['message'] as String?) ?? '';
+                                  final message = context.t((item['message'] as String?) ?? '');
                                   final date = _formatDateTime(context, item['createdAt'] as String?);
                                   final type = item['type'] as String?;
 
