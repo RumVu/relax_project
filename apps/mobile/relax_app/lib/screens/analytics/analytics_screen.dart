@@ -5,7 +5,7 @@ import '../../core/tour_controller.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
-import '../../widgets/mood_line_chart.dart';
+import '../../widgets/mood_line_chart/mood_line_chart.dart';
 import 'models/mood_labels.dart';
 import 'widgets/mood_distribution.dart';
 import 'widgets/stat_tile.dart';

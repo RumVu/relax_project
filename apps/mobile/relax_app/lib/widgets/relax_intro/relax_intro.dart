@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 
 import '../../core/theme.dart';
 import '../../core/locale_controller.dart';
-import '../journey_prompt.dart';
+import '../journey_prompt/journey_prompt.dart';
 
 import 'models/intro_phase.dart';
 import 'helpers/intro_helpers.dart';

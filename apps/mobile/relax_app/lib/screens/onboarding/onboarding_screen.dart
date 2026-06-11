@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/secure_storage.dart';
-import '../core/theme.dart';
-import '../widgets/cat_mascot.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/secure_storage.dart';
+import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
+import 'models/onboarding_slide.dart';
 
-/// Carousel chào mừng lần đầu — 3 slide như mockup. Sau khi xem xong (hoặc
-/// bấm bỏ qua) lưu cờ vào secure storage để không hiện lại, rồi sang đăng nhập.
+// Carousel chao mung lan dau — 4 slide. Sau khi xem xong (hoac
+// bam bo qua) luu co vao secure storage de khong hien lai, roi sang dang nhap.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -23,31 +24,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _page = 0;
 
-  static const _slides = [
-    _Slide(
-      emoji: '🌙',
-      title: 'Không gian chill\ndành cho bạn',
-      body: 'Thư giãn, hít thở và tận hưởng những khoảnh khắc bình yên.',
-    ),
-    _Slide(
-      emoji: '🫶',
-      title: 'Chọn phương thức\nyêu thích',
-      body:
-          'Nhạc, thiền, hít thở, viết nhật ký — pick cách bạn thấy dễ chịu nhất.',
-    ),
-    _Slide(
-      emoji: '📈',
-      title: 'Theo dõi cảm xúc\n& tiến độ',
-      body:
-          'Mood check-in mỗi ngày, biểu đồ tuần — hiểu rõ nhịp bên trong mình.',
-    ),
-    _Slide(
-      emoji: '✦',
-      title: 'Sẵn sàng\nbắt đầu chưa?',
-      body: 'Đăng nhập để Thi Ái nâng niu trút bỏ nỗi buồn của bạn nha ~',
-    ),
-  ];
-
   @override
   void dispose() {
     _controller.dispose();
@@ -55,12 +31,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _finish() async {
-    await secureStorage
-        .write(key: OnboardingScreen.seenKey, value: '1');
+    await secureStorage.write(key: OnboardingScreen.seenKey, value: '1');
     if (!mounted) return;
-    // Cập nhật in-memory state + notify router refreshListenable, nếu
-    // không sẽ kẹt loop: storage đã '1' nhưng auth.onboardingSeen vẫn
-    // false → redirect /login → /onboarding.
     context.read<AuthState>().markOnboardingSeen();
     context.go('/login');
   }
@@ -87,10 +59,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _slides.length,
+                itemCount: kOnboardingSlides.length,
                 onPageChanged: (i) => setState(() => _page = i),
                 itemBuilder: (context, i) {
-                  final s = _slides[i];
+                  final s = kOnboardingSlides[i];
                   return Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
                     child: Column(
@@ -127,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             // Dots
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_slides.length, (i) {
+              children: List.generate(kOnboardingSlides.length, (i) {
                 final active = i == _page;
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
@@ -151,7 +123,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    if (_page == _slides.length - 1) {
+                    if (_page == kOnboardingSlides.length - 1) {
                       _finish();
                     } else {
                       _controller.nextPage(
@@ -161,7 +133,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     }
                   },
                   child: Text(
-                    _page == _slides.length - 1 ? context.t('Bắt đầu nào') : context.t('Tiếp tục'),
+                    _page == kOnboardingSlides.length - 1
+                        ? context.t('Bắt đầu nào')
+                        : context.t('Tiếp tục'),
                   ),
                 ),
               ),
@@ -172,11 +146,4 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ),
     );
   }
-}
-
-class _Slide {
-  const _Slide({required this.emoji, required this.title, required this.body});
-  final String emoji;
-  final String title;
-  final String body;
 }

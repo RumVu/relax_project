@@ -10,7 +10,7 @@ import '../../../core/api_client.dart';
 import '../../../core/auth_state.dart';
 import '../../../core/locale_controller.dart';
 import '../../../core/theme.dart';
-import '../../../widgets/checkin_sheet.dart';
+import '../../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../models/relax_activity.dart';
 import 'pre_activity_sheet.dart';
 import 'small_button.dart';

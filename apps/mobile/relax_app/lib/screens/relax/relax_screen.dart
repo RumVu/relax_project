@@ -6,7 +6,7 @@ import '../../core/tour_controller.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/cat_mascot.dart';
-import '../../widgets/relax_intro.dart';
+import '../../widgets/relax_intro/relax_intro.dart';
 import 'models/relax_activity.dart';
 import 'widgets/activity_card.dart';
 

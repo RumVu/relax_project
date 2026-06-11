@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/locale_controller.dart';
 import '../../core/api_client.dart';
 import '../../core/theme.dart';
-import '../../widgets/journey_prompt.dart';
+import '../../widgets/journey_prompt/journey_prompt.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/mood_grid.dart';
 import 'widgets/intensity_slider.dart';

@@ -7,8 +7,8 @@ import 'package:provider/provider.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
-import '../../widgets/checkin_sheet.dart';
-import '../../widgets/journey_prompt.dart';
+import '../../widgets/checkin_sheet/checkin_sheet.dart';
+import '../../widgets/journey_prompt/journey_prompt.dart';
 import 'models/breathing_pattern.dart';
 import 'models/breathing_phase.dart';
 

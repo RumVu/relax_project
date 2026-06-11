@@ -2,13 +2,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../core/theme.dart';
+import '../../core/theme.dart';
+import 'mood_painter.dart';
 
-/// Nền gradient động — hai vòng tròn mờ trôi rất chậm, đổi tông theo cảm xúc
-/// chủ đạo. Đặt bên dưới mọi nội dung của Home để tạo cảm giác "thở" cùng
-/// trạng thái user, không gây phân tâm.
-///
-/// `mood`: 'calm' | 'happy' | 'sad' | 'energetic' | 'neutral'.
+// Nen gradient dong — hai vong tron mo troi rat cham, doi tong theo cam xuc
+// chu dao. Dat ben duoi moi noi dung cua Home de tao cam giac "tho" cung
+// trang thai user, khong gay phan tam.
+//
+// `mood`: 'calm' | 'happy' | 'sad' | 'energetic' | 'neutral'.
 class MoodBackground extends StatefulWidget {
   const MoodBackground({
     super.key,
@@ -42,7 +43,6 @@ class _MoodBackgroundState extends State<MoodBackground>
     super.dispose();
   }
 
-  // Mỗi mood = 2 màu nền dịu — lerp giữa chúng tạo "hơi thở" rất chậm.
   ({Color a, Color b}) get _palette {
     switch (widget.mood) {
       case 'happy':
@@ -68,13 +68,12 @@ class _MoodBackgroundState extends State<MoodBackground>
       animation: _c,
       builder: (ctx, _) {
         final t = _c.value * 2 * math.pi;
-        // Hai blob di chuyển vòng tròn rất chậm.
         return Stack(
           children: [
             Positioned.fill(child: ColoredBox(color: base)),
             Positioned.fill(
               child: CustomPaint(
-                painter: _MoodPainter(
+                painter: MoodPainter(
                   t: t,
                   colorA: pal.a.withValues(alpha: dark ? 0.18 : 0.32),
                   colorB: pal.b.withValues(alpha: dark ? 0.18 : 0.32),
@@ -87,38 +86,4 @@ class _MoodBackgroundState extends State<MoodBackground>
       },
     );
   }
-}
-
-class _MoodPainter extends CustomPainter {
-  _MoodPainter({required this.t, required this.colorA, required this.colorB});
-  final double t;
-  final Color colorA;
-  final Color colorB;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final r = w * 0.55;
-
-    final cx1 = w * 0.3 + math.cos(t) * w * 0.15;
-    final cy1 = h * 0.25 + math.sin(t) * h * 0.08;
-    final p1 = Paint()
-      ..shader = RadialGradient(
-        colors: [colorA, colorA.withValues(alpha: 0)],
-      ).createShader(Rect.fromCircle(center: Offset(cx1, cy1), radius: r));
-    canvas.drawCircle(Offset(cx1, cy1), r, p1);
-
-    final cx2 = w * 0.75 + math.cos(t + math.pi) * w * 0.12;
-    final cy2 = h * 0.75 + math.sin(t + math.pi) * h * 0.1;
-    final p2 = Paint()
-      ..shader = RadialGradient(
-        colors: [colorB, colorB.withValues(alpha: 0)],
-      ).createShader(Rect.fromCircle(center: Offset(cx2, cy2), radius: r));
-    canvas.drawCircle(Offset(cx2, cy2), r, p2);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MoodPainter old) =>
-      old.t != t || old.colorA != colorA || old.colorB != colorB;
 }

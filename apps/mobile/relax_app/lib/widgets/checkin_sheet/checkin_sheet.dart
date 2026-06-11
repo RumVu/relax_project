@@ -2,16 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../core/api_client.dart';
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import 'cat_mascot.dart';
-import 'soft_toast.dart';
+import '../../core/api_client.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../cat_mascot.dart';
+import '../soft_toast.dart';
+import 'widgets/rating_selector.dart';
 
-/// Popup "Bạn ổn chứ?" — hiện sau khi hoàn thành hoạt động để check-in cảm xúc
-/// sau hoạt động + ghi chú, rồi lưu mood-checkin hoặc cập nhật session.
-Future<void> showCheckInSheet(BuildContext context, String activity, {String? sessionId}) {
+// Popup "Ban on chua?" — hien sau khi hoan thanh hoat dong de check-in cam xuc
+// sau hoat dong + ghi chu, roi luu mood-checkin hoac cap nhat session.
+Future<void> showCheckInSheet(BuildContext context, String activity,
+    {String? sessionId}) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -22,7 +24,7 @@ Future<void> showCheckInSheet(BuildContext context, String activity, {String? se
 
 class CheckInSheet extends StatefulWidget {
   const CheckInSheet({super.key, required this.activity, this.sessionId});
-  
+
   final String activity;
   final String? sessionId;
 
@@ -31,15 +33,9 @@ class CheckInSheet extends StatefulWidget {
 }
 
 class _CheckInSheetState extends State<CheckInSheet> {
-  // 0..4 → Rất tệ / Tệ / Bình thường / Tốt / Rất tốt
   int _rating = 4;
   final _noteCtrl = TextEditingController();
   bool _saving = false;
-
-  static const _labels = ['Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Rất tốt'];
-  static const _emojis = ['😿', '😾', '😐', '😺', '😻'];
-  // Map rating → mood gửi backend.
-  static const _moods = ['SAD', 'STRESSED', 'NEUTRAL', 'CALM', 'HAPPY'];
 
   @override
   void dispose() {
@@ -53,32 +49,30 @@ class _CheckInSheetState extends State<CheckInSheet> {
     setState(() => _saving = true);
     try {
       if (widget.sessionId != null) {
-        // Complete the relax session on backend
         final auth = context.read<AuthState>();
         final ok = await auth.finishRelaxSession(
           widget.sessionId!,
-          moodAfter: _moods[_rating],
+          moodAfter: RatingSelector.moods[_rating],
           reliefLevel: _rating + 1,
-          note: _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
+          note:
+              _noteCtrl.text.trim().isNotEmpty ? _noteCtrl.text.trim() : null,
         );
         if (!ok) {
           throw Exception(errorMsg);
         }
       } else {
-        // Fallback: direct mood check-in
         await RelaxApi.instance.post('/mood-checkins/me', body: {
-          'mood': _moods[_rating],
+          'mood': RatingSelector.moods[_rating],
           'intensity': _rating + 1,
           if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
           'tags': ['after-activity', widget.activity],
         });
       }
-      
+
       if (!mounted) return;
       Navigator.pop(context);
       showSoftToast(context,
-          message: successMsg,
-          tone: SoftToastTone.success);
+          message: successMsg, tone: SoftToastTone.success);
 
       if (goToAnalytics && mounted) {
         context.go('/home?tab=2');
@@ -102,7 +96,8 @@ class _CheckInSheetState extends State<CheckInSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: context.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(24)),
           border: Border.all(color: context.fieldBorder),
         ),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -135,42 +130,9 @@ class _CheckInSheetState extends State<CheckInSheet> {
               style: TextStyle(color: context.mutedText, fontSize: 13),
             ),
             const SizedBox(height: 14),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: List.generate(5, (i) {
-                final sel = _rating == i;
-                return GestureDetector(
-                  onTap: () => setState(() => _rating = i),
-                  child: Container(
-                    width: 58,
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: BoxDecoration(
-                      color: sel
-                          ? RelaxColors.violet.withValues(alpha: 0.15)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: sel ? RelaxColors.violet : context.fieldBorder,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(_emojis[i], style: const TextStyle(fontSize: 22)),
-                        const SizedBox(height: 2),
-                        Text(
-                          context.t(_labels[i]),
-                          style: TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w600,
-                            color: context.appText,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
+            RatingSelector(
+              rating: _rating,
+              onChanged: (i) => setState(() => _rating = i),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -186,7 +148,8 @@ class _CheckInSheetState extends State<CheckInSheet> {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: _saving ? null : () => _continue(goToAnalytics: false),
+                onPressed:
+                    _saving ? null : () => _continue(goToAnalytics: false),
                 child: _saving
                     ? const SizedBox(
                         height: 20,
@@ -199,7 +162,8 @@ class _CheckInSheetState extends State<CheckInSheet> {
             ),
             const SizedBox(height: 8),
             TextButton(
-              onPressed: _saving ? null : () => _continue(goToAnalytics: true),
+              onPressed:
+                  _saving ? null : () => _continue(goToAnalytics: true),
               child: Text(
                 context.t('Mình ổn, quay lại làm việc thôi'),
                 style: const TextStyle(color: RelaxColors.violet),

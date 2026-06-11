@@ -9,9 +9,9 @@ import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/cat_mascot.dart';
-import '../../widgets/journey_prompt.dart';
-import '../../widgets/mood_background.dart';
-import '../../widgets/notification_sheet.dart';
+import '../../widgets/journey_prompt/journey_prompt.dart';
+import '../../widgets/mood_background/mood_background.dart';
+import '../../widgets/notification_sheet/notification_sheet.dart';
 import '../../widgets/soft_toast.dart';
 import 'helpers/home_data_loader.dart';
 

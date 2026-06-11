@@ -1,128 +1,8 @@
 import 'package:flutter/material.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
 
-/// Biểu đồ xu hướng nhiệt độ 7 ngày (Cao nhất / Thấp nhất).
-/// Tự vẽ bằng CustomPainter, tích hợp hiển thị chỉ số trực tiếp lên chấm đồ thị.
-class WeatherForecastChart extends StatelessWidget {
-  const WeatherForecastChart({
-    super.key,
-    required this.forecast,
-    this.height = 140,
-  });
-
-  final List<Map<String, dynamic>> forecast;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    if (forecast.isEmpty) return const SizedBox.shrink();
-
-    // Định dạng label ngày dưới trục hoành (vd: "08/06", "09/06")
-    final labels = forecast.map((d) {
-      final dateStr = d['date'] as String? ?? '';
-      if (dateStr.length >= 10) {
-        final parts = dateStr.split('-');
-        if (parts.length >= 3) {
-          return '${parts[2]}/${parts[1]}';
-        }
-      }
-      return dateStr;
-    }).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          context.t('Xu hướng nhiệt độ 7 ngày 📊'),
-          style: TextStyle(
-            fontWeight: FontWeight.w800,
-            fontSize: 15,
-            color: context.appText,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-          decoration: BoxDecoration(
-            color: context.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.fieldBorder),
-          ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: height,
-                width: double.infinity,
-                child: CustomPaint(
-                  painter: _WeatherChartPainter(
-                    forecast: forecast,
-                    highColor: RelaxColors.coral,
-                    lowColor: RelaxColors.violet,
-                    gridColor: context.fieldBorder,
-                    textColor: context.appText,
-                    mutedTextColor: context.mutedText,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: labels
-                    .map((l) => Text(
-                          l,
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: context.mutedText,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ))
-                    .toList(),
-              ),
-              const SizedBox(height: 12),
-              // Legend ghi chú màu
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: RelaxColors.coral,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    context.t('Cao nhất'),
-                    style: TextStyle(fontSize: 11, color: context.mutedText),
-                  ),
-                  const SizedBox(width: 24),
-                  Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: RelaxColors.violet,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    context.t('Thấp nhất'),
-                    style: TextStyle(fontSize: 11, color: context.mutedText),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _WeatherChartPainter extends CustomPainter {
-  _WeatherChartPainter({
+// CustomPainter for the 7-day temperature trend chart.
+class WeatherChartPainter extends CustomPainter {
+  WeatherChartPainter({
     required this.forecast,
     required this.highColor,
     required this.lowColor,
@@ -142,8 +22,10 @@ class _WeatherChartPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (forecast.isEmpty) return;
 
-    final highs = forecast.map((d) => (d['temperatureMax'] as num?)?.toDouble()).toList();
-    final lows = forecast.map((d) => (d['temperatureMin'] as num?)?.toDouble()).toList();
+    final highs =
+        forecast.map((d) => (d['temperatureMax'] as num?)?.toDouble()).toList();
+    final lows =
+        forecast.map((d) => (d['temperatureMin'] as num?)?.toDouble()).toList();
 
     double? globalMin;
     double? globalMax;
@@ -162,7 +44,6 @@ class _WeatherChartPainter extends CustomPainter {
     globalMin ??= 15.0;
     globalMax ??= 35.0;
 
-    // Chừa khoảng trống đệm ở biên
     if (globalMax == globalMin) {
       globalMax += 2;
       globalMin -= 2;
@@ -185,7 +66,7 @@ class _WeatherChartPainter extends CustomPainter {
       return Offset(x, y);
     }
 
-    // Vẽ lưới ngang
+    // Grid lines
     final gridPaint = Paint()
       ..color = gridColor.withValues(alpha: 0.5)
       ..strokeWidth = 1;
@@ -238,7 +119,7 @@ class _WeatherChartPainter extends CustomPainter {
       }
     }
 
-    // Tô gradient High
+    // High gradient fill
     if (highDots.isNotEmpty) {
       highFill.lineTo(highDots.last.dx, size.height);
       highFill.close();
@@ -254,7 +135,7 @@ class _WeatherChartPainter extends CustomPainter {
       canvas.drawPath(highFill, highFillPaint);
     }
 
-    // Tô gradient Low
+    // Low gradient fill
     if (lowDots.isNotEmpty) {
       lowFill.lineTo(lowDots.last.dx, size.height);
       lowFill.close();
@@ -270,7 +151,7 @@ class _WeatherChartPainter extends CustomPainter {
       canvas.drawPath(lowFill, lowFillPaint);
     }
 
-    // Vẽ đường đồ thị
+    // Line strokes
     final linePaint = Paint()
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
@@ -284,21 +165,20 @@ class _WeatherChartPainter extends CustomPainter {
       canvas.drawPath(lowPath, linePaint..color = lowColor);
     }
 
-    // Vẽ các nút tròn và chữ chỉ số nhiệt độ
+    // Dots and temperature labels
     final dotFill = Paint();
     final dotRing = Paint()..color = Colors.white;
 
-    void drawDotsAndLabels(List<Offset> dots, List<double?> temps, Color color, bool isHigh) {
+    void drawDotsAndLabels(
+        List<Offset> dots, List<double?> temps, Color color, bool isHigh) {
       for (var i = 0; i < dots.length; i++) {
         final p = dots[i];
         final t = temps[i];
         if (t == null) continue;
 
-        // Vẽ dot
         canvas.drawCircle(p, 4.5, dotRing);
         canvas.drawCircle(p, 3.0, dotFill..color = color);
 
-        // Vẽ text chỉ số nhiệt độ
         final textPainter = TextPainter(
           text: TextSpan(
             text: '${t.round()}°',
@@ -311,7 +191,6 @@ class _WeatherChartPainter extends CustomPainter {
           textDirection: TextDirection.ltr,
         )..layout();
 
-        // High hiện phía trên dot, Low hiện phía dưới
         final textOffset = Offset(
           p.dx - textPainter.width / 2,
           isHigh ? p.dy - 16 : p.dy + 6,
@@ -325,6 +204,6 @@ class _WeatherChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _WeatherChartPainter old) =>
+  bool shouldRepaint(covariant WeatherChartPainter old) =>
       old.forecast != forecast;
 }

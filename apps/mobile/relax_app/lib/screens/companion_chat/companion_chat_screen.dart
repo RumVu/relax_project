@@ -3,10 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/api_client.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/soft_toast.dart';
+import '../../core/api_client.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/soft_toast.dart';
+import 'widgets/chat_bubble.dart';
 
 class CompanionChatScreen extends StatefulWidget {
   const CompanionChatScreen({super.key});
@@ -48,7 +49,8 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
         _companionName = compRes.data['name'] as String? ?? 'Linh thú';
       }
 
-      final res = await RelaxApi.instance.get('/user-companions/me/chat/history');
+      final res =
+          await RelaxApi.instance.get('/user-companions/me/chat/history');
       if (res.data is List) {
         _messages.clear();
         for (final item in res.data) {
@@ -110,12 +112,15 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
         }
       } else {
         if (mounted) {
-          showSoftToast(context, message: context.t('Không gửi được tin nhắn'), tone: SoftToastTone.error);
+          showSoftToast(context,
+              message: context.t('Không gửi được tin nhắn'),
+              tone: SoftToastTone.error);
         }
       }
     } catch (e) {
       if (mounted) {
-        showSoftToast(context, message: e.toString(), tone: SoftToastTone.error);
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
       }
     } finally {
       setState(() => _sending = false);
@@ -138,11 +143,17 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
           children: [
             Text(
               _companionName,
-              style: TextStyle(color: context.appText, fontWeight: FontWeight.w800, fontSize: 16),
+              style: TextStyle(
+                  color: context.appText,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 16),
             ),
             Text(
               context.t('Trực tuyến'),
-              style: const TextStyle(color: RelaxColors.mint, fontSize: 11, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  color: RelaxColors.mint,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -152,57 +163,43 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
           children: [
             Expanded(
               child: _loading
-                  ? const Center(child: CircularProgressIndicator(color: RelaxColors.violet))
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                          color: RelaxColors.violet))
                   : _error != null
                       ? Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(_error!, style: const TextStyle(color: RelaxColors.coral)),
+                              Text(_error!,
+                                  style: const TextStyle(
+                                      color: RelaxColors.coral)),
                               const SizedBox(height: 12),
-                              ElevatedButton(onPressed: _loadHistory, child: Text(context.t('Thử lại'))),
+                              ElevatedButton(
+                                  onPressed: _loadHistory,
+                                  child: Text(context.t('Thử lại'))),
                             ],
                           ),
                         )
                       : _messages.isEmpty
                           ? Center(
                               child: Text(
-                                context.t('Hãy gửi lời chào đầu tiên tới linh thú nhé!'),
-                                style: TextStyle(color: context.mutedText, fontSize: 13),
+                                context.t(
+                                    'Hãy gửi lời chào đầu tiên tới linh thú nhé!'),
+                                style: TextStyle(
+                                    color: context.mutedText, fontSize: 13),
                               ),
                             )
                           : ListView.builder(
                               controller: _scrollController,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
                               itemCount: _messages.length,
                               itemBuilder: (context, index) {
                                 final msg = _messages[index];
-                                final isUser = msg['sender'] == 'user';
-                                return Align(
-                                  alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: 12),
-                                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-                                    decoration: BoxDecoration(
-                                      color: isUser ? RelaxColors.violet : context.surface,
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: const Radius.circular(16),
-                                        topRight: const Radius.circular(16),
-                                        bottomLeft: Radius.circular(isUser ? 16 : 0),
-                                        bottomRight: Radius.circular(isUser ? 0 : 16),
-                                      ),
-                                      border: isUser ? null : Border.all(color: context.fieldBorder),
-                                    ),
-                                    child: Text(
-                                      msg['text'] as String? ?? '',
-                                      style: TextStyle(
-                                        color: isUser ? Colors.white : context.appText,
-                                        fontSize: 14,
-                                        height: 1.4,
-                                      ),
-                                    ),
-                                  ),
+                                return ChatBubble(
+                                  text: msg['text'] as String? ?? '',
+                                  isUser: msg['sender'] == 'user',
                                 );
                               },
                             ),
@@ -211,10 +208,14 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                   child: Text(
                     context.t('Linh thú đang nhập tin nhắn...'),
-                    style: TextStyle(color: context.mutedText, fontSize: 11, fontStyle: FontStyle.italic),
+                    style: TextStyle(
+                        color: context.mutedText,
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic),
                   ),
                 ),
               ),
@@ -222,7 +223,8 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: context.surface,
-                border: Border(top: BorderSide(color: context.fieldBorder)),
+                border:
+                    Border(top: BorderSide(color: context.fieldBorder)),
               ),
               child: Row(
                 children: [
@@ -230,16 +232,19 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
                     child: TextField(
                       controller: _controller,
                       decoration: InputDecoration(
-                        hintText: context.t('Nhắn gì đó với linh thú...'),
+                        hintText:
+                            context.t('Nhắn gì đó với linh thú...'),
                         hintStyle: TextStyle(color: context.mutedText),
                         border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
                       ),
                       onSubmitted: (_) => _sendMessage(),
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.send, color: RelaxColors.violet),
+                    icon: const Icon(Icons.send,
+                        color: RelaxColors.violet),
                     onPressed: _sendMessage,
                   ),
                 ],

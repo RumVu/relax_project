@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/api_client.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
+import '../../core/api_client.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import 'widgets/location_kv_row.dart';
+import 'widgets/location_why_card.dart';
 
-/// Cho phép user chia sẻ vị trí GPS để app gợi ý thời tiết / phòng tập / quán
-/// cà phê phù hợp. Vị trí được lưu vào preferences trên backend.
+// Cho phep user chia se vi tri GPS de app goi y thoi tiet / phong tap / quan
+// ca phe phu hop. Vi tri duoc luu vao preferences tren backend.
 class LocationScreen extends StatefulWidget {
   const LocationScreen({super.key});
 
@@ -48,7 +50,8 @@ class _LocationScreenState extends State<LocationScreen> {
       });
     } catch (e) {
       if (e.toString().contains('MissingPluginException')) {
-        setState(() => _status = 'Lỗi: MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.');
+        setState(() => _status =
+            'Lỗi: MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.');
       } else {
         setState(() => _status = 'Lỗi: $e');
       }
@@ -104,43 +107,7 @@ class _LocationScreenState extends State<LocationScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [RelaxColors.violet, RelaxColors.plum],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.place_outlined,
-                            color: Colors.white, size: 28),
-                        const SizedBox(width: 8),
-                        Text(context.t('Vì sao cần vị trí?'),
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800)),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.t('Để gợi ý thời tiết, quán cà phê yên tĩnh và phòng tập thiền gần bạn. Chúng tôi chỉ lưu toạ độ, không theo dõi di chuyển.'),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.9),
-                        height: 1.5,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const LocationWhyCard(),
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(16),
@@ -160,7 +127,8 @@ class _LocationScreenState extends State<LocationScreen> {
                       builder: (ctx) {
                         String displayStatus;
                         if (_status.startsWith('Lỗi: ')) {
-                          displayStatus = '${ctx.t('Lỗi:')} ${_status.substring(5)}';
+                          displayStatus =
+                              '${ctx.t('Lỗi:')} ${_status.substring(5)}';
                         } else {
                           displayStatus = ctx.t(_status);
                         }
@@ -175,10 +143,15 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                     if (p != null) ...[
                       const SizedBox(height: 12),
-                      _kv(context, 'Vĩ độ', p.latitude.toStringAsFixed(5)),
-                      _kv(context, 'Kinh độ', p.longitude.toStringAsFixed(5)),
-                      _kv(context, 'Độ chính xác',
-                          '${p.accuracy.toStringAsFixed(0)} m'),
+                      LocationKvRow(
+                          label: 'Vĩ độ',
+                          value: p.latitude.toStringAsFixed(5)),
+                      LocationKvRow(
+                          label: 'Kinh độ',
+                          value: p.longitude.toStringAsFixed(5)),
+                      LocationKvRow(
+                          label: 'Độ chính xác',
+                          value: '${p.accuracy.toStringAsFixed(0)} m'),
                     ],
                   ],
                 ),
@@ -223,21 +196,6 @@ class _LocationScreenState extends State<LocationScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _kv(BuildContext c, String k, String v) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 4),
-      child: Row(
-        children: [
-          Text(c.t(k), style: TextStyle(color: c.mutedText, fontSize: 12)),
-          const Spacer(),
-          Text(v,
-              style: TextStyle(
-                  color: c.appText, fontWeight: FontWeight.w700)),
-        ],
       ),
     );
   }

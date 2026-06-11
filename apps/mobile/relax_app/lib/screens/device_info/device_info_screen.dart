@@ -4,11 +4,11 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
 
-/// Hiển thị thông tin thiết bị (model, OS, version) và phiên bản app — dùng
-/// khi user cần báo lỗi cho support.
+// Hien thi thong tin thiet bi (model, OS, version) va phien ban app — dung
+// khi user can bao loi cho support.
 class DeviceInfoScreen extends StatefulWidget {
   const DeviceInfoScreen({super.key});
 
@@ -50,7 +50,10 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
       _rows.add(('Phiên bản app', '1.0.0 (build 1)'));
     } catch (e) {
       if (e.toString().contains('MissingPluginException')) {
-        _rows.add(('Lỗi', 'MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.'));
+        _rows.add((
+          'Lỗi',
+          'MissingPluginException. Vui lòng chạy "flutter clean && flutter pub get" và rebuild native project.'
+        ));
       } else {
         _rows.add(('Lỗi', e.toString()));
       }
@@ -111,7 +114,8 @@ class _DeviceInfoScreenState extends State<DeviceInfoScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    context.t('Khi cần báo lỗi, hãy gửi kèm thông tin này để bộ phận hỗ trợ chẩn đoán nhanh hơn nha 💜'),
+                    context.t(
+                        'Khi cần báo lỗi, hãy gửi kèm thông tin này để bộ phận hỗ trợ chẩn đoán nhanh hơn nha 💜'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: context.mutedText, fontSize: 12),
                   ),

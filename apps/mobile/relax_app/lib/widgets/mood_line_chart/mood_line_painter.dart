@@ -1,54 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-
-/// Biểu đồ đường cảm xúc 7 ngày — tự vẽ bằng CustomPainter, không cần
-/// package ngoài. `values` là 7 điểm 0..1 (null = ngày chưa có dữ liệu).
-class MoodLineChart extends StatelessWidget {
-  const MoodLineChart({
-    super.key,
-    required this.values,
-    this.labels = const ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
-    this.height = 130,
-  });
-
-  final List<double?> values;
-  final List<String> labels;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        SizedBox(
-          height: height,
-          width: double.infinity,
-          child: CustomPaint(
-            painter: _LinePainter(
-              values: values,
-              lineColor: RelaxColors.violet,
-              gridColor: context.fieldBorder,
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: labels
-              .map((l) => Text(
-                    context.t(l),
-                    style: TextStyle(fontSize: 10, color: context.mutedText),
-                  ))
-              .toList(),
-        ),
-      ],
-    );
-  }
-}
-
-class _LinePainter extends CustomPainter {
-  _LinePainter({
+// CustomPainter for the 7-day mood line chart.
+class MoodLinePainter extends CustomPainter {
+  MoodLinePainter({
     required this.values,
     required this.lineColor,
     required this.gridColor,
@@ -60,7 +14,7 @@ class _LinePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Lưới ngang 4 đường mờ.
+    // 4 horizontal grid lines.
     final gridPaint = Paint()
       ..color = gridColor.withValues(alpha: 0.5)
       ..strokeWidth = 1;
@@ -73,10 +27,8 @@ class _LinePainter extends CustomPainter {
     final n = values.length;
     final dx = n > 1 ? size.width / (n - 1) : size.width;
 
-    // Toạ độ các điểm có dữ liệu.
     Offset pointAt(int i, double v) {
       final x = dx * i;
-      // chừa 8px top/bottom để chấm không sát mép.
       final y = 8 + (size.height - 16) * (1 - v.clamp(0, 1));
       return Offset(x, y);
     }
@@ -105,7 +57,7 @@ class _LinePainter extends CustomPainter {
       fill.close();
     }
 
-    // Vùng tô gradient nhẹ dưới đường.
+    // Gradient fill under the line.
     final fillPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -117,7 +69,7 @@ class _LinePainter extends CustomPainter {
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawPath(fill, fillPaint);
 
-    // Đường chính.
+    // Main line.
     final linePaint = Paint()
       ..color = lineColor
       ..strokeWidth = 2.5
@@ -126,7 +78,7 @@ class _LinePainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(path, linePaint);
 
-    // Chấm tròn.
+    // Dots.
     final dotFill = Paint()..color = lineColor;
     final dotRing = Paint()..color = Colors.white;
     for (final d in dots) {
@@ -136,6 +88,6 @@ class _LinePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _LinePainter old) =>
+  bool shouldRepaint(covariant MoodLinePainter old) =>
       old.values != values || old.lineColor != lineColor;
 }
