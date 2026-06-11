@@ -39,8 +39,9 @@ pnpm-debug.log*
 **/test-results/
 **/.playwright/
 
-# Local database backups are rescue artifacts only.
+# Database backups (local rescue artifacts, not in repo)
 apps/backend/prisma/backups/*.sql
+backups/
 .tunnel-url
 apps/web/.vercel/
 scratch/

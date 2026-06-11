@@ -169,6 +169,40 @@ prisma-seed: ## Seed catalog + demo data
 prisma-cleanup: ## Wipe test-data only
 	npm run prisma:cleanup-test-data
 
+# ---- Database Backup & Version ----------------------------------------------
+
+.PHONY: db-version
+db-version: ## Show DB version, migration status & health
+	scripts/db-version.sh
+
+.PHONY: db-version-json
+db-version-json: ## DB version as JSON (for CI/scripts)
+	scripts/db-version.sh --json
+
+.PHONY: db-backup
+db-backup: ## Create timestamped DB backup (optional tag: make db-backup TAG=before-deploy)
+	scripts/db-backup.sh $(TAG)
+
+.PHONY: db-restore
+db-restore: ## Restore DB from a backup (interactive picker or FILE=path)
+	scripts/db-restore.sh $(FILE)
+
+.PHONY: db-snapshot
+db-snapshot: ## Schema snapshot (NAME required: make db-snapshot NAME=before-feature-x)
+	scripts/db-snapshot.sh $(NAME)
+
+.PHONY: db-snapshot-data
+db-snapshot-data: ## Schema + data snapshot (NAME required)
+	scripts/db-snapshot.sh $(NAME) --with-data
+
+.PHONY: db-snapshot-list
+db-snapshot-list: ## List all schema snapshots
+	scripts/db-snapshot.sh --list
+
+.PHONY: db-snapshot-diff
+db-snapshot-diff: ## Diff two snapshots (A and B required: make db-snapshot-diff A=before B=after)
+	scripts/db-snapshot.sh --diff $(A) $(B)
+
 # ---- Web -------------------------------------------------------------------
 
 .PHONY: web-install
