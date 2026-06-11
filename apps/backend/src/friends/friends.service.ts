@@ -8,7 +8,9 @@ export class FriendsService {
 
   async sendRequest(userId: string, friendId: string) {
     if (userId === friendId) {
-      throw new BadRequestException('You cannot send a friend request to yourself');
+      throw new BadRequestException(
+        'You cannot send a friend request to yourself',
+      );
     }
 
     const friend = await this.prisma.user.findUnique({
@@ -28,7 +30,9 @@ export class FriendsService {
     });
 
     if (existing) {
-      throw new BadRequestException('Friend request already sent or you are already friends');
+      throw new BadRequestException(
+        'Friend request already sent or you are already friends',
+      );
     }
 
     return this.prisma.friend.create({

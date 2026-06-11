@@ -90,14 +90,12 @@ export class UserCompanionsController {
 
   @ApiOperation({ summary: 'Chat with user companion using AI' })
   @ApiCreatedResponse({
-    description: 'User message sent, companion response generated using Gemini, and state updated.',
+    description:
+      'User message sent, companion response generated using Gemini, and state updated.',
   })
   @UseGuards(JwtAuthGuard)
   @Post('me/chat')
-  chat(
-    @CurrentUser() user: AuthUser,
-    @Body() dto: CompanionChatDto,
-  ) {
+  chat(@CurrentUser() user: AuthUser, @Body() dto: CompanionChatDto) {
     return this.userCompanionsService.chatWithCompanion(user.id, dto.message);
   }
 

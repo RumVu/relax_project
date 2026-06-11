@@ -14,7 +14,7 @@ export class MeditationsService {
     return this.prisma.meditationGuide.findMany({
       where: {
         isActive: true,
-        difficulty: difficulty ? (difficulty.toUpperCase() as any) : undefined,
+        difficulty: difficulty ? difficulty.toUpperCase() : undefined,
         focusArea: focusArea || undefined,
       },
       orderBy: { createdAt: 'desc' },

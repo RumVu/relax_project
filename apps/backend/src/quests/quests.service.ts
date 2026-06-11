@@ -80,7 +80,10 @@ export class QuestsService {
       // Trigger achievements & feed for newly completed quests
       for (const q of newlyCompleted) {
         try {
-          await this.achievementsService.checkAndUnlock(userId, 'Nhiệm vụ đầu tiên');
+          await this.achievementsService.checkAndUnlock(
+            userId,
+            'Nhiệm vụ đầu tiên',
+          );
           await this.feedService.createEntry(
             userId,
             'QUEST_COMPLETED',
@@ -88,7 +91,7 @@ export class QuestsService {
             `đã hoàn thành nhiệm vụ: "${q.title}".`,
             q.id,
           );
-        } catch (err) {
+        } catch {
           // ignore
         }
       }

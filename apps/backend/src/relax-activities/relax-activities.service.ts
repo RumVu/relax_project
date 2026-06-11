@@ -237,7 +237,10 @@ export class RelaxActivitiesService {
 
     // Check achievement and create feed entry
     try {
-      await this.achievementsService.checkAndUnlock(userId, 'Buổi thư giãn đầu tiên');
+      await this.achievementsService.checkAndUnlock(
+        userId,
+        'Buổi thư giãn đầu tiên',
+      );
       await this.feedService.createEntry(
         userId,
         'RELAX_SESSION',
@@ -245,7 +248,7 @@ export class RelaxActivitiesService {
         `đã hoàn thành phiên thư giãn: "${session.title}" trong ${Math.round(durationSeconds / 60)} phút.`,
         session.id,
       );
-    } catch (err) {
+    } catch {
       // Don't block flow if achievements/feed fails
     }
 

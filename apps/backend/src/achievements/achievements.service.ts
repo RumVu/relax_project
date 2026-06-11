@@ -79,7 +79,8 @@ export class AchievementsService implements OnModuleInit {
     return all.map((a) => ({
       ...a,
       unlocked: unlockedIds.has(a.id),
-      unlockedAt: unlocked.find((u) => u.achievementId === a.id)?.unlockedAt ?? null,
+      unlockedAt:
+        unlocked.find((u) => u.achievementId === a.id)?.unlockedAt ?? null,
       description: a.description ?? '', // Ensure fallback
     }));
   }
@@ -129,7 +130,7 @@ export class AchievementsService implements OnModuleInit {
           `đã đạt thành tựu: "${achievement.title}" - ${achievement.description ?? ''}`,
           achievement.id,
         );
-      } catch (feedError) {
+      } catch {
         // Do not block unlock logic if feed entry fails
       }
     }

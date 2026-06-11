@@ -198,15 +198,27 @@ export class MoodCheckinsService {
 
     // Check achievement and create feed entry
     try {
-      await this.achievementsService.checkAndUnlock(userId, 'Bước đầu ghi nhận cảm xúc');
+      await this.achievementsService.checkAndUnlock(
+        userId,
+        'Bước đầu ghi nhận cảm xúc',
+      );
       if (streak.current >= 3) {
-        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 3 ngày: Đồng hành chớm nở');
+        await this.achievementsService.checkAndUnlock(
+          userId,
+          'Chuỗi 3 ngày: Đồng hành chớm nở',
+        );
       }
       if (streak.current >= 7) {
-        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 7 ngày: Thói quen vững vàng');
+        await this.achievementsService.checkAndUnlock(
+          userId,
+          'Chuỗi 7 ngày: Thói quen vững vàng',
+        );
       }
       if (streak.current >= 30) {
-        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 30 ngày: Bậc thầy tự cân bằng');
+        await this.achievementsService.checkAndUnlock(
+          userId,
+          'Chuỗi 30 ngày: Bậc thầy tự cân bằng',
+        );
       }
 
       await this.feedService.createEntry(
@@ -216,7 +228,7 @@ export class MoodCheckinsService {
         `đã ghi nhận cảm xúc: "${checkin.mood}" với cường độ ${checkin.intensity}/5.`,
         checkin.id,
       );
-    } catch (err) {
+    } catch {
       // Don't block flow if achievements/feed fails
     }
 
@@ -275,27 +287,26 @@ export class MoodCheckinsService {
     await this.usersService.findOne(userId);
     const where = this.buildWhere(userId, query);
 
-    const [total, byMood, average, latest, userStreak] =
-      await Promise.all([
-        this.prisma.moodCheckin.count({ where }),
-        this.prisma.moodCheckin.groupBy({
-          by: ['mood'],
-          where,
-          _count: { mood: true },
-          orderBy: { mood: 'asc' },
-        }),
-        this.prisma.moodCheckin.aggregate({
-          where,
-          _avg: { intensity: true },
-        }),
-        this.prisma.moodCheckin.findFirst({
-          where,
-          orderBy: { createdAt: 'desc' },
-        }),
-        this.prisma.userStreak.findUnique({
-          where: { userId },
-        }),
-      ]);
+    const [total, byMood, average, latest, userStreak] = await Promise.all([
+      this.prisma.moodCheckin.count({ where }),
+      this.prisma.moodCheckin.groupBy({
+        by: ['mood'],
+        where,
+        _count: { mood: true },
+        orderBy: { mood: 'asc' },
+      }),
+      this.prisma.moodCheckin.aggregate({
+        where,
+        _avg: { intensity: true },
+      }),
+      this.prisma.moodCheckin.findFirst({
+        where,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.userStreak.findUnique({
+        where: { userId },
+      }),
+    ]);
 
     return {
       total,
@@ -617,7 +628,9 @@ export class MoodCheckinsService {
     const streak = calculateStreaks(checkins, timezoneContext);
 
     const latestCheckin = checkins[0];
-    const lastActivityDate = latestCheckin ? (latestCheckin.scoredAt ?? latestCheckin.createdAt) : null;
+    const lastActivityDate = latestCheckin
+      ? (latestCheckin.scoredAt ?? latestCheckin.createdAt)
+      : null;
 
     await this.prisma.userStreak.upsert({
       where: { userId },

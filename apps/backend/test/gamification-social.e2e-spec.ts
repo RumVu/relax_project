@@ -54,10 +54,7 @@ describe('Gamification & Social APIs (e2e)', () => {
     });
     await prisma.friend.deleteMany({
       where: {
-        OR: [
-          { userId: { in: userIds } },
-          { friendId: { in: userIds } },
-        ],
+        OR: [{ userId: { in: userIds } }, { friendId: { in: userIds } }],
       },
     });
     await prisma.relaxSession.deleteMany({
@@ -96,8 +93,14 @@ describe('Gamification & Social APIs (e2e)', () => {
       .expect(({ body }) => {
         expect(body).toEqual(
           expect.arrayContaining([
-            expect.objectContaining({ title: 'Bước đầu ghi nhận cảm xúc', unlocked: false }),
-            expect.objectContaining({ title: 'Buổi thư giãn đầu tiên', unlocked: false }),
+            expect.objectContaining({
+              title: 'Bước đầu ghi nhận cảm xúc',
+              unlocked: false,
+            }),
+            expect.objectContaining({
+              title: 'Buổi thư giãn đầu tiên',
+              unlocked: false,
+            }),
           ]),
         );
       });
@@ -120,7 +123,9 @@ describe('Gamification & Social APIs (e2e)', () => {
       .set('Authorization', `Bearer ${tokenA}`)
       .expect(200)
       .expect(({ body }) => {
-        const checkinAch = body.find((a: any) => a.title === 'Bước đầu ghi nhận cảm xúc');
+        const checkinAch = body.find(
+          (a: any) => a.title === 'Bước đầu ghi nhận cảm xúc',
+        );
         expect(checkinAch).toBeDefined();
         expect(checkinAch.unlocked).toBe(true);
       });
@@ -152,7 +157,9 @@ describe('Gamification & Social APIs (e2e)', () => {
       .set('Authorization', `Bearer ${tokenA}`)
       .expect(200)
       .expect(({ body }) => {
-        const relaxAch = body.find((a: any) => a.title === 'Buổi thư giãn đầu tiên');
+        const relaxAch = body.find(
+          (a: any) => a.title === 'Buổi thư giãn đầu tiên',
+        );
         expect(relaxAch).toBeDefined();
         expect(relaxAch.unlocked).toBe(true);
       });
@@ -289,7 +296,9 @@ describe('Gamification & Social APIs (e2e)', () => {
       .set('Authorization', `Bearer ${tokenC}`)
       .expect(200)
       .expect(({ body }) => {
-        const streakAch = body.find((a: any) => a.title === 'Chuỗi 3 ngày: Đồng hành chớm nở');
+        const streakAch = body.find(
+          (a: any) => a.title === 'Chuỗi 3 ngày: Đồng hành chớm nở',
+        );
         expect(streakAch).toBeDefined();
         expect(streakAch.unlocked).toBe(true);
       });
@@ -302,10 +311,14 @@ describe('Gamification & Social APIs (e2e)', () => {
       .expect(({ body }) => {
         const feedEntries = body.filter((f: any) => f.userId === idC);
         const achievementUnlockFeed = feedEntries.find(
-          (f: any) => f.type === 'ACHIEVEMENT_UNLOCKED' && f.title === 'Đã mở khóa thành tựu mới',
+          (f: any) =>
+            f.type === 'ACHIEVEMENT_UNLOCKED' &&
+            f.title === 'Đã mở khóa thành tựu mới',
         );
         expect(achievementUnlockFeed).toBeDefined();
-        expect(achievementUnlockFeed.description).toContain('Chuỗi 3 ngày: Đồng hành chớm nở');
+        expect(achievementUnlockFeed.description).toContain(
+          'Chuỗi 3 ngày: Đồng hành chớm nở',
+        );
       });
   });
 });

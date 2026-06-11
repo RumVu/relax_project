@@ -361,7 +361,10 @@ export class UserCompanionsService {
         const historyList = [...historyRows].reverse();
         const historyText = historyList
           .map((row) => {
-            const meta = row.metadata as { sender?: string; text?: string } | null;
+            const meta = row.metadata as {
+              sender?: string;
+              text?: string;
+            } | null;
             if (meta?.sender && meta?.text) {
               return `${meta.sender === 'user' ? 'User' : companion.name}: ${meta.text}`;
             }
@@ -400,7 +403,8 @@ export class UserCompanionsService {
               properties: {
                 reply: {
                   type: SchemaType.STRING,
-                  description: 'Lời phản hồi bằng tiếng Việt ngắn gọn (1-2 câu).',
+                  description:
+                    'Lời phản hồi bằng tiếng Việt ngắn gọn (1-2 câu).',
                 },
                 mood: {
                   type: SchemaType.STRING,
@@ -431,39 +435,46 @@ export class UserCompanionsService {
           newMood = parsed.mood as CompanionMood;
           newAction = parsed.action as CompanionAction;
         }
-      } catch (err) {
+      } catch {
         // Fallback to default reply on model/api error
       }
     }
 
-    const [userMsgRow, companionMsgRow, updated] = await this.prisma.$transaction([
-      this.prisma.companionInteraction.create({
-        data: {
-          userId,
-          companionId: companion.id,
-          type: 'CHAT',
-          metadata: { sender: 'user', text: message } as Prisma.InputJsonValue,
-        },
-      }),
-      this.prisma.companionInteraction.create({
-        data: {
-          userId,
-          companionId: companion.id,
-          type: 'CHAT',
-          metadata: { sender: 'companion', text: reply } as Prisma.InputJsonValue,
-        },
-      }),
-      this.prisma.userCompanion.update({
-        where: { id: companion.id },
-        data: {
-          affection: Math.min(100, companion.affection + 2),
-          mood: newMood,
-          action: newAction,
-          lastSeenAt: new Date(),
-        },
-        include: { asset: true },
-      }),
-    ]);
+    const [userMsgRow, companionMsgRow, updated] =
+      await this.prisma.$transaction([
+        this.prisma.companionInteraction.create({
+          data: {
+            userId,
+            companionId: companion.id,
+            type: 'CHAT',
+            metadata: {
+              sender: 'user',
+              text: message,
+            },
+          },
+        }),
+        this.prisma.companionInteraction.create({
+          data: {
+            userId,
+            companionId: companion.id,
+            type: 'CHAT',
+            metadata: {
+              sender: 'companion',
+              text: reply,
+            },
+          },
+        }),
+        this.prisma.userCompanion.update({
+          where: { id: companion.id },
+          data: {
+            affection: Math.min(100, companion.affection + 2),
+            mood: newMood,
+            action: newAction,
+            lastSeenAt: new Date(),
+          },
+          include: { asset: true },
+        }),
+      ]);
 
     this.emitCompanionUpdate(userId, updated);
 
