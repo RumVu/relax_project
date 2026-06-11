@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/api_client.dart';
-import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/soft_toast.dart';
 import 'helpers/billing_formatters.dart';
+import 'helpers/payment_confirmation.dart';
+import 'widgets/checkout_sheet.dart';
 import 'widgets/current_plan_card.dart';
-import 'widgets/info_row.dart';
+import 'widgets/payment_history_sheet.dart';
 import 'widgets/plan_card.dart';
 
 /// Màn hình Billing — hiển thị gói hiện tại, danh sách gói mua, và cho phép
@@ -61,17 +61,10 @@ class _BillingScreenState extends State<BillingScreen> {
     }
   }
 
-  bool _isCurrentPlan(Map<String, dynamic> plan) {
-    final planTier = (plan['slug'] ?? plan['name'] ?? '') as String;
-    final subObj = _subscription?['subscription'] as Map?;
-    final currentTier = (subObj?['planName'] ?? subObj?['plan'] ?? subObj?['tier'] ?? _subscription?['tier'] ?? _subscription?['plan'] ?? 'FREE') as String;
-    return planTier.toUpperCase() == currentTier.toUpperCase();
-  }
-
   Future<void> _checkout(Map<String, dynamic> plan) async {
     final planSlug = (plan['slug'] ?? plan['name'] ?? '') as String;
 
-    if (_isCurrentPlan(plan)) {
+    if (isCurrentPlan(plan, _subscription)) {
       if (mounted) {
         showSoftToast(context,
             message: context.t('Bạn đang dùng gói này rồi!'), tone: SoftToastTone.info);
@@ -107,7 +100,19 @@ class _BillingScreenState extends State<BillingScreen> {
         final data = res.data is Map
             ? Map<String, dynamic>.from(res.data as Map)
             : <String, dynamic>{};
-        _showCheckoutInfo(data, planSlug);
+        showCheckoutSheet(
+          context,
+          data: data,
+          planSlug: planSlug,
+          onConfirmPayment: (sheetCtx, paymentId, isSepayActive) =>
+              confirmPayment(
+            parentCtx: context,
+            sheetCtx: sheetCtx,
+            paymentId: paymentId,
+            isSepayActive: isSepayActive,
+            onReload: _load,
+          ),
+        );
       } else {
         final msg =
             (res.data is Map ? res.data['message'] as String? : null) ??
@@ -121,249 +126,6 @@ class _BillingScreenState extends State<BillingScreen> {
         nav.pop(); // Close loading
         showSoftToast(context,
             message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
-      }
-    }
-  }
-
-  void _showCheckoutInfo(Map<String, dynamic> data, String planSlug) {
-    final checkout = data['checkout'] is Map ? Map<String, dynamic>.from(data['checkout'] as Map) : null;
-    final payment = data['payment'] is Map ? Map<String, dynamic>.from(data['payment'] as Map) : null;
-
-    final paymentId = (data['paymentId'] ?? payment?['id'] ?? checkout?['paymentId']) as String?;
-    final transferContent = (data['transferContent'] ?? checkout?['transferContent'] ?? (payment != null ? 'RELAX${payment['id']}' : null)) as String?;
-    final bankAccount = (data['bankAccount'] ?? checkout?['bankAccount'] ?? checkout?['accountNo']) as String?;
-    final bankName = (data['bankName'] ?? checkout?['bankName'] ?? checkout?['bankId']) as String?;
-    final amount = data['amount'] ?? checkout?['amount'] ?? payment?['amount'];
-    final qrUrl = (data['qrUrl'] ?? checkout?['qrUrl'] ?? checkout?['qrCodeUrl']) as String?;
-    final isSepayActive = data['configured'] == true;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: ctx.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: ctx.fieldBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              context.t('Thanh toán gói {tier}', {'tier': tierDisplayName(context, planSlug)}),
-              style: TextStyle(
-                color: ctx.appText,
-                fontWeight: FontWeight.w800,
-                fontSize: 20,
-              ),
-            ),
-            const SizedBox(height: 20),
-            if (bankName != null)
-              InfoRow(label: context.t('Ngân hàng'), value: bankName),
-            if (bankAccount != null)
-              InfoRow(
-                label: context.t('Số tài khoản'),
-                value: bankAccount,
-                copyValue: bankAccount,
-              ),
-            if (amount != null)
-              InfoRow(
-                label: context.t('Số tiền'),
-                value: formatPrice(context, amount),
-                copyValue: amount.toString(),
-              ),
-            if (transferContent != null)
-              InfoRow(
-                label: context.t('Nội dung CK'),
-                value: transferContent,
-                copyValue: transferContent,
-              ),
-            if (qrUrl != null) ...[
-              const SizedBox(height: 16),
-              Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.network(qrUrl,
-                      width: 200, height: 200, fit: BoxFit.contain),
-                ),
-              ),
-            ],
-            const SizedBox(height: 24),
-            Text(
-              context.t('Sau khi chuyển khoản, hệ thống sẽ tự xác nhận trong vài phút.'),
-              style: TextStyle(color: ctx.mutedText, fontSize: 12),
-            ),
-            const SizedBox(height: 16),
-            if (paymentId != null)
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: RelaxColors.violet,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => _confirmPayment(ctx, paymentId, isSepayActive),
-                  child: Text(context.t('Tôi đã chuyển khoản'),
-                      style: const TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700)),
-                ),
-              ),
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: Text(context.t('Đóng'),
-                    style: TextStyle(
-                        color: ctx.mutedText, fontWeight: FontWeight.w600)),
-              ),
-            ),
-            SizedBox(height: MediaQuery.of(ctx).padding.bottom),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _confirmPayment(BuildContext sheetCtx, String paymentId, bool isSepayActive) async {
-    final parentCtx = context;
-    final successMsg = parentCtx.t('Thanh toán thành công! Gói đã được kích hoạt.');
-    final confirmDevMsg = parentCtx.t('Đã xác nhận! Gói (DEV) đã được kích hoạt.');
-    final errorMsgPrefix = parentCtx.t('Lỗi:');
-    final notReceivedMsgTitle = parentCtx.t('Chưa nhận được giao dịch');
-    final notReceivedMsgContent = parentCtx.t('Hệ thống chưa ghi nhận được khoản chuyển của bạn. Vui lòng kiểm tra lại số tài khoản, số tiền và nội dung chuyển khoản thô đã đúng chưa.\n\nNếu bạn đã chuyển khoản thành công, vui lòng chờ 1-2 phút hoặc liên hệ với admin để được hỗ trợ.');
-    final closeBtnText = parentCtx.t('Đóng');
-
-    if (isSepayActive) {
-      // Show verification loading dialog
-      showDialog(
-        context: parentCtx,
-        barrierDismissible: false,
-        builder: (_) => Center(
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const CircularProgressIndicator(color: RelaxColors.violet),
-                  const SizedBox(height: 16),
-                  Text(
-                    context.t('Đang kiểm tra giao dịch...'),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-
-      bool confirmed = false;
-      for (int i = 0; i < 5; i++) {
-        await Future.delayed(const Duration(seconds: 3));
-        try {
-          final res = await RelaxApi.instance.get('/billing/me/payments/$paymentId');
-          if (res.statusCode == 200 && res.data is Map) {
-            final status = res.data['status'] as String?;
-            if (status == 'COMPLETED') {
-              confirmed = true;
-              break;
-            }
-          }
-        } catch (e) {
-          // Ignore transient request errors during polling
-        }
-      }
-
-      // Hide verification loader
-      if (parentCtx.mounted) {
-        Navigator.pop(parentCtx);
-      }
-
-      if (confirmed) {
-        if (sheetCtx.mounted) {
-          Navigator.pop(sheetCtx); // Close payment sheet
-        }
-        if (parentCtx.mounted) {
-          showSoftToast(parentCtx,
-              message: successMsg,
-              tone: SoftToastTone.success);
-          parentCtx.read<AuthState>().refreshUser();
-        }
-        _load(); // Refresh local screen details
-      } else {
-        if (parentCtx.mounted) {
-          showDialog(
-            context: parentCtx,
-            builder: (ctx) => AlertDialog(
-              title: Text(notReceivedMsgTitle),
-              content: Text(notReceivedMsgContent),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(ctx),
-                  child: Text(closeBtnText),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-    } else {
-      // Dev mode: allow manual confirmation bypass
-      showDialog(
-        context: parentCtx,
-        barrierDismissible: false,
-        builder: (_) => const Center(child: CircularProgressIndicator()),
-      );
-      try {
-        final res = await RelaxApi.instance.post(
-          '/billing/me/payments/$paymentId/confirm',
-        );
-        if (parentCtx.mounted) {
-          Navigator.pop(parentCtx);
-        }
-        if (!sheetCtx.mounted) return;
-        Navigator.pop(sheetCtx);
-
-        if (res.statusCode == 200 || res.statusCode == 201) {
-          if (parentCtx.mounted) {
-            showSoftToast(parentCtx,
-                message: confirmDevMsg,
-                tone: SoftToastTone.success);
-            parentCtx.read<AuthState>().refreshUser();
-          }
-          _load();
-        } else {
-          final msg =
-              (res.data is Map ? res.data['message'] as String? : null) ??
-                  'Chưa xác nhận được — hệ thống sẽ tự kiểm tra.';
-          if (parentCtx.mounted) {
-            showSoftToast(parentCtx, message: parentCtx.t(msg), tone: SoftToastTone.info);
-          }
-        }
-      } catch (e) {
-        if (parentCtx.mounted) {
-          Navigator.pop(parentCtx);
-          showSoftToast(parentCtx,
-              message: '$errorMsgPrefix $e', tone: SoftToastTone.error);
-        }
       }
     }
   }
@@ -433,7 +195,7 @@ class _BillingScreenState extends State<BillingScreen> {
                         final name = (plan['name'] ?? plan['slug'] ?? '') as String;
                         final desc = (plan['description'] ?? '') as String;
                         final price = plan['price'] ?? plan['priceVnd'] ?? 0;
-                        final isCurrent = _isCurrentPlan(plan);
+                        final isCurrent = isCurrentPlan(plan, _subscription);
                         final features =
                             plan['features'] is List ? plan['features'] as List : [];
                         return PlanCard(
@@ -450,7 +212,7 @@ class _BillingScreenState extends State<BillingScreen> {
                       const SizedBox(height: 24),
                       // Payment history link
                       TextButton.icon(
-                        onPressed: () => _showPaymentHistory(context),
+                        onPressed: () => showPaymentHistorySheet(context),
                         icon: const Icon(Icons.receipt_long_outlined,
                             color: RelaxColors.violet),
                         label: Text(context.t('Lịch sử thanh toán'),
@@ -460,158 +222,5 @@ class _BillingScreenState extends State<BillingScreen> {
                   ),
                 ),
     );
-  }
-
-  Future<void> _showPaymentHistory(BuildContext ctx) async {
-    final errorMsgPrefix = ctx.t('Lỗi:');
-    showDialog(
-      context: ctx,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
-    );
-    try {
-      final res = await RelaxApi.instance.get('/billing/me/payments');
-      if (!ctx.mounted) return;
-      Navigator.pop(ctx); // Close loading
-
-      final payments = <Map<String, dynamic>>[];
-      if (res.statusCode == 200) {
-        final data = res.data;
-        final items = data is Map ? data['items'] ?? data : data;
-        if (items is List) {
-          for (final p in items) {
-            if (p is Map) payments.add(Map<String, dynamic>.from(p));
-          }
-        }
-      }
-
-      if (!ctx.mounted) return;
-      showModalBottomSheet(
-        context: ctx,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
-        builder: (sheetCtx) => Container(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(sheetCtx).size.height * 0.65,
-          ),
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: sheetCtx.surface,
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: sheetCtx.fieldBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                sheetCtx.t('Lịch sử thanh toán'),
-                style: TextStyle(
-                  color: sheetCtx.appText,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 16),
-              if (payments.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32),
-                  child: Text(sheetCtx.t('Chưa có giao dịch nào.'),
-                      style: TextStyle(color: sheetCtx.mutedText)),
-                )
-              else
-                Flexible(
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: payments.length,
-                    separatorBuilder: (_, index) =>
-                        Divider(height: 1, color: sheetCtx.fieldBorder),
-                    itemBuilder: (_, i) {
-                      final p = payments[i];
-                      final amount = p['amount'];
-                      final status =
-                          (p['status'] as String?) ?? 'UNKNOWN';
-                      final createdAt = p['createdAt'] as String?;
-                      final date = createdAt != null
-                          ? DateTime.tryParse(createdAt)
-                          : null;
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: Icon(
-                          status == 'COMPLETED'
-                              ? Icons.check_circle
-                              : status == 'PENDING'
-                                  ? Icons.hourglass_bottom
-                                  : Icons.cancel,
-                          color: status == 'COMPLETED'
-                              ? RelaxColors.mint
-                              : status == 'PENDING'
-                                  ? RelaxColors.sun
-                                  : RelaxColors.coral,
-                        ),
-                        title: Text(formatPrice(context, amount),
-                            style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                color: sheetCtx.appText)),
-                        subtitle: Text(
-                          date != null
-                              ? '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute.toString().padLeft(2, '0')}'
-                              : status,
-                          style: TextStyle(
-                              color: sheetCtx.mutedText, fontSize: 12),
-                        ),
-                        trailing: Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: status == 'COMPLETED'
-                                ? RelaxColors.mint.withValues(alpha: 0.15)
-                                : status == 'PENDING'
-                                    ? RelaxColors.sun
-                                        .withValues(alpha: 0.15)
-                                    : RelaxColors.coral
-                                        .withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            status == 'COMPLETED'
-                                ? sheetCtx.t('Thành công')
-                                : status == 'PENDING'
-                                    ? sheetCtx.t('Đang chờ')
-                                    : status,
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: status == 'COMPLETED'
-                                  ? RelaxColors.mint
-                                  : status == 'PENDING'
-                                      ? RelaxColors.sun
-                                      : RelaxColors.coral,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              SizedBox(height: MediaQuery.of(sheetCtx).padding.bottom + 8),
-            ],
-          ),
-        ),
-      );
-    } catch (e) {
-      if (ctx.mounted) {
-        Navigator.pop(ctx);
-        showSoftToast(ctx, message: '$errorMsgPrefix $e', tone: SoftToastTone.error);
-      }
-    }
   }
 }

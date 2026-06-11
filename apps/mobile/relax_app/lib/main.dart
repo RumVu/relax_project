@@ -12,16 +12,16 @@ import 'core/theme_controller.dart';
 import 'widgets/soft_toast.dart';
 import 'core/tour_controller.dart';
 import 'core/local_notifications.dart';
-import 'screens/analytics_screen.dart';
+import 'screens/analytics/analytics_screen.dart';
 import 'screens/billing/billing_screen.dart';
 import 'screens/app_shell.dart';
 import 'screens/breathing/breathing_screen.dart';
 import 'screens/companion/companion_screen.dart';
 import 'screens/companion_chat_screen.dart';
-import 'screens/meditation_screen.dart';
+import 'screens/meditation/meditation_screen.dart';
 import 'screens/sleep/sleep_screen.dart';
 import 'screens/device_info_screen.dart';
-import 'screens/journal_screen.dart';
+import 'screens/journal/journal_screen.dart';
 import 'screens/legal_screen.dart';
 import 'screens/location_screen.dart';
 import 'screens/login_screen.dart';
@@ -31,7 +31,7 @@ import 'screens/register_screen.dart';
 import 'screens/relax/relax_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/sounds/sounds_screen.dart';
-import 'screens/weather_screen.dart';
+import 'screens/weather/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

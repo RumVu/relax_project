@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/api_client.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/weather_chart.dart';
+import '../../core/api_client.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/weather_chart.dart';
+import 'widgets/forecast_day_card.dart';
+import 'widgets/mini_stat.dart';
 
 /// Màn thời tiết: gọi /weather/me/current + /weather/me/forecast. Tách hai
 /// call để nếu forecast lỗi thì current vẫn hiện (rút kinh nghiệm từ bug
@@ -39,11 +41,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
         RelaxApi.instance
             .get('/weather/me/forecast', query: {'forecastDays': 7}),
       ]);
-      _current =
-          results[0].data is Map ? Map<String, dynamic>.from(results[0].data) : null;
+      _current = results[0].data is Map
+          ? Map<String, dynamic>.from(results[0].data)
+          : null;
       final fc = results[1].data is Map ? results[1].data['forecast'] : null;
       _forecast = (fc is List)
-          ? fc.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList()
+          ? fc
+              .whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList()
           : [];
     } catch (e) {
       _error = e.toString();
@@ -72,13 +78,15 @@ class _WeatherScreenState extends State<WeatherScreen> {
         ),
         title: Text(
           context.t('Thời tiết'),
-          style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
+          style:
+              TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
       body: SafeArea(
         child: _loading
             ? const Center(
-                child: CircularProgressIndicator(color: RelaxColors.violet))
+                child:
+                    CircularProgressIndicator(color: RelaxColors.violet))
             : RefreshIndicator(
                 color: RelaxColors.violet,
                 onRefresh: _load,
@@ -95,7 +103,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           border: Border.all(color: RelaxColors.coral),
                         ),
                         child: Text(
-                          context.t('Không tải được thời tiết: {error}', {'error': '$_error'}),
+                          context.t('Không tải được thời tiết: {error}',
+                              {'error': '$_error'}),
                           style: const TextStyle(
                               color: RelaxColors.coral, fontSize: 12),
                         ),
@@ -140,7 +149,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                           ),
                           if (feels != null)
                             Text(
-                              context.t('Cảm giác như {temp}°', {'temp': '$feels'}),
+                              context.t('Cảm giác như {temp}°',
+                                  {'temp': '$feels'}),
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.8),
                               ),
@@ -152,7 +162,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: _MiniStat(
+                          child: MiniStat(
                             icon: Icons.water_drop_outlined,
                             label: context.t('Độ ẩm'),
                             value: humidity != null ? '$humidity%' : '—',
@@ -160,7 +170,7 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _MiniStat(
+                          child: MiniStat(
                             icon: Icons.air,
                             label: context.t('Gió'),
                             value: wind != null ? '$wind km/h' : '—',
@@ -173,7 +183,8 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     const SizedBox(height: 24),
                     Text(
                       context.t('Dự báo 7 ngày'),
-                      style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w800, fontSize: 16),
                     ),
                     const SizedBox(height: 12),
                     if (_forecast.isEmpty)
@@ -185,113 +196,11 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                       )
                     else
-                      ..._forecast.map(_buildDay),
+                      ..._forecast.map(
+                          (d) => ForecastDayCard(day: d)),
                   ],
                 ),
               ),
-      ),
-    );
-  }
-
-  Widget _buildDay(Map<String, dynamic> d) {
-    final date = (d['date'] as String?) ?? '';
-    final max = (d['temperatureMax'] as num?)?.round();
-    final min = (d['temperatureMin'] as num?)?.round();
-    final rain = (d['precipitationProbability'] as num?)?.round();
-    final title = (d['title'] as String?) ?? '';
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                date,
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: context.appText,
-                ),
-              ),
-              if (title.isNotEmpty)
-                Text(
-                  context.t(title),
-                  style: const TextStyle(
-                      color: RelaxColors.slate, fontSize: 11),
-                ),
-            ],
-          ),
-          const Spacer(),
-          if (rain != null) ...[
-            const Icon(Icons.water_drop, size: 14, color: RelaxColors.violet),
-            const SizedBox(width: 2),
-            Text(
-              '$rain%',
-              style: const TextStyle(
-                color: RelaxColors.violet,
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
-            ),
-            const SizedBox(width: 14),
-          ],
-          Text(
-            '${min ?? '—'}° / ${max ?? '—'}°',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: context.appText,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MiniStat extends StatelessWidget {
-  const _MiniStat({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, color: RelaxColors.violet, size: 20),
-          const SizedBox(height: 8),
-          Text(
-            label,
-            style: const TextStyle(color: RelaxColors.slate, fontSize: 12),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-              color: context.appText,
-            ),
-          ),
-        ],
       ),
     );
   }

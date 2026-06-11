@@ -32,3 +32,11 @@ String tierDisplayName(BuildContext context, String? tier) {
       return tier ?? context.t('Miễn phí');
   }
 }
+
+/// Check whether [plan] matches the user's current subscription tier.
+bool isCurrentPlan(Map<String, dynamic> plan, Map<String, dynamic>? subscription) {
+  final planTier = (plan['slug'] ?? plan['name'] ?? '') as String;
+  final subObj = subscription?['subscription'] as Map?;
+  final currentTier = (subObj?['planName'] ?? subObj?['plan'] ?? subObj?['tier'] ?? subscription?['tier'] ?? subscription?['plan'] ?? 'FREE') as String;
+  return planTier.toUpperCase() == currentTier.toUpperCase();
+}

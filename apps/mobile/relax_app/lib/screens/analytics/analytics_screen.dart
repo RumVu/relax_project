@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/tour_controller.dart';
-import '../core/api_client.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/mood_line_chart.dart';
+import '../../core/tour_controller.dart';
+import '../../core/api_client.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/mood_line_chart.dart';
+import 'models/mood_labels.dart';
+import 'widgets/mood_distribution.dart';
+import 'widgets/stat_tile.dart';
 
 /// Màn phân tích cảm xúc: biểu đồ 7 ngày, phân bố theo loại cảm xúc, và vài
 /// chỉ số tổng quan — tính từ check-in cảm xúc.
@@ -27,19 +30,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _total = 0;
   String _topMood = '—';
   int _activeDays = 0;
-
-  static const _moodLabels = {
-    'HAPPY': 'Vui vẻ',
-    'SAD': 'Buồn',
-    'STRESSED': 'Căng thẳng',
-    'TIRED': 'Mệt mỏi',
-    'ANXIOUS': 'Lo lắng',
-    'NEUTRAL': 'Bình thường',
-    'CALM': 'Bình yên',
-    'EXCITED': 'Hào hứng',
-    'LONELY': 'Cô đơn',
-    'GRATEFUL': 'Biết ơn',
-  };
 
   @override
   void initState() {
@@ -87,7 +77,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       dist.forEach((k, v) {
         if (v > topN) {
           topN = v;
-          top = _moodLabels[k] ?? k;
+          top = kMoodLabels[k] ?? k;
         }
       });
       if (mounted) {
@@ -135,10 +125,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Row(
                       key: TourController.instance.targetKeys[6],
                       children: [
-                        _statTile(context, '$_total', context.t('Lượt ghi'), Icons.edit_note),
+                        StatTile(
+                            value: '$_total',
+                            label: context.t('Lượt ghi'),
+                            icon: Icons.edit_note),
                         const SizedBox(width: 12),
-                        _statTile(context, '$_activeDays', context.t('Ngày hoạt động'),
-                            Icons.calendar_today),
+                        StatTile(
+                            value: '$_activeDays',
+                            label: context.t('Ngày hoạt động'),
+                            icon: Icons.calendar_today),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -171,56 +166,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       title: context.t('Phân bố cảm xúc'),
                       child: _dist.isEmpty
                           ? _empty(context)
-                          : Column(
-                              children: (_dist.entries.toList()
-                                    ..sort((a, b) => b.value.compareTo(a.value)))
-                                  .map((e) {
-                                final pct = _total == 0 ? 0.0 : e.value / _total;
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 90,
-                                        child: Text(
-                                          context.t(_moodLabels[e.key] ?? e.key),
-                                          style: TextStyle(
-                                              fontSize: 12,
-                                              color: context.appText),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          child: LinearProgressIndicator(
-                                            value: pct,
-                                            minHeight: 8,
-                                            backgroundColor: context.surfaceAlt,
-                                            valueColor:
-                                                const AlwaysStoppedAnimation<
-                                                    Color>(RelaxColors.violet),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      SizedBox(
-                                        width: 38,
-                                        child: Text(
-                                          '${(pct * 100).round()}%',
-                                          textAlign: TextAlign.right,
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w700,
-                                            color: context.appText,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ),
+                          : MoodDistribution(
+                              distribution: _dist, total: _total),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
@@ -253,37 +200,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _statTile(
-      BuildContext context, String value, String label, IconData icon) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: context.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.fieldBorder),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: RelaxColors.violet, size: 20),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: context.appText,
-              ),
-            ),
-            Text(label,
-                style: TextStyle(color: context.mutedText, fontSize: 12)),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _card(BuildContext context,
       {required String title, required Widget child}) {
     return Container(
@@ -296,13 +212,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: context.appText,
-            ),
-          ),
+          Text(title,
+              style:
+                  TextStyle(fontWeight: FontWeight.w800, color: context.appText)),
           const SizedBox(height: 14),
           child,
         ],

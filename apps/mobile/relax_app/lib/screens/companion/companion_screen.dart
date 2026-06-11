@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +8,11 @@ import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/soft_toast.dart';
+import 'helpers/companion_helpers.dart';
 import 'widgets/action_button.dart';
 import 'widgets/companion_error_box.dart';
+import 'widgets/custom_assets_grid.dart';
+import 'widgets/personalization_modes.dart';
 import 'widgets/stat_bar.dart';
 
 /// Companion screen: view status (level / affection / energy) and
@@ -255,26 +257,7 @@ class _CompanionScreenState extends State<CompanionScreen>
     }
   }
 
-  String _fallbackEmoji(String? type) {
-    switch (type?.toUpperCase()) {
-      case 'CAT':
-        return '🐱';
-      case 'DOG':
-        return '🐶';
-      case 'PANDA':
-        return '🐼';
-      case 'DRAGON':
-        return '🐉';
-      case 'RABBIT':
-        return '🐰';
-      case 'FOX':
-        return '🦊';
-      case 'BEAR':
-        return '🐻';
-      default:
-        return '🐾';
-    }
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -346,13 +329,13 @@ class _CompanionScreenState extends State<CompanionScreen>
                                             width: 110,
                                             fit: BoxFit.contain,
                                             errorBuilder: (ctx, err, stack) => Text(
-                                              _fallbackEmoji(companionType),
+                                              fallbackEmoji(companionType),
                                               style: const TextStyle(fontSize: 56),
                                             ),
                                           ),
                                         )
                                       : Text(
-                                          _fallbackEmoji(companionType),
+                                          fallbackEmoji(companionType),
                                           style: const TextStyle(fontSize: 56),
                                         ),
                                 ),
@@ -489,7 +472,12 @@ class _CompanionScreenState extends State<CompanionScreen>
                           style: TextStyle(color: context.mutedText, fontSize: 12),
                         ),
                         const SizedBox(height: 16),
-                        _buildPersonalizationModes(currentMode),
+                        PersonalizationModes(
+                          currentMode: currentMode,
+                          busy: _busy,
+                          customAssets: _customAssets,
+                          onChangeMode: _changePersonalizationMode,
+                        ),
                         if (currentMode == 'CUSTOM' && _customAssets.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Text(
@@ -500,7 +488,12 @@ class _CompanionScreenState extends State<CompanionScreen>
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _buildCustomAssetsGrid(currentAssetId),
+                          CustomAssetsGrid(
+                            customAssets: _customAssets,
+                            currentAssetId: currentAssetId,
+                            busy: _busy,
+                            onSelectAsset: (id) => _changePersonalizationMode('CUSTOM', assetId: id),
+                          ),
                         ],
                       ],
                     ),
@@ -509,141 +502,4 @@ class _CompanionScreenState extends State<CompanionScreen>
     );
   }
 
-  Widget _buildPersonalizationModes(String currentMode) {
-    final modesList = [
-      {'mode': 'DEFAULT', 'label': 'Mặc định', 'icon': Icons.pets},
-      {'mode': 'ZODIAC', 'label': 'Cung hoàng đạo', 'icon': Icons.star_border},
-      {'mode': 'CHINESE_ZODIAC', 'label': '12 con giáp', 'icon': Icons.calendar_month},
-      {'mode': 'CUSTOM', 'label': 'Tự chọn', 'icon': Icons.dashboard_customize},
-    ];
-
-    return Column(
-      children: modesList.map((m) {
-        final mode = m['mode'] as String;
-        final label = context.t(m['label'] as String);
-        final icon = m['icon'] as IconData;
-        final isSelected = currentMode == mode;
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 10),
-          color: context.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: BorderSide(
-              color: isSelected ? RelaxColors.violet : context.fieldBorder,
-              width: isSelected ? 2 : 1,
-            ),
-          ),
-          child: ListTile(
-            leading: Icon(icon, color: isSelected ? RelaxColors.violet : context.mutedText),
-            title: Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: isSelected ? RelaxColors.violet : context.appText,
-              ),
-            ),
-            trailing: isSelected
-                ? const Icon(Icons.check_circle, color: RelaxColors.violet)
-                : null,
-            onTap: _busy
-                ? null
-                : (isSelected && mode != 'CUSTOM')
-                    ? null
-                    : () {
-                        if (mode == 'CUSTOM') {
-                          if (_customAssets.isNotEmpty) {
-                            final randomAsset = _customAssets[
-                                Random().nextInt(_customAssets.length)];
-                            _changePersonalizationMode('CUSTOM',
-                                assetId: randomAsset['id'] as String);
-                          } else {
-                            showSoftToast(context,
-                                message: context.t('Kho linh thú tự chọn trống.'),
-                                tone: SoftToastTone.info);
-                          }
-                        } else {
-                          _changePersonalizationMode(mode);
-                        }
-                      },
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildCustomAssetsGrid(String? currentAssetId) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.85,
-      ),
-      itemCount: _customAssets.length,
-      itemBuilder: (context, idx) {
-        final asset = _customAssets[idx];
-        final id = asset['id'] as String;
-        final name = asset['name'] as String;
-        final preview = asset['previewImageUrl'] as String?;
-        final type = asset['type'] as String?;
-        final isSelected = currentAssetId == id;
-
-        return GestureDetector(
-          onTap: _busy || isSelected
-              ? null
-              : () => _changePersonalizationMode('CUSTOM', assetId: id),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: isSelected ? RelaxColors.violet : context.fieldBorder,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: 50,
-                  width: 50,
-                  alignment: Alignment.center,
-                  child: preview != null && preview.isNotEmpty
-                      ? Image.network(
-                          preview,
-                          fit: BoxFit.contain,
-                          errorBuilder: (ctx, err, stack) => Text(
-                            _fallbackEmoji(type),
-                            style: const TextStyle(fontSize: 28),
-                          ),
-                        )
-                      : Text(
-                          _fallbackEmoji(type),
-                          style: const TextStyle(fontSize: 28),
-                        ),
-                ),
-                const SizedBox(height: 6),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? RelaxColors.violet : context.appText,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 }

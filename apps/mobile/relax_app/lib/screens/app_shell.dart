@@ -13,7 +13,7 @@ import '../core/theme.dart';
 import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
 import '../widgets/tour_overlay.dart';
-import 'analytics_screen.dart';
+import 'analytics/analytics_screen.dart';
 import 'home/home_screen.dart';
 import 'relax/relax_screen.dart';
 import 'settings/settings_screen.dart';

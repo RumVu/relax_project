@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/api_client.dart';
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/checkin_sheet.dart';
-import '../widgets/journey_prompt.dart';
-import '../widgets/soft_toast.dart';
+import '../../core/api_client.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/checkin_sheet.dart';
+import '../../widgets/journey_prompt.dart';
+import '../../widgets/soft_toast.dart';
+import 'widgets/journal_composer.dart';
+import 'widgets/journal_entry_card.dart';
 
 /// Màn nhật ký: viết entry mới (POST /journals/me) + xem danh sách gần đây
 /// (GET /journals/me). Cho phép đánh dấu yêu thích và xoá entry.
@@ -207,64 +209,11 @@ class _JournalScreenState extends State<JournalScreen> {
               style: const TextStyle(color: RelaxColors.slate),
             ),
             const SizedBox(height: 20),
-            // Composer
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: context.surface,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: context.fieldBorder),
-              ),
-              child: Column(
-                children: [
-                  TextField(
-                    controller: _titleCtrl,
-                    decoration: InputDecoration(
-                      hintText: context.t('Tiêu đề (không bắt buộc)'),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      filled: false,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const Divider(color: RelaxColors.lilac),
-                  TextField(
-                    controller: _bodyCtrl,
-                    maxLines: 4,
-                    maxLength: 600,
-                    decoration: InputDecoration(
-                      hintText: context.t('Hôm nay có gì đáng nhớ?'),
-                      border: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      filled: false,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton.icon(
-                      onPressed: _saving ? null : _save,
-                      icon: _saving
-                          ? const SizedBox(
-                              height: 16,
-                              width: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Icon(Icons.edit, size: 18),
-                      label: Text(_saving ? context.t('Đang lưu…') : context.t('Lưu nhật ký')),
-                    ),
-                  ),
-                ],
-              ),
+            JournalComposer(
+              titleController: _titleCtrl,
+              bodyController: _bodyCtrl,
+              saving: _saving,
+              onSave: _save,
             ),
             const SizedBox(height: 24),
             Text(
@@ -302,74 +251,13 @@ class _JournalScreenState extends State<JournalScreen> {
                 ),
               )
             else
-              ..._entries.map(_buildEntry),
+              ..._entries.map((e) => JournalEntryCard(
+                    entry: e,
+                    onToggleFavorite: () => _toggleFavorite(e),
+                    onDelete: () => _delete(e),
+                  )),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildEntry(Map<String, dynamic> e) {
-    final fav = e['isFavorite'] == true || e['favorite'] == true;
-    final title = (e['title'] as String?) ?? '';
-    final content = (e['content'] as String?) ?? '';
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (title.isNotEmpty)
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.w800,
-                color: context.appText,
-                fontSize: 15,
-              ),
-            ),
-          if (content.isNotEmpty) ...[
-            const SizedBox(height: 4),
-            Text(
-              content,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: RelaxColors.plum, fontSize: 13, height: 1.4),
-            ),
-          ],
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              InkWell(
-                onTap: () => _toggleFavorite(e),
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Icon(
-                    fav ? Icons.favorite : Icons.favorite_border,
-                    size: 20,
-                    color: fav ? RelaxColors.coral : RelaxColors.slate,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              InkWell(
-                onTap: () => _delete(e),
-                borderRadius: BorderRadius.circular(8),
-                child: const Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Icon(Icons.delete_outline,
-                      size: 20, color: RelaxColors.slate),
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
