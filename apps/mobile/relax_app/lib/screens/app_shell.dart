@@ -14,9 +14,9 @@ import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
 import '../widgets/tour_overlay.dart';
 import 'analytics_screen.dart';
-import 'home_screen.dart';
-import 'relax_screen.dart';
-import 'settings_screen.dart';
+import 'home/home_screen.dart';
+import 'relax/relax_screen.dart';
+import 'settings/settings_screen.dart';
 
 /// Khung chính sau khi đăng nhập. 4 tab:
 ///   0. Trang chủ — daily snapshot (weather, mood check-in, companion)

@@ -3,16 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../core/tour_controller.dart';
-import '../core/api_client.dart';
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/cat_mascot.dart';
-import '../widgets/journey_prompt.dart';
-import '../widgets/mood_background.dart';
-import '../widgets/notification_sheet.dart';
-import '../widgets/soft_toast.dart';
+import '../../core/tour_controller.dart';
+import '../../core/api_client.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
+import '../../widgets/journey_prompt.dart';
+import '../../widgets/mood_background.dart';
+import '../../widgets/notification_sheet.dart';
+import '../../widgets/soft_toast.dart';
+import 'helpers/home_data_loader.dart';
 
 /// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
 /// thoại, lưới cảm xúc, thanh theo dõi cảm xúc, và các phương thức phù hợp.
@@ -61,44 +62,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     try {
       final lang = _lastLang ?? 'vi';
-      final results = await Future.wait([
-        RelaxApi.instance.get('/weather/me/current'),
-        RelaxApi.instance.get('/cozy-quotes/random', query: {'lang': lang}),
-        RelaxApi.instance.get('/mood-checkins/options'),
-        RelaxApi.instance.get('/mood-checkins/me', query: {'limit': 60}),
-        RelaxApi.instance.get('/notifications/me/unread-count'),
-      ]);
-      final w = results[0].data;
-      _greeting = (w is Map && w['greeting'] is Map)
-          ? Map<String, dynamic>.from(w['greeting'])
-          : null;
-      _quote = results[1].data is Map
-          ? Map<String, dynamic>.from(results[1].data)
-          : null;
-      final opts = results[2].data;
-      _moodOptions = (opts is List)
-          ? opts
-              .whereType<Map>()
-              .map((e) => Map<String, dynamic>.from(e))
-              .take(6)
-              .toList()
-          : [];
-      final hist = results[3].data;
-      final items = hist is Map ? hist['items'] : hist;
-      _moodCounts = {};
-      _moodTotal = 0;
-      if (items is List) {
-        for (final it in items.whereType<Map>()) {
-          final m = it['mood'] as String?;
-          if (m == null) continue;
-          _moodCounts[m] = (_moodCounts[m] ?? 0) + 1;
-          _moodTotal++;
-        }
-      }
-      final unreadRes = results[4].data;
-      _unreadCount = (unreadRes is Map && unreadRes['count'] is num)
-          ? (unreadRes['count'] as num).toInt()
-          : 0;
+      final data = await HomeDataLoader.loadAll(lang);
+      _greeting = data.greeting;
+      _quote = data.quote;
+      _moodOptions = data.moodOptions;
+      _moodCounts = data.moodCounts;
+      _moodTotal = data.moodTotal;
+      _unreadCount = data.unreadCount;
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -223,13 +193,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _refreshUnreadCount() async {
     try {
-      final res = await RelaxApi.instance.get('/notifications/me/unread-count');
-      final unreadRes = res.data;
-      if (unreadRes is Map && unreadRes['count'] is num) {
-        setState(() {
-          _unreadCount = (unreadRes['count'] as num).toInt();
-        });
-      }
+      final count = await HomeDataLoader.fetchUnreadCount();
+      setState(() {
+        _unreadCount = count;
+      });
     } catch (_) {}
   }
 

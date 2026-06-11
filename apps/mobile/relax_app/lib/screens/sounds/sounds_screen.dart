@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../core/api_client.dart';
-import '../core/audio_controller.dart';
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
+import '../../core/api_client.dart';
+import '../../core/audio_controller.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import 'widgets/download_button.dart';
 
 /// Trình phát âm thanh nền / podcast. Phát qua AudioController dùng chung
 /// nên nhạc tiếp tục khi user thoát màn (mini-player toàn cục hiện ở shell).
@@ -197,7 +198,7 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           if (soundId != null && soundUrl != null)
-                                            _DownloadButton(
+                                            DownloadButton(
                                               soundId: soundId,
                                               soundUrl: soundUrl,
                                               audio: audio,
@@ -353,78 +354,5 @@ class _SoundsScreenState extends State<SoundsScreen> {
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$m:$s';
-  }
-}
-
-class _DownloadButton extends StatelessWidget {
-  const _DownloadButton({
-    required this.soundId,
-    required this.soundUrl,
-    required this.audio,
-  });
-
-  final String soundId;
-  final String soundUrl;
-  final AudioController audio;
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = audio.downloadProgress[soundId];
-    if (progress != null) {
-      return SizedBox(
-        width: 20,
-        height: 20,
-        child: CircularProgressIndicator(
-          value: progress == 0.0 ? null : progress,
-          strokeWidth: 2,
-          color: RelaxColors.violet,
-        ),
-      );
-    }
-
-    return FutureBuilder<bool>(
-      future: audio.isDownloaded(soundId),
-      builder: (context, snapshot) {
-        final downloaded = snapshot.data ?? false;
-        if (downloaded) {
-          return const Icon(
-            Icons.cloud_done_outlined,
-            color: RelaxColors.mint,
-            size: 20,
-          );
-        }
-        return IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: const Icon(
-            Icons.cloud_download_outlined,
-            color: RelaxColors.violet,
-            size: 20,
-          ),
-          onPressed: () async {
-            try {
-              await audio.download(soundId, soundUrl);
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(context.t('Đã tải thành công tệp âm thanh ngoại tuyến!')),
-                    backgroundColor: RelaxColors.mint,
-                  ),
-                );
-              }
-            } catch (e) {
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${context.t('Lỗi tải tệp âm thanh:')} $e'),
-                    backgroundColor: RelaxColors.coral,
-                  ),
-                );
-              }
-            }
-          },
-        );
-      },
-    );
   }
 }

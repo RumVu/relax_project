@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:provider/provider.dart';
-import '../core/api_client.dart';
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/soft_toast.dart';
+
+import '../../core/api_client.dart';
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/soft_toast.dart';
+import 'helpers/billing_formatters.dart';
+import 'widgets/current_plan_card.dart';
+import 'widgets/info_row.dart';
+import 'widgets/plan_card.dart';
 
 /// Màn hình Billing — hiển thị gói hiện tại, danh sách gói mua, và cho phép
 /// nạp tiền qua SePay. Flow:
@@ -55,35 +58,6 @@ class _BillingScreenState extends State<BillingScreen> {
       _error = e.toString();
     } finally {
       if (mounted) setState(() => _loading = false);
-    }
-  }
-
-  String _formatPrice(dynamic price) {
-    if (price == null) return context.t('Miễn phí');
-    final n = (price is num) ? price.toInt() : int.tryParse('$price') ?? 0;
-    if (n == 0) return context.t('Miễn phí');
-    // Format VND with dot separator
-    final s = n.toString();
-    final buf = StringBuffer();
-    for (var i = 0; i < s.length; i++) {
-      if (i > 0 && (s.length - i) % 3 == 0) buf.write('.');
-      buf.write(s[i]);
-    }
-    return '${buf.toString()}đ';
-  }
-
-  String _tierDisplayName(String? tier) {
-    switch (tier?.toUpperCase()) {
-      case 'CHILL_PLUS':
-        return 'Chill+';
-      case 'CHILL_PLUS_ANNUAL':
-        return context.t('Chill+ Năm');
-      case 'PREMIUM':
-        return 'Premium';
-      case 'FREE':
-        return context.t('Miễn phí');
-      default:
-        return tier ?? context.t('Miễn phí');
     }
   }
 
@@ -189,7 +163,7 @@ class _BillingScreenState extends State<BillingScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              context.t('Thanh toán gói {tier}', {'tier': _tierDisplayName(planSlug)}),
+              context.t('Thanh toán gói {tier}', {'tier': tierDisplayName(context, planSlug)}),
               style: TextStyle(
                 color: ctx.appText,
                 fontWeight: FontWeight.w800,
@@ -198,21 +172,21 @@ class _BillingScreenState extends State<BillingScreen> {
             ),
             const SizedBox(height: 20),
             if (bankName != null)
-              _InfoRow(label: context.t('Ngân hàng'), value: bankName),
+              InfoRow(label: context.t('Ngân hàng'), value: bankName),
             if (bankAccount != null)
-              _InfoRow(
+              InfoRow(
                 label: context.t('Số tài khoản'),
                 value: bankAccount,
                 copyValue: bankAccount,
               ),
             if (amount != null)
-              _InfoRow(
+              InfoRow(
                 label: context.t('Số tiền'),
-                value: _formatPrice(amount),
+                value: formatPrice(context, amount),
                 copyValue: amount.toString(),
               ),
             if (transferContent != null)
-              _InfoRow(
+              InfoRow(
                 label: context.t('Nội dung CK'),
                 value: transferContent,
                 copyValue: transferContent,
@@ -439,9 +413,9 @@ class _BillingScreenState extends State<BillingScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
                     children: [
                       // Current plan card
-                      _CurrentPlanCard(
+                      CurrentPlanCard(
                         subscription: _subscription,
-                        tierName: _tierDisplayName,
+                        tierName: (tier) => tierDisplayName(context, tier),
                       ),
                       const SizedBox(height: 28),
                       // Available plans
@@ -462,10 +436,10 @@ class _BillingScreenState extends State<BillingScreen> {
                         final isCurrent = _isCurrentPlan(plan);
                         final features =
                             plan['features'] is List ? plan['features'] as List : [];
-                        return _PlanCard(
-                          name: _tierDisplayName(name),
+                        return PlanCard(
+                          name: tierDisplayName(context, name),
                           description: context.t(desc),
-                          price: _formatPrice(price),
+                          price: formatPrice(context, price),
                           isCurrent: isCurrent,
                           features: features
                               .map((f) => f is String ? context.t(f) : '$f')
@@ -583,7 +557,7 @@ class _BillingScreenState extends State<BillingScreen> {
                                   ? RelaxColors.sun
                                   : RelaxColors.coral,
                         ),
-                        title: Text(_formatPrice(amount),
+                        title: Text(formatPrice(context, amount),
                             style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: sheetCtx.appText)),
@@ -639,286 +613,5 @@ class _BillingScreenState extends State<BillingScreen> {
         showSoftToast(ctx, message: '$errorMsgPrefix $e', tone: SoftToastTone.error);
       }
     }
-  }
-}
-
-/// Card hiển thị gói hiện tại.
-class _CurrentPlanCard extends StatelessWidget {
-  const _CurrentPlanCard({
-    required this.subscription,
-    required this.tierName,
-  });
-  final Map<String, dynamic>? subscription;
-  final String Function(String?) tierName;
-
-  @override
-  Widget build(BuildContext context) {
-    final subObj = subscription?['subscription'] as Map?;
-    final tier = (subObj?['planName'] ?? subObj?['plan'] ?? subObj?['tier'] ?? subscription?['tier'] ?? subscription?['plan'] ?? 'FREE') as String;
-    final isFree = tier.toUpperCase() == 'FREE';
-    final expiresAt = (subObj?['endDate'] ?? subObj?['expiresAt'] ?? subscription?['expiresAt'] ?? subscription?['endDate']) as String?;
-    final expDate =
-        expiresAt != null ? DateTime.tryParse(expiresAt) : null;
-
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isFree
-              ? [RelaxColors.slate, const Color(0xFF5a6072)]
-              : [RelaxColors.violet, RelaxColors.plum],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: (isFree ? RelaxColors.slate : RelaxColors.violet)
-                .withValues(alpha: 0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                isFree ? Icons.person_outline : Icons.workspace_premium,
-                color: Colors.white,
-                size: 28,
-              ),
-              const SizedBox(width: 10),
-              Text(
-                context.t('Gói hiện tại'),
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.8),
-                  fontSize: 13,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Text(
-            tierName(tier),
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w900,
-              fontSize: 28,
-            ),
-          ),
-          if (expDate != null) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${context.t('Hết hạn:')} ${expDate.day}/${expDate.month}/${expDate.year}',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12,
-              ),
-            ),
-          ],
-          if (isFree) ...[
-            const SizedBox(height: 10),
-            Text(
-              context.t('Nâng cấp để mở khóa toàn bộ tính năng!'),
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.85),
-                fontSize: 13,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Card gói đăng ký.
-class _PlanCard extends StatelessWidget {
-  const _PlanCard({
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.isCurrent,
-    required this.features,
-    required this.onTap,
-  });
-  final String name;
-  final String description;
-  final String price;
-  final bool isCurrent;
-  final List<String> features;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isCurrent ? RelaxColors.violet : context.fieldBorder,
-          width: isCurrent ? 2 : 1,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  name,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    color: context.appText,
-                  ),
-                ),
-              ),
-              if (isCurrent)
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: RelaxColors.violet.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    context.t('Đang dùng'),
-                    style: const TextStyle(
-                      color: RelaxColors.violet,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 11,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          if (description.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(description,
-                style: TextStyle(color: context.mutedText, fontSize: 13)),
-          ],
-          const SizedBox(height: 12),
-          Text(
-            price,
-            style: TextStyle(
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              color: context.appText,
-            ),
-          ),
-          if (features.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ...features.map((f) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.check_circle,
-                          size: 16, color: RelaxColors.mint),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(f,
-                            style: TextStyle(
-                                color: context.appText, fontSize: 13)),
-                      ),
-                    ],
-                  ),
-                )),
-          ],
-          const SizedBox(height: 14),
-          SizedBox(
-            width: double.infinity,
-            height: 44,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    isCurrent ? context.surfaceAlt : RelaxColors.violet,
-                foregroundColor: isCurrent ? context.mutedText : Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onPressed: onTap,
-              child: Text(
-                isCurrent ? context.t('Gói hiện tại') : context.t('Chọn gói này'),
-                style: const TextStyle(fontWeight: FontWeight.w700),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Dòng thông tin trong bottom sheet thanh toán.
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.copyValue,
-  });
-  final String label;
-  final String value;
-  final String? copyValue;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: TextStyle(
-                color: context.mutedText,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: context.appText,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          if (copyValue != null)
-            GestureDetector(
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: copyValue!));
-                showSoftToast(
-                  context,
-                  message: context.t('Đã sao chép {label}', {'label': label}),
-                  tone: SoftToastTone.success,
-                );
-              },
-              child: const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                child: Icon(
-                  Icons.copy,
-                  size: 16,
-                  color: RelaxColors.violet,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 }

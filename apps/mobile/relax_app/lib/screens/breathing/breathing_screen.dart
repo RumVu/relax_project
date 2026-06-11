@@ -4,64 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-import '../core/auth_state.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/checkin_sheet.dart';
-import '../widgets/journey_prompt.dart';
-
-/// Một nhịp thở: bao nhiêu giây cho từng pha + số chu kỳ.
-class _Pattern {
-  const _Pattern({
-    required this.code,
-    required this.label,
-    required this.inhale,
-    required this.hold,
-    required this.exhale,
-    required this.holdAfter,
-    required this.cycles,
-  });
-
-  final String code;
-  final String label;
-  final int inhale;
-  final int hold;
-  final int exhale;
-  final int holdAfter;
-  final int cycles;
-}
-
-const _patterns = <_Pattern>[
-  _Pattern(
-    code: 'box',
-    label: 'Box 4-4-4-4 · cân bằng',
-    inhale: 4,
-    hold: 4,
-    exhale: 4,
-    holdAfter: 4,
-    cycles: 6,
-  ),
-  _Pattern(
-    code: 'relax',
-    label: '4-7-8 · ngủ ngon',
-    inhale: 4,
-    hold: 7,
-    exhale: 8,
-    holdAfter: 0,
-    cycles: 5,
-  ),
-  _Pattern(
-    code: 'natural',
-    label: '4-0-4-0 · tự nhiên',
-    inhale: 4,
-    hold: 0,
-    exhale: 4,
-    holdAfter: 0,
-    cycles: 8,
-  ),
-];
-
-enum _Phase { idle, inhale, hold, exhale, holdAfter, finished }
+import '../../core/auth_state.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/checkin_sheet.dart';
+import '../../widgets/journey_prompt.dart';
+import 'models/breathing_pattern.dart';
+import 'models/breathing_phase.dart';
 
 /// Vòng tròn hít thở hoạt họa: phình to khi hít vào, thu nhỏ khi thở ra,
 /// giữ nguyên khi nín thở; có bộ đếm ngược giây + đếm chu kỳ. Dùng
@@ -77,13 +26,13 @@ class _BreathingScreenState extends State<BreathingScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _scaleCtrl;
   int _patternIdx = 0;
-  _Phase _phase = _Phase.idle;
+  BreathingPhase _phase = BreathingPhase.idle;
   int _cyclesDone = 0;
   int _phaseRemaining = 0;
   bool _running = false;
   Timer? _ticker;
 
-  _Pattern get _pattern => _patterns[_patternIdx];
+  BreathingPattern get _pattern => breathingPatterns[_patternIdx];
 
   @override
   void initState() {
@@ -111,45 +60,45 @@ class _BreathingScreenState extends State<BreathingScreen>
     super.dispose();
   }
 
-  int _phaseLength(_Phase p) {
+  int _phaseLength(BreathingPhase p) {
     switch (p) {
-      case _Phase.inhale:
+      case BreathingPhase.inhale:
         return _pattern.inhale;
-      case _Phase.hold:
+      case BreathingPhase.hold:
         return _pattern.hold;
-      case _Phase.exhale:
+      case BreathingPhase.exhale:
         return _pattern.exhale;
-      case _Phase.holdAfter:
+      case BreathingPhase.holdAfter:
         return _pattern.holdAfter;
       default:
         return 0;
     }
   }
 
-  _Phase _nextPhase(_Phase current) {
-    const order = [_Phase.inhale, _Phase.hold, _Phase.exhale, _Phase.holdAfter];
+  BreathingPhase _nextPhase(BreathingPhase current) {
+    const order = [BreathingPhase.inhale, BreathingPhase.hold, BreathingPhase.exhale, BreathingPhase.holdAfter];
     final idx = order.indexOf(current);
     for (var step = 1; step <= order.length; step++) {
       final candidate = order[(idx + step) % order.length];
       if (_phaseLength(candidate) > 0) return candidate;
     }
-    return _Phase.inhale;
+    return BreathingPhase.inhale;
   }
 
-  void _applyPhaseAnimation(_Phase p) {
+  void _applyPhaseAnimation(BreathingPhase p) {
     final secs = _phaseLength(p);
-    if (p == _Phase.inhale) {
+    if (p == BreathingPhase.inhale) {
       _scaleCtrl.animateTo(1.0, duration: Duration(seconds: secs == 0 ? 1 : secs));
-    } else if (p == _Phase.exhale) {
+    } else if (p == BreathingPhase.exhale) {
       _scaleCtrl.animateTo(0.55, duration: Duration(seconds: secs == 0 ? 1 : secs));
     }
     // hold / holdAfter: giữ nguyên scale hiện tại.
   }
 
   void _start() {
-    const order = [_Phase.inhale, _Phase.hold, _Phase.exhale, _Phase.holdAfter];
+    const order = [BreathingPhase.inhale, BreathingPhase.hold, BreathingPhase.exhale, BreathingPhase.holdAfter];
     final first = order.firstWhere((p) => _phaseLength(p) > 0,
-        orElse: () => _Phase.inhale);
+        orElse: () => BreathingPhase.inhale);
     setState(() {
       _phase = first;
       _phaseRemaining = _phaseLength(first);
@@ -167,11 +116,11 @@ class _BreathingScreenState extends State<BreathingScreen>
       _phaseRemaining -= 1;
       if (_phaseRemaining > 0) return;
       final next = _nextPhase(_phase);
-      if (next == _Phase.inhale) {
+      if (next == BreathingPhase.inhale) {
         _cyclesDone += 1;
         if (_cyclesDone >= _pattern.cycles) {
           _running = false;
-          _phase = _Phase.finished;
+          _phase = BreathingPhase.finished;
           _ticker?.cancel();
           _scaleCtrl.animateTo(0.7, duration: const Duration(milliseconds: 600));
           // Haptic nhẹ báo hoàn thành — không rung mạnh.
@@ -199,7 +148,7 @@ class _BreathingScreenState extends State<BreathingScreen>
                       // Reset state + bắt đầu lại session ngay tức thì.
                       setState(() {
                         _cyclesDone = 0;
-                        _phase = _Phase.idle;
+                        _phase = BreathingPhase.idle;
                         _phaseRemaining = 0;
                         _running = false;
                       });
@@ -255,7 +204,7 @@ class _BreathingScreenState extends State<BreathingScreen>
     _ticker?.cancel();
     setState(() {
       _running = false;
-      _phase = _Phase.idle;
+      _phase = BreathingPhase.idle;
       _phaseRemaining = 0;
       _cyclesDone = 0;
     });
@@ -264,15 +213,15 @@ class _BreathingScreenState extends State<BreathingScreen>
 
   String get _phaseLabel {
     switch (_phase) {
-      case _Phase.inhale:
+      case BreathingPhase.inhale:
         return 'Hít vào';
-      case _Phase.hold:
+      case BreathingPhase.hold:
         return 'Giữ';
-      case _Phase.exhale:
+      case BreathingPhase.exhale:
         return 'Thở ra';
-      case _Phase.holdAfter:
+      case BreathingPhase.holdAfter:
         return 'Nghỉ';
-      case _Phase.finished:
+      case BreathingPhase.finished:
         return 'Hoàn thành';
       default:
         return 'Sẵn sàng';
@@ -307,7 +256,7 @@ class _BreathingScreenState extends State<BreathingScreen>
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: List.generate(_patterns.length, (i) {
+              children: List.generate(breathingPatterns.length, (i) {
                 final sel = i == _patternIdx;
                 return GestureDetector(
                   onTap: () {
@@ -325,7 +274,7 @@ class _BreathingScreenState extends State<BreathingScreen>
                       ),
                     ),
                     child: Text(
-                      context.t(_patterns[i].label),
+                      context.t(breathingPatterns[i].label),
                       style: TextStyle(
                         color: sel ? Colors.white : context.appText,
                         fontWeight: FontWeight.w700,
@@ -385,9 +334,9 @@ class _BreathingScreenState extends State<BreathingScreen>
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  _phase == _Phase.idle
+                                  _phase == BreathingPhase.idle
                                       ? '·'
-                                      : _phase == _Phase.finished
+                                      : _phase == BreathingPhase.finished
                                           ? '✓'
                                           : '$_phaseRemaining',
                                   style: const TextStyle(
@@ -423,12 +372,12 @@ class _BreathingScreenState extends State<BreathingScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (_phase == _Phase.idle || _phase == _Phase.finished)
+                if (_phase == BreathingPhase.idle || _phase == BreathingPhase.finished)
                   ElevatedButton.icon(
                     onPressed: _start,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(
-                      _phase == _Phase.finished ? context.t('Tập lại') : context.t('Bắt đầu'),
+                      _phase == BreathingPhase.finished ? context.t('Tập lại') : context.t('Bắt đầu'),
                     ),
                   )
                 else if (_running)

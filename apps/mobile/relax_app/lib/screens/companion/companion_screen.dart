@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/api_client.dart';
-import '../core/locale_controller.dart';
-import '../core/theme.dart';
-import '../widgets/soft_toast.dart';
+import '../../core/api_client.dart';
+import '../../core/locale_controller.dart';
+import '../../core/theme.dart';
+import '../../widgets/soft_toast.dart';
+import 'widgets/action_button.dart';
+import 'widgets/companion_error_box.dart';
+import 'widgets/stat_bar.dart';
 
-/// Màn linh thú: xem trạng thái (level / độ thân thiết / năng lượng) và
-/// tương tác (Vuốt ve / Cho ăn / Chơi) qua POST /user-companions/me/interactions.
-/// Đồng thời cho phép đặt tên linh thú và thay đổi chế độ cá nhân hóa (Zodiac, Chinese Zodiac, Custom).
+/// Companion screen: view status (level / affection / energy) and
+/// interact (Pet / Feed / Play) via POST /user-companions/me/interactions.
+/// Also allows naming the companion and changing personalization mode
+/// (Zodiac, Chinese Zodiac, Custom).
 class CompanionScreen extends StatefulWidget {
   const CompanionScreen({super.key});
 
@@ -81,7 +85,6 @@ class _CompanionScreenState extends State<CompanionScreen>
     if (_busy) return;
     setState(() => _busy = true);
     HapticFeedback.mediumImpact();
-    // Bắt đầu nhún nhảy nhẹ
     unawaited(_bounce.forward().then((_) => _bounce.reverse()));
 
     try {
@@ -305,7 +308,7 @@ class _CompanionScreenState extends State<CompanionScreen>
             ? const Center(
                 child: CircularProgressIndicator(color: RelaxColors.violet))
             : _error != null
-                ? _ErrorBox(message: _error!, onRetry: _load)
+                ? CompanionErrorBox(message: _error!, onRetry: _load)
                 : RefreshIndicator(
                     color: RelaxColors.violet,
                     onRefresh: _load,
@@ -398,14 +401,14 @@ class _CompanionScreenState extends State<CompanionScreen>
                           ),
                         ),
                         const SizedBox(height: 24),
-                        _StatBar(
+                        StatBar(
                           label: context.t('Độ thân thiết'),
                           value: affection,
                           color: RelaxColors.coral,
                           icon: Icons.favorite,
                         ),
                         const SizedBox(height: 14),
-                        _StatBar(
+                        StatBar(
                           label: context.t('Năng lượng'),
                           value: energy,
                           color: RelaxColors.mint,
@@ -425,7 +428,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                             Row(
                               children: [
                                 Expanded(
-                                  child: _ActionButton(
+                                  child: ActionButton(
                                     icon: Icons.pan_tool_alt_outlined,
                                     label: context.t('Vuốt ve'),
                                     onTap: _busy
@@ -435,7 +438,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
-                                  child: _ActionButton(
+                                  child: ActionButton(
                                     icon: Icons.restaurant,
                                     label: context.t('Cho ăn'),
                                     onTap: _busy
@@ -449,7 +452,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                             Row(
                               children: [
                                 Expanded(
-                                  child: _ActionButton(
+                                  child: ActionButton(
                                     icon: Icons.sports_esports_outlined,
                                     label: context.t('Chơi'),
                                     onTap: _busy
@@ -459,7 +462,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                                 ),
                                 const SizedBox(width: 10),
                                 Expanded(
-                                  child: _ActionButton(
+                                  child: ActionButton(
                                     icon: Icons.chat_bubble_outline,
                                     label: context.t('Trò chuyện'),
                                     onTap: () {
@@ -641,130 +644,6 @@ class _CompanionScreenState extends State<CompanionScreen>
           ),
         );
       },
-    );
-  }
-}
-
-class _StatBar extends StatelessWidget {
-  const _StatBar({
-    required this.label,
-    required this.value,
-    required this.color,
-    required this.icon,
-  });
-  final String label;
-  final int value;
-  final Color color;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 18, color: color),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                color: context.appText,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '$value%',
-              style: TextStyle(fontWeight: FontWeight.w800, color: color),
-            ),
-          ],
-        ),
-        const SizedBox(height: 6),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: LinearProgressIndicator(
-            value: (value / 100).clamp(0.0, 1.0),
-            minHeight: 8,
-            backgroundColor: RelaxColors.lilac,
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: context.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: context.fieldBorder),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: RelaxColors.violet),
-            const SizedBox(height: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-                fontSize: 13,
-                color: context.appText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ErrorBox extends StatelessWidget {
-  const _ErrorBox({required this.message, required this.onRetry});
-  final String message;
-  final VoidCallback onRetry;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.error_outline, color: RelaxColors.coral, size: 40),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: RelaxColors.coral, fontSize: 13),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh),
-              label: Text(context.t('Thử lại')),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
