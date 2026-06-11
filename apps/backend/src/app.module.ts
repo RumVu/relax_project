@@ -50,6 +50,11 @@ import { BillingModule } from './billing/billing.module';
 import { AdminDashboardModule } from './admin-dashboard/admin-dashboard.module';
 import { AdminAuditInterceptor } from './admin-logs/admin-audit.interceptor';
 import { AdminLogsModule } from './admin-logs/admin-logs.module';
+import { AchievementsModule } from './achievements/achievements.module';
+import { FriendsModule } from './friends/friends.module';
+import { FeedModule } from './feed/feed.module';
+import { MeditationsModule } from './meditations/meditations.module';
+import { SleepModule } from './sleep/sleep.module';
 
 @Module({
   imports: [
@@ -146,6 +151,11 @@ import { AdminLogsModule } from './admin-logs/admin-logs.module';
     AmbientSoundsModule,
     BreathingExercisesModule,
     CozyQuotesModule,
+    AchievementsModule,
+    FriendsModule,
+    FeedModule,
+    MeditationsModule,
+    SleepModule,
   ],
   controllers: [AppController],
   providers: [

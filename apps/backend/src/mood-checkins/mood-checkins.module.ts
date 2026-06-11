@@ -3,9 +3,11 @@ import { AuthCoreModule } from '../auth/auth-core.module';
 import { UsersModule } from '../users/users.module';
 import { MoodCheckinsController } from './mood-checkins.controller';
 import { MoodCheckinsService } from './mood-checkins.service';
+import { AchievementsModule } from '../achievements/achievements.module';
+import { FeedModule } from '../feed/feed.module';
 
 @Module({
-  imports: [AuthCoreModule, UsersModule],
+  imports: [AuthCoreModule, UsersModule, AchievementsModule, FeedModule],
   controllers: [MoodCheckinsController],
   providers: [MoodCheckinsService],
   exports: [MoodCheckinsService],

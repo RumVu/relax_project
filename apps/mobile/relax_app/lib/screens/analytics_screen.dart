@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/tour_controller.dart';
 import '../core/api_client.dart';
 import '../core/locale_controller.dart';
 import '../core/theme.dart';
@@ -132,6 +133,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   children: [
                     Row(
+                      key: TourController.instance.targetKeys[6],
                       children: [
                         _statTile(context, '$_total', context.t('Lượt ghi'), Icons.edit_note),
                         const SizedBox(width: 12),
@@ -153,12 +155,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _card(
-                      context,
-                      title: context.t('Biểu đồ cảm xúc 7 ngày qua'),
-                      child: _total == 0
-                          ? _empty(context)
-                          : MoodLineChart(values: _daily),
+                    Container(
+                      key: TourController.instance.targetKeys[7],
+                      child: _card(
+                        context,
+                        title: context.t('Biểu đồ cảm xúc 7 ngày qua'),
+                        child: _total == 0
+                            ? _empty(context)
+                            : MoodLineChart(values: _daily),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     _card(

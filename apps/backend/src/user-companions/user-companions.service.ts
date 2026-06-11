@@ -13,6 +13,8 @@ import { UsersService } from '../users/users.service';
 import { CreateCompanionInteractionDto } from './dto/create-companion-interaction.dto';
 import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-personalization.dto';
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
+import { ConfigService } from '@nestjs/config';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 @Injectable()
 export class UserCompanionsService {
@@ -20,6 +22,7 @@ export class UserCompanionsService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly realtime: RealtimeService,
+    private readonly configService: ConfigService,
   ) {}
 
   private emitCompanionUpdate(
@@ -338,5 +341,155 @@ export class UserCompanionsService {
     if (normalized === 'PLAY') return -8;
     if (normalized === 'SLEEP') return 20;
     return 0;
+  }
+
+  async chatWithCompanion(userId: string, message: string) {
+    const companion = await this.ensureCompanion(userId);
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+
+    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let newMood = companion.mood;
+    let newAction = companion.action;
+
+    if (apiKey) {
+      try {
+        const historyRows = await this.prisma.companionInteraction.findMany({
+          where: { userId, companionId: companion.id, type: 'CHAT' },
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        });
+        const historyList = [...historyRows].reverse();
+        const historyText = historyList
+          .map((row) => {
+            const meta = row.metadata as { sender?: string; text?: string } | null;
+            if (meta?.sender && meta?.text) {
+              return `${meta.sender === 'user' ? 'User' : companion.name}: ${meta.text}`;
+            }
+            return '';
+          })
+          .filter(Boolean)
+          .join('\n');
+
+        const prompt = [
+          `Bạn là ${companion.name}, linh thú trợ lý ảo thuộc hệ ${companion.type} của người dùng.`,
+          `Trạng thái hiện tại của bạn:`,
+          `- Cảm xúc hiện tại: ${companion.mood}`,
+          `- Động tác hiện tại: ${companion.action}`,
+          `- Độ thân thiết (0-100): ${companion.affection}`,
+          `- Năng lượng (0-100): ${companion.energy}`,
+          ``,
+          `Quy tắc trả lời:`,
+          `- Trả lời cực kỳ thân thiện, ấm áp bằng tiếng Việt.`,
+          `- Ngắn gọn (1-2 câu), giống như tin nhắn chat nhanh.`,
+          `- Phù hợp với tính cách hệ linh thú ${companion.type} và mức độ thân thiện hiện tại.`,
+          `- Dựa vào lịch sử hội thoại gần đây để tiếp nối câu chuyện tự nhiên.`,
+          ``,
+          `Lịch sử hội thoại gần đây:`,
+          historyText || '(Chưa có hội thoại trước đó)',
+          ``,
+          `Tin nhắn mới nhất từ người dùng: "${message}"`,
+        ].join('\n');
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: SchemaType.OBJECT,
+              properties: {
+                reply: {
+                  type: SchemaType.STRING,
+                  description: 'Lời phản hồi bằng tiếng Việt ngắn gọn (1-2 câu).',
+                },
+                mood: {
+                  type: SchemaType.STRING,
+                  format: 'enum',
+                  enum: ['CHILL', 'HAPPY', 'EXCITED', 'TIRED'],
+                },
+                action: {
+                  type: SchemaType.STRING,
+                  format: 'enum',
+                  enum: ['IDLE', 'WAVE', 'EAT', 'SLEEP'],
+                },
+              },
+              required: ['reply', 'mood', 'action'],
+            },
+          },
+        });
+
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
+        const parsed = JSON.parse(text) as {
+          reply: string;
+          mood: string;
+          action: string;
+        };
+
+        if (parsed.reply) {
+          reply = parsed.reply;
+          newMood = parsed.mood as CompanionMood;
+          newAction = parsed.action as CompanionAction;
+        }
+      } catch (err) {
+        // Fallback to default reply on model/api error
+      }
+    }
+
+    const [userMsgRow, companionMsgRow, updated] = await this.prisma.$transaction([
+      this.prisma.companionInteraction.create({
+        data: {
+          userId,
+          companionId: companion.id,
+          type: 'CHAT',
+          metadata: { sender: 'user', text: message } as Prisma.InputJsonValue,
+        },
+      }),
+      this.prisma.companionInteraction.create({
+        data: {
+          userId,
+          companionId: companion.id,
+          type: 'CHAT',
+          metadata: { sender: 'companion', text: reply } as Prisma.InputJsonValue,
+        },
+      }),
+      this.prisma.userCompanion.update({
+        where: { id: companion.id },
+        data: {
+          affection: Math.min(100, companion.affection + 2),
+          mood: newMood,
+          action: newAction,
+          lastSeenAt: new Date(),
+        },
+        include: { asset: true },
+      }),
+    ]);
+
+    this.emitCompanionUpdate(userId, updated);
+
+    return {
+      reply,
+      companion: updated,
+      userMessage: userMsgRow,
+      companionMessage: companionMsgRow,
+    };
+  }
+
+  async getChatHistory(userId: string) {
+    const companion = await this.ensureCompanion(userId);
+    const rows = await this.prisma.companionInteraction.findMany({
+      where: { userId, companionId: companion.id, type: 'CHAT' },
+      orderBy: { createdAt: 'desc' },
+      take: 30,
+    });
+    return [...rows].reverse().map((r) => {
+      const meta = r.metadata as { sender?: string; text?: string } | null;
+      return {
+        id: r.id,
+        sender: meta?.sender || 'user',
+        text: meta?.text || '',
+        createdAt: r.createdAt,
+      };
+    });
   }
 }

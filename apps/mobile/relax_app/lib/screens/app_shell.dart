@@ -8,9 +8,11 @@ import 'package:provider/provider.dart';
 import '../core/audio_controller.dart';
 import '../core/auth_state.dart';
 import '../core/locale_controller.dart';
+import '../core/tour_controller.dart';
 import '../core/theme.dart';
 import '../widgets/checkin_sheet.dart';
 import '../widgets/journey_prompt.dart';
+import '../widgets/tour_overlay.dart';
 import 'analytics_screen.dart';
 import 'home_screen.dart';
 import 'relax_screen.dart';
@@ -50,7 +52,39 @@ class _AppShellState extends State<AppShell> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final audio = context.read<AudioController>();
       _audioCompletionSub = audio.onTrackCompleted.listen(_onAudioFinished);
+
+      // Start the app tour automatically for new users
+      final tour = TourController.instance;
+      if (!tour.hasCompletedTour) {
+        tour.startTour();
+      }
     });
+
+    TourController.instance.addListener(_onTourStepChanged);
+  }
+
+  void _onTourStepChanged() {
+    if (!mounted) return;
+    final tour = TourController.instance;
+    if (!tour.isTourActive) return;
+
+    int newIndex = _index;
+    final step = tour.currentStep;
+    if (step >= 0 && step <= 2) {
+      newIndex = 0;
+    } else if (step >= 3 && step <= 5) {
+      newIndex = 1;
+    } else if (step >= 6 && step <= 7) {
+      newIndex = 2;
+    } else if (step >= 8 && step <= 10) {
+      newIndex = 3;
+    }
+
+    if (newIndex != _index) {
+      setState(() {
+        _index = newIndex;
+      });
+    }
   }
 
   @override
@@ -65,6 +99,7 @@ class _AppShellState extends State<AppShell> {
 
   @override
   void dispose() {
+    TourController.instance.removeListener(_onTourStepChanged);
     _audioCompletionSub?.cancel();
     super.dispose();
   }
@@ -140,79 +175,84 @@ class _AppShellState extends State<AppShell> {
         if (didPop || _index == 0) return;
         setState(() => _index = 0);
       },
-      child: Scaffold(
-        body: Column(
-          children: [
-            Expanded(
-              // Stack: IndexedStack giữ state (scroll, controllers) +
-              // một lớp overlay fade trắng khi đổi tab cho cảm giác
-              // dịu dàng (không reset state như AnimatedSwitcher).
-              child: Stack(
-                children: [
-                  IndexedStack(
-                    index: _index,
-                    children: List.generate(_tabCount, _screen),
-                  ),
-                  // Hiệu ứng fade veil — opacity 0.0 ổn định, sẽ
-                  // animate qua _veil khi tab change.
-                  IgnorePointer(
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOut,
-                      opacity: _veilOpacity,
-                      child: Container(
-                        color: context.surface,
+      child: Stack(
+        children: [
+          Scaffold(
+            body: Column(
+              children: [
+                Expanded(
+                  // Stack: IndexedStack giữ state (scroll, controllers) +
+                  // một lớp overlay fade trắng khi đổi tab cho cảm giác
+                  // dịu dàng (không reset state như AnimatedSwitcher).
+                  child: Stack(
+                    children: [
+                      IndexedStack(
+                        index: _index,
+                        children: List.generate(_tabCount, _screen),
                       ),
-                    ),
+                      // Hiệu ứng fade veil — opacity 0.0 ổn định, sẽ
+                      // animate qua _veil khi tab change.
+                      IgnorePointer(
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeOut,
+                          opacity: _veilOpacity,
+                          child: Container(
+                            color: context.surface,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+                const _MiniPlayer(),
+              ],
             ),
-            const _MiniPlayer(),
-          ],
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _index,
-          onDestinationSelected: (i) {
-            if (i == _index) return;
-            // Haptic nhẹ cho tap chính xác — không rung mạnh, chỉ nhỏ.
-            HapticFeedback.selectionClick();
-            // Flash veil 0 → 0.6 → 0 trong ~440ms để có cảm giác
-            // "chớp mắt" dịu dàng khi đổi tab — không reset state
-            // của tab cũ.
-            setState(() {
-              _veilOpacity = 0.6;
-              _index = i;
-            });
-            Future.delayed(const Duration(milliseconds: 220), () {
-              if (mounted) setState(() => _veilOpacity = 0);
-            });
-          },
-          backgroundColor: context.surface,
-          indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home, color: RelaxColors.violet),
-              label: context.t('Trang chủ'),
+            bottomNavigationBar: NavigationBar(
+              selectedIndex: _index,
+              onDestinationSelected: (i) {
+                if (i == _index) return;
+                // Haptic nhẹ cho tap chính xác — không rung mạnh, chỉ nhỏ.
+                HapticFeedback.selectionClick();
+                // Flash veil 0 → 0.6 → 0 trong ~440ms để có cảm giác
+                // "chớp mắt" dịu dàng khi đổi tab — không reset state
+                // của tab cũ.
+                setState(() {
+                  _veilOpacity = 0.6;
+                  _index = i;
+                });
+                Future.delayed(const Duration(milliseconds: 220), () {
+                  if (mounted) setState(() => _veilOpacity = 0);
+                });
+              },
+              backgroundColor: context.surface,
+              indicatorColor: RelaxColors.violet.withValues(alpha: 0.18),
+              destinations: [
+                NavigationDestination(
+                  icon: const Icon(Icons.home_outlined),
+                  selectedIcon: const Icon(Icons.home, color: RelaxColors.violet),
+                  label: context.t('Trang chủ'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.spa_outlined),
+                  selectedIcon: const Icon(Icons.spa, color: RelaxColors.violet),
+                  label: context.t('Thư giãn'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.insights_outlined),
+                  selectedIcon: const Icon(Icons.insights, color: RelaxColors.violet),
+                  label: context.t('Cảm xúc'),
+                ),
+                NavigationDestination(
+                  icon: const Icon(Icons.settings_outlined),
+                  selectedIcon: const Icon(Icons.settings, color: RelaxColors.violet),
+                  label: context.t('Setup'),
+                ),
+              ],
             ),
-            NavigationDestination(
-              icon: const Icon(Icons.spa_outlined),
-              selectedIcon: const Icon(Icons.spa, color: RelaxColors.violet),
-              label: context.t('Thư giãn'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.insights_outlined),
-              selectedIcon: const Icon(Icons.insights, color: RelaxColors.violet),
-              label: context.t('Cảm xúc'),
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.settings_outlined),
-              selectedIcon: const Icon(Icons.settings, color: RelaxColors.violet),
-              label: context.t('Setup'),
-            ),
-          ],
-        ),
+          ),
+          const TourOverlay(),
+        ],
       ),
     );
   }

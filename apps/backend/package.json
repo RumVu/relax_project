@@ -1,6 +1,6 @@
 {
   "name": "digital-cigarette-break-backend",
-  "version": "0.0.1",
+  "version": "1.1.1.1",
   "description": "",
   "author": "",
   "private": true,
@@ -31,9 +31,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand"
+    "test:e2e": "DATABASE_URL=${DATABASE_URL_TEST:-postgresql://postgres:123456@localhost:5555/digital_cigarette_break_test?schema=public} npm run prisma:migrate:deploy && DATABASE_URL=${DATABASE_URL_TEST:-postgresql://postgres:123456@localhost:5555/digital_cigarette_break_test?schema=public} npm run prisma:seed && DATABASE_URL=${DATABASE_URL_TEST:-postgresql://postgres:123456@localhost:5555/digital_cigarette_break_test?schema=public} jest --config ./test/jest-e2e.json --runInBand"
   },
   "dependencies": {
+    "@digital-cigarette-break/shared-types": "*",
+    "@digital-cigarette-break/shared-utils": "*",
     "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.4",

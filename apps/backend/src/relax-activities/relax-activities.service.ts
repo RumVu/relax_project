@@ -25,6 +25,8 @@ import {
 } from './relax-activity-options';
 
 import { getNextSuggestion, toSessionPayload } from './helpers/relax-mapper';
+import { AchievementsService } from '../achievements/achievements.service';
+import { FeedService } from '../feed/feed.service';
 import {
   getStressReliefPercent,
   resolveDurationSeconds,
@@ -61,6 +63,8 @@ export class RelaxActivitiesService {
     private readonly usersService: UsersService,
     private readonly moodCheckinsService: MoodCheckinsService,
     private readonly realtime: RealtimeService,
+    private readonly achievementsService: AchievementsService,
+    private readonly feedService: FeedService,
   ) {}
 
   // ============================================================
@@ -230,6 +234,20 @@ export class RelaxActivitiesService {
       status: session.status,
       durationSeconds,
     });
+
+    // Check achievement and create feed entry
+    try {
+      await this.achievementsService.checkAndUnlock(userId, 'Buổi thư giãn đầu tiên');
+      await this.feedService.createEntry(
+        userId,
+        'RELAX_SESSION',
+        'Hoàn thành buổi thư giãn',
+        `đã hoàn thành phiên thư giãn: "${session.title}" trong ${Math.round(durationSeconds / 60)} phút.`,
+        session.id,
+      );
+    } catch (err) {
+      // Don't block flow if achievements/feed fails
+    }
 
     // Side-effect: write a mood check-in derived from this session so
     // dashboards reflect "post-relax mood" automatically.

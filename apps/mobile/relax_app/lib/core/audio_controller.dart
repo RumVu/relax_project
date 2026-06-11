@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// Bộ điều khiển phát nhạc dùng chung toàn app — giữ MỘT AudioPlayer nên
 /// nhạc tiếp tục phát khi user chuyển màn. Mini-player toàn cục + màn
@@ -29,6 +32,45 @@ class AudioController extends ChangeNotifier {
   List<Map<String, dynamic>> _queue = [];
   int _index = -1;
 
+  final Map<String, double> _downloadProgress = {};
+  Map<String, double> get downloadProgress => _downloadProgress;
+
+  Future<String> _getLocalPath(String soundId) async {
+    final dir = await getApplicationDocumentsDirectory();
+    return '${dir.path}/sound_$soundId.mp3';
+  }
+
+  Future<bool> isDownloaded(String soundId) async {
+    final path = await _getLocalPath(soundId);
+    return File(path).existsSync();
+  }
+
+  Future<void> download(String soundId, String url) async {
+    if (_downloadProgress.containsKey(soundId)) return;
+    _downloadProgress[soundId] = 0.0;
+    notifyListeners();
+    try {
+      final path = await _getLocalPath(soundId);
+      final dio = Dio();
+      await dio.download(
+        url,
+        path,
+        onReceiveProgress: (received, total) {
+          if (total != -1) {
+            _downloadProgress[soundId] = received / total;
+            notifyListeners();
+          }
+        },
+      );
+      _downloadProgress.remove(soundId);
+      notifyListeners();
+    } catch (e) {
+      _downloadProgress.remove(soundId);
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   AudioPlayer get player => _player;
   bool get playing => _player.playing;
   int get index => _index;
@@ -50,11 +92,23 @@ class AudioController extends ChangeNotifier {
 
   Future<void> playAt(int i) async {
     if (i < 0 || i >= _queue.length) return;
-    final url = _queue[i]['soundUrl'] as String?;
+    final t = _queue[i];
+    final url = t['soundUrl'] as String?;
+    final soundId = t['id'] as String?;
     if (url == null) return;
     _index = i;
     notifyListeners();
     try {
+      if (soundId != null) {
+        final localPath = await _getLocalPath(soundId);
+        if (File(localPath).existsSync()) {
+          debugPrint('Playing local cached audio: $localPath');
+          await _player.setAudioSource(AudioSource.file(localPath));
+          await _player.play();
+          return;
+        }
+      }
+      debugPrint('Streaming remote audio: $url');
       await _player.setUrl(url);
       await _player.play();
     } catch (e) {

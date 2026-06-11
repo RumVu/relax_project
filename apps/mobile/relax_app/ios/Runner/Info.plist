@@ -85,5 +85,17 @@
 			</array>
 		</dict>
 	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và địa điểm thư giãn phù hợp gần bạn.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí liên tục để cập nhật thông tin thời tiết phù hợp.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và địa điểm thư giãn phù hợp gần bạn.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và các địa điểm phù hợp gần bạn.</string>
 </dict>
 </plist>

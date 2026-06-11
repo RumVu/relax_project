@@ -28,5 +28,7 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và các địa điểm phù hợp gần bạn.</string>
 </dict>
 </plist>

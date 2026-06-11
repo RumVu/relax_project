@@ -13,6 +13,7 @@ import { CreateCompanionInteractionDto } from './dto/create-companion-interactio
 import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-personalization.dto';
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
 import { UserCompanionResponseDto } from './dto/user-companion-response.dto';
+import { CompanionChatDto } from './dto/companion-chat.dto';
 import { UserCompanionsService } from './user-companions.service';
 
 @ApiTags('User Companions')
@@ -85,6 +86,27 @@ export class UserCompanionsController {
     @Body() dto: CreateCompanionInteractionDto,
   ) {
     return this.userCompanionsService.interact(user.id, dto);
+  }
+
+  @ApiOperation({ summary: 'Chat with user companion using AI' })
+  @ApiCreatedResponse({
+    description: 'User message sent, companion response generated using Gemini, and state updated.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Post('me/chat')
+  chat(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CompanionChatDto,
+  ) {
+    return this.userCompanionsService.chatWithCompanion(user.id, dto.message);
+  }
+
+  @ApiOperation({ summary: 'Get companion chat history' })
+  @ApiOkResponse({ description: 'Companion chat history.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/chat/history')
+  getChatHistory(@CurrentUser() user: AuthUser) {
+    return this.userCompanionsService.getChatHistory(user.id);
   }
 
   @ApiOperation({ summary: 'Get current user companion stats' })

@@ -8,6 +8,8 @@ import { UserQuest } from '@prisma/client';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
 import { PrismaService } from '../prisma/prisma.service';
+import { AchievementsService } from '../achievements/achievements.service';
+import { FeedService } from '../feed/feed.service';
 import {
   pickQuestTemplate,
   QuestMetric,
@@ -38,7 +40,11 @@ export interface QuestStateView {
 @Injectable()
 export class QuestsService {
   private readonly logger = new Logger(QuestsService.name);
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly achievementsService: AchievementsService,
+    private readonly feedService: FeedService,
+  ) {}
 
   /**
    * Read the active quest slate for a user. If they don't have ACTIVE_QUEST_COUNT
@@ -70,6 +76,22 @@ export class QuestsService {
         where: { id: { in: newlyCompleted.map((v) => v.id) } },
         data: { completedAt: new Date() },
       });
+
+      // Trigger achievements & feed for newly completed quests
+      for (const q of newlyCompleted) {
+        try {
+          await this.achievementsService.checkAndUnlock(userId, 'Nhiệm vụ đầu tiên');
+          await this.feedService.createEntry(
+            userId,
+            'QUEST_COMPLETED',
+            'Hoàn thành nhiệm vụ',
+            `đã hoàn thành nhiệm vụ: "${q.title}".`,
+            q.id,
+          );
+        } catch (err) {
+          // ignore
+        }
+      }
     }
     return views;
   }

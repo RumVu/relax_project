@@ -1,7 +1,7 @@
 {
   "name": "@digital-cigarette-break/web",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.1.a",
   "scripts": {
     "dev": "node ./scripts/free-dev-port.cjs && next dev --port ${WEB_PORT:-3233}",
     "dev:fresh": "npm run dev",
@@ -16,6 +16,7 @@
     "openapi:types": "mkdir -p lib/generated && npx --yes openapi-typescript ${NEXT_PUBLIC_API_URL:-http://localhost:6823}/docs-json -o lib/generated/openapi-types.ts"
   },
   "dependencies": {
+    "@digital-cigarette-break/shared-types": "*",
     "@vercel/analytics": "^2.0.1",
     "clsx": "^2.1.1",
     "lucide-react": "^1.14.0",

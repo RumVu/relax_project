@@ -130,6 +130,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                   itemCount: _tracks.length,
                                 itemBuilder: (context, i) {
                                   final t = _tracks[i];
+                                  final soundId = t['id'] as String?;
+                                  final soundUrl = t['soundUrl'] as String?;
                                   final playing = identical(
                                       audio.current, _tracks[i]) ||
                                       audio.current?['id'] == t['id'];
@@ -191,11 +193,23 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                             color: context.mutedText,
                                             fontSize: 12),
                                       ),
-                                      trailing: Icon(
-                                        playing
-                                            ? Icons.equalizer
-                                            : Icons.play_arrow,
-                                        color: RelaxColors.violet,
+                                      trailing: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (soundId != null && soundUrl != null)
+                                            _DownloadButton(
+                                              soundId: soundId,
+                                              soundUrl: soundUrl,
+                                              audio: audio,
+                                            ),
+                                          const SizedBox(width: 8),
+                                          Icon(
+                                            playing
+                                                ? Icons.equalizer
+                                                : Icons.play_arrow,
+                                            color: RelaxColors.violet,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   );
@@ -339,5 +353,78 @@ class _SoundsScreenState extends State<SoundsScreen> {
     final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
     final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
     return '$m:$s';
+  }
+}
+
+class _DownloadButton extends StatelessWidget {
+  const _DownloadButton({
+    required this.soundId,
+    required this.soundUrl,
+    required this.audio,
+  });
+
+  final String soundId;
+  final String soundUrl;
+  final AudioController audio;
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = audio.downloadProgress[soundId];
+    if (progress != null) {
+      return SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          value: progress == 0.0 ? null : progress,
+          strokeWidth: 2,
+          color: RelaxColors.violet,
+        ),
+      );
+    }
+
+    return FutureBuilder<bool>(
+      future: audio.isDownloaded(soundId),
+      builder: (context, snapshot) {
+        final downloaded = snapshot.data ?? false;
+        if (downloaded) {
+          return const Icon(
+            Icons.cloud_done_outlined,
+            color: RelaxColors.mint,
+            size: 20,
+          );
+        }
+        return IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: const Icon(
+            Icons.cloud_download_outlined,
+            color: RelaxColors.violet,
+            size: 20,
+          ),
+          onPressed: () async {
+            try {
+              await audio.download(soundId, soundUrl);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(context.t('Đã tải thành công tệp âm thanh ngoại tuyến!')),
+                    backgroundColor: RelaxColors.mint,
+                  ),
+                );
+              }
+            } catch (e) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${context.t('Lỗi tải tệp âm thanh:')} $e'),
+                    backgroundColor: RelaxColors.coral,
+                  ),
+                );
+              }
+            }
+          },
+        );
+      },
+    );
   }
 }

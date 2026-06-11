@@ -420,36 +420,55 @@ class _CompanionScreenState extends State<CompanionScreen>
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Row(
+                        Column(
                           children: [
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.pan_tool_alt_outlined,
-                                label: context.t('Vuốt ve'),
-                                onTap: _busy
-                                    ? null
-                                    : () => _interact('PET', context.t('Linh thú thích lắm!')),
-                              ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _ActionButton(
+                                    icon: Icons.pan_tool_alt_outlined,
+                                    label: context.t('Vuốt ve'),
+                                    onTap: _busy
+                                        ? null
+                                        : () => _interact('PET', context.t('Linh thú thích lắm!')),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _ActionButton(
+                                    icon: Icons.restaurant,
+                                    label: context.t('Cho ăn'),
+                                    onTap: _busy
+                                        ? null
+                                        : () => _interact('FEED', context.t('Đã cho ăn ngon lành!')),
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.restaurant,
-                                label: context.t('Cho ăn'),
-                                onTap: _busy
-                                    ? null
-                                    : () => _interact('FEED', context.t('Đã cho ăn ngon lành!')),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: _ActionButton(
-                                icon: Icons.sports_esports_outlined,
-                                label: context.t('Chơi'),
-                                onTap: _busy
-                                    ? null
-                                    : () => _interact('PLAY', context.t('Chơi vui quá!')),
-                              ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _ActionButton(
+                                    icon: Icons.sports_esports_outlined,
+                                    label: context.t('Chơi'),
+                                    onTap: _busy
+                                        ? null
+                                        : () => _interact('PLAY', context.t('Chơi vui quá!')),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: _ActionButton(
+                                    icon: Icons.chat_bubble_outline,
+                                    label: context.t('Trò chuyện'),
+                                    onTap: () {
+                                      HapticFeedback.selectionClick();
+                                      context.push('/companion-chat');
+                                    },
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),

@@ -79,7 +79,7 @@ class LegalScreen extends StatelessWidget {
                 onTap: () => showLicensePage(
                   context: context,
                   applicationName: 'Relax',
-                  applicationVersion: '1.0.0',
+                  applicationVersion: '1.1.1.0',
                 ),
               ),
             ),

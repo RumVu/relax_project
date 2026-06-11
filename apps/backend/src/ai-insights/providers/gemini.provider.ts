@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import {
   InsightDraft,
   InsightGenerationResult,
@@ -10,12 +10,12 @@ import {
 
 /**
  * Gemini provider — asks gemini-1.5-flash (default) for personalized
- * insights + recommendations. Output is constrained to JSON via the
- * `responseMimeType: 'application/json'` flag so we can parse it
- * deterministically.
+ * insights + recommendations. Output is constrained via `responseSchema`
+ * (Structured Outputs) so the model is guaranteed to return valid JSON
+ * matching our exact schema — no regex/manual parsing needed.
  *
- * If the model returns invalid JSON or the API errors, the AiInsightsService
- * catches and falls back to the deterministic provider.
+ * Fallback behavior: if the model errors, AiInsightsService catches
+ * and falls back to the deterministic provider automatically.
  */
 export class GeminiInsightProvider implements InsightProvider {
   readonly name = 'gemini';
@@ -36,15 +36,100 @@ export class GeminiInsightProvider implements InsightProvider {
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.6,
+        // Structured Outputs: ép buộc model trả về đúng schema JSON —
+        // không cần regex/parse thủ công, không lo hallucination sai format.
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            insights: {
+              type: SchemaType.ARRAY,
+              description:
+                'Danh sách 3 nhận định cảm xúc cho người dùng (tiếng Việt tự nhiên).',
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  type: {
+                    type: SchemaType.STRING,
+                    format: 'enum',
+                    description:
+                      'Loại insight: weekly-summary | mood-pattern | risk-flag | celebration',
+                    enum: [
+                      'weekly-summary',
+                      'mood-pattern',
+                      'risk-flag',
+                      'celebration',
+                    ],
+                  },
+                  title: {
+                    type: SchemaType.STRING,
+                    description: 'Tiêu đề ngắn gọn (tối đa 60 ký tự).',
+                  },
+                  content: {
+                    type: SchemaType.STRING,
+                    description:
+                      'Nội dung nhận định, 2-3 câu, giọng ấm áp không phán xét.',
+                  },
+                },
+                required: ['type', 'title', 'content'],
+              },
+              minItems: 3,
+              maxItems: 3,
+            },
+            recommendations: {
+              type: SchemaType.ARRAY,
+              description:
+                'Danh sách 2-3 gợi ý hoạt động dựa trên dữ liệu cảm xúc.',
+              items: {
+                type: SchemaType.OBJECT,
+                properties: {
+                  contentType: {
+                    type: SchemaType.STRING,
+                    format: 'enum',
+                    description:
+                      'Loại nội dung: BreathingExercise | AmbientSound',
+                    enum: ['BreathingExercise', 'AmbientSound'],
+                  },
+                  contentId: {
+                    type: SchemaType.STRING,
+                    description:
+                      'ID phải lấy chính xác từ danh sách catalog được cung cấp trong prompt.',
+                  },
+                  reason: {
+                    type: SchemaType.STRING,
+                    description: 'Lý do gợi ý, 1 câu ngắn gọn bằng tiếng Việt.',
+                  },
+                  score: {
+                    type: SchemaType.NUMBER,
+                    description: 'Điểm phù hợp từ 0.0 đến 1.0.',
+                  },
+                },
+                required: ['contentType', 'contentId', 'reason', 'score'],
+              },
+              minItems: 2,
+              maxItems: 3,
+            },
+          },
+          required: ['insights', 'recommendations'],
+        },
       },
     });
 
     const prompt = this.buildPrompt(ctx);
     const res = await model.generateContent(prompt);
     const text = res.response.text();
-    const parsed = this.parseJson(text);
-    if (!parsed) {
-      throw new Error('Gemini returned non-JSON response');
+
+    // Với Structured Outputs, JSON đã được đảm bảo hợp lệ từ phía Gemini.
+    // Vẫn parse để lấy typed object, nhưng không cần fallback regex nữa.
+    let parsed: { insights?: unknown[]; recommendations?: unknown[] };
+    try {
+      parsed = JSON.parse(text) as {
+        insights?: unknown[];
+        recommendations?: unknown[];
+      };
+    } catch (err) {
+      throw new Error(
+        `Gemini Structured Output parse failed (unexpected): ${(err as Error).message}`,
+      );
     }
 
     const insights = this.normaliseInsights(parsed.insights);
@@ -52,6 +137,12 @@ export class GeminiInsightProvider implements InsightProvider {
       parsed.recommendations,
       ctx,
     );
+
+    if (insights.length === 0) {
+      throw new Error(
+        'Gemini returned 0 valid insights after normalisation — triggering fallback.',
+      );
+    }
 
     return { provider: this.name, insights, recommendations };
   }
@@ -82,55 +173,19 @@ export class GeminiInsightProvider implements InsightProvider {
       `Điểm cảm xúc trung bình (0..100): ${Math.round(aggregate.averageScore)}.`,
       `Phân bố: ${breakdownStr || 'trống'}.`,
       ``,
-      `Danh sách bài thở khả dụng (chọn id từ đây):`,
-      breathingList || '(trống)',
+      `Danh sách bài thở khả dụng (chọn contentId chính xác từ đây — KHÔNG được bịa id):`,
+      breathingList || '(không có bài thở nào đang hoạt động)',
       ``,
-      `Danh sách âm thanh thư giãn khả dụng (chọn id từ đây):`,
-      ambientList || '(trống)',
+      `Danh sách âm thanh thư giãn khả dụng (chọn contentId chính xác từ đây — KHÔNG được bịa id):`,
+      ambientList || '(không có âm thanh nào đang hoạt động)',
       ``,
-      `Hãy trả về JSON đúng schema sau, viết bằng tiếng Việt tự nhiên, KHÔNG dùng từ viết tắt, KHÔNG chêm tiếng Anh:`,
-      `{`,
-      `  "insights": [`,
-      `    { "type": "weekly-summary" | "mood-pattern" | "risk-flag" | "celebration", "title": "tiêu đề ngắn", "content": "2-3 câu" }`,
-      `  ],`,
-      `  "recommendations": [`,
-      `    { "contentType": "BreathingExercise" | "AmbientSound", "contentId": "id-có-trong-danh-sách", "reason": "1 câu vì sao gợi ý", "score": 0.0..1.0 }`,
-      `  ]`,
-      `}`,
-      ``,
-      `Yêu cầu:`,
+      `Yêu cầu bắt buộc:`,
+      `- Viết bằng tiếng Việt tự nhiên, KHÔNG dùng từ viết tắt, KHÔNG chêm tiếng Anh.`,
       `- Đúng 3 insights, 2-3 recommendations.`,
-      `- Giọng văn ấm áp, không phán xét.`,
-      `- contentId PHẢI lấy từ danh sách trên, không bịa.`,
-      `- Nếu dữ liệu ít (total < 3) thì viết động viên người dùng ghi thêm.`,
+      `- Giọng văn ấm áp, không phán xét, không sáo rỗng.`,
+      `- contentId PHẢI là id lấy từ danh sách trên — nếu danh sách trống, bỏ qua recommendations loại đó.`,
+      `- Nếu dữ liệu ít (total < 3) thì insight đầu tiên nên động viên người dùng ghi thêm cảm xúc.`,
     ].join('\n');
-  }
-
-  private parseJson(raw: string): {
-    insights?: unknown[];
-    recommendations?: unknown[];
-  } | null {
-    try {
-      return JSON.parse(raw) as {
-        insights?: unknown[];
-        recommendations?: unknown[];
-      };
-    } catch {
-      // Try to extract the first {...} block.
-      const match = raw.match(/\{[\s\S]*\}/);
-      if (!match) return null;
-      try {
-        return JSON.parse(match[0]) as {
-          insights?: unknown[];
-          recommendations?: unknown[];
-        };
-      } catch (err) {
-        this.logger.warn(
-          `Failed to parse Gemini JSON: ${(err as Error).message}`,
-        );
-        return null;
-      }
-    }
   }
 
   private normaliseInsights(raw: unknown): InsightDraft[] {
@@ -167,7 +222,7 @@ export class GeminiInsightProvider implements InsightProvider {
         const reason = typeof r.reason === 'string' ? r.reason : null;
         const score = typeof r.score === 'number' ? r.score : 0.5;
         if (!contentType || !contentId || !reason) return null;
-        // Drop hallucinated ids.
+        // Xác minh lại id từ catalog dù Structured Outputs đã giảm thiểu hallucination.
         if (
           contentType === 'BreathingExercise' &&
           !validBreathingIds.has(contentId)

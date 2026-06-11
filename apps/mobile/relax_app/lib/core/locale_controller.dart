@@ -335,7 +335,7 @@ class Translations {
     'Nếu đang run trong lòng, đặt tay lên ngực. Mình ở đây, cơ thể cũng ở đây.': 'If you are trembling inside, place your hand on your chest. I\'m here, your body is here.',
     'Nội dung CK': 'Transfer description',
     'Phiên': 'Session',
-    'Phiên bản 1.0.0': 'Version 1.0.0',
+    'Phiên bản 1.1.1.0': 'Version 1.1.1.0',
     'Phiên bản app': 'App Version',
     'Phát hiện đăng nhập từ {device}{ip}. Nếu không phải anh, hãy đổi mật khẩu ngay.': 'Detected login from {device}{ip}. If this wasn\'t you, change your password immediately.',
     'Phân bố cảm xúc': 'Mood distribution',

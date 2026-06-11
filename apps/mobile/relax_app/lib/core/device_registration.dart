@@ -75,7 +75,7 @@ class DeviceRegistration {
           'provider': 'FCM',
           'deviceId': deviceId,
           'deviceName': deviceName,
-          'appVersion': '1.0.0',
+          'appVersion': '1.1.1.0',
           'timezone': timezone,
           'enabled': true,
         },

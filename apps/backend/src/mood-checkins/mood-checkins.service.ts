@@ -22,6 +22,8 @@ import { MoodCheckinQueryDto } from './dto/mood-checkin-query.dto';
 import { RecalculateWeeklyMoodStatsDto } from './dto/recalculate-weekly-mood-stats.dto';
 import { UpdateMoodCheckinDto } from './dto/update-mood-checkin.dto';
 import { getMoodOption, MOOD_OPTIONS, MoodActionType } from './mood-options';
+import { AchievementsService } from '../achievements/achievements.service';
+import { FeedService } from '../feed/feed.service';
 
 // Helpers (pure)
 import {
@@ -36,7 +38,7 @@ import {
   getCheckinDate,
   addLocalDays,
 } from './helpers/mood-time';
-import { calculateStreaks } from './helpers/mood-streaks';
+import { calculateStreaks, StreakResult } from './helpers/mood-streaks';
 import { buildGreeting } from './helpers/mood-greeting';
 import {
   buildRecommendation,
@@ -83,6 +85,8 @@ export class MoodCheckinsService {
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
     private readonly realtime: RealtimeService,
+    private readonly achievementsService: AchievementsService,
+    private readonly feedService: FeedService,
   ) {}
 
   // ============================================================
@@ -184,13 +188,38 @@ export class MoodCheckinsService {
       },
     });
 
-    await this.syncProfileStats(userId);
+    const streak = await this.syncProfileStats(userId);
     await this.syncWeeklyStatsAroundDate(userId, getCheckinDate(checkin));
     this.realtime.emitToUser(userId, 'mood.updated', {
       id: checkin.id,
       mood: checkin.mood,
       createdAt: checkin.createdAt,
     });
+
+    // Check achievement and create feed entry
+    try {
+      await this.achievementsService.checkAndUnlock(userId, 'Bước đầu ghi nhận cảm xúc');
+      if (streak.current >= 3) {
+        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 3 ngày: Đồng hành chớm nở');
+      }
+      if (streak.current >= 7) {
+        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 7 ngày: Thói quen vững vàng');
+      }
+      if (streak.current >= 30) {
+        await this.achievementsService.checkAndUnlock(userId, 'Chuỗi 30 ngày: Bậc thầy tự cân bằng');
+      }
+
+      await this.feedService.createEntry(
+        userId,
+        'MOOD_CHECKIN',
+        'Ghi nhận cảm xúc mới',
+        `đã ghi nhận cảm xúc: "${checkin.mood}" với cường độ ${checkin.intensity}/5.`,
+        checkin.id,
+      );
+    } catch (err) {
+      // Don't block flow if achievements/feed fails
+    }
+
     return checkin;
   }
 
@@ -244,11 +273,9 @@ export class MoodCheckinsService {
 
   async getStats(userId: string, query: MoodCheckinQueryDto) {
     await this.usersService.findOne(userId);
-    const timezone = await this.resolveTimezone(userId);
-    const timezoneContext = createTimezoneContext(timezone);
     const where = this.buildWhere(userId, query);
 
-    const [total, byMood, average, latest, checkinsForStreak] =
+    const [total, byMood, average, latest, userStreak] =
       await Promise.all([
         this.prisma.moodCheckin.count({ where }),
         this.prisma.moodCheckin.groupBy({
@@ -265,10 +292,8 @@ export class MoodCheckinsService {
           where,
           orderBy: { createdAt: 'desc' },
         }),
-        this.prisma.moodCheckin.findMany({
+        this.prisma.userStreak.findUnique({
           where: { userId },
-          select: { createdAt: true, scoredAt: true },
-          orderBy: { createdAt: 'desc' },
         }),
       ]);
 
@@ -280,7 +305,10 @@ export class MoodCheckinsService {
         count: entry._count.mood,
       })),
       latest,
-      streak: calculateStreaks(checkinsForStreak, timezoneContext),
+      streak: {
+        current: userStreak?.currentStreak ?? 0,
+        longest: userStreak?.longestStreak ?? 0,
+      },
     };
   }
 
@@ -434,15 +462,13 @@ export class MoodCheckinsService {
     const range = resolveAnalyticsRange(query, timezoneContext);
     const previousRange = getPreviousRange(range);
 
-    const [currentCheckins, previousCheckins, allCheckins] = await Promise.all([
+    const [currentCheckins, previousCheckins, userStreak] = await Promise.all([
       this.findCheckinsInRange(userId, range),
       query.compare === false
         ? Promise.resolve([])
         : this.findCheckinsInRange(userId, previousRange),
-      this.prisma.moodCheckin.findMany({
+      this.prisma.userStreak.findUnique({
         where: { userId },
-        select: { createdAt: true, scoredAt: true },
-        orderBy: { createdAt: 'desc' },
       }),
     ]);
 
@@ -466,7 +492,10 @@ export class MoodCheckinsService {
           : buildAnalyticsDelta(summary, previousSummary),
       timeline: buildTimeline(currentCheckins, range, timezoneContext),
       distribution: buildDistribution(currentCheckins),
-      streak: calculateStreaks(allCheckins, timezoneContext),
+      streak: {
+        current: userStreak?.currentStreak ?? 0,
+        longest: userStreak?.longestStreak ?? 0,
+      },
       insights: buildInsights(summary, previousSummary),
     };
   }
@@ -577,7 +606,7 @@ export class MoodCheckinsService {
     );
   }
 
-  private async syncProfileStats(userId: string) {
+  private async syncProfileStats(userId: string): Promise<StreakResult> {
     const timezone = await this.resolveTimezone(userId);
     const timezoneContext = createTimezoneContext(timezone);
     const checkins = await this.prisma.moodCheckin.findMany({
@@ -587,6 +616,25 @@ export class MoodCheckinsService {
     });
     const streak = calculateStreaks(checkins, timezoneContext);
 
+    const latestCheckin = checkins[0];
+    const lastActivityDate = latestCheckin ? (latestCheckin.scoredAt ?? latestCheckin.createdAt) : null;
+
+    await this.prisma.userStreak.upsert({
+      where: { userId },
+      update: {
+        currentStreak: streak.current,
+        longestStreak: streak.longest,
+        lastActivityDate,
+      },
+      create: {
+        userId,
+        currentStreak: streak.current,
+        longestStreak: streak.longest,
+        lastActivityDate,
+        streakType: 'MOOD_TRACKING',
+      },
+    });
+
     await this.prisma.userProfile.updateMany({
       where: { userId },
       data: {
@@ -595,6 +643,8 @@ export class MoodCheckinsService {
         longestStreak: streak.longest,
       },
     });
+
+    return streak;
   }
 
   private async syncWeeklyStatsAroundDate(userId: string, date: Date) {
@@ -621,16 +671,14 @@ export class MoodCheckinsService {
       addLocalDays(previousWeekStart, 7, timezoneContext).getTime() - 1,
     );
 
-    const [checkins, previousCheckins, streakCheckins] = await Promise.all([
+    const [checkins, previousCheckins, userStreak] = await Promise.all([
       this.findCheckinsInRange(userId, { from: weekStart, to: weekEnd }),
       this.findCheckinsInRange(userId, {
         from: previousWeekStart,
         to: previousWeekEnd,
       }),
-      this.prisma.moodCheckin.findMany({
+      this.prisma.userStreak.findUnique({
         where: { userId },
-        select: { createdAt: true, scoredAt: true },
-        orderBy: { createdAt: 'desc' },
       }),
     ]);
     const existingStat = await this.prisma.weeklyMoodStat.findUnique({
@@ -658,10 +706,7 @@ export class MoodCheckinsService {
           )
         : avgScore;
 
-    const streakDays = calculateStreaks(
-      streakCheckins,
-      timezoneContext,
-    ).current;
+    const streakDays = userStreak?.currentStreak ?? 0;
     const dominantMood = getTopMood(checkins);
     const stressReducePct = round2(previousAvgScore - avgScore);
 

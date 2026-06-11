@@ -4,12 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../core/tour_controller.dart';
 import '../core/auth_state.dart';
 import '../core/theme.dart';
 import '../core/api_client.dart';
 import '../core/locale_controller.dart';
 import '../core/theme_controller.dart';
 import '../core/secure_storage.dart';
+import '../core/local_notifications.dart';
 import '../widgets/cat_mascot.dart';
 import '../widgets/mood_line_chart.dart';
 import '../widgets/soft_toast.dart';
@@ -20,6 +22,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthState>();
+    final tour = context.watch<TourController>();
     final user = auth.user;
     final name = (user?['name'] as String?) ?? 'Người dùng';
     final email = (user?['email'] as String?) ?? '';
@@ -41,6 +44,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: ListView(
+          cacheExtent: 9999,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
           children: [
             // Header có mascot như mockup.
@@ -59,7 +63,10 @@ class SettingsScreen extends StatelessWidget {
             _ProfileHero(name: name, email: email, avatar: avatar, role: role),
             const SizedBox(height: 24),
             _SectionLabel(context.t('Thông báo')),
-            const _NotificationCard(),
+            Container(
+              key: tour.notificationsKey,
+              child: const _NotificationCard(),
+            ),
             const SizedBox(height: 24),
             _SectionLabel(context.t('Khám phá')),
             _Card(
@@ -78,11 +85,14 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => context.push('/weather'),
                 ),
                 const _Divider(),
-                _Row(
-                  icon: Icons.pets_outlined,
-                  title: context.t('Linh thú'),
-                  subtitle: context.t('Nuôi và tương tác với bạn đồng hành'),
-                  onTap: () => context.push('/companion'),
+                Container(
+                  key: tour.companionCustomizerKey,
+                  child: _Row(
+                    icon: Icons.pets_outlined,
+                    title: context.t('Linh thú'),
+                    subtitle: context.t('Nuôi và tương tác với bạn đồng hành'),
+                    onTap: () => context.push('/companion'),
+                  ),
                 ),
               ],
             ),
@@ -120,7 +130,7 @@ class SettingsScreen extends StatelessWidget {
                 _Row(
                   icon: Icons.info_outline,
                   title: context.t('Giới thiệu'),
-                  subtitle: context.t('Phiên bản 1.0.0'),
+                  subtitle: context.t('Phiên bản 1.1.1.0'),
                   onTap: () => _showAboutDialog(context),
                 ),
               ],
@@ -135,7 +145,49 @@ class SettingsScreen extends StatelessWidget {
             const _AccentPickerCard(),
             const SizedBox(height: 24),
             _SectionLabel(context.t('Ngôn ngữ')),
-            const _LanguagePickerCard(),
+            Container(
+              key: tour.languagePickerKey,
+              child: const _LanguagePickerCard(),
+            ),
+            if (tour.hasCompletedTour && !tour.isTourActive) ...[
+              const SizedBox(height: 12),
+              GestureDetector(
+                onTap: () {
+                  HapticFeedback.mediumImpact();
+                  tour.restartTour();
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.directions_run_outlined,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.t('Cần đi tour du lịch app này nha'),
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             _SectionLabel(context.t('Nạp thẻ / Nâng cấp')),
             (() {
@@ -204,7 +256,7 @@ class SettingsScreen extends StatelessWidget {
     showAboutDialog(
       context: context,
       applicationName: 'Relax',
-      applicationVersion: '1.0.0',
+      applicationVersion: '1.1.1.0',
       applicationLegalese:
           context.t('Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.'),
     );
@@ -388,6 +440,8 @@ class _NotificationCardState extends State<_NotificationCard> {
 
   Future<void> _saveReminder(int hour, int minute) async {
     if (!mounted) return;
+    final localTitle = context.t('Nhắc nhở tự phản chiếu');
+    final localBody = context.t('Viết vài dòng cuối ngày để giữ tâm trạng cân bằng nhé.');
     setState(() => _loading = true);
     try {
       final now = DateTime.now();
@@ -443,6 +497,16 @@ class _NotificationCardState extends State<_NotificationCard> {
           }
         }
       }
+      // Lên lịch nhắc nhở cục bộ offline
+      await LocalNotifications.requestPermissions();
+      await LocalNotifications.scheduleDaily(
+        id: 1,
+        title: localTitle,
+        body: localBody,
+        hour: hour,
+        minute: minute,
+      );
+
       await _loadReminders();
     } catch (e) {
       if (mounted) {

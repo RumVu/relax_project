@@ -2,17 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import 'core/api_client.dart';
 import 'core/audio_controller.dart';
 import 'core/auth_state.dart';
 import 'core/locale_controller.dart';
 import 'core/page_transitions.dart';
 import 'core/theme.dart';
 import 'core/theme_controller.dart';
+import 'widgets/soft_toast.dart';
+import 'core/tour_controller.dart';
+import 'core/local_notifications.dart';
 import 'screens/analytics_screen.dart';
 import 'screens/billing_screen.dart';
 import 'screens/app_shell.dart';
 import 'screens/breathing_screen.dart';
 import 'screens/companion_screen.dart';
+import 'screens/companion_chat_screen.dart';
+import 'screens/meditation_screen.dart';
+import 'screens/sleep_screen.dart';
 import 'screens/device_info_screen.dart';
 import 'screens/journal_screen.dart';
 import 'screens/legal_screen.dart';
@@ -26,7 +33,9 @@ import 'screens/settings_screen.dart';
 import 'screens/sounds_screen.dart';
 import 'screens/weather_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalNotifications.init();
   runApp(const RelaxApp());
 }
 
@@ -53,6 +62,11 @@ class _RelaxAppState extends State<RelaxApp> {
       RelaxScreen.resetIntroForLogout();
       _audio.stop();
     };
+    RelaxApi.onRateLimitExceeded = (msg) {
+      if (mounted) {
+        showSoftToast(context, message: msg, tone: SoftToastTone.error);
+      }
+    };
     _router = _buildRouter(_auth);
   }
 
@@ -71,6 +85,7 @@ class _RelaxAppState extends State<RelaxApp> {
         ChangeNotifierProvider(create: (_) => ThemeController()),
         ChangeNotifierProvider.value(value: _audio),
         ChangeNotifierProvider(create: (_) => LocaleController()),
+        ChangeNotifierProvider.value(value: TourController.instance),
       ],
       child: Builder(builder: (context) {
         final theme = context.watch<ThemeController>();
@@ -165,6 +180,21 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/companion',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const CompanionScreen()),
+      ),
+      GoRoute(
+        path: '/companion-chat',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const CompanionChatScreen()),
+      ),
+      GoRoute(
+        path: '/meditation',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const MeditationScreen()),
+      ),
+      GoRoute(
+        path: '/sleep',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const SleepScreen()),
       ),
       GoRoute(
         path: '/mood',

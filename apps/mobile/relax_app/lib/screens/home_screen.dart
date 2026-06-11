@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../core/tour_controller.dart';
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/locale_controller.dart';
@@ -284,6 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final title = context.t(cleanTemplate, {'name': name});
     final subtitle = context.t((_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.');
     return Row(
+      key: TourController.instance.targetKeys[0],
       children: [
         Expanded(
           child: GestureDetector(
@@ -370,6 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
             {'name': name},
           );
     return Container(
+      key: TourController.instance.targetKeys[2],
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.surface,
@@ -438,6 +441,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _moodGrid() {
     return GridView.count(
+      key: TourController.instance.targetKeys[1],
       crossAxisCount: 3,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

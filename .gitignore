@@ -43,3 +43,4 @@ pnpm-debug.log*
 apps/backend/prisma/backups/*.sql
 .tunnel-url
 apps/web/.vercel/
+scratch/

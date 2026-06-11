@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../core/tour_controller.dart';
 import '../core/api_client.dart';
 import '../core/auth_state.dart';
 import '../core/locale_controller.dart';
@@ -75,6 +76,22 @@ class _RelaxScreenState extends State<RelaxScreen> {
     ),
     _Activity(
       no: '05',
+      title: 'Thiền định',
+      desc: 'Các bài thiền định có hướng dẫn để giải tỏa căng thẳng lo âu.',
+      icon: Icons.spa_outlined,
+      route: '/meditation',
+      type: 'MEDITATION',
+    ),
+    _Activity(
+      no: '06',
+      title: 'Giấc ngủ',
+      desc: 'Theo dõi giấc ngủ và chìm vào giấc ngủ với âm thanh thư giãn.',
+      icon: Icons.nights_stay_outlined,
+      route: '/sleep',
+      type: 'SLEEP',
+    ),
+    _Activity(
+      no: '07',
       title: 'Bí ẩn',
       desc: 'Để linh thú chọn một hoạt động bất ngờ phù hợp với bạn!',
       icon: Icons.help_outline,
@@ -90,6 +107,11 @@ class _RelaxScreenState extends State<RelaxScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tour = context.watch<TourController>();
+    if (tour.isTourActive) {
+      RelaxScreen._introSeenThisSession = true;
+      _showIntro = false;
+    }
     if (_showIntro) {
       return RelaxIntro(
         onDone: _dismissIntro,
@@ -101,6 +123,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
     }
     return SafeArea(
       child: ListView(
+        cacheExtent: 9999,
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
         children: [
           Row(
@@ -164,7 +187,7 @@ class _ActivityCard extends StatelessWidget {
 
     var route = activity.route;
     if (route == '__random__') {
-      const pool = ['/sounds', '/journal', '/breathing'];
+      const pool = ['/sounds', '/journal', '/breathing', '/meditation', '/sleep'];
       route = pool[Random().nextInt(pool.length)];
     }
     context.push(route);
@@ -191,7 +214,7 @@ class _ActivityCard extends StatelessWidget {
 
           var route = activity.route;
           if (route == '__random__') {
-            const pool = ['/sounds', '/journal', '/breathing'];
+            const pool = ['/sounds', '/journal', '/breathing', '/meditation', '/sleep'];
             route = pool[Random().nextInt(pool.length)];
           }
           if (ctx.mounted) {
@@ -208,7 +231,17 @@ class _ActivityCard extends StatelessWidget {
     final auth = context.watch<AuthState>();
     final isRunning = auth.activeSessionId != null && auth.activeActivityType == activity.type;
 
+    Key? targetKey;
+    if (activity.type == 'MUSIC') {
+      targetKey = TourController.instance.targetKeys[3];
+    } else if (activity.type == 'BREATHING') {
+      targetKey = TourController.instance.targetKeys[4];
+    } else if (activity.type == 'MEDITATION') {
+      targetKey = TourController.instance.targetKeys[5];
+    }
+
     return GestureDetector(
+      key: targetKey,
       onTap: () {
         HapticFeedback.selectionClick();
         if (isRunning) {
@@ -436,7 +469,7 @@ class _SmallButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 84,
+        width: 96,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: filled ? activeColor : Colors.transparent,

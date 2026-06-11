@@ -25,6 +25,7 @@ class RelaxApi {
   }
 
   static final RelaxApi instance = RelaxApi._();
+  static void Function(String message)? onRateLimitExceeded;
   late final Dio _dio;
   final FlutterSecureStorage _storage = secureStorage;
 
@@ -81,6 +82,9 @@ class RelaxApi {
         // Backend trả 401 với envelope `{success:false, code:'AUTH_*', ...}`
         // do `validateStatus` cho qua. Nếu là 401 + chưa retry → refresh +
         // gọi lại.
+        if (response.statusCode == 429) {
+          onRateLimitExceeded?.call('Bạn đang thao tác quá nhanh, vui lòng nghỉ ngơi một chút! (HTTP 429)');
+        }
         if (response.statusCode == 401 &&
             response.requestOptions.extra['relax_retry'] != true) {
           final refreshed = await _tryRefresh();
