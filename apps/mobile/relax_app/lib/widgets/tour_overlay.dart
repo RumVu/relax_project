@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../core/tour_controller.dart';
+import '../core/locale_controller.dart';
 import '../core/theme.dart';
 
 class TourOverlay extends StatefulWidget {
