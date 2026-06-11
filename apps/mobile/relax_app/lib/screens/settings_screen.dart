@@ -43,208 +43,213 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
       body: SafeArea(
-        child: ListView(
-          cacheExtent: 9999,
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-          children: [
-            // Header có mascot như mockup.
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    context.t('Tùy chỉnh không gian của {name} ~', {'name': name}),
-                    style: TextStyle(color: context.mutedText, fontSize: 13),
-                  ),
-                ),
-                const CatMascot(size: 56, emoji: '😺', glow: false),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _ProfileHero(name: name, email: email, avatar: avatar, role: role),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Thông báo')),
-            Container(
-              key: tour.notificationsKey,
-              child: const _NotificationCard(),
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Khám phá')),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.insights_outlined,
-                  title: context.t('Phân tích cảm xúc'),
-                  subtitle: context.t('Biểu đồ & phân bố cảm xúc của bạn'),
-                  onTap: () => context.push('/analytics'),
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.cloud_outlined,
-                  title: context.t('Thời tiết'),
-                  subtitle: context.t('Theo dõi thời tiết & dự báo'),
-                  onTap: () => context.push('/weather'),
-                ),
-                const _Divider(),
-                Container(
-                  key: tour.companionCustomizerKey,
-                  child: _Row(
-                    icon: Icons.pets_outlined,
-                    title: context.t('Linh thú'),
-                    subtitle: context.t('Nuôi và tương tác với bạn đồng hành'),
-                    onTap: () => context.push('/companion'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Thiết bị & vị trí')),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.place_outlined,
-                  title: context.t('Vị trí của bạn'),
-                  subtitle:
-                      context.t('Gợi ý thời tiết & địa điểm thư giãn gần bạn'),
-                  onTap: () => context.push('/location'),
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.phone_iphone_outlined,
-                  title: context.t('Thông tin thiết bị'),
-                  subtitle: context.t('Model, hệ điều hành, phiên bản app'),
-                  onTap: () => context.push('/device-info'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Quy định & sử dụng')),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.description_outlined,
-                  title: context.t('Điều khoản, bản quyền & giấy phép'),
-                  subtitle: context.t('Đọc trước khi sử dụng'),
-                  onTap: () => context.push('/legal'),
-                ),
-                const _Divider(),
-                _Row(
-                  icon: Icons.info_outline,
-                  title: context.t('Giới thiệu'),
-                  subtitle: context.t('Phiên bản 1.1.1.0'),
-                  onTap: () => _showAboutDialog(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Thống kê tình trạng')),
-            const _StatsCard(),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Giao diện')),
-            const _ThemeToggleCard(),
-            const SizedBox(height: 12),
-            const _AccentPickerCard(),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Ngôn ngữ')),
-            Container(
-              key: tour.languagePickerKey,
-              child: const _LanguagePickerCard(),
-            ),
-            if (tour.hasCompletedTour && !tour.isTourActive) ...[
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () {
-                  HapticFeedback.mediumImpact();
-                  tour.restartTour();
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+        child: RefreshIndicator(
+          color: RelaxColors.violet,
+          onRefresh: () => auth.refreshUser(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            cacheExtent: 9999,
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            children: [
+              // Header có mascot như mockup.
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      context.t('Tùy chỉnh không gian của {name} ~', {'name': name}),
+                      style: TextStyle(color: context.mutedText, fontSize: 13),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.directions_run_outlined,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        context.t('Cần đi tour du lịch app này nha'),
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                  const CatMascot(size: 56, emoji: '😺', glow: false),
+                ],
               ),
-            ],
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Nạp thẻ / Nâng cấp')),
-            (() {
-              final auth = context.watch<AuthState>();
-              final user = auth.user;
-              final subs = user?['subscriptions'] as List?;
-              final sub = (subs != null && subs.isNotEmpty) ? subs.first as Map? : null;
-              final planName = (sub?['planName'] as String?) ?? 'FREE';
-              final subStatus = (sub?['status'] as String?) ?? 'ACTIVE';
-              final isPremium = planName.toUpperCase() != 'FREE' && subStatus.toUpperCase() == 'ACTIVE';
-
-              return _Card(
+              const SizedBox(height: 16),
+              _ProfileHero(name: name, email: email, avatar: avatar, role: role),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Thông báo')),
+              Container(
+                key: tour.notificationsKey,
+                child: const _NotificationCard(),
+              ),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Khám phá')),
+              _Card(
                 children: [
                   _Row(
-                    icon: Icons.workspace_premium_outlined,
-                    title: isPremium ? '${context.t('Gói của bạn')}: ${planName.toUpperCase().replaceAll('_', ' ')}' : context.t('Mở khóa tính năng nâng cao'),
-                    subtitle: isPremium ? context.t('Cảm ơn bạn đã nâng cấp dịch vụ!') : context.t('Phân tích sâu, companion theo cung & con giáp'),
-                    trailing: Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: isPremium ? RelaxColors.mint : RelaxColors.violet,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        isPremium ? context.t('Chi tiết') : context.t('Nạp ngay'),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
+                    icon: Icons.insights_outlined,
+                    title: context.t('Phân tích cảm xúc'),
+                    subtitle: context.t('Biểu đồ & phân bố cảm xúc của bạn'),
+                    onTap: () => context.push('/analytics'),
+                  ),
+                  const _Divider(),
+                  _Row(
+                    icon: Icons.cloud_outlined,
+                    title: context.t('Thời tiết'),
+                    subtitle: context.t('Theo dõi thời tiết & dự báo'),
+                    onTap: () => context.push('/weather'),
+                  ),
+                  const _Divider(),
+                  Container(
+                    key: tour.companionCustomizerKey,
+                    child: _Row(
+                      icon: Icons.pets_outlined,
+                      title: context.t('Linh thú'),
+                      subtitle: context.t('Nuôi và tương tác với bạn đồng hành'),
+                      onTap: () => context.push('/companion'),
                     ),
-                    onTap: () => context.push('/billing'),
                   ),
                 ],
-              );
-            })(),
-            const SizedBox(height: 24),
-            _SectionLabel(context.t('Tài khoản')),
-            _Card(
-              children: [
-                _Row(
-                  icon: Icons.delete_outline,
-                  title: context.t('Xóa tài khoản'),
-                  subtitle:
-                      context.t('Xóa vĩnh viễn toàn bộ dữ liệu của bạn'),
-                  trailing: const Icon(Icons.chevron_right,
-                      color: RelaxColors.coral),
-                  onTap: () => _confirmDelete(context),
+              ),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Thiết bị & vị trí')),
+              _Card(
+                children: [
+                  _Row(
+                    icon: Icons.place_outlined,
+                    title: context.t('Vị trí của bạn'),
+                    subtitle:
+                        context.t('Gợi ý thời tiết & địa điểm thư giãn gần bạn'),
+                    onTap: () => context.push('/location'),
+                  ),
+                  const _Divider(),
+                  _Row(
+                    icon: Icons.phone_iphone_outlined,
+                    title: context.t('Thông tin thiết bị'),
+                    subtitle: context.t('Model, hệ điều hành, phiên bản app'),
+                    onTap: () => context.push('/device-info'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Quy định & sử dụng')),
+              _Card(
+                children: [
+                  _Row(
+                    icon: Icons.description_outlined,
+                    title: context.t('Điều khoản, bản quyền & giấy phép'),
+                    subtitle: context.t('Đọc trước khi sử dụng'),
+                    onTap: () => context.push('/legal'),
+                  ),
+                  const _Divider(),
+                  _Row(
+                    icon: Icons.info_outline,
+                    title: context.t('Giới thiệu'),
+                    subtitle: context.t('Phiên bản 1.1.1.0'),
+                    onTap: () => _showAboutDialog(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Thống kê tình trạng')),
+              const _StatsCard(),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Giao diện')),
+              const _ThemeToggleCard(),
+              const SizedBox(height: 12),
+              const _AccentPickerCard(),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Ngôn ngữ')),
+              Container(
+                key: tour.languagePickerKey,
+                child: const _LanguagePickerCard(),
+              ),
+              if (tour.hasCompletedTour && !tour.isTourActive) ...[
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    tour.restartTour();
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.directions_run_outlined,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          context.t('Cần đi tour du lịch app này nha'),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
-            ),
-            const SizedBox(height: 28),
-            _LogoutButton(),
-            const SizedBox(height: 24),
-          ],
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Nạp thẻ / Nâng cấp')),
+              (() {
+                final auth = context.watch<AuthState>();
+                final user = auth.user;
+                final subs = user?['subscriptions'] as List?;
+                final sub = (subs != null && subs.isNotEmpty) ? subs.first as Map? : null;
+                final planName = (sub?['planName'] as String?) ?? 'FREE';
+                final subStatus = (sub?['status'] as String?) ?? 'ACTIVE';
+                final isPremium = planName.toUpperCase() != 'FREE' && subStatus.toUpperCase() == 'ACTIVE';
+
+                return _Card(
+                  children: [
+                    _Row(
+                      icon: Icons.workspace_premium_outlined,
+                      title: isPremium ? '${context.t('Gói của bạn')}: ${planName.toUpperCase().replaceAll('_', ' ')}' : context.t('Mở khóa tính năng nâng cao'),
+                      subtitle: isPremium ? context.t('Cảm ơn bạn đã nâng cấp dịch vụ!') : context.t('Phân tích sâu, companion theo cung & con giáp'),
+                      trailing: Container(
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isPremium ? RelaxColors.mint : RelaxColors.violet,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          isPremium ? context.t('Chi tiết') : context.t('Nạp ngay'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      onTap: () => context.push('/billing'),
+                    ),
+                  ],
+                );
+              })(),
+              const SizedBox(height: 24),
+              _SectionLabel(context.t('Tài khoản')),
+              _Card(
+                children: [
+                  _Row(
+                    icon: Icons.delete_outline,
+                    title: context.t('Xóa tài khoản'),
+                    subtitle:
+                        context.t('Xóa vĩnh viễn toàn bộ dữ liệu của bạn'),
+                    trailing: const Icon(Icons.chevron_right,
+                        color: RelaxColors.coral),
+                    onTap: () => _confirmDelete(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 28),
+              _LogoutButton(),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );

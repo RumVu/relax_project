@@ -84,6 +84,9 @@ class _AppShellState extends State<AppShell> {
       setState(() {
         _index = newIndex;
       });
+      if (newIndex == 3) {
+        context.read<AuthState>().refreshUser();
+      }
     }
   }
 
@@ -221,6 +224,9 @@ class _AppShellState extends State<AppShell> {
                   _veilOpacity = 0.6;
                   _index = i;
                 });
+                if (i == 3) {
+                  context.read<AuthState>().refreshUser();
+                }
                 Future.delayed(const Duration(milliseconds: 220), () {
                   if (mounted) setState(() => _veilOpacity = 0);
                 });
