@@ -131,8 +131,8 @@ class _TourOverlayState extends State<TourOverlay> {
     if (!tour.isTourActive) return const SizedBox.shrink();
 
     final step = tour.currentStep;
-    final title = tour.stepTitles[step] ?? '';
-    final description = tour.stepDescriptions[step] ?? '';
+    final title = context.t(tour.stepTitles[step] ?? '');
+    final description = context.t(tour.stepDescriptions[step] ?? '');
     final totalSteps = tour.targetKeys.length;
 
     // Check if dialog should show on top or bottom
@@ -179,9 +179,9 @@ class _TourOverlayState extends State<TourOverlay> {
                   children: [
                     const Icon(Icons.directions_run_outlined, color: RelaxColors.violet, size: 48),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Tiếp tục tour chứ?',
-                      style: TextStyle(
+                    Text(
+                      context.t('Tiếp tục tour chứ?'),
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
@@ -189,7 +189,7 @@ class _TourOverlayState extends State<TourOverlay> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'Chúng ta sẽ chuyển sang trang tiếp theo để khám phá thêm nhiều chức năng thú vị nha ~',
+                      context.t('Chúng ta sẽ chuyển sang trang tiếp theo để khám phá thêm nhiều chức năng thú vị nha ~'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -206,9 +206,9 @@ class _TourOverlayState extends State<TourOverlay> {
                               setState(() => _showTransitionPopup = false);
                               tour.stopTour();
                             },
-                            child: const Text(
-                              'Bỏ qua',
-                              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                            child: Text(
+                              context.t('Bỏ qua'),
+                              style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
@@ -223,10 +223,10 @@ class _TourOverlayState extends State<TourOverlay> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             onPressed: () => _confirmTransition(tour),
-                            child: const Text(
-                              'Cho tui đi tiếp cái tour này đi',
+                            child: Text(
+                              context.t('Cho tui đi tiếp cái tour này đi'),
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
@@ -250,19 +250,19 @@ class _TourOverlayState extends State<TourOverlay> {
                   children: [
                     const Icon(Icons.celebration, color: RelaxColors.mint, size: 48),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Tour Kết Thúc 🎉',
-                      style: TextStyle(
+                    Text(
+                      context.t('Tour Kết Thúc 🎉'),
+                      style: const TextStyle(
                         fontSize: 19,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
-                      'tour du lịch tới đây đã hết tiền dồiii ~, trải nghiệm tốt nha',
+                    Text(
+                      context.t('tour du lịch tới đây đã hết tiền dồiii ~, trải nghiệm tốt nha'),
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -284,9 +284,9 @@ class _TourOverlayState extends State<TourOverlay> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             onPressed: () => _confirmFinal(tour),
-                            child: const Text(
-                              'Đã hiểu rùi nè ~',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            child: Text(
+                              context.t('Đã hiểu rùi nè ~'),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -306,9 +306,9 @@ class _TourOverlayState extends State<TourOverlay> {
                                 _showSelectPagePopup = true;
                               });
                             },
-                            child: const Text(
-                              'đi lại lần nữa',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            child: Text(
+                              context.t('đi lại lần nữa'),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -328,9 +328,9 @@ class _TourOverlayState extends State<TourOverlay> {
                   children: [
                     const Icon(Icons.map_outlined, color: RelaxColors.plum, size: 44),
                     const SizedBox(height: 16),
-                    const Text(
-                      'Chọn trang muốn quay lại',
-                      style: TextStyle(
+                    Text(
+                      context.t('Chọn trang muốn quay lại'),
+                      style: const TextStyle(
                         fontSize: 17,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
@@ -367,7 +367,7 @@ class _TourOverlayState extends State<TourOverlay> {
                                 ),
                                 const SizedBox(width: 12),
                                 Text(
-                                  pages[index],
+                                  context.t(pages[index]),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w600,
@@ -388,9 +388,9 @@ class _TourOverlayState extends State<TourOverlay> {
                             onPressed: () {
                               setState(() => _showSelectPagePopup = false);
                             },
-                            child: const Text(
-                              'Hủy',
-                              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
+                            child: Text(
+                              context.t('Hủy'),
+                              style: const TextStyle(color: Colors.white70, fontWeight: FontWeight.w600),
                             ),
                           ),
                         ),
@@ -405,9 +405,9 @@ class _TourOverlayState extends State<TourOverlay> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                             ),
                             onPressed: () => _restartTourAtPage(tour, _selectedRestartPage),
-                            child: const Text(
-                              'Đi thoaii',
-                              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            child: Text(
+                              context.t('Đi thoaii'),
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                             ),
                           ),
                         ),
@@ -454,7 +454,10 @@ class _TourOverlayState extends State<TourOverlay> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            'Bước ${step + 1} / $totalSteps',
+                            context.t('Bước {current} / {total}', {
+                              'current': '${step + 1}',
+                              'total': '$totalSteps',
+                            }),
                             style: const TextStyle(
                               color: RelaxColors.violet,
                               fontWeight: FontWeight.bold,
@@ -493,7 +496,7 @@ class _TourOverlayState extends State<TourOverlay> {
                         TextButton(
                           onPressed: () => tour.stopTour(),
                           child: Text(
-                            'Bỏ qua',
+                            context.t('Bỏ qua'),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.4),
                               fontSize: 12,
@@ -512,9 +515,9 @@ class _TourOverlayState extends State<TourOverlay> {
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             ),
                             onPressed: () => tour.prevStep(),
-                            child: const Text(
-                              'Trở lại',
-                              style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            child: Text(
+                              context.t('Trở lại'),
+                              style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -529,7 +532,7 @@ class _TourOverlayState extends State<TourOverlay> {
                           ),
                           onPressed: () => _onNextPressed(tour),
                           child: Text(
-                            step == totalSteps - 1 ? 'Hoàn thành' : 'Tiếp theo',
+                            step == totalSteps - 1 ? context.t('Hoàn thành') : context.t('Tiếp theo'),
                             style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
                           ),
                         ),
