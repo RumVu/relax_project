@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, UseGuards } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AuthUser } from '../auth/auth.types';
+import type { AuthUser } from '../auth/auth.types';
 
 @Controller('friends')
 @UseGuards(JwtAuthGuard)
