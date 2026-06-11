@@ -7,6 +7,7 @@ import '../../../core/locale_controller.dart';
 import '../../../core/secure_storage.dart';
 import '../../../core/local_notifications.dart';
 import '../../../widgets/soft_toast.dart';
+import 'sound_selector_sheet.dart';
 
 /// Khung giờ nhận nhắc nhở — chip 17:00 / 19:00 / 21:00 + "Mở rộng" + âm báo,
 /// dựng theo mockup, đồng bộ với backend thông qua /reminders.
@@ -205,95 +206,10 @@ class _NotificationCardState extends State<NotificationCard> {
   }
 
   void _showSoundSelectorSheet() {
-    final sounds = [
-      {'name': 'Tiếng mèo con kêu 🐱', 'key': 'cat_meow'},
-      {'name': 'Chuông gió mùa xuân 🎐', 'key': 'wind_chimes'},
-      {'name': 'Tiếng mưa rơi tí tách 🌧️', 'key': 'rain'},
-      {'name': 'Sóng biển rì rào 🌊', 'key': 'ocean'},
-      {'name': 'Tiếng chuông thiền 🔔', 'key': 'bell'},
-    ];
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (sheetCtx) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: sheetCtx.surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: sheetCtx.fieldBorder,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              context.t('Chọn âm báo nhắc nhở 🔔'),
-              style: TextStyle(
-                color: sheetCtx.appText,
-                fontWeight: FontWeight.w800,
-                fontSize: 18,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: sounds.length,
-                itemBuilder: (ctx, index) {
-                  final s = sounds[index];
-                  final name = s['name']!;
-                  final isSelected = _selectedSound == name;
-
-                  return ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      context.t(name),
-                      style: TextStyle(
-                        color: sheetCtx.appText,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        fontSize: 14,
-                      ),
-                    ),
-                    trailing: isSelected
-                        ? const Icon(Icons.check_circle, color: RelaxColors.violet)
-                        : null,
-                    onTap: () async {
-                      HapticFeedback.lightImpact();
-                      setState(() {
-                        _selectedSound = name;
-                      });
-                      try {
-                        await secureStorage.write(
-                          key: 'relax_reminder_sound',
-                          value: name,
-                        );
-                      } catch (_) {}
-                      if (!mounted) return;
-                      showSoftToast(context,
-                          message: context.t('Đã thay đổi âm báo: {sound}', {'sound': context.t(name)}),
-                          tone: SoftToastTone.success);
-
-                      if (!sheetCtx.mounted) return;
-                      Navigator.pop(sheetCtx);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+    showSoundSelectorSheet(
+      context,
+      selectedSound: _selectedSound,
+      onSoundChanged: (name) => setState(() => _selectedSound = name),
     );
   }
 

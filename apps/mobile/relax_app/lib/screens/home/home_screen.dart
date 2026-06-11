@@ -3,20 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
-import '../../core/tour_controller.dart';
 import '../../core/api_client.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
-import '../../widgets/cat_mascot.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import '../../widgets/mood_background/mood_background.dart';
 import '../../widgets/notification_sheet/notification_sheet.dart';
 import '../../widgets/soft_toast.dart';
 import 'helpers/home_data_loader.dart';
+import 'helpers/home_ui_helpers.dart';
+import 'widgets/home_header.dart';
+import 'widgets/home_mood_grid.dart';
+import 'widgets/methods_card.dart';
+import 'widgets/mood_tracking_card.dart';
+import 'widgets/speech_bubble.dart';
 
-/// Trang chủ — dựng theo mockup: lời chào theo thời tiết, mèo + bong bóng
-/// thoại, lưới cảm xúc, thanh theo dõi cảm xúc, và các phương thức phù hợp.
+// Trang chu — loi chao theo thoi tiet, meo + bong bong
+// thoai, luoi cam xuc, thanh theo doi cam xuc, va cac phuong thuc phu hop.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -36,11 +40,6 @@ class _HomeScreenState extends State<HomeScreen> {
   int _unreadCount = 0;
 
   String? _lastLang;
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void didChangeDependencies() {
@@ -95,108 +94,21 @@ class _HomeScreenState extends State<HomeScreen> {
         await showJourneyPrompt(
           context,
           title: context.t('Đã ghi nhận cảm xúc 🌸'),
-          subtitle: subtitleForMood(mood), // subtitleForMood uses localized strings already
+          subtitle: subtitleForMood(mood),
           suggestions: suggestionsForMood(mood),
         );
       }
     } catch (_) {
-      // ignore — snackbar đủ
+      // ignore
     } finally {
       if (mounted) setState(() => _savingMood = null);
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final user = context.watch<AuthState>().user;
-    final name = (user?['name'] as String?) ??
-        (user?['email'] as String?)?.split('@').first ??
-        context.t('bạn');
-
-    // Mood chủ đạo = mood được log nhiều nhất gần đây, fallback 'calm'.
-    String dominant = 'calm';
-    if (_moodCounts.isNotEmpty) {
-      final top = _moodCounts.entries
-          .reduce((a, b) => a.value >= b.value ? a : b)
-          .key
-          .toLowerCase();
-      const map = {
-        'happy': 'happy',
-        'joyful': 'happy',
-        'sad': 'sad',
-        'down': 'sad',
-        'angry': 'energetic',
-        'anxious': 'energetic',
-        'stressed': 'energetic',
-        'calm': 'calm',
-        'relaxed': 'calm',
-        'neutral': 'neutral',
-        'okay': 'neutral',
-      };
-      dominant = map[top] ?? 'calm';
-    }
-    return MoodBackground(
-      mood: dominant,
-      child: SafeArea(
-      child: RefreshIndicator(
-        color: RelaxColors.violet,
-        onRefresh: _loadAll,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-          children: [
-            _header(context, name),
-            const SizedBox(height: 16),
-            _speechBubble(context, name),
-            const SizedBox(height: 20),
-            if (_loading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(30),
-                  child: CircularProgressIndicator(color: RelaxColors.violet),
-                ),
-              )
-            else ...[
-              _sectionTitle('${context.t('Hôm nay')} $name ${context.t('đang cảm thấy:')}'),
-              const SizedBox(height: 12),
-              _moodGrid(),
-              const SizedBox(height: 12),
-              GestureDetector(
-                onTap: () => context.push('/mood'),
-                child: Text(
-                  context.t('Chi tiết hơn với ghi chú & cường độ ➜'),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: RelaxColors.violet,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              _trackingCard(context, name),
-              const SizedBox(height: 24),
-              _methodsCard(context, name),
-              if (_error != null) ...[
-                const SizedBox(height: 16),
-                Text(
-                  _error!,
-                  style: const TextStyle(color: RelaxColors.coral, fontSize: 12),
-                ),
-              ],
-            ],
-          ],
-        ),
-      ),
-      ),
-    );
-  }
-
   Future<void> _refreshUnreadCount() async {
     try {
       final count = await HomeDataLoader.fetchUnreadCount();
-      setState(() {
-        _unreadCount = count;
-      });
+      setState(() => _unreadCount = count);
     } catch (_) {}
   }
 
@@ -206,181 +118,87 @@ class _HomeScreenState extends State<HomeScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => NotificationSheet(
-        onRefreshCount: () {
-          _refreshUnreadCount();
-        },
+        onRefreshCount: _refreshUnreadCount,
       ),
     );
   }
 
-  IconData _getWeatherIcon(String? iconKey) {
-    switch (iconKey) {
-      case 'weather-sunny':
-        return Icons.wb_sunny_outlined;
-      case 'weather-night':
-        return Icons.nightlight_round_outlined;
-      case 'weather-rain':
-        return Icons.umbrella_outlined;
-      case 'weather-storm':
-        return Icons.thunderstorm_outlined;
-      case 'weather-cloudy':
-        return Icons.cloud_outlined;
-      default:
-        return Icons.wb_sunny_outlined;
-    }
-  }
+  @override
+  Widget build(BuildContext context) {
+    final user = context.watch<AuthState>().user;
+    final name = (user?['name'] as String?) ??
+        (user?['email'] as String?)?.split('@').first ??
+        context.t('bạn');
 
-  Color _getWeatherIconColor(String? iconKey) {
-    switch (iconKey) {
-      case 'weather-sunny':
-        return RelaxColors.sun;
-      case 'weather-night':
-        return RelaxColors.lilac;
-      case 'weather-rain':
-      case 'weather-storm':
-        return RelaxColors.violet;
-      case 'weather-cloudy':
-        return RelaxColors.slate;
-      default:
-        return RelaxColors.sun;
-    }
-  }
-
-  Widget _header(BuildContext context, String name) {
-    final template = (_greeting?['titleTemplate'] as String?) ?? (_greeting?['title'] as String?) ?? 'Đã trở lại rồi nè ~';
-    final cleanTemplate = template.replaceAll('{{name}}', '{name}');
-    final title = context.t(cleanTemplate, {'name': name});
-    final subtitle = context.t((_greeting?['subtitle'] as String?) ?? 'Chúc bạn một ngày nhẹ nhàng.');
-    return Row(
-      key: TourController.instance.targetKeys[0],
-      children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: () => context.push('/weather'),
-            behavior: HitTestBehavior.opaque,
-            child: Row(
-              children: [
-                Icon(
-                  _getWeatherIcon(_greeting?['iconKey']),
-                  color: _getWeatherIconColor(_greeting?['iconKey']),
-                  size: 30,
+    return MoodBackground(
+      mood: dominantMood(_moodCounts),
+      child: SafeArea(
+        child: RefreshIndicator(
+          color: RelaxColors.violet,
+          onRefresh: _loadAll,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+            children: [
+              HomeHeader(
+                name: name,
+                greeting: _greeting,
+                unreadCount: _unreadCount,
+                onNotifications: _showNotifications,
+              ),
+              const SizedBox(height: 16),
+              SpeechBubble(quote: _quote, name: name),
+              const SizedBox(height: 20),
+              if (_loading)
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(30),
+                    child:
+                        CircularProgressIndicator(color: RelaxColors.violet),
+                  ),
+                )
+              else ...[
+                _sectionTitle(
+                    '${context.t('Hôm nay')} $name ${context.t('đang cảm thấy:')}'),
+                const SizedBox(height: 12),
+                HomeMoodGrid(
+                  moodOptions: _moodOptions,
+                  savingMood: _savingMood,
+                  onLogMood: _logMood,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 17,
-                          color: context.appText,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        subtitle,
-                        style: TextStyle(color: context.mutedText, fontSize: 12),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Stack(
-          children: [
-            IconButton(
-              onPressed: _showNotifications,
-              icon: Icon(Icons.notifications_outlined, color: context.appText),
-            ),
-            if (_unreadCount > 0)
-              Positioned(
-                right: 6,
-                top: 6,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: RelaxColors.coral,
-                    shape: BoxShape.circle,
-                  ),
-                  constraints: const BoxConstraints(
-                    minWidth: 16,
-                    minHeight: 16,
-                  ),
+                const SizedBox(height: 12),
+                GestureDetector(
+                  onTap: () => context.push('/mood'),
                   child: Text(
-                    '$_unreadCount',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    context.t('Chi tiết hơn với ghi chú & cường độ ➜'),
                     textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      color: RelaxColors.violet,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-              ),
-          ],
+                const SizedBox(height: 24),
+                MoodTrackingCard(
+                  name: name,
+                  moodOptions: _moodOptions,
+                  moodCounts: _moodCounts,
+                  moodTotal: _moodTotal,
+                ),
+                const SizedBox(height: 24),
+                MethodsCard(name: name),
+                if (_error != null) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    _error!,
+                    style: const TextStyle(
+                        color: RelaxColors.coral, fontSize: 12),
+                  ),
+                ],
+              ],
+            ],
+          ),
         ),
-      ],
-    );
-  }
-
-  Widget _speechBubble(BuildContext context, String name) {
-    final line = _quote?['content'] != null
-        ? context.t(_quote!['content'] as String)
-        : context.t(
-            'Stress quá mới tìm đến toi hở? {name} nói cho toi nghe đi nè!',
-            {'name': name},
-          );
-    return Container(
-      key: TourController.instance.targetKeys[2],
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: RelaxColors.violet.withValues(alpha: context.isDark ? 0.16 : 0.08),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              line,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.appText,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          // Tap vào mascot để mở màn linh thú — biến mascot từ trang
-          // trí thành cổng vào /companion (vốn là dead route).
-          GestureDetector(
-            onTap: () => context.push('/companion'),
-            child: const CatMascot(size: 130, emoji: '😺'),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            context.t('Chạm vào mèo để thăm linh thú ✦'),
-            style: TextStyle(
-              color: context.mutedText,
-              fontSize: 11,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -404,246 +222,5 @@ class _HomeScreenState extends State<HomeScreen> {
         const Text(' ✦', style: TextStyle(color: RelaxColors.violet)),
       ],
     );
-  }
-
-  Widget _moodGrid() {
-    return GridView.count(
-      key: TourController.instance.targetKeys[1],
-      crossAxisCount: 3,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 0.95,
-      children: _moodOptions.map((o) {
-        final mood = o['mood'] as String;
-        final label = (o['shortLabel'] as String?) ?? (o['label'] as String?) ?? mood;
-        final saving = _savingMood == mood;
-        return GestureDetector(
-          onTap: saving ? null : () => _logMood(mood, label),
-          child: Container(
-            decoration: BoxDecoration(
-              color: context.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: context.fieldBorder),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(_moodEmoji(mood), style: const TextStyle(fontSize: 30)),
-                const SizedBox(height: 6),
-                saving
-                    ? const SizedBox(
-                        height: 14,
-                        width: 14,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: RelaxColors.violet),
-                      )
-                    : Text(
-                        context.t(label),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                          color: context.appText,
-                        ),
-                      ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _trackingCard(BuildContext context, String name) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  '${context.t('Theo dõi cảm xúc của')} $name',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    color: context.appText,
-                  ),
-                ),
-              ),
-              const Icon(Icons.bar_chart, color: RelaxColors.violet, size: 20),
-            ],
-          ),
-          const SizedBox(height: 14),
-          if (_moodOptions.isEmpty)
-            Text(context.t('Chưa có dữ liệu cảm xúc.'),
-                style: TextStyle(color: context.mutedText, fontSize: 12))
-          else
-            ..._moodOptions.map((o) {
-              final mood = o['mood'] as String;
-              final label = (o['label'] as String?) ?? mood;
-              final pct = _moodTotal == 0
-                  ? 0.0
-                  : (_moodCounts[mood] ?? 0) / _moodTotal;
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 90,
-                      child: Text(
-                        context.t(label),
-                        style: TextStyle(fontSize: 12, color: context.appText),
-                      ),
-                    ),
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: pct,
-                          minHeight: 8,
-                          backgroundColor: context.surfaceAlt,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            _moodColor(mood),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    SizedBox(
-                      width: 38,
-                      child: Text(
-                        '${(pct * 100).round()}%',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: context.appText,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-        ],
-      ),
-    );
-  }
-
-  Widget _methodsCard(BuildContext context, String name) {
-    final methods = [
-      ('Thiền định', Icons.self_improvement, '/meditation'),
-      ('Hít thở', Icons.air, '/breathing'),
-      ('Nhật ký', Icons.edit_note, '/journal'),
-      ('Nhạc', Icons.headphones, '/sounds'),
-      ('Podcast', Icons.mic_none, '/podcast'),
-    ];
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${context.t('Phương thức phù hợp cho')} $name',
-            style: TextStyle(
-              fontWeight: FontWeight.w800,
-              color: context.appText,
-            ),
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: methods.map((m) {
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () {
-                    HapticFeedback.selectionClick();
-                    context.push(m.$3);
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    decoration: BoxDecoration(
-                      color: context.surfaceAlt,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: context.fieldBorder),
-                    ),
-                    child: Column(
-                      children: [
-                        Icon(m.$2, color: RelaxColors.violet),
-                        const SizedBox(height: 6),
-                        Text(
-                          context.t(m.$1),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: context.appText,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _moodEmoji(String mood) {
-    switch (mood) {
-      case 'HAPPY':
-        return '😺';
-      case 'SAD':
-        return '😿';
-      case 'STRESSED':
-        return '🙀';
-      case 'TIRED':
-        return '😾';
-      case 'ANXIOUS':
-        return '😼';
-      case 'NEUTRAL':
-        return '😐';
-      case 'CALM':
-        return '😌';
-      case 'EXCITED':
-        return '😸';
-      case 'LONELY':
-        return '🐱';
-      case 'GRATEFUL':
-        return '😻';
-      default:
-        return '🐱';
-    }
-  }
-
-  Color _moodColor(String mood) {
-    switch (mood) {
-      case 'HAPPY':
-      case 'GRATEFUL':
-        return RelaxColors.sun;
-      case 'STRESSED':
-      case 'ANXIOUS':
-        return RelaxColors.coral;
-      case 'CALM':
-      case 'EXCITED':
-        return RelaxColors.mint;
-      default:
-        return RelaxColors.violet;
-    }
   }
 }

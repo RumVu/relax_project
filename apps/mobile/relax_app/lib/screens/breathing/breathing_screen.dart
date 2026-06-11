@@ -11,10 +11,11 @@ import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import 'models/breathing_pattern.dart';
 import 'models/breathing_phase.dart';
+import 'widgets/breathing_circle.dart';
+import 'widgets/pattern_picker.dart';
 
-/// Vòng tròn hít thở hoạt họa: phình to khi hít vào, thu nhỏ khi thở ra,
-/// giữ nguyên khi nín thở; có bộ đếm ngược giây + đếm chu kỳ. Dùng
-/// AnimationController điều khiển scale theo độ dài từng pha.
+// Vong tron hit tho hoat hoa: phinh to khi hit vao, thu nho khi tho ra,
+// giu nguyen khi nin tho; co bo dem nguoc giay + dem chu ky.
 class BreathingScreen extends StatefulWidget {
   const BreathingScreen({super.key});
 
@@ -37,7 +38,6 @@ class _BreathingScreenState extends State<BreathingScreen>
   @override
   void initState() {
     super.initState();
-    // Min scale 0.55 → 1.0 (giống web). Value của controller = scale.
     _scaleCtrl = AnimationController(
       vsync: this,
       lowerBound: 0.55,
@@ -76,7 +76,12 @@ class _BreathingScreenState extends State<BreathingScreen>
   }
 
   BreathingPhase _nextPhase(BreathingPhase current) {
-    const order = [BreathingPhase.inhale, BreathingPhase.hold, BreathingPhase.exhale, BreathingPhase.holdAfter];
+    const order = [
+      BreathingPhase.inhale,
+      BreathingPhase.hold,
+      BreathingPhase.exhale,
+      BreathingPhase.holdAfter
+    ];
     final idx = order.indexOf(current);
     for (var step = 1; step <= order.length; step++) {
       final candidate = order[(idx + step) % order.length];
@@ -88,15 +93,21 @@ class _BreathingScreenState extends State<BreathingScreen>
   void _applyPhaseAnimation(BreathingPhase p) {
     final secs = _phaseLength(p);
     if (p == BreathingPhase.inhale) {
-      _scaleCtrl.animateTo(1.0, duration: Duration(seconds: secs == 0 ? 1 : secs));
+      _scaleCtrl.animateTo(1.0,
+          duration: Duration(seconds: secs == 0 ? 1 : secs));
     } else if (p == BreathingPhase.exhale) {
-      _scaleCtrl.animateTo(0.55, duration: Duration(seconds: secs == 0 ? 1 : secs));
+      _scaleCtrl.animateTo(0.55,
+          duration: Duration(seconds: secs == 0 ? 1 : secs));
     }
-    // hold / holdAfter: giữ nguyên scale hiện tại.
   }
 
   void _start() {
-    const order = [BreathingPhase.inhale, BreathingPhase.hold, BreathingPhase.exhale, BreathingPhase.holdAfter];
+    const order = [
+      BreathingPhase.inhale,
+      BreathingPhase.hold,
+      BreathingPhase.exhale,
+      BreathingPhase.holdAfter
+    ];
     final first = order.firstWhere((p) => _phaseLength(p) > 0,
         orElse: () => BreathingPhase.inhale);
     setState(() {
@@ -122,30 +133,28 @@ class _BreathingScreenState extends State<BreathingScreen>
           _running = false;
           _phase = BreathingPhase.finished;
           _ticker?.cancel();
-          _scaleCtrl.animateTo(0.7, duration: const Duration(milliseconds: 600));
-          // Haptic nhẹ báo hoàn thành — không rung mạnh.
+          _scaleCtrl.animateTo(0.7,
+              duration: const Duration(milliseconds: 600));
           HapticFeedback.lightImpact();
-          // Đợi 600ms cho animation kết thúc rồi mời tiếp. Primary CTA
-          // là "Tập 1 vòng nữa" → restart ngay tại chỗ, không phải hỏi
-          // user pick lại pattern.
           Future.delayed(const Duration(milliseconds: 700), () {
             if (!mounted) return;
             final auth = context.read<AuthState>();
             final activeId = auth.activeSessionId;
-            showCheckInSheet(context, context.t('Hít thở không khí'), sessionId: activeId).then((_) {
+            showCheckInSheet(context, context.t('Hít thở không khí'),
+                    sessionId: activeId)
+                .then((_) {
               if (!mounted) return;
               showJourneyPrompt(
                 context,
                 title: context.t('Đã hít thở xong 🌬️'),
-                subtitle:
-                    context.t('Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?'),
+                subtitle: context.t(
+                    'Nhẹ nhõm hơn rồi nhỉ? Muốn tập thêm 1 vòng nữa, hay đi tiếp một bước êm?'),
                 suggestions: [
                   JourneySuggestion(
                     icon: Icons.refresh,
                     label: context.t('Tập thêm 1 vòng nữa'),
                     onTap: () {
                       if (!mounted) return;
-                      // Reset state + bắt đầu lại session ngay tức thì.
                       setState(() {
                         _cyclesDone = 0;
                         _phase = BreathingPhase.idle;
@@ -154,7 +163,8 @@ class _BreathingScreenState extends State<BreathingScreen>
                       });
                       final authNew = context.read<AuthState>();
                       if (authNew.activeSessionId == null) {
-                        authNew.startRelaxSession('BREATHING', context.t('Hít thở không khí'));
+                        authNew.startRelaxSession(
+                            'BREATHING', context.t('Hít thở không khí'));
                       }
                       _start();
                     },
@@ -211,23 +221,6 @@ class _BreathingScreenState extends State<BreathingScreen>
     _scaleCtrl.animateTo(0.55, duration: const Duration(milliseconds: 400));
   }
 
-  String get _phaseLabel {
-    switch (_phase) {
-      case BreathingPhase.inhale:
-        return 'Hít vào';
-      case BreathingPhase.hold:
-        return 'Giữ';
-      case BreathingPhase.exhale:
-        return 'Thở ra';
-      case BreathingPhase.holdAfter:
-        return 'Nghỉ';
-      case BreathingPhase.finished:
-        return 'Hoàn thành';
-      default:
-        return 'Sẵn sàng';
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -240,7 +233,8 @@ class _BreathingScreenState extends State<BreathingScreen>
               alignment: Alignment.centerLeft,
               child: Text(
                 context.t('Hít thở cùng nhau'),
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
               ),
             ),
             const SizedBox(height: 4),
@@ -252,112 +246,23 @@ class _BreathingScreenState extends State<BreathingScreen>
               ),
             ),
             const SizedBox(height: 16),
-            // Pattern picker
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: List.generate(breathingPatterns.length, (i) {
-                final sel = i == _patternIdx;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _patternIdx = i);
-                    _reset();
-                  },
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: sel ? RelaxColors.violet : context.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: sel ? RelaxColors.violet : context.fieldBorder,
-                      ),
-                    ),
-                    child: Text(
-                      context.t(breathingPatterns[i].label),
-                      style: TextStyle(
-                        color: sel ? Colors.white : context.appText,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+            PatternPicker(
+              selectedIndex: _patternIdx,
+              onSelect: (i) {
+                setState(() => _patternIdx = i);
+                _reset();
+              },
             ),
             const SizedBox(height: 36),
-            // The breathing circle
-            SizedBox(
-              height: 280,
-              child: Center(
-                child: AnimatedBuilder(
-                  animation: _scaleCtrl,
-                  builder: (context, child) {
-                    return Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        _ring(260),
-                        _ring(220),
-                        _ring(180),
-                        Transform.scale(
-                          scale: _scaleCtrl.value,
-                          child: Container(
-                            height: 220,
-                            width: 220,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [RelaxColors.violet, RelaxColors.plum],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color:
-                                      RelaxColors.violet.withValues(alpha: 0.45),
-                                  blurRadius: 50,
-                                ),
-                              ],
-                            ),
-                            alignment: Alignment.center,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  context.t(_phaseLabel).toUpperCase(),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    fontWeight: FontWeight.w800,
-                                    letterSpacing: 1.6,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  _phase == BreathingPhase.idle
-                                      ? '·'
-                                      : _phase == BreathingPhase.finished
-                                          ? '✓'
-                                          : '$_phaseRemaining',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 44,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+            BreathingCircle(
+              scaleCtrl: _scaleCtrl,
+              phase: _phase,
+              phaseRemaining: _phaseRemaining,
             ),
             const SizedBox(height: 16),
             Text(
-              context.t('Chu kỳ {done} / {total}', {'done': '$_cyclesDone', 'total': '${_pattern.cycles}'}),
+              context.t('Chu kỳ {done} / {total}',
+                  {'done': '$_cyclesDone', 'total': '${_pattern.cycles}'}),
               style: const TextStyle(
                 color: RelaxColors.slate,
                 fontWeight: FontWeight.w700,
@@ -372,12 +277,15 @@ class _BreathingScreenState extends State<BreathingScreen>
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (_phase == BreathingPhase.idle || _phase == BreathingPhase.finished)
+                if (_phase == BreathingPhase.idle ||
+                    _phase == BreathingPhase.finished)
                   ElevatedButton.icon(
                     onPressed: _start,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(
-                      _phase == BreathingPhase.finished ? context.t('Tập lại') : context.t('Bắt đầu'),
+                      _phase == BreathingPhase.finished
+                          ? context.t('Tập lại')
+                          : context.t('Bắt đầu'),
                     ),
                   )
                 else if (_running)
@@ -405,19 +313,6 @@ class _BreathingScreenState extends State<BreathingScreen>
               ],
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _ring(double size) {
-    return Container(
-      height: size,
-      width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: RelaxColors.violet.withValues(alpha: 0.18),
         ),
       ),
     );

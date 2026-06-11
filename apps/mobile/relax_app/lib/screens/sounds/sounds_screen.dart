@@ -6,14 +6,14 @@ import '../../core/audio_controller.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
-import 'widgets/download_button.dart';
+import 'widgets/now_playing_bar.dart';
+import 'widgets/track_tile.dart';
 
-/// Trình phát âm thanh nền / podcast. Phát qua AudioController dùng chung
-/// nên nhạc tiếp tục khi user thoát màn (mini-player toàn cục hiện ở shell).
+// Trinh phat am thanh nen / podcast. Phat qua AudioController dung chung
+// nen nhac tiep tuc khi user thoat man (mini-player toan cuc hien o shell).
 class SoundsScreen extends StatefulWidget {
   const SoundsScreen({super.key, this.category});
 
-  /// Lọc theo category (vd 'PODCAST'); null = tất cả nhạc nền.
   final String? category;
 
   @override
@@ -51,7 +51,6 @@ class _SoundsScreenState extends State<SoundsScreen> {
       if (widget.category != null) {
         list = list.where((e) => e['category'] == widget.category).toList();
       } else {
-        // Lọc bỏ Podcast và Thiền khỏi danh mục nhạc thư giãn thông thường
         list = list
             .where((e) =>
                 e['category'] != 'PODCAST' &&
@@ -60,13 +59,31 @@ class _SoundsScreenState extends State<SoundsScreen> {
             .toList();
       }
       _tracks = list;
-      // Nạp queue vào controller dùng chung.
       if (mounted) context.read<AudioController>().setQueue(_tracks);
     } catch (e) {
       _error = e.toString();
     } finally {
       if (mounted) setState(() => _loading = false);
     }
+  }
+
+  void _playTrack(int index) {
+    if (!mounted) return;
+    final auth = context.read<AuthState>();
+    if (auth.activeSessionId == null) {
+      final cat = widget.category ?? 'MUSIC';
+      String type = 'MUSIC';
+      String title = 'Nhạc';
+      if (cat == 'PODCAST') {
+        type = 'PODCAST';
+        title = 'Podcast';
+      } else if (cat == 'MEDITATION') {
+        type = 'MEDITATION';
+        title = 'Thiền định';
+      }
+      auth.startRelaxSession(type, title);
+    }
+    context.read<AudioController>().playAt(index);
   }
 
   @override
@@ -77,7 +94,9 @@ class _SoundsScreenState extends State<SoundsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: Text(
-          widget.category == 'PODCAST' ? context.t('Podcast') : context.t('Nhạc thư giãn'),
+          widget.category == 'PODCAST'
+              ? context.t('Podcast')
+              : context.t('Nhạc thư giãn'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),
         ),
       ),
@@ -105,8 +124,6 @@ class _SoundsScreenState extends State<SoundsScreen> {
                           onRefresh: _load,
                           child: _tracks.isEmpty
                               ? ListView(
-                                  // ListView để pull-to-refresh hoạt động
-                                  // ngay cả khi list trống.
                                   physics:
                                       const AlwaysScrollableScrollPhysics(),
                                   children: [
@@ -114,7 +131,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                       height: 320,
                                       child: Center(
                                         child: Text(
-                                          context.t('Chưa có bản nào.\nKéo xuống để tải lại.'),
+                                          context.t(
+                                              'Chưa có bản nào.\nKéo xuống để tải lại.'),
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
                                               color: context.mutedText),
@@ -129,230 +147,25 @@ class _SoundsScreenState extends State<SoundsScreen> {
                                   padding:
                                       const EdgeInsets.fromLTRB(16, 8, 16, 8),
                                   itemCount: _tracks.length,
-                                itemBuilder: (context, i) {
-                                  final t = _tracks[i];
-                                  final soundId = t['id'] as String?;
-                                  final soundUrl = t['soundUrl'] as String?;
-                                  final playing = identical(
-                                      audio.current, _tracks[i]) ||
-                                      audio.current?['id'] == t['id'];
-                                  return Container(
-                                    margin: const EdgeInsets.only(bottom: 8),
-                                    decoration: BoxDecoration(
-                                      color: playing
-                                          ? RelaxColors.violet
-                                              .withValues(alpha: 0.12)
-                                          : context.surface,
-                                      borderRadius: BorderRadius.circular(14),
-                                      border: Border.all(
-                                        color: playing
-                                            ? RelaxColors.violet
-                                            : context.fieldBorder,
-                                      ),
-                                    ),
-                                    child: ListTile(
-                                      onTap: () {
-                                        if (!mounted) return;
-                                        final auth = context.read<AuthState>();
-                                        if (auth.activeSessionId == null) {
-                                          final cat = widget.category ?? 'MUSIC';
-                                          String type = 'MUSIC';
-                                          String title = 'Nhạc';
-                                          if (cat == 'PODCAST') {
-                                            type = 'PODCAST';
-                                            title = 'Podcast';
-                                          } else if (cat == 'MEDITATION') {
-                                            type = 'MEDITATION';
-                                            title = 'Thiền định';
-                                          }
-                                          auth.startRelaxSession(type, title);
-                                        }
-                                        audio.playAt(i);
-                                      },
-                                      leading: CircleAvatar(
-                                        backgroundColor: RelaxColors.violet
-                                            .withValues(alpha: 0.15),
-                                        child: Icon(
-                                          playing && audio.playing
-                                              ? Icons.graphic_eq
-                                              : Icons.music_note,
-                                          color: RelaxColors.violet,
-                                        ),
-                                      ),
-                                      title: Text(
-                                        context.t((t['title'] as String?) ?? 'Không tên'),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.w700,
-                                          color: context.appText,
-                                        ),
-                                      ),
-                                      subtitle: Text(
-                                        context.t((t['category'] as String?) ?? ''),
-                                        style: TextStyle(
-                                            color: context.mutedText,
-                                            fontSize: 12),
-                                      ),
-                                      trailing: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          if (soundId != null && soundUrl != null)
-                                            DownloadButton(
-                                              soundId: soundId,
-                                              soundUrl: soundUrl,
-                                              audio: audio,
-                                            ),
-                                          const SizedBox(width: 8),
-                                          Icon(
-                                            playing
-                                                ? Icons.equalizer
-                                                : Icons.play_arrow,
-                                            color: RelaxColors.violet,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
+                                  itemBuilder: (context, i) {
+                                    final t = _tracks[i];
+                                    final playing =
+                                        identical(audio.current, _tracks[i]) ||
+                                            audio.current?['id'] == t['id'];
+                                    return TrackTile(
+                                      track: t,
+                                      playing: playing,
+                                      audio: audio,
+                                      onTap: () => _playTrack(i),
+                                    );
+                                  },
+                                ),
                         ),
                       ),
-                      if (audio.hasTrack) _nowPlayingBar(context, audio),
+                      if (audio.hasTrack) NowPlayingBar(audio: audio),
                     ],
                   ),
       ),
     );
-  }
-
-  Widget _nowPlayingBar(BuildContext context, AudioController audio) {
-    final t = audio.current!;
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [RelaxColors.violet, RelaxColors.plum],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: RelaxColors.violet.withValues(alpha: 0.3),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.album, color: Colors.white70),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.t((t['title'] as String?) ?? ''),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    Text(
-                      context.t((t['category'] as String?) ?? 'Đang phát'),
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          StreamBuilder<Duration>(
-            stream: audio.positionStream,
-            builder: (context, snap) {
-              final pos = snap.data ?? Duration.zero;
-              final dur = audio.duration;
-              final value = dur.inMilliseconds == 0
-                  ? 0.0
-                  : pos.inMilliseconds / dur.inMilliseconds;
-              return Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: value.clamp(0.0, 1.0),
-                      minHeight: 4,
-                      backgroundColor: Colors.white.withValues(alpha: 0.2),
-                      valueColor:
-                          const AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_fmt(pos),
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 11)),
-                      Text(_fmt(dur),
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 11)),
-                    ],
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                onPressed: audio.hasPrev ? audio.prev : null,
-                icon: const Icon(Icons.skip_previous, color: Colors.white),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: audio.toggle,
-                child: Container(
-                  height: 56,
-                  width: 56,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    audio.playing ? Icons.pause : Icons.play_arrow,
-                    color: RelaxColors.violet,
-                    size: 30,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                onPressed: audio.hasNext ? audio.next : null,
-                icon: const Icon(Icons.skip_next, color: Colors.white),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _fmt(Duration d) {
-    final m = d.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
   }
 }
