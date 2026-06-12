@@ -1,18 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:just_audio/just_audio.dart';
 
+import '../../../core/api_client.dart';
 import '../../../core/locale_controller.dart';
 import '../../../core/secure_storage.dart';
 import '../../../core/theme.dart';
 import '../../../widgets/soft_toast.dart';
 
-// Bottom sheet for selecting reminder notification sound.
+// Bottom sheet for selecting reminder notification sound with live preview.
 void showSoundSelectorSheet(
   BuildContext context, {
   required String selectedSound,
   required ValueChanged<String> onSoundChanged,
 }) {
-  const sounds = [
+  showModalBottomSheet(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (sheetCtx) => _SoundSelectorBody(
+      parentContext: context,
+      selectedSound: selectedSound,
+      onSoundChanged: onSoundChanged,
+    ),
+  );
+}
+
+class _SoundSelectorBody extends StatefulWidget {
+  const _SoundSelectorBody({
+    required this.parentContext,
+    required this.selectedSound,
+    required this.onSoundChanged,
+  });
+
+  final BuildContext parentContext;
+  final String selectedSound;
+  final ValueChanged<String> onSoundChanged;
+
+  @override
+  State<_SoundSelectorBody> createState() => _SoundSelectorBodyState();
+}
+
+class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
+  final AudioPlayer _preview = AudioPlayer();
+  List<Map<String, dynamic>> _sounds = [];
+  bool _loading = true;
+  String? _playingKey;
+  late String _currentSelected;
+
+  // Hardcoded fallback khi API chua co category NOTIFICATION.
+  static const _fallbackSounds = [
     {'name': 'Tiếng mèo con kêu 🐱', 'key': 'cat_meow'},
     {'name': 'Chuông gió mùa xuân 🎐', 'key': 'wind_chimes'},
     {'name': 'Tiếng mưa rơi tí tách 🌧️', 'key': 'rain'},
@@ -20,88 +57,218 @@ void showSoundSelectorSheet(
     {'name': 'Tiếng chuông thiền 🔔', 'key': 'bell'},
   ];
 
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: Colors.transparent,
-    builder: (sheetCtx) => Container(
+  @override
+  void initState() {
+    super.initState();
+    _currentSelected = widget.selectedSound;
+    _fetchSounds();
+
+    _preview.playerStateStream.listen((state) {
+      if (state.processingState == ProcessingState.completed) {
+        if (mounted) setState(() => _playingKey = null);
+      }
+    });
+  }
+
+  Future<void> _fetchSounds() async {
+    try {
+      final res = await RelaxApi.instance
+          .get('/ambient-sounds/category/NOTIFICATION');
+      if (res.statusCode == 200 && res.data is List) {
+        final items = (res.data as List)
+            .whereType<Map>()
+            .map((e) => Map<String, dynamic>.from(e))
+            .where((e) => (e['soundUrl'] as String?)?.isNotEmpty == true)
+            .toList();
+        if (items.isNotEmpty && mounted) {
+          setState(() {
+            _sounds = items;
+            _loading = false;
+          });
+          return;
+        }
+      }
+    } catch (_) {}
+
+    // Fallback: dung danh sach co dinh (khong co URL de preview).
+    if (mounted) {
+      setState(() {
+        _sounds = _fallbackSounds
+            .map((s) => <String, dynamic>{
+                  'title': s['name']!,
+                  'key': s['key']!,
+                })
+            .toList();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _togglePreview(Map<String, dynamic> sound) async {
+    final url = sound['soundUrl'] as String?;
+    if (url == null || url.isEmpty) return;
+
+    final key = sound['id'] as String? ?? sound['key'] as String? ?? '';
+    if (_playingKey == key) {
+      // Dang phat → dung lai.
+      await _preview.stop();
+      if (mounted) setState(() => _playingKey = null);
+      return;
+    }
+
+    // Phat sound moi.
+    final errMsg = widget.parentContext.t('Không phát được âm thanh');
+    setState(() => _playingKey = key);
+    try {
+      await _preview.setUrl(url);
+      await _preview.play();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _playingKey = null);
+      showSoftToast(context, message: errMsg, tone: SoftToastTone.error);
+    }
+  }
+
+  Future<void> _selectSound(Map<String, dynamic> sound) async {
+    HapticFeedback.lightImpact();
+    final name = (sound['title'] as String?) ?? '';
+    final url = sound['soundUrl'] as String?;
+
+    // Dung preview neu dang phat.
+    await _preview.stop();
+
+    widget.onSoundChanged(name);
+    setState(() => _currentSelected = name);
+
+    try {
+      await secureStorage.write(key: 'relax_reminder_sound', value: name);
+      if (url != null && url.isNotEmpty) {
+        await secureStorage.write(
+            key: 'relax_reminder_sound_url', value: url);
+      }
+    } catch (_) {}
+
+    if (!widget.parentContext.mounted) return;
+    showSoftToast(widget.parentContext,
+        message: widget.parentContext
+            .t('Đã thay đổi âm báo: {sound}', {'sound': widget.parentContext.t(name)}),
+        tone: SoftToastTone.success);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _preview.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.55,
+      ),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: sheetCtx.surface,
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(24)),
+        color: context.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Drag handle.
           Center(
             child: Container(
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: sheetCtx.fieldBorder,
+                color: context.fieldBorder,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            context.t('Chọn âm báo nhắc nhở 🔔'),
+            widget.parentContext.t('Chọn âm báo nhắc nhở 🔔'),
             style: TextStyle(
-              color: sheetCtx.appText,
+              color: context.appText,
               fontWeight: FontWeight.w800,
               fontSize: 18,
             ),
           ),
-          const SizedBox(height: 16),
-          Flexible(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: sounds.length,
-              itemBuilder: (ctx, index) {
-                final s = sounds[index];
-                final name = s['name']!;
-                final isSelected = selectedSound == name;
-
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    context.t(name),
-                    style: TextStyle(
-                      color: sheetCtx.appText,
-                      fontWeight:
-                          isSelected ? FontWeight.w700 : FontWeight.w500,
-                      fontSize: 14,
-                    ),
-                  ),
-                  trailing: isSelected
-                      ? const Icon(Icons.check_circle,
-                          color: RelaxColors.violet)
-                      : null,
-                  onTap: () async {
-                    HapticFeedback.lightImpact();
-                    onSoundChanged(name);
-                    try {
-                      await secureStorage.write(
-                        key: 'relax_reminder_sound',
-                        value: name,
-                      );
-                    } catch (_) {}
-                    if (!context.mounted) return;
-                    showSoftToast(context,
-                        message: context.t('Đã thay đổi âm báo: {sound}',
-                            {'sound': context.t(name)}),
-                        tone: SoftToastTone.success);
-
-                    if (!sheetCtx.mounted) return;
-                    Navigator.pop(sheetCtx);
-                  },
-                );
-              },
-            ),
+          const SizedBox(height: 4),
+          Text(
+            widget.parentContext.t('Bấm nút play để nghe thử trước khi chọn'),
+            style: TextStyle(color: context.mutedText, fontSize: 12),
           ),
+          const SizedBox(height: 16),
+          if (_loading)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: Center(
+                child:
+                    CircularProgressIndicator(color: RelaxColors.violet),
+              ),
+            )
+          else
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: _sounds.length,
+                separatorBuilder: (_, index) =>
+                    Divider(height: 1, color: context.fieldBorder),
+                itemBuilder: (_, i) {
+                  final s = _sounds[i];
+                  final title =
+                      (s['title'] as String?) ?? '';
+                  final key =
+                      s['id'] as String? ?? s['key'] as String? ?? '';
+                  final hasUrl =
+                      (s['soundUrl'] as String?)?.isNotEmpty == true;
+                  final isSelected = _currentSelected == title;
+                  final isPlaying = _playingKey == key;
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: hasUrl
+                        ? IconButton(
+                            icon: Icon(
+                              isPlaying
+                                  ? Icons.stop_circle_rounded
+                                  : Icons.play_circle_filled,
+                              color: isPlaying
+                                  ? RelaxColors.coral
+                                  : RelaxColors.violet,
+                              size: 32,
+                            ),
+                            onPressed: () => _togglePreview(s),
+                          )
+                        : const Icon(Icons.music_note,
+                            color: RelaxColors.violet),
+                    title: Text(
+                      widget.parentContext.t(title),
+                      style: TextStyle(
+                        color: context.appText,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(Icons.check_circle,
+                            color: RelaxColors.violet)
+                        : const Icon(Icons.radio_button_unchecked,
+                            color: Colors.grey, size: 20),
+                    onTap: () => _selectSound(s),
+                  );
+                },
+              ),
+            ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }
