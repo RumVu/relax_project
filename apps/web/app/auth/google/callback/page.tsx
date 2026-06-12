@@ -15,12 +15,38 @@ import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type CallbackState = 'loading' | 'success' | 'error';
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1500;
+
+async function fetchWithRetry<T>(
+  path: string,
+  init: RequestInit,
+  retries = MAX_RETRIES,
+): Promise<T> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await apiFetch<T>(path, init);
+    } catch (err) {
+      const isNetworkError =
+        err instanceof TypeError && /fetch|network/i.test(err.message);
+      if (!isNetworkError || attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS * (attempt + 1)));
+    }
+  }
+  throw new Error('Unreachable');
+}
+
 export default function GoogleCallbackPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const [state, setState] = useState<CallbackState>('loading');
   const [message, setMessage] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
   const handledRef = useRef(false);
+  const paramsRef = useRef<{
+    authorizationCode: string;
+    redirectUri: string;
+  } | null>(null);
 
   const fallbackHref = useMemo(() => authRoutes.login, []);
 
@@ -56,7 +82,9 @@ export default function GoogleCallbackPage() {
         throw new Error(t('auth.google.noToken'));
       }
 
-      const auth = await apiFetch<AuthResponse>('/auth/google', {
+      paramsRef.current = { authorizationCode, redirectUri };
+
+      const auth = await fetchWithRetry<AuthResponse>('/auth/google', {
         method: 'POST',
         body: JSON.stringify({ authorizationCode, redirectUri }),
       });
@@ -74,6 +102,31 @@ export default function GoogleCallbackPage() {
       setMessage(cause instanceof Error ? cause.message : t('auth.google.serverDenied'));
     });
   }, [router, t]);
+
+  async function handleManualRetry() {
+    if (!paramsRef.current) return;
+    setState('loading');
+    setMessage('');
+    setRetryCount((c) => c + 1);
+    try {
+      const auth = await fetchWithRetry<AuthResponse>('/auth/google', {
+        method: 'POST',
+        body: JSON.stringify(paramsRef.current),
+      });
+      persistAuthSession(auth);
+      setState('success');
+      setMessage(auth.user.email);
+      router.replace(
+        auth.user.role === 'ADMIN' ? authRoutes.admin : authRoutes.dashboard,
+      );
+      router.refresh();
+    } catch (cause) {
+      setState('error');
+      setMessage(
+        cause instanceof Error ? cause.message : t('auth.google.serverDenied'),
+      );
+    }
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
@@ -94,12 +147,23 @@ export default function GoogleCallbackPage() {
           </p>
         ) : null}
         {state === 'error' ? (
-          <Link
-            className="mt-6 inline-flex font-semibold text-[var(--brand-primary)] hover:underline"
-            href={fallbackHref}
-          >
-            {t('auth.google.backToLogin')}
-          </Link>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            {paramsRef.current && retryCount < 3 ? (
+              <button
+                type="button"
+                onClick={handleManualRetry}
+                className="inline-flex items-center gap-2 rounded-lg bg-violet px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+              >
+                {t('auth.google.retry')}
+              </button>
+            ) : null}
+            <Link
+              className="inline-flex font-semibold text-[var(--brand-primary)] hover:underline"
+              href={fallbackHref}
+            >
+              {t('auth.google.backToLogin')}
+            </Link>
+          </div>
         ) : null}
       </Card>
     </main>

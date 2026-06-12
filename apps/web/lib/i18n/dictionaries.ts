@@ -283,6 +283,7 @@ const vi = {
   'auth.google.failed': 'Đăng nhập bằng Google không thành công',
   'auth.google.popupFailed': 'Không mở được cửa sổ chọn tài khoản Google.',
   'auth.google.serverDenied': 'Máy chủ không chấp nhận mã thông báo của Google.',
+  'auth.google.retry': 'Thử lại',
   'auth.signingIn': 'Đang đăng nhập…',
 
   // ===== Roles =====
@@ -1528,6 +1529,7 @@ const en: Record<keyof typeof vi, string> = {
   'auth.google.failed': 'Google sign-in failed',
   'auth.google.popupFailed': 'Could not open the Google account chooser.',
   'auth.google.serverDenied': 'Server did not accept the Google token.',
+  'auth.google.retry': 'Try again',
   'auth.signingIn': 'Signing in…',
 
   // ===== Roles =====
