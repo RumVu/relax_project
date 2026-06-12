@@ -203,15 +203,20 @@ async function downloadAudio(sound) {
 function generateAudio(sound) {
   const [, flavor, rawIndex] = sound.sourceUrl.split(':');
   const index = Number(String(rawIndex).match(/\d+$/)?.[0]) || 1;
-  const duration = Math.max(45, Math.min(Number(sound.duration) || 90, 150));
-  const base =
-    flavor === 'buddha'
+  const isNotification = flavor === 'notification';
+  const duration = isNotification
+    ? Math.max(4, Math.min(Number(sound.duration) || 8, 15))
+    : Math.max(45, Math.min(Number(sound.duration) || 90, 150));
+  const base = isNotification
+    ? 520 + (index % 8) * 45
+    : flavor === 'buddha'
       ? 174 + (index % 5) * 13
       : flavor === 'podcast'
         ? 196 + (index % 6) * 11
         : 220 + (index % 7) * 9;
-  const frequencies =
-    flavor === 'buddha'
+  const frequencies = isNotification
+    ? [base, base * 1.5, base * 2, base * 3]
+    : flavor === 'buddha'
       ? [base, base * 1.5, base * 2]
       : flavor === 'podcast'
         ? [base, base * 1.25, base * 1.5]
@@ -226,12 +231,18 @@ function generateAudio(sound) {
     '-i',
     `sine=frequency=${Math.round(frequency)}:sample_rate=44100:duration=${duration}`,
   ]);
+  const notifVol = isNotification ? '0.035' : '0.045';
+  const notifVolSub = isNotification ? '0.018' : '0.028';
   const volumeFilters = frequencies
-    .map((_, inputIndex) => `[${inputIndex}:a]volume=${inputIndex === 0 ? '0.045' : '0.028'}[a${inputIndex}]`)
+    .map((_, inputIndex) => `[${inputIndex}:a]volume=${inputIndex === 0 ? notifVol : notifVolSub}[a${inputIndex}]`)
     .join(';');
   const mixInputs = frequencies.map((_, inputIndex) => `[a${inputIndex}]`).join('');
-  const echo = flavor === 'lofi' ? ',aecho=0.6:0.35:420:0.18' : '';
-  const filter = `${volumeFilters};${mixInputs}amix=inputs=${frequencies.length}:duration=longest,lowpass=f=1800${echo},afade=t=in:st=0:d=2,afade=t=out:st=${Math.max(0, duration - 4)}:d=4`;
+  const echo = isNotification
+    ? ',aecho=0.8:0.5:180:0.25'
+    : flavor === 'lofi' ? ',aecho=0.6:0.35:420:0.18' : '';
+  const fadeIn = isNotification ? 0.3 : 2;
+  const fadeOut = isNotification ? 1.5 : 4;
+  const filter = `${volumeFilters};${mixInputs}amix=inputs=${frequencies.length}:duration=longest,lowpass=f=${isNotification ? 3200 : 1800}${echo},afade=t=in:st=0:d=${fadeIn},afade=t=out:st=${Math.max(0, duration - fadeOut)}:d=${fadeOut}`;
   const result = spawnSync(
     'ffmpeg',
     [

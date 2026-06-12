@@ -35,6 +35,12 @@ const CATEGORY_IMAGES = {
     'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600',
     'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=600',
   ],
+  NOTIFICATION: [
+    'https://images.unsplash.com/photo-1531971589569-0d9370cbe1e5?w=600',
+    'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600',
+    'https://images.unsplash.com/photo-1501426026826-31c667bdf23d?w=600',
+  ],
 };
 
 const TRACKS = {
@@ -160,6 +166,16 @@ const TRACKS = {
     ['gentle-karuna', 'Gentle Karuna', 'generated:buddha:07', 128],
     ['still-water-prayer', 'Still Water Prayer', 'generated:buddha:08', 120],
   ],
+  NOTIFICATION: [
+    ['gentle-chime', 'Chuông dịu nhẹ 🔔', 'generated:notification:01', 8],
+    ['cat-purr-bell', 'Tiếng mèo con kêu 🐱', 'generated:notification:02', 6],
+    ['spring-wind-chime', 'Chuông gió mùa xuân 🎐', 'generated:notification:03', 10],
+    ['rain-tap', 'Tiếng mưa rơi tí tách 🌧️', 'generated:notification:04', 8],
+    ['ocean-whisper', 'Sóng biển rì rào 🌊', 'generated:notification:05', 10],
+    ['zen-bell', 'Tiếng chuông thiền 🔔', 'generated:notification:06', 6],
+    ['soft-harp', 'Hạc cầm dịu êm 🎵', 'generated:notification:07', 8],
+    ['crystal-drop', 'Giọt pha lê ✨', 'generated:notification:08', 6],
+  ],
 };
 
 TRACKS.LOFI.push(
@@ -249,6 +265,7 @@ const CATEGORY_DESCRIPTIONS = {
   PIANO: 'Piano/classical nhẹ, hợp đọc, viết nhật ký hoặc thở chậm.',
   PODCAST: 'Podcast thư giãn ngắn với nền chill nhẹ, hợp check-in và nghỉ giữa giờ.',
   MEDITATION: 'Buddha chill/thiền định dịu, nền rất nhẹ để thở chậm và hạ nhịp.',
+  NOTIFICATION: 'Âm báo nhắc nhở ngắn, dịu nhẹ — dùng cho thông báo check-in và nhắc nhở.',
 };
 
 const AMBIENT_SOUND_CATALOG = Object.entries(TRACKS).flatMap(

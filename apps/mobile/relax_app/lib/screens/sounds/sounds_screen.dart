@@ -55,7 +55,8 @@ class _SoundsScreenState extends State<SoundsScreen> {
             .where((e) =>
                 e['category'] != 'PODCAST' &&
                 e['category'] != 'MEDITATION' &&
-                e['category'] != 'BUDDHA')
+                e['category'] != 'BUDDHA' &&
+                e['category'] != 'NOTIFICATION')
             .toList();
       }
       _tracks = list;
