@@ -17,6 +17,7 @@ import 'screens/billing/billing_screen.dart';
 import 'screens/app_shell.dart';
 import 'screens/breathing/breathing_screen.dart';
 import 'screens/calm_now/calm_now_screen.dart';
+import 'screens/craving_break/craving_break_screen.dart';
 import 'screens/companion/companion_screen.dart';
 import 'screens/companion_chat/companion_chat_screen.dart';
 import 'screens/meditation/meditation_screen.dart';
@@ -266,6 +267,11 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/calm-now',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const CalmNowScreen()),
+      ),
+      GoRoute(
+        path: '/break',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const CravingBreakScreen()),
       ),
       GoRoute(
         path: '/location',

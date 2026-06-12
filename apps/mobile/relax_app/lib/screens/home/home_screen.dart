@@ -148,8 +148,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               SpeechBubble(quote: _quote, name: name),
               const SizedBox(height: 20),
-              // ===== Nút "Calm Now" — nổi bật nhất trên Home =====
+              // ===== Nút "Calm Now" + "I Need a Break" — nổi bật nhất trên Home =====
               _CalmNowButton(),
+              const SizedBox(height: 10),
+              _BreakButton(),
               const SizedBox(height: 20),
               if (_loading)
                 const Center(
@@ -224,6 +226,72 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const Text(' ✦', style: TextStyle(color: RelaxColors.violet)),
       ],
+    );
+  }
+}
+
+/// Nút "I Need a Break" — Digital Cigarette Break. Nhỏ hơn Calm Now,
+/// nhưng nổi bật với style riêng.
+class _BreakButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/break');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        decoration: BoxDecoration(
+          color: context.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.fieldBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: const Color(0xFF2d6a4f).withValues(alpha: 0.15),
+              ),
+              child: const Center(
+                child: Text('🚬', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.t('I Need a Break'),
+                    style: TextStyle(
+                      color: context.appText,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  const SizedBox(height: 1),
+                  Text(
+                    context.t('3 phút nghỉ lành mạnh — như hút thuốc, nhưng tốt hơn.'),
+                    style: TextStyle(
+                      color: context.mutedText,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: context.mutedText,
+              size: 14,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
