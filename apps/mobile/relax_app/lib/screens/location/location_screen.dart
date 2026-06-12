@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -20,11 +22,66 @@ class LocationScreen extends StatefulWidget {
 
 class _LocationScreenState extends State<LocationScreen> {
   Position? _pos;
-  String _status = 'Chưa lấy vị trí';
+  String _status = 'Đang tải…';
   bool _loading = false;
   bool _saving = false;
   String? _address;
   bool _geocoding = false;
+  Timer? _refreshTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLocation();
+    // Tu dong cap nhat vi tri moi 5 phut.
+    _refreshTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (mounted) _grabAndSave();
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Load vi tri da luu tu backend khi vao man hinh.
+  Future<void> _loadSavedLocation() async {
+    try {
+      final res = await RelaxApi.instance.get('/user-preferences/me/preferences');
+      if (!mounted) return;
+      final data = res.data;
+      if (data is Map) {
+        final lat = data['latitude'];
+        final lng = data['longitude'];
+        final name = data['locationName'];
+        if (lat is num && lng is num) {
+          setState(() {
+            _pos = Position(
+              latitude: lat.toDouble(),
+              longitude: lng.toDouble(),
+              timestamp: DateTime.now(),
+              accuracy: 0,
+              altitude: 0,
+              altitudeAccuracy: 0,
+              heading: 0,
+              headingAccuracy: 0,
+              speed: 0,
+              speedAccuracy: 0,
+            );
+            _address = name is String ? name : null;
+            _status = 'Đã lấy vị trí thành công';
+          });
+        } else {
+          setState(() => _status = 'Chưa lấy vị trí');
+        }
+      } else {
+        setState(() => _status = 'Chưa lấy vị trí');
+      }
+    } catch (_) {
+      if (mounted) setState(() => _status = 'Chưa lấy vị trí');
+    }
+  }
 
   Future<void> _grab() async {
     setState(() {
@@ -66,6 +123,29 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   }
 
+  /// Lay vi tri moi va tu dong luu len backend (dung cho auto-refresh 5p).
+  Future<void> _grabAndSave() async {
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) return;
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) return;
+      final p = await Geolocator.getCurrentPosition();
+      if (!mounted) return;
+      setState(() {
+        _pos = p;
+        _status = 'Đã lấy vị trí thành công';
+      });
+      _reverseGeocode(p.latitude, p.longitude);
+      // Doi geocode xong roi luu.
+      await Future.delayed(const Duration(seconds: 2));
+      await _saveToBackend(p.latitude, p.longitude, _address);
+    } catch (_) {
+      // Silent fail cho auto-refresh.
+    }
+  }
+
   Future<void> _reverseGeocode(double lat, double lng) async {
     setState(() => _geocoding = true);
     try {
@@ -92,19 +172,20 @@ class _LocationScreenState extends State<LocationScreen> {
     }
   }
 
+  Future<void> _saveToBackend(double lat, double lng, String? address) async {
+    await RelaxApi.instance.patch('/user-preferences/me/preferences', body: {
+      'latitude': lat,
+      'longitude': lng,
+      if (address != null) 'locationName': address,
+    });
+  }
+
   Future<void> _save() async {
     final p = _pos;
     if (p == null) return;
     setState(() => _saving = true);
     try {
-      await RelaxApi.instance.patch('/users/me/preferences', body: {
-        'location': {
-          'lat': p.latitude,
-          'lng': p.longitude,
-          'accuracyM': p.accuracy,
-          if (_address != null) 'address': _address,
-        },
-      });
+      await _saveToBackend(p.latitude, p.longitude, _address);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.t('Đã lưu vị trí của bạn 💜'))),
@@ -182,9 +263,10 @@ class _LocationScreenState extends State<LocationScreen> {
                       LocationKvRow(
                           label: 'Kinh độ',
                           value: p.longitude.toStringAsFixed(5)),
-                      LocationKvRow(
-                          label: 'Độ chính xác',
-                          value: '${p.accuracy.toStringAsFixed(0)} m'),
+                      if (p.accuracy > 0)
+                        LocationKvRow(
+                            label: 'Độ chính xác',
+                            value: '${p.accuracy.toStringAsFixed(0)} m'),
                       const SizedBox(height: 14),
                       Divider(height: 1, color: context.fieldBorder),
                       const SizedBox(height: 14),

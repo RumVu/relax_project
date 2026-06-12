@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../core/api_client.dart';
 import '../core/audio_controller.dart';
 import '../core/auth_state.dart';
 import '../core/locale_controller.dart';
@@ -58,6 +61,11 @@ class _AppShellState extends State<AppShell> {
       if (!tour.hasCompletedTour) {
         tour.startTour();
       }
+
+      // Hoi user chia se vi tri khi vao app (delay 2s de UX muot hon).
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) _promptLocationIfNeeded();
+      });
     });
 
     TourController.instance.addListener(_onTourStepChanged);
@@ -105,6 +113,125 @@ class _AppShellState extends State<AppShell> {
     TourController.instance.removeListener(_onTourStepChanged);
     _audioCompletionSub?.cancel();
     super.dispose();
+  }
+
+  /// Kiem tra xem user da chia se vi tri chua. Neu chua → hien dialog hoi.
+  /// Neu dong y → lay GPS + geocode + luu len backend.
+  Future<void> _promptLocationIfNeeded() async {
+    try {
+      // Kiem tra xem da co vi tri tren backend chua.
+      final res =
+          await RelaxApi.instance.get('/user-preferences/me/preferences');
+      final data = res.data;
+      if (data is Map &&
+          data['latitude'] is num &&
+          data['longitude'] is num) {
+        // Da co vi tri → khong hoi nua.
+        return;
+      }
+    } catch (_) {
+      // API fail → khong hoi, tranh lam phien user.
+      return;
+    }
+
+    if (!mounted) return;
+
+    // Hien dialog hoi user.
+    final agreed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.location_on, color: RelaxColors.violet, size: 28),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                ctx.t('Chia sẻ vị trí'),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          ctx.t(
+              'Cho phép Thi Ái biết vị trí của bạn để gợi ý thời tiết và địa điểm phù hợp nhé? 🌤️'),
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('Để sau'),
+                style: TextStyle(color: ctx.appText.withValues(alpha: 0.5))),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: RelaxColors.violet,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.t('Đồng ý')),
+          ),
+        ],
+      ),
+    );
+
+    if (agreed != true || !mounted) return;
+
+    // Lay GPS.
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) return;
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) return;
+      final pos = await Geolocator.getCurrentPosition();
+
+      // Reverse geocode.
+      String? address;
+      try {
+        final placemarks =
+            await placemarkFromCoordinates(pos.latitude, pos.longitude);
+        if (placemarks.isNotEmpty) {
+          final pm = placemarks.first;
+          final parts = <String>[
+            if (pm.street != null && pm.street!.isNotEmpty) pm.street!,
+            if (pm.subLocality != null && pm.subLocality!.isNotEmpty)
+              pm.subLocality!,
+            if (pm.locality != null && pm.locality!.isNotEmpty) pm.locality!,
+            if (pm.administrativeArea != null &&
+                pm.administrativeArea!.isNotEmpty)
+              pm.administrativeArea!,
+            if (pm.country != null && pm.country!.isNotEmpty) pm.country!,
+          ];
+          address = parts.join(', ');
+        }
+      } catch (_) {}
+
+      // Luu len backend.
+      await RelaxApi.instance
+          .patch('/user-preferences/me/preferences', body: {
+        'latitude': pos.latitude,
+        'longitude': pos.longitude,
+        if (address != null) 'locationName': address,
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.t('Đã lưu vị trí của bạn 💜')),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      // Silent fail — khong lam phien user.
+    }
   }
 
   void _onAudioFinished(Map<String, dynamic> track) {
