@@ -48,13 +48,51 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
   String? _playingKey;
   late String _currentSelected;
 
-  // Hardcoded fallback khi API chua co category NOTIFICATION.
+  static const _assetBase =
+      'https://koshdbyfhivhpmydcgst.supabase.co/storage/v1/object/public/public-assets/ambient-sounds';
+
+  // Fallback khi API khong tra duoc — dung URL Supabase that de van nghe thu duoc.
   static const _fallbackSounds = [
-    {'name': 'Tiếng mèo con kêu 🐱', 'key': 'cat_meow'},
-    {'name': 'Chuông gió mùa xuân 🎐', 'key': 'wind_chimes'},
-    {'name': 'Tiếng mưa rơi tí tách 🌧️', 'key': 'rain'},
-    {'name': 'Sóng biển rì rào 🌊', 'key': 'ocean'},
-    {'name': 'Tiếng chuông thiền 🔔', 'key': 'bell'},
+    {
+      'title': 'Chuông dịu nhẹ 🔔',
+      'key': 'gentle-chime',
+      'soundUrl': '$_assetBase/notification-gentle-chime.mp3',
+    },
+    {
+      'title': 'Tiếng mèo con kêu 🐱',
+      'key': 'cat-purr-bell',
+      'soundUrl': '$_assetBase/notification-cat-purr-bell.mp3',
+    },
+    {
+      'title': 'Chuông gió mùa xuân 🎐',
+      'key': 'spring-wind-chime',
+      'soundUrl': '$_assetBase/notification-spring-wind-chime.mp3',
+    },
+    {
+      'title': 'Tiếng mưa rơi tí tách 🌧️',
+      'key': 'rain-tap',
+      'soundUrl': '$_assetBase/notification-rain-tap.mp3',
+    },
+    {
+      'title': 'Sóng biển rì rào 🌊',
+      'key': 'ocean-whisper',
+      'soundUrl': '$_assetBase/notification-ocean-whisper.mp3',
+    },
+    {
+      'title': 'Tiếng chuông thiền 🔔',
+      'key': 'zen-bell',
+      'soundUrl': '$_assetBase/notification-zen-bell.mp3',
+    },
+    {
+      'title': 'Hạc cầm dịu êm 🎵',
+      'key': 'soft-harp',
+      'soundUrl': '$_assetBase/notification-soft-harp.mp3',
+    },
+    {
+      'title': 'Giọt pha lê ✨',
+      'key': 'crystal-drop',
+      'soundUrl': '$_assetBase/notification-crystal-drop.mp3',
+    },
   ];
 
   @override
@@ -90,14 +128,11 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
       }
     } catch (_) {}
 
-    // Fallback: dung danh sach co dinh (khong co URL de preview).
+    // Fallback: dung danh sach co dinh voi URL Supabase that.
     if (mounted) {
       setState(() {
         _sounds = _fallbackSounds
-            .map((s) => <String, dynamic>{
-                  'title': s['name']!,
-                  'key': s['key']!,
-                })
+            .map((s) => Map<String, dynamic>.from(s))
             .toList();
         _loading = false;
       });
