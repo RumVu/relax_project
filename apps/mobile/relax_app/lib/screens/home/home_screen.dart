@@ -148,6 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               SpeechBubble(quote: _quote, name: name),
               const SizedBox(height: 20),
+              // ===== Nút "Calm Now" — nổi bật nhất trên Home =====
+              _CalmNowButton(),
+              const SizedBox(height: 20),
               if (_loading)
                 const Center(
                   child: Padding(
@@ -221,6 +224,82 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const Text(' ✦', style: TextStyle(color: RelaxColors.violet)),
       ],
+    );
+  }
+}
+
+/// Nút "Calm Now" — nổi bật, gradient, lớn, dễ bấm khi đang stress.
+/// Đây là USP của app: "Một nút nhấn — bình tĩnh ngay".
+class _CalmNowButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/calm-now');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF6c63ff), Color(0xFF9c27b0)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF6c63ff).withValues(alpha: 0.35),
+              blurRadius: 20,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 48,
+              width: 48,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.2),
+              ),
+              child: const Center(
+                child: Text('🫂', style: TextStyle(fontSize: 26)),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.t('Calm Now'),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    context.t('Cần dịu lại ngay? Bấm vào đây.'),
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.7),
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.white.withValues(alpha: 0.6),
+              size: 18,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

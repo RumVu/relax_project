@@ -244,6 +244,35 @@ class SettingsScreen extends StatelessWidget {
                 );
               })(),
               const SizedBox(height: 24),
+              SectionLabel(context.t('An toàn & hỗ trợ')),
+              SettingsCard(
+                children: [
+                  SettingsRow(
+                    icon: Icons.favorite_outline,
+                    title: context.t('Cần hỗ trợ khẩn cấp?'),
+                    subtitle:
+                        context.t('Đường dây nóng tâm lý & liên hệ người thân'),
+                    trailing: Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: RelaxColors.coral.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        context.t('SOS'),
+                        style: const TextStyle(
+                          color: RelaxColors.coral,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                    onTap: () => _showSafetySheet(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
               SectionLabel(context.t('Tài khoản')),
               SettingsCard(
                 children: [
@@ -269,6 +298,136 @@ class SettingsScreen extends StatelessWidget {
   }
 
 
+
+  void _showSafetySheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: ctx.fieldBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.favorite, color: RelaxColors.coral, size: 28),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    ctx.t('Bạn không đơn độc'),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                      color: ctx.appText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              ctx.t('Thi Ái là ứng dụng hỗ trợ thư giãn, KHÔNG thay thế bác sĩ hoặc chuyên gia tâm lý. Nếu bạn đang cảm thấy quá sức chịu đựng, hãy liên hệ ngay:'),
+              style: TextStyle(
+                color: ctx.mutedText,
+                fontSize: 14,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _safetyRow(ctx, '🇻🇳', ctx.t('Đường dây nóng VN'), '1800 599 920',
+                ctx.t('Miễn phí, 24/7')),
+            const SizedBox(height: 12),
+            _safetyRow(ctx, '🌏', ctx.t('Tâm lý trẻ em & thanh niên'),
+                '111', ctx.t('Tổng đài bảo vệ trẻ em')),
+            const SizedBox(height: 12),
+            _safetyRow(ctx, '📞', ctx.t('Cấp cứu'), '115',
+                ctx.t('Cấp cứu y tế')),
+            const SizedBox(height: 24),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: RelaxColors.violet.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Text(
+                ctx.t('Nhắn với người thân bạn tin tưởng. Việc chia sẻ không phải là yếu đuối — đó là dũng cảm. 💜'),
+                style: TextStyle(
+                  color: ctx.appText,
+                  fontSize: 14,
+                  height: 1.5,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _safetyRow(
+      BuildContext ctx, String flag, String title, String number, String note) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: ctx.surface,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: ctx.fieldBorder),
+      ),
+      child: Row(
+        children: [
+          Text(flag, style: const TextStyle(fontSize: 24)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w700, color: ctx.appText)),
+                Text(note,
+                    style: TextStyle(color: ctx.mutedText, fontSize: 12)),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: RelaxColors.coral.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              number,
+              style: const TextStyle(
+                color: RelaxColors.coral,
+                fontWeight: FontWeight.w800,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
