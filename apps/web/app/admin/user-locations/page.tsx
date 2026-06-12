@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Globe,
   MapPin,
@@ -19,6 +19,20 @@ import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
+interface RawUserWithPrefs {
+  id: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  lastLoginAt?: string;
+  profile?: { displayName?: string } | null;
+  preferences?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    locationName?: string | null;
+  } | null;
+}
+
 interface UserLocation {
   id: string;
   name: string;
@@ -26,20 +40,7 @@ interface UserLocation {
   latitude: number | null;
   longitude: number | null;
   locationName: string | null;
-  lastLogin: string | null;
-}
-
-interface RawUser {
-  id?: string;
-  name?: string;
-  email?: string;
-  profile?: { displayName?: string } | null;
-  preferences?: {
-    latitude?: number | null;
-    longitude?: number | null;
-    locationName?: string | null;
-  } | null;
-  lastLoginAt?: string | null;
+  lastLogin: string;
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -65,40 +66,55 @@ export default function AdminUserLocationsPage() {
   const { t } = useTranslation();
   const [users, setUsers] = useState<UserLocation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'ALL' | 'HAS_LOCATION' | 'NO_LOCATION'>(
     'ALL',
   );
 
-  async function load() {
+  const load = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      const res = await apiFetch<{ items: RawUser[] }>('/users', undefined, {
-        query: { limit: 200 },
-      });
+      const res = await apiFetch<{ items: RawUserWithPrefs[] }>(
+        '/users',
+        undefined,
+        { query: { limit: 500 } },
+      );
       const mapped: UserLocation[] = (res.items ?? []).map((u) => ({
-        id: u.id ?? '',
+        id: u.id,
         name:
           u.profile?.displayName ?? u.name ?? u.email?.split('@')[0] ?? 'User',
         email: u.email ?? '-',
         latitude: u.preferences?.latitude ?? null,
         longitude: u.preferences?.longitude ?? null,
         locationName: u.preferences?.locationName ?? null,
-        lastLogin: u.lastLoginAt ?? null,
+        lastLogin: formatDate(u.lastLoginAt),
       }));
       setUsers(mapped);
-    } catch {
-      /* ignore */
+    } catch (err) {
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message?: string }).message)
+          : 'Unknown error';
+      console.error('[UserLocations] fetch failed:', message);
+      setError(message);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [load]);
 
-  const withLoc = users.filter((u) => u.latitude != null);
-  const noLoc = users.filter((u) => u.latitude == null);
+  const withLoc = useMemo(
+    () => users.filter((u) => u.latitude != null),
+    [users],
+  );
+  const noLoc = useMemo(
+    () => users.filter((u) => u.latitude == null),
+    [users],
+  );
 
   const displayed =
     filter === 'HAS_LOCATION'
@@ -176,6 +192,10 @@ export default function AdminUserLocationsPage() {
             <p className="py-12 text-center text-sm text-slate">
               {t('common.loading')}
             </p>
+          ) : error ? (
+            <p className="py-12 text-center text-sm text-red-400">
+              {error}
+            </p>
           ) : (
             <DataTable
               columns={[
@@ -222,7 +242,7 @@ export default function AdminUserLocationsPage() {
                     {t('admin.userLocations.notShared')}
                   </span>
                 ),
-                formatDate(u.lastLogin),
+                u.lastLogin,
               ])}
             />
           )}
