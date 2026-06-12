@@ -57,39 +57,48 @@ class _RelaxScreenState extends State<RelaxScreen> {
         },
       );
     }
-    return SafeArea(
-      child: ListView(
-        cacheExtent: 9999,
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.t('Thư giãn ✨'),
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w800,
-                        color: context.appText,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      context.t('Chọn một cách để thư giãn nhé ~'),
-                      style: TextStyle(color: context.mutedText, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-              const CatMascot(size: 64, emoji: '🐈', glow: false),
-            ],
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: context.appText),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home?tab=0');
+            }
+          },
+        ),
+        title: Text(
+          context.t('Thư giãn ✨'),
+          style: TextStyle(
+            color: context.appText,
+            fontWeight: FontWeight.w800,
           ),
-          const SizedBox(height: 20),
-          ...relaxActivities.map((a) => ActivityCard(activity: a)),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CatMascot(size: 44, emoji: '🐈', glow: false),
+          ),
         ],
+      ),
+      body: SafeArea(
+        child: ListView(
+          cacheExtent: 9999,
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          children: [
+            Text(
+              context.t('Chọn một cách để thư giãn nhé ~'),
+              style: TextStyle(color: context.mutedText, fontSize: 13),
+            ),
+            const SizedBox(height: 20),
+            ...relaxActivities.map((a) => ActivityCard(activity: a)),
+          ],
+        ),
       ),
     );
   }

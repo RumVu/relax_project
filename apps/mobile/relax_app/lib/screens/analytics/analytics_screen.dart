@@ -101,12 +101,16 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
-        leading: widget.embedded
-            ? null
-            : IconButton(
-                icon: Icon(Icons.arrow_back, color: context.appText),
-                onPressed: () => context.pop(),
-              ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: context.appText),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home?tab=0');
+            }
+          },
+        ),
         title: Text(
           context.t('Phân tích cảm xúc'),
           style: TextStyle(color: context.appText, fontWeight: FontWeight.w800),

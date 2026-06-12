@@ -363,6 +363,7 @@ class AuthState extends ChangeNotifier {
           _activeSessionId = null;
           _activeActivityType = null;
         }
+        notifyListeners();
         await refreshUser(); // refresh user stats & info
         return true;
       }

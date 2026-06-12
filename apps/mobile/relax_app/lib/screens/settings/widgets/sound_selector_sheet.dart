@@ -139,20 +139,29 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
     }
   }
 
-  Future<void> _togglePreview(Map<String, dynamic> sound) async {
+  Future<void> _previewAndSelect(Map<String, dynamic> sound) async {
+    HapticFeedback.lightImpact();
+    final name = (sound['title'] as String?) ?? '';
     final url = sound['soundUrl'] as String?;
+    final key = sound['id'] as String? ?? sound['key'] as String? ?? '';
+
+    setState(() {
+      _currentSelected = name;
+    });
+
     if (url == null || url.isEmpty) return;
 
-    final key = sound['id'] as String? ?? sound['key'] as String? ?? '';
     if (_playingKey == key) {
-      // Dang phat → dung lai.
+      // Đang phát -> dừng lại.
       await _preview.stop();
       if (mounted) setState(() => _playingKey = null);
       return;
     }
 
-    // Phat sound moi.
+    // Phát âm thanh mới.
     final errMsg = widget.parentContext.t('Không phát được âm thanh');
+    await _preview.stop();
+    if (!mounted) return;
     setState(() => _playingKey = key);
     try {
       await _preview.setUrl(url);
@@ -164,16 +173,23 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
     }
   }
 
-  Future<void> _selectSound(Map<String, dynamic> sound) async {
-    HapticFeedback.lightImpact();
+  Future<void> _saveAndConfirm() async {
+    final sound = _sounds.firstWhere(
+      (s) => ((s['title'] as String?) ?? '') == _currentSelected,
+      orElse: () => <String, dynamic>{},
+    );
+    if (sound.isEmpty) {
+      Navigator.pop(context);
+      return;
+    }
+
     final name = (sound['title'] as String?) ?? '';
     final url = sound['soundUrl'] as String?;
 
-    // Dung preview neu dang phat.
+    // Dừng preview nếu đang phát.
     await _preview.stop();
 
     widget.onSoundChanged(name);
-    setState(() => _currentSelected = name);
 
     try {
       await secureStorage.write(key: 'relax_reminder_sound', value: name);
@@ -203,7 +219,7 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.55,
+        maxHeight: MediaQuery.of(context).size.height * 0.65,
       ),
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -236,7 +252,7 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
           ),
           const SizedBox(height: 4),
           Text(
-            widget.parentContext.t('Bấm nút play để nghe thử trước khi chọn'),
+            widget.parentContext.t('Chạm vào âm báo để nghe thử và chọn'),
             style: TextStyle(color: context.mutedText, fontSize: 12),
           ),
           const SizedBox(height: 16),
@@ -248,7 +264,7 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
                     CircularProgressIndicator(color: RelaxColors.violet),
               ),
             )
-          else
+          else ...[
             Flexible(
               child: ListView.separated(
                 shrinkWrap: true,
@@ -279,7 +295,7 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
                                   : RelaxColors.violet,
                               size: 32,
                             ),
-                            onPressed: () => _togglePreview(s),
+                            onPressed: () => _previewAndSelect(s),
                           )
                         : const Icon(Icons.music_note,
                             color: RelaxColors.violet),
@@ -297,11 +313,34 @@ class _SoundSelectorBodyState extends State<_SoundSelectorBody> {
                             color: RelaxColors.violet)
                         : const Icon(Icons.radio_button_unchecked,
                             color: Colors.grey, size: 20),
-                    onTap: () => _selectSound(s),
+                    onTap: () => _previewAndSelect(s),
                   );
                 },
               ),
             ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {
+                      _preview.stop();
+                      Navigator.pop(context);
+                    },
+                    child: Text(widget.parentContext.t('Hủy')),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 2,
+                  child: ElevatedButton(
+                    onPressed: _saveAndConfirm,
+                    child: Text(widget.parentContext.t('Xác nhận')),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

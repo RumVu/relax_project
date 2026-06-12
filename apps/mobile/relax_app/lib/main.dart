@@ -35,6 +35,7 @@ import 'screens/weather/weather_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Translations.load();
   await LocalNotifications.init();
   runApp(const RelaxApp());
 }
