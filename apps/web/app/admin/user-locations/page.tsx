@@ -75,12 +75,27 @@ export default function AdminUserLocationsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiFetch<{ items: RawUserWithPrefs[] }>(
+      const res = await apiFetch<{ items: RawUserWithPrefs[]; total: number }>(
         '/users',
         undefined,
-        { query: { limit: 500 } },
+        { query: { limit: 100 } },
       );
-      const mapped: UserLocation[] = (res.items ?? []).map((u) => ({
+
+      // Nếu có nhiều hơn 100 user → fetch thêm các trang còn lại.
+      const allItems = [...(res.items ?? [])];
+      const total = res.total ?? allItems.length;
+      let skip = allItems.length;
+      while (skip < total) {
+        const next = await apiFetch<{ items: RawUserWithPrefs[] }>(
+          '/users',
+          undefined,
+          { query: { limit: 100, skip } },
+        );
+        allItems.push(...(next.items ?? []));
+        skip += (next.items ?? []).length;
+        if ((next.items ?? []).length === 0) break; // tránh loop vô hạn
+      }
+      const mapped: UserLocation[] = allItems.map((u) => ({
         id: u.id,
         name:
           u.profile?.displayName ?? u.name ?? u.email?.split('@')[0] ?? 'User',
