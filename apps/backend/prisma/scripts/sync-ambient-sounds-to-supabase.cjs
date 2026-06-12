@@ -200,8 +200,179 @@ async function downloadAudio(sound) {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Notification sound recipes — each key produces a genuinely unique sound.
+// ---------------------------------------------------------------------------
+const NOTIFICATION_RECIPES = {
+  // Three ascending bell tones (C5-E5-G5) with shimmer echo.
+  'notification-gentle-chime': () => ({
+    inputs: [
+      'sine=frequency=523:duration=3',
+      'sine=frequency=659:duration=3',
+      'sine=frequency=784:duration=3',
+    ],
+    filter:
+      '[0:a]volume=1.5,afade=t=out:st=0.15:d=2.5[a0];' +
+      '[1:a]volume=1.2,adelay=350|350,afade=t=out:st=0.5:d=2[a1];' +
+      '[2:a]volume=1.0,adelay=700|700,afade=t=out:st=1:d=1.8[a2];' +
+      '[a0][a1][a2]amix=inputs=3:duration=longest,' +
+      'aecho=0.8:0.6:120:0.35,' +
+      'afade=t=in:st=0:d=0.05,afade=t=out:st=2.5:d=1',
+  }),
+
+  // Cat meow — vibrato pitch sweep + harmonics + tremolo for vocal quality.
+  'notification-cat-purr-bell': () => ({
+    inputs: [
+      'sine=frequency=700:duration=2.5',
+      'sine=frequency=1400:duration=2.5',
+      'sine=frequency=2100:duration=2.5',
+    ],
+    filter:
+      '[0:a]volume=2.5,vibrato=f=1.2:d=0.4,tremolo=f=1.2:d=0.65[m0];' +
+      '[1:a]volume=1.2,vibrato=f=1.2:d=0.4,tremolo=f=1.2:d=0.65[m1];' +
+      '[2:a]volume=0.5,vibrato=f=1.2:d=0.4,tremolo=f=1.2:d=0.65[m2];' +
+      '[m0][m1][m2]amix=inputs=3:duration=longest,' +
+      'highpass=f=280,lowpass=f=3200,' +
+      'afade=t=in:st=0:d=0.08,afade=t=out:st=1.8:d=0.7',
+  }),
+
+  // Wind chimes — high-pitched sequential tings (G6-A6-C7-F6) with airy echo.
+  'notification-spring-wind-chime': () => ({
+    inputs: [
+      'sine=frequency=1568:duration=2.5',
+      'sine=frequency=1760:duration=2.5',
+      'sine=frequency=2093:duration=2.5',
+      'sine=frequency=1397:duration=2.5',
+    ],
+    filter:
+      '[0:a]volume=1.8,afade=t=out:st=0.08:d=2[w0];' +
+      '[1:a]volume=1.6,adelay=300|300,afade=t=out:st=0.35:d=1.8[w1];' +
+      '[2:a]volume=1.4,adelay=650|650,afade=t=out:st=0.7:d=1.5[w2];' +
+      '[3:a]volume=1.5,adelay=1000|1000,afade=t=out:st=1.1:d=1.5[w3];' +
+      '[w0][w1][w2][w3]amix=inputs=4:duration=longest,' +
+      'aecho=0.8:0.7:200:0.4,' +
+      'afade=t=in:st=0:d=0.02,afade=t=out:st=3:d=1',
+  }),
+
+  // Rain drops — pink noise through bandpass with rhythmic tremolo.
+  'notification-rain-tap': () => ({
+    inputs: ['anoisesrc=color=pink:duration=5'],
+    filter:
+      '[0:a]volume=3.0,' +
+      'bandpass=f=3500:width_type=o:w=1.5,' +
+      'tremolo=f=11:d=0.85,' +
+      'aecho=0.6:0.5:30|55|80:0.35|0.25|0.15,' +
+      'afade=t=in:st=0:d=0.3,afade=t=out:st=3.5:d=1.5',
+  }),
+
+  // Ocean — brown noise with slow wave-like modulation + deep undertone.
+  'notification-ocean-whisper': () => ({
+    inputs: [
+      'anoisesrc=color=brown:duration=6',
+      'sine=frequency=160:duration=6',
+    ],
+    filter:
+      '[0:a]volume=1.2,lowpass=f=700,tremolo=f=0.4:d=0.6[ocean];' +
+      '[1:a]volume=0.2,tremolo=f=0.3:d=0.7[deep];' +
+      '[ocean][deep]amix=inputs=2:duration=longest,' +
+      'afade=t=in:st=0:d=0.8,afade=t=out:st=4:d=2',
+  }),
+
+  // Zen bowl strike — deep tone with long sustain and reverb.
+  'notification-zen-bell': () => ({
+    inputs: [
+      'sine=frequency=340:duration=6',
+      'sine=frequency=680:duration=6',
+      'sine=frequency=1020:duration=5',
+    ],
+    filter:
+      '[0:a]volume=2.5,afade=t=out:st=0.3:d=5[z0];' +
+      '[1:a]volume=1.2,afade=t=out:st=0.2:d=4[z1];' +
+      '[2:a]volume=0.5,afade=t=out:st=0.1:d=2.5[z2];' +
+      '[z0][z1][z2]amix=inputs=3:duration=longest,' +
+      'aecho=0.9:0.8:400:0.5,' +
+      'afade=t=in:st=0:d=0.01,afade=t=out:st=4:d=2',
+  }),
+
+  // Harp arpeggio — C4-E4-G4-C5 plucked sequence with soft echo.
+  'notification-soft-harp': () => ({
+    inputs: [
+      'sine=frequency=262:duration=4',
+      'sine=frequency=330:duration=4',
+      'sine=frequency=392:duration=4',
+      'sine=frequency=523:duration=4',
+    ],
+    filter:
+      '[0:a]volume=3.0,afade=t=out:st=0.03:d=3[h0];' +
+      '[1:a]volume=2.5,adelay=200|200,afade=t=out:st=0.23:d=2.5[h1];' +
+      '[2:a]volume=2.0,adelay=400|400,afade=t=out:st=0.43:d=2[h2];' +
+      '[3:a]volume=1.5,adelay=600|600,afade=t=out:st=0.63:d=1.5[h3];' +
+      '[h0][h1][h2][h3]amix=inputs=4:duration=longest,' +
+      'aecho=0.7:0.5:150:0.25,' +
+      'afade=t=in:st=0:d=0.01,afade=t=out:st=2.5:d=1.5',
+  }),
+
+  // Crystal water drops — high E7/G7 pings with heavy multi-tap reverb.
+  'notification-crystal-drop': () => ({
+    inputs: [
+      'sine=frequency=2637:duration=1.5',
+      'sine=frequency=3136:duration=1.5',
+      'sine=frequency=2637:duration=1.5',
+    ],
+    filter:
+      '[0:a]volume=1.5,afade=t=out:st=0.03:d=1[d0];' +
+      '[1:a]volume=1.2,adelay=450|450,afade=t=out:st=0.48:d=0.8[d1];' +
+      '[2:a]volume=1.3,adelay=900|900,afade=t=out:st=0.93:d=0.8[d2];' +
+      '[d0][d1][d2]amix=inputs=3:duration=longest,' +
+      'aecho=0.9:0.8:80|160|240:0.5|0.4|0.3,' +
+      'afade=t=in:st=0:d=0.01,afade=t=out:st=1.8:d=0.8',
+  }),
+};
+
+function generateNotificationAudio(sound) {
+  const recipe = NOTIFICATION_RECIPES[sound.key];
+  if (!recipe) return null;
+
+  const { inputs, filter } = recipe();
+  const outputPath = path.join(
+    os.tmpdir(),
+    `relax-${sound.key}-${Date.now()}-${process.pid}.mp3`,
+  );
+  const inputArgs = inputs.flatMap((src) => ['-f', 'lavfi', '-i', src]);
+  const result = spawnSync(
+    'ffmpeg',
+    [
+      '-y', '-hide_banner', '-loglevel', 'error',
+      ...inputArgs,
+      '-filter_complex', filter,
+      '-codec:a', 'libmp3lame', '-b:a', '128k',
+      outputPath,
+    ],
+    { encoding: 'utf8' },
+  );
+
+  if (result.status !== 0) {
+    throw new Error(
+      `Cannot generate notification audio for "${sound.title}": ${result.stderr || 'ffmpeg failed'}`,
+    );
+  }
+
+  try {
+    return { body: fs.readFileSync(outputPath), contentType: 'audio/mpeg' };
+  } finally {
+    fs.rmSync(outputPath, { force: true });
+  }
+}
+
 function generateAudio(sound) {
   const [, flavor, rawIndex] = sound.sourceUrl.split(':');
+
+  // Use per-key recipes for notification sounds.
+  if (flavor === 'notification') {
+    const notifResult = generateNotificationAudio(sound);
+    if (notifResult) return notifResult;
+  }
+
   const index = Number(String(rawIndex).match(/\d+$/)?.[0]) || 1;
   const isNotification = flavor === 'notification';
   const duration = isNotification
