@@ -1267,6 +1267,24 @@ const vi = {
   'settings.btn.savingPreferences': 'Đang lưu tuỳ chọn…',
   'settings.btn.savePreferences': 'Lưu tuỳ chọn',
   'settings.btn.testNotification': 'Gửi thông báo thử',
+
+  // ===== Admin user locations =====
+  'nav.userLocations': 'Vị trí người dùng',
+  'admin.userLocations.title': 'Vị trí người dùng',
+  'admin.userLocations.metric.total': 'Tổng người dùng',
+  'admin.userLocations.metric.hasLocation': 'Có vị trí',
+  'admin.userLocations.metric.noLocation': 'Chưa có vị trí',
+  'admin.userLocations.table.title': 'Danh sách vị trí',
+  'admin.userLocations.table.copy': 'Vị trí được người dùng chia sẻ từ ứng dụng di động.',
+  'admin.userLocations.filter.all': 'Tất cả',
+  'admin.userLocations.filter.hasLocation': 'Có vị trí',
+  'admin.userLocations.filter.noLocation': 'Chưa có vị trí',
+  'admin.userLocations.refresh': 'Làm mới',
+  'admin.userLocations.col.lat': 'Vĩ độ',
+  'admin.userLocations.col.lng': 'Kinh độ',
+  'admin.userLocations.col.address': 'Địa chỉ',
+  'admin.userLocations.viewOnMap': 'Xem trên bản đồ',
+  'admin.userLocations.notShared': 'Chưa chia sẻ',
 } as const;
 
 const en: Record<keyof typeof vi, string> = {
@@ -2513,6 +2531,24 @@ const en: Record<keyof typeof vi, string> = {
   'settings.btn.savingPreferences': 'Saving preferences…',
   'settings.btn.savePreferences': 'Save preferences',
   'settings.btn.testNotification': 'Send test notification',
+
+  // ===== Admin user locations =====
+  'nav.userLocations': 'User Locations',
+  'admin.userLocations.title': 'User Locations',
+  'admin.userLocations.metric.total': 'Total users',
+  'admin.userLocations.metric.hasLocation': 'With location',
+  'admin.userLocations.metric.noLocation': 'No location',
+  'admin.userLocations.table.title': 'Location list',
+  'admin.userLocations.table.copy': 'Locations shared by users from the mobile app.',
+  'admin.userLocations.filter.all': 'All',
+  'admin.userLocations.filter.hasLocation': 'With location',
+  'admin.userLocations.filter.noLocation': 'No location',
+  'admin.userLocations.refresh': 'Refresh',
+  'admin.userLocations.col.lat': 'Latitude',
+  'admin.userLocations.col.lng': 'Longitude',
+  'admin.userLocations.col.address': 'Address',
+  'admin.userLocations.viewOnMap': 'View on map',
+  'admin.userLocations.notShared': 'Not shared',
 };
 
 export type TranslationKey = keyof typeof vi;
