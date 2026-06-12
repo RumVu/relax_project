@@ -231,8 +231,8 @@ function generateAudio(sound) {
     '-i',
     `sine=frequency=${Math.round(frequency)}:sample_rate=44100:duration=${duration}`,
   ]);
-  const notifVol = isNotification ? '0.035' : '0.045';
-  const notifVolSub = isNotification ? '0.018' : '0.028';
+  const notifVol = isNotification ? '3.0' : '0.045';
+  const notifVolSub = isNotification ? '1.8' : '0.028';
   const volumeFilters = frequencies
     .map((_, inputIndex) => `[${inputIndex}:a]volume=${inputIndex === 0 ? notifVol : notifVolSub}[a${inputIndex}]`)
     .join(';');
