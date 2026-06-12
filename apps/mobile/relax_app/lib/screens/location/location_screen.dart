@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
@@ -22,11 +23,14 @@ class _LocationScreenState extends State<LocationScreen> {
   String _status = 'Chưa lấy vị trí';
   bool _loading = false;
   bool _saving = false;
+  String? _address;
+  bool _geocoding = false;
 
   Future<void> _grab() async {
     setState(() {
       _loading = true;
       _status = 'Đang lấy vị trí…';
+      _address = null;
     });
     try {
       final enabled = await Geolocator.isLocationServiceEnabled();
@@ -48,6 +52,8 @@ class _LocationScreenState extends State<LocationScreen> {
         _pos = p;
         _status = 'Đã lấy vị trí thành công';
       });
+      // Reverse geocode ngay sau khi co toa do.
+      _reverseGeocode(p.latitude, p.longitude);
     } catch (e) {
       if (e.toString().contains('MissingPluginException')) {
         setState(() => _status =
@@ -57,6 +63,32 @@ class _LocationScreenState extends State<LocationScreen> {
       }
     } finally {
       if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _reverseGeocode(double lat, double lng) async {
+    setState(() => _geocoding = true);
+    try {
+      final placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty && mounted) {
+        final pm = placemarks.first;
+        final parts = <String>[
+          if (pm.street != null && pm.street!.isNotEmpty) pm.street!,
+          if (pm.subLocality != null && pm.subLocality!.isNotEmpty)
+            pm.subLocality!,
+          if (pm.locality != null && pm.locality!.isNotEmpty) pm.locality!,
+          if (pm.administrativeArea != null &&
+              pm.administrativeArea!.isNotEmpty)
+            pm.administrativeArea!,
+          if (pm.country != null && pm.country!.isNotEmpty) pm.country!,
+        ];
+        setState(() => _address = parts.join(', '));
+      }
+    } catch (_) {
+      // Geocoding fail thi chi hien toa do, khong sao.
+      if (mounted) setState(() => _address = null);
+    } finally {
+      if (mounted) setState(() => _geocoding = false);
     }
   }
 
@@ -70,6 +102,7 @@ class _LocationScreenState extends State<LocationScreen> {
           'lat': p.latitude,
           'lng': p.longitude,
           'accuracyM': p.accuracy,
+          if (_address != null) 'address': _address,
         },
       });
       if (!mounted) return;
@@ -152,6 +185,70 @@ class _LocationScreenState extends State<LocationScreen> {
                       LocationKvRow(
                           label: 'Độ chính xác',
                           value: '${p.accuracy.toStringAsFixed(0)} m'),
+                      const SizedBox(height: 14),
+                      Divider(height: 1, color: context.fieldBorder),
+                      const SizedBox(height: 14),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(Icons.place,
+                              color: RelaxColors.violet, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  context.t('Địa chỉ hiện tại'),
+                                  style: TextStyle(
+                                    color: context.mutedText,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                if (_geocoding)
+                                  Row(
+                                    children: [
+                                      SizedBox(
+                                        height: 14,
+                                        width: 14,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: RelaxColors.violet,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        context.t('Đang xác định địa chỉ…'),
+                                        style: TextStyle(
+                                          color: context.mutedText,
+                                          fontSize: 13,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  Text(
+                                    _address ??
+                                        context.t(
+                                            'Không xác định được địa chỉ'),
+                                    style: TextStyle(
+                                      color: _address != null
+                                          ? context.appText
+                                          : context.mutedText,
+                                      fontWeight: _address != null
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                      fontSize: 14,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ],
                   ],
                 ),
