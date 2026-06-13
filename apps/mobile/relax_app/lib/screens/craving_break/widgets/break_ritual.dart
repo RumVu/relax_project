@@ -178,7 +178,7 @@ class _BreakRitualState extends State<BreakRitual>
           ),
           const SizedBox(height: 8),
           Text(
-            _stepLabel,
+            context.t(_stepLabel),
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.4),
               fontSize: 12,

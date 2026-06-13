@@ -268,7 +268,7 @@ class _BreakButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.t('I Need a Break'),
+                    context.t('Nghỉ một chút'),
                     style: TextStyle(
                       color: context.appText,
                       fontWeight: FontWeight.w700,
@@ -344,7 +344,7 @@ class _CalmNowButton extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    context.t('Calm Now'),
+                    context.t('Dịu lại ngay'),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,

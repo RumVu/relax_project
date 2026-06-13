@@ -59,7 +59,7 @@ class BreakReasonPicker extends StatelessWidget {
           Expanded(
             child: ListView.separated(
               itemCount: _reasons.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              separatorBuilder: (_, index) => const SizedBox(height: 10),
               itemBuilder: (ctx, i) {
                 final r = _reasons[i];
                 return _ReasonTile(reason: r, onTap: () => onSelect(r.code));

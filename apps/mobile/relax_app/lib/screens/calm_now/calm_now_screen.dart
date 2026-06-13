@@ -156,7 +156,7 @@ class _CalmNowScreenState extends State<CalmNowScreen>
           onPressed: () => context.pop(),
         ),
         title: Text(
-          context.t('Calm Now'),
+          context.t('Dịu lại ngay'),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontWeight: FontWeight.w800,

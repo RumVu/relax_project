@@ -153,7 +153,7 @@ class _CravingBreakScreenState extends State<CravingBreakScreen>
           onPressed: () => context.pop(),
         ),
         title: Text(
-          context.t('I Need a Break'),
+          context.t('Nghỉ một chút'),
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.9),
             fontWeight: FontWeight.w800,

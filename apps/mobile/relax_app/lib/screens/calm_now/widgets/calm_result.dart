@@ -233,15 +233,15 @@ class _CalmResultState extends State<CalmResult> {
   String _reliefLabel(int level) {
     switch (level) {
       case 1:
-        return 'Chưa đỡ mấy';
+        return context.t('Chưa đỡ mấy');
       case 2:
-        return 'Đỡ một chút';
+        return context.t('Đỡ một chút');
       case 3:
-        return 'Tạm ổn';
+        return context.t('Tạm ổn');
       case 4:
-        return 'Nhẹ nhõm hơn';
+        return context.t('Nhẹ nhõm hơn');
       case 5:
-        return 'Tốt hơn nhiều';
+        return context.t('Tốt hơn nhiều');
       default:
         return '';
     }
