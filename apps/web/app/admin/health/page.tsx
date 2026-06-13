@@ -115,11 +115,11 @@ export default function HealthDashboardPage() {
         <Card>
           <SectionTitle title="Providers" copy="External service readiness" />
           <div className="mt-4 space-y-3">
-            <_StatusRow label="Push Notification" ok={ops?.providers?.push?.ready ?? false} />
-            <_StatusRow label="Email" ok={ops?.providers?.email?.ready ?? false} />
-            <_StatusRow label="Billing (Stripe)" ok={ops?.providers?.billing?.ready ?? false} />
+            <_StatusRow label="Push Notification" ok={ops?.providers?.push?.ready ?? false} notImplemented />
+            <_StatusRow label="Email" ok={ops?.providers?.email?.ready ?? false} notImplemented />
+            <_StatusRow label="Billing (SePay)" ok={ops?.providers?.billing?.ready ?? false} />
             <_StatusRow
-              label="Storage"
+              label="Storage (Supabase)"
               ok={ops?.providers?.storage?.ready ?? false}
               detail={ops?.providers?.storage?.bucket ?? undefined}
             />
@@ -155,16 +155,33 @@ export default function HealthDashboardPage() {
   );
 }
 
-function _StatusRow({ label, ok, detail }: { label: string; ok: boolean; detail?: string }) {
+function _StatusRow({
+  label,
+  ok,
+  detail,
+  notImplemented,
+}: {
+  label: string;
+  ok: boolean;
+  detail?: string;
+  notImplemented?: boolean;
+}) {
   return (
     <div className="flex items-center justify-between rounded-lg border border-lilac/20 px-4 py-3">
       <span className="text-sm text-slate font-medium">{label}</span>
       <div className="flex items-center gap-2">
         {detail && <span className="text-xs text-slate">{detail}</span>}
-        <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${ok ? 'text-mint' : 'text-coral'}`}>
-          {ok ? <CheckCircle className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
-          {ok ? 'Ready' : 'Offline'}
-        </span>
+        {notImplemented ? (
+          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-slate">
+            <Clock className="h-3.5 w-3.5" />
+            Not Implemented
+          </span>
+        ) : (
+          <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${ok ? 'text-mint' : 'text-coral'}`}>
+            {ok ? <CheckCircle className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+            {ok ? 'Ready' : 'Offline'}
+          </span>
+        )}
       </div>
     </div>
   );

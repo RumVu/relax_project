@@ -152,10 +152,9 @@ export class AppService {
       this.configService.get<string>('SENDGRID_API_KEY'),
     );
     const billingConfigured = Boolean(
-      this.configService.get<string>('STRIPE_SECRET_KEY') ||
-      (this.configService.get<string>('SEPAY_MERCHANT_ID') &&
-       this.configService.get<string>('SEPAY_SECRET_KEY') &&
-       this.configService.get<string>('SEPAY_WEBHOOK_API_KEY')),
+      this.configService.get<string>('SEPAY_MERCHANT_ID') &&
+      this.configService.get<string>('SEPAY_SECRET_KEY') &&
+      this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'),
     );
 
     let userCount = 0;
