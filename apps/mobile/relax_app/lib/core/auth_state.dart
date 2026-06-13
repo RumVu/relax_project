@@ -171,6 +171,16 @@ class AuthState extends ChangeNotifier {
     return false;
   }
 
+  Future<void> loginWithTokens({
+    required String accessToken,
+    String? refreshToken,
+    Map<String, dynamic>? user,
+  }) async {
+    await RelaxApi.instance.saveTokens(access: accessToken, refresh: refreshToken);
+    _user = user;
+    notifyListeners();
+  }
+
   Future<bool> register({
     required String email,
     required String password,

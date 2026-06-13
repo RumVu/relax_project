@@ -33,6 +33,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { DemoLoginDto } from './dto/demo-login.dto';
 import { GoogleLoginDto } from './dto/google-login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
@@ -93,6 +94,27 @@ export class AuthController {
     return this.withRefreshCookie(
       response,
       this.authService.login(dto, userAgent, getClientIp(request)),
+    );
+  }
+
+  @ApiOperation({ summary: 'Login as demo user with pre-populated data' })
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'Demo user session with sample data.',
+  })
+  @Post('demo')
+  demo(
+    @Body() dto: DemoLoginDto,
+    @Headers('user-agent') userAgent: string | undefined,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.withRefreshCookie(
+      response,
+      this.authService.demoLogin(
+        dto.deviceName ?? userAgent,
+        getClientIp(request),
+      ),
     );
   }
 

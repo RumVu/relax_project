@@ -126,6 +126,125 @@ export class AuthService {
     return this.createAuthResponse(user, userAgent, ipAddress);
   }
 
+  async demoLogin(userAgent?: string, ipAddress?: string) {
+    const demoEmail = 'demo@thiai.app';
+    const demoPassword = await bcrypt.hash('demo1234', 12);
+
+    let user = await this.prisma.user.findUnique({
+      where: { email: demoEmail },
+      select: { id: true, email: true, role: true, isActive: true },
+    });
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email: demoEmail,
+          name: 'Demo User',
+          password: demoPassword,
+          authProvider: AuthProvider.LOCAL,
+          emailVerified: true,
+          profile: { create: { displayName: 'Demo User' } },
+          preferences: { create: {} },
+        },
+        select: { id: true, email: true, role: true, isActive: true },
+      });
+      await this.seedDemoData(user.id);
+    }
+
+    return this.createAuthResponse(user, userAgent, ipAddress);
+  }
+
+  private async seedDemoData(userId: string) {
+    const moods = ['HAPPY', 'CALM', 'NEUTRAL', 'ANXIOUS', 'SAD'] as const;
+    const tags = [
+      ['vui vẻ', 'gia đình'],
+      ['bình yên', 'thiên nhiên'],
+      ['bình thường'],
+      ['lo lắng', 'công việc'],
+      ['buồn', 'mệt mỏi'],
+    ];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      const moodIndex = i % moods.length;
+      await this.prisma.moodCheckin.create({
+        data: {
+          userId,
+          mood: moods[moodIndex],
+          intensity: 3 + (i % 3),
+          tags: tags[moodIndex],
+          note: `Demo mood entry day -${i}`,
+          createdAt: date,
+        },
+      });
+    }
+
+    await this.prisma.journal.createMany({
+      data: [
+        {
+          userId,
+          title: 'Ngày đầu tiên',
+          content: 'Hôm nay mình bắt đầu dùng Thi Ái. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
+          mood: 'CALM',
+          tags: ['reflection', 'first-day'],
+        },
+        {
+          userId,
+          title: 'Buổi sáng đẹp trời',
+          content: 'Sáng nay dậy sớm, hít thở và thiền 5 phút. Không ngờ mình lại có thể duy trì được 3 ngày liên tiếp.',
+          mood: 'HAPPY',
+          tags: ['morning', 'meditation'],
+        },
+        {
+          userId,
+          title: 'Stress công việc',
+          content: 'Deadline dồn dập. Dùng breathing exercise 4-2-4 để bình tĩnh lại. Thấy hiệu quả thật.',
+          mood: 'ANXIOUS',
+          tags: ['work', 'breathing'],
+        },
+      ],
+    });
+
+    await this.prisma.relaxSession.createMany({
+      data: [
+        {
+          userId,
+          activityType: 'BREATHING',
+          status: 'FINISHED',
+          title: 'Hít thở 4-2-4',
+          duration: 180,
+          moodBefore: 'ANXIOUS',
+          moodAfter: 'CALM',
+          reliefLevel: 4,
+          stressReliefPercent: 72,
+        },
+        {
+          userId,
+          activityType: 'MUSIC',
+          status: 'FINISHED',
+          title: 'Nhạc thư giãn',
+          duration: 600,
+          moodBefore: 'SAD',
+          moodAfter: 'NEUTRAL',
+          reliefLevel: 3,
+          stressReliefPercent: 55,
+        },
+        {
+          userId,
+          activityType: 'MEDITATION',
+          status: 'FINISHED',
+          title: 'Thiền chánh niệm',
+          duration: 300,
+          moodBefore: 'NEUTRAL',
+          moodAfter: 'HAPPY',
+          reliefLevel: 5,
+          stressReliefPercent: 85,
+        },
+      ],
+    });
+  }
+
   async refresh(refreshToken: string, userAgent?: string, ipAddress?: string) {
     const session = await this.prisma.session.findUnique({
       where: { refreshToken: hashToken(refreshToken) },

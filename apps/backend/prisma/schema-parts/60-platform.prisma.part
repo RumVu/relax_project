@@ -291,6 +291,21 @@ model CacheEntry {
   @@map("cache_entries")
 }
 
+model FeatureFlag {
+  id String @id @default(cuid())
+
+  key         String  @unique
+  label       String
+  description String?
+  enabled     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("feature_flags")
+}
+
 /// Flexible raw app/client telemetry events.
 /// Promote events to PlatformEvent only after the backend contract is stable.
 model AppEvent {

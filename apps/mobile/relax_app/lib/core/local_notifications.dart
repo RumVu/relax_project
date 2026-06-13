@@ -106,6 +106,30 @@ class LocalNotifications {
     );
   }
 
+  static Future<void> showInstant({
+    required String title,
+    required String body,
+    int id = 9999,
+  }) async {
+    const androidDetails = AndroidNotificationDetails(
+      'instant_channel',
+      'Instant Notifications',
+      channelDescription: 'Immediate notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+    await _plugin.show(id, title, body, details);
+  }
+
   static Future<void> cancel(int id) async {
     await _plugin.cancel(id);
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/tour_controller.dart';
@@ -9,6 +10,7 @@ import '../../core/theme.dart';
 import '../../core/locale_controller.dart';
 import '../../widgets/cat_mascot.dart';
 
+import '../../core/vault_lock.dart';
 import 'helpers/account_deletion.dart';
 import 'widgets/settings_shared.dart';
 import 'widgets/notification_card.dart';
@@ -111,6 +113,34 @@ class SettingsScreen extends StatelessWidget {
                     title: context.t('Kế hoạch tuần'),
                     subtitle: context.t('Gợi ý hoạt động 7 ngày theo mood'),
                     onTap: () => context.push('/wellness-plan'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.emoji_events_outlined,
+                    title: context.t('Thành tựu'),
+                    subtitle: context.t('Xem huy hiệu & điểm thưởng'),
+                    onTap: () => context.push('/achievements'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.map_outlined,
+                    title: context.t('Bản đồ Trigger'),
+                    subtitle: context.t('Ánh xạ stress → hoạt động phù hợp'),
+                    onTap: () => context.push('/trigger-map'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.graphic_eq_outlined,
+                    title: context.t('Soundscape'),
+                    subtitle: context.t('Mix nhiều âm thanh theo mood'),
+                    onTap: () => context.push('/soundscape'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.timer_outlined,
+                    title: context.t('Focus Break'),
+                    subtitle: context.t('Pomodoro — tập trung & nghỉ xen kẽ'),
+                    onTap: () => context.push('/focus-break'),
                   ),
                   const SettingsDivider(),
                   SettingsRow(
@@ -281,6 +311,13 @@ class SettingsScreen extends StatelessWidget {
                 );
               })(),
               const SizedBox(height: 24),
+              SectionLabel(context.t('Bảo mật nhật ký')),
+              SettingsCard(
+                children: [
+                  _VaultToggleRow(),
+                ],
+              ),
+              const SizedBox(height: 24),
               SectionLabel(context.t('An toàn & hỗ trợ')),
               SettingsCard(
                 children: [
@@ -307,6 +344,8 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     onTap: () => _showSafetySheet(context),
                   ),
+                  const SettingsDivider(),
+                  _EmergencyContactRow(),
                 ],
               ),
               const SizedBox(height: 24),
@@ -475,5 +514,136 @@ class SettingsScreen extends StatelessWidget {
           context.t('Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.'),
     );
   }
+}
 
+class _VaultToggleRow extends StatefulWidget {
+  @override
+  State<_VaultToggleRow> createState() => _VaultToggleRowState();
+}
+
+class _VaultToggleRowState extends State<_VaultToggleRow> {
+  bool _enabled = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _check();
+  }
+
+  Future<void> _check() async {
+    final enabled = await VaultLock.instance.isEnabled;
+    if (mounted) setState(() { _enabled = enabled; _loaded = true; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+    return SettingsRow(
+      icon: Icons.lock_outline,
+      title: context.t('Khóa nhật ký bằng PIN'),
+      subtitle: _enabled
+          ? context.t('Nhật ký được bảo vệ bằng mã PIN')
+          : context.t('Bật để yêu cầu PIN khi mở nhật ký'),
+      trailing: Switch.adaptive(
+        value: _enabled,
+        activeTrackColor: RelaxColors.violet,
+        onChanged: (val) async {
+          if (val) {
+            final ok = await VaultLock.setupPin(context);
+            if (ok) setState(() => _enabled = true);
+          } else {
+            final ok = await VaultLock.unlock(context);
+            if (ok) {
+              await VaultLock.instance.removePin();
+              setState(() => _enabled = false);
+            }
+          }
+        },
+      ),
+      onTap: () {},
+    );
+  }
+}
+
+class _EmergencyContactRow extends StatefulWidget {
+  @override
+  State<_EmergencyContactRow> createState() => _EmergencyContactRowState();
+}
+
+class _EmergencyContactRowState extends State<_EmergencyContactRow> {
+  String _contact = '';
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final box = await Hive.openBox('emergency_contact');
+    if (mounted) {
+      setState(() {
+        _contact = box.get('contact', defaultValue: '') as String;
+        _loaded = true;
+      });
+    }
+  }
+
+  Future<void> _edit() async {
+    final ctrl = TextEditingController(text: _contact);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.t('Liên hệ khẩn cấp')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              context.t('Số điện thoại người thân tin tưởng. Sẽ hiện khi phát hiện dấu hiệu cần hỗ trợ.'),
+              style: TextStyle(color: context.mutedText, fontSize: 12),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ctrl,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                hintText: context.t('Số điện thoại'),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(context.t('Hủy')),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+            child: Text(context.t('Lưu')),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      final box = await Hive.openBox('emergency_contact');
+      await box.put('contact', result);
+      if (mounted) setState(() => _contact = result);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+    return SettingsRow(
+      icon: Icons.contact_phone_outlined,
+      title: context.t('Liên hệ khẩn cấp'),
+      subtitle: _contact.isEmpty
+          ? context.t('Thêm số người thân tin tưởng')
+          : _contact,
+      onTap: _edit,
+    );
+  }
 }

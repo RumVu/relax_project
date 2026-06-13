@@ -55,6 +55,7 @@ import { FriendsModule } from './friends/friends.module';
 import { FeedModule } from './feed/feed.module';
 import { MeditationsModule } from './meditations/meditations.module';
 import { SleepModule } from './sleep/sleep.module';
+import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 
 @Module({
   imports: [
@@ -156,6 +157,7 @@ import { SleepModule } from './sleep/sleep.module';
     FeedModule,
     MeditationsModule,
     SleepModule,
+    FeatureFlagsModule,
   ],
   controllers: [AppController],
   providers: [

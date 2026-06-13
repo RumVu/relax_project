@@ -61,6 +61,8 @@ const NAV_TRANSLATION_KEYS: Record<string, TranslationKey> = {
   Onboarding: 'nav.onboarding',
   'Companion Assets': 'nav.companionAssets',
   'Companion Messages': 'nav.companionMessages',
+  'Feature Flags': 'nav.featureFlags',
+  Health: 'nav.health',
 };
 
 const iconMap = {

@@ -33,9 +33,13 @@ import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/register/register_screen.dart';
 import 'screens/relax/relax_screen.dart';
 import 'screens/settings/settings_screen.dart';
+import 'screens/achievements/achievements_screen.dart';
 import 'screens/buddies/buddies_screen.dart';
+import 'screens/focus_break/focus_break_screen.dart';
 import 'screens/sessions/sessions_screen.dart';
+import 'screens/soundscape/soundscape_screen.dart';
 import 'screens/sounds/sounds_screen.dart';
+import 'screens/trigger_map/trigger_map_screen.dart';
 import 'screens/weather/weather_screen.dart';
 import 'screens/weekly_report/weekly_report_screen.dart';
 import 'screens/wellness_plan/wellness_plan_screen.dart';
@@ -298,6 +302,26 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/buddies',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const BuddiesScreen()),
+      ),
+      GoRoute(
+        path: '/achievements',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const AchievementsScreen()),
+      ),
+      GoRoute(
+        path: '/trigger-map',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const TriggerMapScreen()),
+      ),
+      GoRoute(
+        path: '/soundscape',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const SoundscapeScreen()),
+      ),
+      GoRoute(
+        path: '/focus-break',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const FocusBreakScreen()),
       ),
       GoRoute(
         path: '/location',

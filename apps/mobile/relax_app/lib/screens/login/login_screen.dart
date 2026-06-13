@@ -34,6 +34,30 @@ class _LoginScreenState extends State<LoginScreen> {
     if (mounted) setState(() => _busy = v);
   }
 
+  Future<void> _demoLogin() async {
+    _setBusy(true);
+    try {
+      final res = await RelaxApi.instance.post('/auth/demo', body: {});
+      if (!mounted) return;
+      final data = res.data as Map<String, dynamic>?;
+      if (data != null && data['accessToken'] != null) {
+        final auth = context.read<AuthState>();
+        await auth.loginWithTokens(
+          accessToken: data['accessToken'] as String,
+          refreshToken: data['refreshToken'] as String?,
+          user: data['user'] as Map<String, dynamic>?,
+        );
+        if (mounted) context.go('/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context,
+            message: 'Demo: ${e.toString()}', tone: SoftToastTone.error);
+      }
+    }
+    _setBusy(false);
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: EMAIL LÀM BẰNG TAY] ===');
@@ -237,6 +261,29 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      height: 48,
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(
+                            color: RelaxColors.mint.withValues(alpha: 0.5),
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onPressed: _busy ? null : _demoLogin,
+                        icon: const Text('🎮', style: TextStyle(fontSize: 18)),
+                        label: Text(
+                          context.t('Dùng thử Demo'),
+                          style: const TextStyle(
+                            color: RelaxColors.mint,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                       ),
                     ),

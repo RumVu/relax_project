@@ -26,4 +26,6 @@ export const adminNav: NavItem[] = [
   { label: 'Companion Messages', href: '/admin/companion-messages' },
   { label: 'Pricing & sale', href: '/admin/pricing' },
   { label: 'User Locations', href: '/admin/user-locations' },
+  { label: 'Feature Flags', href: '/admin/feature-flags' },
+  { label: 'Health', href: '/admin/health' },
 ];

@@ -43,6 +43,13 @@ const CATEGORY_IMAGES = {
   ],
 };
 
+const VALID_MIXKIT_IDS = [
+  443, 282, 135, 234, 175, 988, 685, 485, 905, 1023, 738, 400, 281, 403, 666, 224, 841, 739, 476, 235,
+  480, 640, 27, 750, 109, 150, 662, 723, 646, 183, 427, 439, 331, 127, 292, 139, 138, 441, 444, 442,
+  657, 168, 595, 617, 613, 43, 182, 23, 591, 542, 545, 600, 675, 673, 544, 602, 806, 665, 845, 1177,
+  493, 614, 659, 587, 682, 839, 601, 688, 749, 684, 522, 184, 714, 31, 599, 22, 709, 89, 710
+];
+
 const TRACKS = {
   LOFI: [
     ['serene-view', 'Serene View', 443, 114],
@@ -65,10 +72,10 @@ const TRACKS = {
     ['hip-hop-03', 'Hip Hop 03', 739, 112],
     ['baileys', 'Baileys', 476, 97],
     ['try-me', 'Try Me', 235, 110],
-    ['summertime-sadness-lana', 'Summertime Sadness (Lofi)', 'generated:lofi:lana01', 120],
-    ['young-and-beautiful-lana', 'Young and Beautiful (Lofi)', 'generated:lofi:lana02', 150],
-    ['born-to-die-lana', 'Born to Die (Ambient)', 'generated:lofi:lana03', 140],
-    ['video-games-lana', 'Video Games (Piano)', 'generated:lofi:lana04', 160],
+    ['summertime-sadness-lana', 'Summertime Sadness (Lofi)', VALID_MIXKIT_IDS[0], 120],
+    ['young-and-beautiful-lana', 'Young and Beautiful (Lofi)', VALID_MIXKIT_IDS[1], 150],
+    ['born-to-die-lana', 'Born to Die (Ambient)', VALID_MIXKIT_IDS[2], 140],
+    ['video-games-lana', 'Video Games (Piano)', VALID_MIXKIT_IDS[3], 160],
   ],
   CHILL: [
     ['curiosity', 'Curiosity', 480, 100],
@@ -147,34 +154,34 @@ const TRACKS = {
     ['sleepy-evening-note', 'Sleepy Evening Note', 723, 96],
     ['daily-kindness-prompt', 'Daily Kindness Prompt', 646, 136],
     ['quiet-confidence', 'Quiet Confidence', 183, 267],
-    ['chua-lanh', 'Podcast chữa lành', 'generated:podcast:base-01', 118],
-    ['dem-mua', 'Podcast đêm mưa', 'generated:podcast:base-02', 98],
-    ['don-phuong', 'Podcast đơn phương', 'generated:podcast:base-03', 108],
-    ['tinh-yeu', 'Podcast tình yêu', 'generated:podcast:base-04', 100],
-    ['vuc-day-ban-than', 'Podcast vực dậy bản thân', 'generated:podcast:base-05', 116],
-    ['nguoi-ke-ben', 'Podcast người kề bên', 'generated:podcast:base-06', 96],
-    ['queen-of-sadcore-lana', 'Lana Del Rey - Queen of Sadcore', 'generated:podcast:lana01', 180],
-    ['poetry-of-lana-del-rey', 'The Poetry of Lana Del Rey', 'generated:podcast:lana02', 200],
+    ['chua-lanh', 'Podcast chữa lành', VALID_MIXKIT_IDS[4 % VALID_MIXKIT_IDS.length], 118],
+    ['dem-mua', 'Podcast đêm mưa', VALID_MIXKIT_IDS[5 % VALID_MIXKIT_IDS.length], 98],
+    ['don-phuong', 'Podcast đơn phương', VALID_MIXKIT_IDS[6 % VALID_MIXKIT_IDS.length], 108],
+    ['tinh-yeu', 'Podcast tình yêu', VALID_MIXKIT_IDS[7 % VALID_MIXKIT_IDS.length], 100],
+    ['vuc-day-ban-than', 'Podcast vực dậy bản thân', VALID_MIXKIT_IDS[8 % VALID_MIXKIT_IDS.length], 116],
+    ['nguoi-ke-ben', 'Podcast người kề bên', VALID_MIXKIT_IDS[9 % VALID_MIXKIT_IDS.length], 96],
+    ['queen-of-sadcore-lana', 'Lana Del Rey - Queen of Sadcore', VALID_MIXKIT_IDS[10 % VALID_MIXKIT_IDS.length], 180],
+    ['poetry-of-lana-del-rey', 'The Poetry of Lana Del Rey', VALID_MIXKIT_IDS[11 % VALID_MIXKIT_IDS.length], 200],
   ],
   MEDITATION: [
-    ['buddha-dawn-bell', 'Buddha Dawn Bell', 'generated:buddha:01', 126],
-    ['lotus-breath', 'Lotus Breath', 'generated:buddha:02', 132],
-    ['temple-moon', 'Temple Moon', 'generated:buddha:03', 118],
-    ['soft-mantra-light', 'Soft Mantra Light', 'generated:buddha:04', 124],
-    ['inner-lotus-rain', 'Inner Lotus Rain', 'generated:buddha:05', 130],
-    ['quiet-singing-bowl', 'Quiet Singing Bowl', 'generated:buddha:06', 112],
-    ['gentle-karuna', 'Gentle Karuna', 'generated:buddha:07', 128],
-    ['still-water-prayer', 'Still Water Prayer', 'generated:buddha:08', 120],
+    ['buddha-dawn-bell', 'Buddha Dawn Bell', VALID_MIXKIT_IDS[12 % VALID_MIXKIT_IDS.length], 126],
+    ['lotus-breath', 'Lotus Breath', VALID_MIXKIT_IDS[13 % VALID_MIXKIT_IDS.length], 132],
+    ['temple-moon', 'Temple Moon', VALID_MIXKIT_IDS[14 % VALID_MIXKIT_IDS.length], 118],
+    ['soft-mantra-light', 'Soft Mantra Light', VALID_MIXKIT_IDS[15 % VALID_MIXKIT_IDS.length], 124],
+    ['inner-lotus-rain', 'Inner Lotus Rain', VALID_MIXKIT_IDS[16 % VALID_MIXKIT_IDS.length], 130],
+    ['quiet-singing-bowl', 'Quiet Singing Bowl', VALID_MIXKIT_IDS[17 % VALID_MIXKIT_IDS.length], 112],
+    ['gentle-karuna', 'Gentle Karuna', VALID_MIXKIT_IDS[18 % VALID_MIXKIT_IDS.length], 128],
+    ['still-water-prayer', 'Still Water Prayer', VALID_MIXKIT_IDS[19 % VALID_MIXKIT_IDS.length], 120],
   ],
   NOTIFICATION: [
-    ['gentle-chime', 'Chuông dịu nhẹ 🔔', 'generated:notification:01', 8],
-    ['cat-purr-bell', 'Tiếng mèo con kêu 🐱', 'generated:notification:02', 6],
-    ['spring-wind-chime', 'Chuông gió mùa xuân 🎐', 'generated:notification:03', 10],
-    ['rain-tap', 'Tiếng mưa rơi tí tách 🌧️', 'generated:notification:04', 8],
-    ['ocean-whisper', 'Sóng biển rì rào 🌊', 'generated:notification:05', 10],
-    ['zen-bell', 'Tiếng chuông thiền 🔔', 'generated:notification:06', 6],
-    ['soft-harp', 'Hạc cầm dịu êm 🎵', 'generated:notification:07', 8],
-    ['crystal-drop', 'Giọt pha lê ✨', 'generated:notification:08', 6],
+    ['gentle-chime', 'Chuông dịu nhẹ 🔔', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Illuminate.mp3', 8],
+    ['cat-purr-bell', 'Tiếng mèo con kêu 🐱', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Sencha.mp3', 6],
+    ['spring-wind-chime', 'Chuông gió mùa xuân 🎐', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Constellation.mp3', 10],
+    ['rain-tap', 'Tiếng mưa rơi tí tách 🌧️', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Ripples.mp3', 8],
+    ['ocean-whisper', 'Sóng biển rì rào 🌊', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Waves.mp3', 10],
+    ['zen-bell', 'Tiếng chuông thiền 🔔', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Alarm.mp3', 6],
+    ['soft-harp', 'Hạc cầm dịu êm 🎵', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Silk.mp3', 8],
+    ['crystal-drop', 'Giọt pha lê ✨', 'https://raw.githubusercontent.com/extratone/macOSsystemsounds/main/mp3/Crystals.mp3', 6],
   ],
 };
 
@@ -213,7 +220,7 @@ TRACKS.LOFI.push(
   ].map((title, index) => [
     `fresh-lofi-${String(index + 1).padStart(2, '0')}`,
     title,
-    `generated:lofi:${String(index + 1).padStart(2, '0')}`,
+    VALID_MIXKIT_IDS[(20 + index) % VALID_MIXKIT_IDS.length],
     96 + (index % 9) * 7,
   ]),
 );
@@ -253,7 +260,7 @@ TRACKS.PODCAST.push(
   ].map((title, index) => [
     `fresh-podcast-${String(index + 1).padStart(2, '0')}`,
     title,
-    `generated:podcast:${String(index + 1).padStart(2, '0')}`,
+    VALID_MIXKIT_IDS[(50 + index) % VALID_MIXKIT_IDS.length],
     90 + (index % 10) * 9,
   ]),
 );
@@ -278,7 +285,9 @@ const AMBIENT_SOUND_CATALOG = Object.entries(TRACKS).flatMap(
       sourceUrl:
         typeof source === 'string' && source.startsWith('generated:')
           ? source
-          : `https://assets.mixkit.co/music/${source}/${source}.mp3`,
+          : typeof source === 'string' && source.startsWith('http')
+            ? source
+            : `https://assets.mixkit.co/music/${source}/${source}.mp3`,
       imageUrl: CATEGORY_IMAGES[category][index % CATEGORY_IMAGES[category].length],
       duration,
       isActive: true,

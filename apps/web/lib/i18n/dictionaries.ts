@@ -61,6 +61,10 @@ const vi = {
   'nav.onboarding': 'Hướng dẫn ban đầu',
   'nav.companionAssets': 'Tài nguyên người bạn đồng hành',
   'nav.companionMessages': 'Tin nhắn người bạn đồng hành',
+  'nav.featureFlags': 'Feature Flags',
+  'nav.health': 'Sức khỏe hệ thống',
+  'admin.featureFlags.title': 'Quản lý Feature Flags',
+  'admin.health.title': 'Sức khỏe hệ thống',
 
   // ===== Brand / Shell =====
   'brand.cozyControl': 'Bảng điều khiển thư giãn',
@@ -1328,6 +1332,10 @@ const en: Record<keyof typeof vi, string> = {
   'nav.onboarding': 'Onboarding',
   'nav.companionAssets': 'Companion assets',
   'nav.companionMessages': 'Companion messages',
+  'nav.featureFlags': 'Feature Flags',
+  'nav.health': 'System Health',
+  'admin.featureFlags.title': 'Manage Feature Flags',
+  'admin.health.title': 'System Health',
 
   // ===== Brand / Shell =====
   'brand.cozyControl': 'Cozy Control',

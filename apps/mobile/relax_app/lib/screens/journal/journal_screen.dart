@@ -6,6 +6,7 @@ import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/safety_detector.dart';
 import '../../core/theme.dart';
+import '../../core/vault_lock.dart';
 import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import '../../widgets/soft_toast.dart';
@@ -32,7 +33,7 @@ class _JournalScreenState extends State<JournalScreen> {
   @override
   void initState() {
     super.initState();
-    _load();
+    _checkVaultAndLoad();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       final auth = context.read<AuthState>();
@@ -40,6 +41,15 @@ class _JournalScreenState extends State<JournalScreen> {
         auth.startRelaxSession('JOURNAL', context.t('Viết nhật ký'));
       }
     });
+  }
+
+  Future<void> _checkVaultAndLoad() async {
+    final unlocked = await VaultLock.unlock(context);
+    if (!unlocked && mounted) {
+      Navigator.of(context).pop();
+      return;
+    }
+    _load();
   }
 
   @override
