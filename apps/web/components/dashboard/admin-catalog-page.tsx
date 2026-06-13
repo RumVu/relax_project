@@ -438,7 +438,8 @@ export function AdminCatalogPage({
     return () => {
       cancelled = true;
     };
-  }, [endpoint, fixedCategory, pushToast, query, statusFilter, title, page, pageSize, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [endpoint, fixedCategory, query, statusFilter, page, pageSize]);
 
   const rows = useMemo(
     () => items.map(config.buildRow),

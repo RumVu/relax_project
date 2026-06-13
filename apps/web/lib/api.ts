@@ -42,6 +42,7 @@ export interface ApiFetchOptions {
   query?: Record<string, QueryValue>;
   skipAuth?: boolean;
   retryOnAuthError?: boolean;
+  skipVersionPrefix?: boolean;
 }
 
 let refreshPromise: Promise<AuthResponse> | undefined;
@@ -78,8 +79,9 @@ async function sendApiRequest<T>(
     headers.set('Authorization', `Bearer ${token}`);
   }
 
+  const prefix = options.skipVersionPrefix ? '' : API_VERSION_PREFIX;
   const response = await fetch(
-    `${API_URL}${API_VERSION_PREFIX}${withQuery(path, options.query)}`,
+    `${API_URL}${prefix}${withQuery(path, options.query)}`,
     {
       ...init,
       headers,

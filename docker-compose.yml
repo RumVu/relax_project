@@ -148,8 +148,8 @@ services:
   web:
     profiles: ["app", "full"]
     build:
-      context: ./apps/web
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/web/Dockerfile
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:6823}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com}

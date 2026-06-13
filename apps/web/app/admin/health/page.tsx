@@ -31,7 +31,7 @@ export default function HealthDashboardPage() {
     setLoading(true);
     try {
       const [healthRes, overviewRes] = await Promise.all([
-        apiFetch<HealthData>('/health').catch(() => null),
+        apiFetch<HealthData>('/health', undefined, { skipVersionPrefix: true }).catch(() => null),
         apiFetch<Record<string, unknown>>('/admin/analytics/overview').catch(() => null),
       ]);
       setHealth(healthRes);
