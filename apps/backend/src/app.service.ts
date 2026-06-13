@@ -138,6 +138,11 @@ export class AppService {
         } as unknown as QueueStatus);
 
     const bucket = this.configService.get<string>('storage.supabaseBucket');
+    const storageConfigured = Boolean(
+      this.configService.get<string>('storage.supabaseUrl') &&
+      this.configService.get<string>('storage.supabasePublishableKey') &&
+      bucket,
+    );
     const pushConfigured = Boolean(
       this.configService.get<string>('FCM_SERVER_KEY') ||
       this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT'),
@@ -147,7 +152,10 @@ export class AppService {
       this.configService.get<string>('SENDGRID_API_KEY'),
     );
     const billingConfigured = Boolean(
-      this.configService.get<string>('STRIPE_SECRET_KEY'),
+      this.configService.get<string>('STRIPE_SECRET_KEY') ||
+      (this.configService.get<string>('SEPAY_MERCHANT_ID') &&
+       this.configService.get<string>('SEPAY_SECRET_KEY') &&
+       this.configService.get<string>('SEPAY_WEBHOOK_API_KEY')),
     );
 
     let userCount = 0;
@@ -212,7 +220,7 @@ export class AppService {
         push: { ready: pushConfigured },
         email: { ready: emailConfigured },
         billing: { ready: billingConfigured },
-        storage: { ready: Boolean(bucket), bucket },
+        storage: { ready: storageConfigured, bucket },
       },
       users: { total: userCount, activeToday },
       lastWeeklyStatsJob: lastWeeklyJob,
