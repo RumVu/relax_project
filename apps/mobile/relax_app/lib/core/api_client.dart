@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'env.dart';
+import 'offline_store.dart';
 import 'secure_storage.dart';
 
 /// API base URL — lấy từ [Env.apiBase] (hỗ trợ `--dart-define=API_BASE=...`).
@@ -47,22 +48,86 @@ class RelaxApi {
     await _storage.delete(key: _refreshKey);
   }
 
-  /// GET wrapper trả Map JSON.
-  Future<Response<dynamic>> get(String path, {Map<String, dynamic>? query}) {
-    return _dio.get(path, queryParameters: query);
+  /// GET wrapper — tries network first, falls back to offline cache.
+  Future<Response<dynamic>> get(String path,
+      {Map<String, dynamic>? query}) async {
+    try {
+      final res = await _dio.get(path, queryParameters: query);
+      if (res.statusCode != null && res.statusCode! < 400) {
+        OfflineStore.instance.cacheResponse(path, query, res.data);
+      }
+      return res;
+    } catch (e) {
+      final cached = OfflineStore.instance.readCache(path, query: query);
+      if (cached != null) {
+        return Response(
+          requestOptions: RequestOptions(path: path),
+          data: cached,
+          statusCode: 200,
+        );
+      }
+      rethrow;
+    }
   }
 
-  /// POST wrapper.
-  Future<Response<dynamic>> post(String path, {dynamic body}) {
-    return _dio.post(path, data: body);
+  /// POST wrapper — queues offline if no connectivity.
+  Future<Response<dynamic>> post(String path, {dynamic body}) async {
+    try {
+      return await _dio.post(path, data: body);
+    } catch (e) {
+      if (await _isNetworkError(e)) {
+        await OfflineStore.instance.enqueue(method: 'POST', path: path, body: body);
+        return Response(
+          requestOptions: RequestOptions(path: path),
+          data: {'queued': true},
+          statusCode: 202,
+        );
+      }
+      rethrow;
+    }
   }
 
-  Future<Response<dynamic>> patch(String path, {dynamic body}) {
-    return _dio.patch(path, data: body);
+  Future<Response<dynamic>> patch(String path, {dynamic body}) async {
+    try {
+      return await _dio.patch(path, data: body);
+    } catch (e) {
+      if (await _isNetworkError(e)) {
+        await OfflineStore.instance.enqueue(method: 'PATCH', path: path, body: body);
+        return Response(
+          requestOptions: RequestOptions(path: path),
+          data: {'queued': true},
+          statusCode: 202,
+        );
+      }
+      rethrow;
+    }
   }
 
-  Future<Response<dynamic>> delete(String path, {dynamic body}) =>
-      _dio.delete(path, data: body);
+  Future<Response<dynamic>> delete(String path, {dynamic body}) async {
+    try {
+      return await _dio.delete(path, data: body);
+    } catch (e) {
+      if (await _isNetworkError(e)) {
+        await OfflineStore.instance.enqueue(method: 'DELETE', path: path, body: body);
+        return Response(
+          requestOptions: RequestOptions(path: path),
+          data: {'queued': true},
+          statusCode: 202,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<bool> _isNetworkError(dynamic e) async {
+    if (e is DioException &&
+        (e.type == DioExceptionType.connectionError ||
+         e.type == DioExceptionType.connectionTimeout ||
+         e.type == DioExceptionType.sendTimeout)) {
+      return true;
+    }
+    return !await OfflineStore.instance.isOnline;
+  }
 
   Interceptor _authInterceptor() {
     return InterceptorsWrapper(

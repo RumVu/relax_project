@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/api_client.dart';
 import 'core/audio_controller.dart';
+import 'core/offline_store.dart';
 import 'core/auth_state.dart';
 import 'core/locale_controller.dart';
 import 'core/page_transitions.dart';
@@ -39,6 +40,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Translations.load();
   await LocalNotifications.init();
+  await OfflineStore.instance.init();
   runApp(const RelaxApp());
 }
 
