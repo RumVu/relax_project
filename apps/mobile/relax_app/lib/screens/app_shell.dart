@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../core/api_client.dart';
 import '../core/audio_controller.dart';
+import '../core/smart_reminders.dart';
 import '../core/auth_state.dart';
 import '../core/locale_controller.dart';
 import '../core/tour_controller.dart';
@@ -66,6 +67,8 @@ class _AppShellState extends State<AppShell> {
       Future.delayed(const Duration(seconds: 2), () {
         if (mounted) _promptLocationIfNeeded();
       });
+
+      SmartReminders.instance.enableDefaults();
     });
 
     TourController.instance.addListener(_onTourStepChanged);

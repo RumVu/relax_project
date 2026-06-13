@@ -18,6 +18,7 @@ import 'widgets/theme_toggle_card.dart';
 import 'widgets/accent_picker_card.dart';
 import 'widgets/language_picker_card.dart';
 import 'widgets/logout_button.dart';
+import 'widgets/reminder_card.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -84,6 +85,9 @@ class SettingsScreen extends StatelessWidget {
                 key: tour.notificationsKey,
                 child: const NotificationCard(),
               ),
+              const SizedBox(height: 12),
+              SectionLabel(context.t('Nhắc nhở thông minh')),
+              const ReminderCard(),
               const SizedBox(height: 24),
               SectionLabel(context.t('Khám phá')),
               SettingsCard(
