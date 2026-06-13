@@ -7,6 +7,7 @@ import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/mood_line_chart/mood_line_chart.dart';
 import 'models/mood_labels.dart';
+import 'widgets/activity_effectiveness.dart';
 import 'widgets/mood_distribution.dart';
 import 'widgets/stat_tile.dart';
 
@@ -30,6 +31,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   int _total = 0;
   String _topMood = '—';
   int _activeDays = 0;
+
+  // Activity effectiveness.
+  List<Map<String, dynamic>> _favoriteActivities = [];
+  int _averageRelief = 0;
 
   @override
   void initState() {
@@ -88,6 +93,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           _activeDays = days.length;
           _loading = false;
         });
+      }
+      // Load relax session effectiveness.
+      try {
+        final statsRes =
+            await RelaxApi.instance.get('/relax-sessions/me/stats');
+        final statsData = statsRes.data;
+        if (statsData is Map) {
+          final favs = statsData['favoriteActivities'];
+          if (favs is List) {
+            _favoriteActivities =
+                favs.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+          }
+          final relief = statsData['relief'];
+          if (relief is Map) {
+            _averageRelief =
+                (relief['averageStressRelief'] as num?)?.toInt() ?? 0;
+          }
+        }
+      } catch (_) {
+        // Non-critical — just skip effectiveness section.
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);
@@ -172,6 +197,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           ? _empty(context)
                           : MoodDistribution(
                               distribution: _dist, total: _total),
+                    ),
+                    const SizedBox(height: 16),
+                    _card(
+                      context,
+                      title: context.t('Hiệu quả hoạt động'),
+                      child: ActivityEffectiveness(
+                        activities: _favoriteActivities,
+                        averageRelief: _averageRelief,
+                      ),
                     ),
                     const SizedBox(height: 24),
                     SizedBox(
