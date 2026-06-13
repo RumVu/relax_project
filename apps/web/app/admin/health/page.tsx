@@ -37,7 +37,7 @@ export default function HealthDashboardPage() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await apiFetch<OpsData>('/ops', undefined, { skipVersionPrefix: true }).catch(() => null);
+      const data = await apiFetch<OpsData>('/ops').catch(() => null);
       setOps(data);
     } catch {
       pushToast({ tone: 'error', title: 'Failed to load ops data' });
