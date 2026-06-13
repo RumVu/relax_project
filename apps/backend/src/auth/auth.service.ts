@@ -163,8 +163,25 @@ export class AuthService {
       ['lo lắng', 'công việc'],
       ['buồn', 'mệt mỏi'],
     ];
+    const triggers = [
+      null,
+      'Nghe nhạc buổi sáng',
+      null,
+      'Deadline công việc',
+      'Ngủ không đủ giấc',
+      null,
+      'Gặp bạn cũ',
+      null,
+      'Tập thể dục',
+      null,
+      'Mưa cả ngày',
+      null,
+      'Đọc sách hay',
+      'Ăn uống lành mạnh',
+    ];
 
-    for (let i = 6; i >= 0; i--) {
+    // 14 mood checkins — one per day for 14 days, alternating moods.
+    for (let i = 13; i >= 0; i--) {
       const date = new Date();
       date.setDate(date.getDate() - i);
       const moodIndex = i % moods.length;
@@ -172,14 +189,18 @@ export class AuthService {
         data: {
           userId,
           mood: moods[moodIndex],
-          intensity: 3 + (i % 3),
+          intensity: 2 + (i % 4),
           tags: tags[moodIndex],
-          note: `Demo mood entry day -${i}`,
+          note:
+            triggers[i]
+              ? `Demo mood day -${i}: ${triggers[i]}`
+              : `Demo mood entry day -${i}`,
           createdAt: date,
         },
       });
     }
 
+    // 5 journals — mix of moods and topics.
     await this.prisma.journal.createMany({
       data: [
         {
@@ -189,6 +210,7 @@ export class AuthService {
             'Hôm nay mình bắt đầu dùng Thi Ái. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
           mood: 'CALM',
           tags: ['reflection', 'first-day'],
+          isPrivate: true,
         },
         {
           userId,
@@ -197,6 +219,7 @@ export class AuthService {
             'Sáng nay dậy sớm, hít thở và thiền 5 phút. Không ngờ mình lại có thể duy trì được 3 ngày liên tiếp.',
           mood: 'HAPPY',
           tags: ['morning', 'meditation'],
+          isPrivate: false,
         },
         {
           userId,
@@ -205,10 +228,30 @@ export class AuthService {
             'Deadline dồn dập. Dùng breathing exercise 4-2-4 để bình tĩnh lại. Thấy hiệu quả thật.',
           mood: 'ANXIOUS',
           tags: ['work', 'breathing'],
+          isPrivate: true,
+        },
+        {
+          userId,
+          title: 'Cuối tuần nhẹ nhàng',
+          content:
+            'Dành cả ngày ở nhà, nấu ăn và đọc sách. Cảm giác bình yên hiếm có.',
+          mood: 'HAPPY',
+          tags: ['weekend', 'self-care'],
+          isPrivate: false,
+        },
+        {
+          userId,
+          title: 'Suy ngẫm đêm khuya',
+          content:
+            'Không ngủ được, viết ra những điều lộn xộn trong đầu. Sau đó thấy nhẹ hơn nhiều.',
+          mood: 'SAD',
+          tags: ['night', 'reflection'],
+          isPrivate: true,
         },
       ],
     });
 
+    // 5 relax sessions — different activity types with mood tracking.
     await this.prisma.relaxSession.createMany({
       data: [
         {
@@ -244,8 +287,78 @@ export class AuthService {
           reliefLevel: 5,
           stressReliefPercent: 85,
         },
+        {
+          userId,
+          activityType: 'BREATHING',
+          status: 'FINISHED',
+          title: 'Hít thở Box Breathing',
+          duration: 240,
+          moodBefore: 'ANXIOUS',
+          moodAfter: 'CALM',
+          reliefLevel: 4,
+          stressReliefPercent: 78,
+        },
+        {
+          userId,
+          activityType: 'PODCAST',
+          status: 'FINISHED',
+          title: 'Podcast mindfulness',
+          duration: 900,
+          moodBefore: 'NEUTRAL',
+          moodAfter: 'HAPPY',
+          reliefLevel: 4,
+          stressReliefPercent: 65,
+        },
       ],
     });
+
+    // 3 content ratings.
+    try {
+      await this.prisma.contentRating.createMany({
+        data: [
+          { userId, contentType: 'GUIDE', contentId: 'breathing-101', rating: 5, review: 'Rất hữu ích!' },
+          { userId, contentType: 'GUIDE', contentId: 'meditation-basics', rating: 4, review: 'Hay' },
+          { userId, contentType: 'SOUND', contentId: 'rain-forest', rating: 5, review: 'Thư giãn tuyệt vời' },
+        ],
+      });
+    } catch {
+      // Content rating table may not exist — skip silently.
+    }
+
+    // 2 achievement unlocks (if table exists).
+    try {
+      const achievements = await this.prisma.achievement.findMany({ take: 2 });
+      if (achievements.length > 0) {
+        await this.prisma.userAchievement.createMany({
+          data: achievements.map((a) => ({
+            userId,
+            achievementId: a.id,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    } catch {
+      // Achievement tables may not exist — skip silently.
+    }
+
+    // Buddy friend request (find another user or skip).
+    try {
+      const otherUser = await this.prisma.user.findFirst({
+        where: { id: { not: userId }, isActive: true },
+        select: { id: true },
+      });
+      if (otherUser) {
+        await this.prisma.friend.create({
+          data: {
+            userId: userId,
+            friendId: otherUser.id,
+            status: 'ACCEPTED',
+          },
+        });
+      }
+    } catch {
+      // Buddy table may not exist or constraint violation — skip.
+    }
   }
 
   async refresh(refreshToken: string, userAgent?: string, ipAddress?: string) {

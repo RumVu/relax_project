@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, Clock, Database, HardDrive, RefreshCcw, Server, Users } from 'lucide-react';
+import { Activity, CheckCircle, Clock, Database, HardDrive, RefreshCcw, Server, Users, Wifi, XCircle, Zap } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';
@@ -10,35 +10,37 @@ import { apiFetch } from '@/lib/api';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
-type HealthData = {
+type OpsData = {
   status: string;
-  uptime?: number;
-  uptimeSeconds?: number;
-  timestamp?: string;
-  users?: { total: number; active: number; newToday: number };
-  sessions?: { active: number };
-  jobs?: { weeklyMoodStats?: { enabled: boolean; lastRun?: { processedUsers: number; failedUsers: number } | null } };
-  database?: { connected: boolean };
+  timestamp: string;
+  uptimeSeconds: number;
+  api: { status: string };
+  database: { connected: boolean; latencyMs: number };
+  redis: { connected: boolean; configured: boolean; latencyMs: number | null };
+  queue: { configured: boolean; enabled: boolean; registeredQueues: string[] };
+  providers: {
+    push: { ready: boolean };
+    email: { ready: boolean };
+    billing: { ready: boolean };
+    storage: { ready: boolean; bucket?: string };
+  };
+  users: { total: number; activeToday: number };
+  lastWeeklyStatsJob: { success: boolean; processedUsers: number; failedUsers?: number; ranAt: string } | null;
 };
 
 export default function HealthDashboardPage() {
   const { t } = useTranslation();
   const pushToast = useUiStore((s) => s.pushToast);
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [overview, setOverview] = useState<Record<string, unknown> | null>(null);
+  const [ops, setOps] = useState<OpsData | null>(null);
   const [loading, setLoading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const [healthRes, overviewRes] = await Promise.all([
-        apiFetch<HealthData>('/health', undefined, { skipVersionPrefix: true }).catch(() => null),
-        apiFetch<Record<string, unknown>>('/admin/analytics/overview').catch(() => null),
-      ]);
-      setHealth(healthRes);
-      setOverview(overviewRes);
+      const data = await apiFetch<OpsData>('/ops', undefined, { skipVersionPrefix: true }).catch(() => null);
+      setOps(data);
     } catch {
-      pushToast({ tone: 'error', title: 'Failed to load health data' });
+      pushToast({ tone: 'error', title: 'Failed to load ops data' });
     } finally {
       setLoading(false);
     }
@@ -48,34 +50,27 @@ export default function HealthDashboardPage() {
     void load();
   }, [load]);
 
-  const uptimeFormatted = health?.uptimeSeconds
-    ? formatUptime(health.uptimeSeconds)
-    : '-';
-
-  const userMetrics = overview as Record<string, unknown> | null;
-  const summaryCards = userMetrics?.summaryCards as Record<string, number> | undefined;
-  const totalUsers = summaryCards?.totalUsers ?? (userMetrics?.totalUsers as number) ?? health?.users?.total ?? 0;
-  const activeUsers = summaryCards?.activeUsers ?? (userMetrics?.activeUsersToday as number) ?? health?.users?.active ?? 0;
-  const newToday = summaryCards?.newUsers ?? (userMetrics?.newUsersToday as number) ?? health?.users?.newToday ?? 0;
+  const uptimeFormatted = ops?.uptimeSeconds ? formatUptime(ops.uptimeSeconds) : '-';
 
   return (
-    <DashboardShell admin eyebrow={t('admin.eyebrow')} title="System Health">
+    <DashboardShell admin eyebrow={t('admin.eyebrow')} title="Ops Dashboard">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={Server}
-          label="Status"
-          value={health?.status === 'ok' ? 'Healthy' : health?.status ?? 'Unknown'}
+          label="API Status"
+          value={ops?.api?.status === 'online' ? 'Online' : ops?.status ?? 'Unknown'}
         />
         <MetricCard icon={Clock} label="Uptime" tone="mint" value={uptimeFormatted} />
-        <MetricCard icon={Users} label="Total Users" tone="lilac" value={totalUsers} />
-        <MetricCard icon={Activity} label="Active Today" tone="mint" value={activeUsers} />
+        <MetricCard icon={Users} label="Total Users" tone="lilac" value={ops?.users?.total ?? 0} />
+        <MetricCard icon={Activity} label="Active Today" tone="mint" value={ops?.users?.activeToday ?? 0} />
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Infrastructure Status */}
         <Card>
           <SectionTitle
-            title="User Metrics"
-            copy="Current user statistics"
+            title="Infrastructure"
+            copy="Database, Redis, and Queue status"
             action={
               <Button variant="secondary" onClick={() => void load()} disabled={loading}>
                 <RefreshCcw className="h-4 w-4" />
@@ -84,61 +79,94 @@ export default function HealthDashboardPage() {
             }
           />
           <div className="mt-4 space-y-3">
-            <_Row label="Total Users" value={totalUsers} />
-            <_Row label="Active Today" value={activeUsers} />
-            <_Row label="New Today" value={newToday} />
+            <_StatusRow
+              label="Database"
+              ok={ops?.database?.connected ?? false}
+              detail={ops?.database?.latencyMs != null ? `${ops.database.latencyMs}ms` : undefined}
+            />
+            <_StatusRow
+              label="Redis"
+              ok={ops?.redis?.connected ?? false}
+              detail={
+                !ops?.redis?.configured
+                  ? 'Not configured'
+                  : ops?.redis?.latencyMs != null
+                    ? `${ops.redis.latencyMs}ms`
+                    : undefined
+              }
+            />
+            <_StatusRow
+              label="Job Queue"
+              ok={ops?.queue?.enabled ?? false}
+              detail={
+                ops?.queue?.registeredQueues?.length
+                  ? `${ops.queue.registeredQueues.length} queues`
+                  : 'Not configured'
+              }
+            />
             <_Row
-              label="Active Sessions"
-              value={health?.sessions?.active ?? '-'}
+              label="Server Time"
+              value={ops?.timestamp ? new Date(ops.timestamp).toLocaleString() : '-'}
             />
           </div>
         </Card>
 
+        {/* Provider Status */}
         <Card>
-          <SectionTitle title="Infrastructure" copy="Database and background jobs" />
+          <SectionTitle title="Providers" copy="External service readiness" />
           <div className="mt-4 space-y-3">
-            <_Row
-              label="Database"
-              value={
-                <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${health?.database?.connected !== false ? 'text-mint' : 'text-coral'}`}>
-                  <Database className="h-3.5 w-3.5" />
-                  {health?.database?.connected !== false ? 'Connected' : 'Disconnected'}
-                </span>
-              }
-            />
-            <_Row
-              label="Weekly Stats Job"
-              value={health?.jobs?.weeklyMoodStats?.enabled ? 'Enabled' : 'Disabled'}
-            />
-            {health?.jobs?.weeklyMoodStats?.lastRun && (
-              <>
-                <_Row
-                  label="Last Run — Processed"
-                  value={health.jobs.weeklyMoodStats.lastRun.processedUsers}
-                />
-                <_Row
-                  label="Last Run — Failed"
-                  value={health.jobs.weeklyMoodStats.lastRun.failedUsers}
-                />
-              </>
-            )}
-            <_Row
-              label="Server Time"
-              value={health?.timestamp ? new Date(health.timestamp).toLocaleString() : '-'}
+            <_StatusRow label="Push Notification" ok={ops?.providers?.push?.ready ?? false} />
+            <_StatusRow label="Email" ok={ops?.providers?.email?.ready ?? false} />
+            <_StatusRow label="Billing (Stripe)" ok={ops?.providers?.billing?.ready ?? false} />
+            <_StatusRow
+              label="Storage"
+              ok={ops?.providers?.storage?.ready ?? false}
+              detail={ops?.providers?.storage?.bucket ?? undefined}
             />
           </div>
         </Card>
       </div>
 
-      {overview && (
-        <Card>
-          <SectionTitle title="Raw Overview Data" copy="Full admin analytics payload for debugging." />
-          <pre className="mt-4 max-h-80 overflow-auto rounded-lg bg-lavender/20 p-4 text-xs text-ink">
-            {JSON.stringify(overview, null, 2)}
-          </pre>
-        </Card>
-      )}
+      {/* Weekly Stats Job */}
+      <Card>
+        <SectionTitle title="Background Jobs" copy="Scheduled job status and last run info" />
+        <div className="mt-4 space-y-3">
+          {ops?.lastWeeklyStatsJob ? (
+            <>
+              <_StatusRow
+                label="Weekly Mood Stats"
+                ok={ops.lastWeeklyStatsJob.success}
+              />
+              <_Row label="Last Run" value={new Date(ops.lastWeeklyStatsJob.ranAt).toLocaleString()} />
+              <_Row label="Processed Users" value={ops.lastWeeklyStatsJob.processedUsers} />
+              {ops.lastWeeklyStatsJob.failedUsers != null && (
+                <_Row label="Failed Users" value={ops.lastWeeklyStatsJob.failedUsers} />
+              )}
+            </>
+          ) : (
+            <_Row label="Weekly Mood Stats" value="No runs yet" />
+          )}
+          {ops?.queue?.registeredQueues && ops.queue.registeredQueues.length > 0 && (
+            <_Row label="Registered Queues" value={ops.queue.registeredQueues.join(', ')} />
+          )}
+        </div>
+      </Card>
     </DashboardShell>
+  );
+}
+
+function _StatusRow({ label, ok, detail }: { label: string; ok: boolean; detail?: string }) {
+  return (
+    <div className="flex items-center justify-between rounded-lg border border-lilac/20 px-4 py-3">
+      <span className="text-sm text-slate font-medium">{label}</span>
+      <div className="flex items-center gap-2">
+        {detail && <span className="text-xs text-slate">{detail}</span>}
+        <span className={`inline-flex items-center gap-1.5 text-sm font-bold ${ok ? 'text-mint' : 'text-coral'}`}>
+          {ok ? <CheckCircle className="h-3.5 w-3.5" /> : <XCircle className="h-3.5 w-3.5" />}
+          {ok ? 'Ready' : 'Offline'}
+        </span>
+      </div>
+    </div>
   );
 }
 

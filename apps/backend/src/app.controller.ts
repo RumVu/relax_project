@@ -60,4 +60,14 @@ export class AppController {
   getReady() {
     return this.appService.getReady();
   }
+
+  @ApiOperation({ summary: 'Get full ops status for admin dashboard' })
+  @ApiOkResponse({
+    description:
+      'Returns DB, Redis, Queue, provider, and user stats for ops dashboard.',
+  })
+  @Get('ops')
+  getOps() {
+    return this.appService.getOpsStatus();
+  }
 }

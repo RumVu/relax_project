@@ -55,9 +55,10 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       final counts = List<int>.filled(7, 0);
       final dist = <String, int>{};
       final days = <String>{};
+      int total = 0;
       if (items is List) {
         for (final it in items.whereType<Map>()) {
-          _total++;
+          total++;
           final mood = it['mood'] as String?;
           if (mood != null) dist[mood] = (dist[mood] ?? 0) + 1;
           final createdRaw = it['createdAt'] as String?;
@@ -85,16 +86,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           top = kMoodLabels[k] ?? k;
         }
       });
-      if (mounted) {
-        setState(() {
-          _daily = daily;
-          _dist = dist;
-          _topMood = top;
-          _activeDays = days.length;
-          _loading = false;
-        });
-      }
-      // Load relax session effectiveness.
+
+      var favActivities = <Map<String, dynamic>>[];
+      var avgRelief = 0;
       try {
         final statsRes =
             await RelaxApi.instance.get('/relax-sessions/me/stats');
@@ -102,17 +96,28 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         if (statsData is Map) {
           final favs = statsData['favoriteActivities'];
           if (favs is List) {
-            _favoriteActivities =
+            favActivities =
                 favs.map((e) => Map<String, dynamic>.from(e as Map)).toList();
           }
           final relief = statsData['relief'];
           if (relief is Map) {
-            _averageRelief =
+            avgRelief =
                 (relief['averageStressRelief'] as num?)?.toInt() ?? 0;
           }
         }
-      } catch (_) {
-        // Non-critical — just skip effectiveness section.
+      } catch (_) {}
+
+      if (mounted) {
+        setState(() {
+          _daily = daily;
+          _dist = dist;
+          _total = total;
+          _topMood = top;
+          _activeDays = days.length;
+          _favoriteActivities = favActivities;
+          _averageRelief = avgRelief;
+          _loading = false;
+        });
       }
     } catch (_) {
       if (mounted) setState(() => _loading = false);

@@ -4,11 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/api_client.dart';
 import '../../core/tour_controller.dart';
 import '../../core/auth_state.dart';
 import '../../core/theme.dart';
 import '../../core/locale_controller.dart';
 import '../../widgets/cat_mascot.dart';
+import '../../widgets/soft_toast.dart';
 
 import '../../core/vault_lock.dart';
 import 'helpers/account_deletion.dart';
@@ -315,6 +317,12 @@ class SettingsScreen extends StatelessWidget {
               SettingsCard(
                 children: [
                   _VaultToggleRow(),
+                  const SettingsDivider(),
+                  _HidePreviewToggleRow(),
+                  const SettingsDivider(),
+                  _PrivateAiToggleRow(),
+                  const SettingsDivider(),
+                  _ExportJournalsRow(),
                 ],
               ),
               const SizedBox(height: 24),
@@ -342,7 +350,7 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                    onTap: () => _showSafetySheet(context),
+                    onTap: () => context.push('/crisis-help'),
                   ),
                   const SettingsDivider(),
                   _EmergencyContactRow(),
@@ -562,6 +570,163 @@ class _VaultToggleRowState extends State<_VaultToggleRow> {
         },
       ),
       onTap: () {},
+    );
+  }
+}
+
+class _HidePreviewToggleRow extends StatefulWidget {
+  @override
+  State<_HidePreviewToggleRow> createState() => _HidePreviewToggleRowState();
+}
+
+class _HidePreviewToggleRowState extends State<_HidePreviewToggleRow> {
+  bool _enabled = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final val = await VaultLock.getHidePreview();
+    if (mounted) setState(() { _enabled = val; _loaded = true; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+    return SettingsRow(
+      icon: Icons.visibility_off_outlined,
+      title: context.t('Ẩn nội dung nhật ký'),
+      subtitle: _enabled
+          ? context.t('Nội dung nhật ký đã được ẩn trong danh sách')
+          : context.t('Hiển thị nội dung xem trước trong danh sách'),
+      trailing: Switch.adaptive(
+        value: _enabled,
+        activeTrackColor: RelaxColors.violet,
+        onChanged: (val) async {
+          await VaultLock.setHidePreview(val);
+          setState(() => _enabled = val);
+        },
+      ),
+      onTap: () {},
+    );
+  }
+}
+
+class _PrivateAiToggleRow extends StatefulWidget {
+  @override
+  State<_PrivateAiToggleRow> createState() => _PrivateAiToggleRowState();
+}
+
+class _PrivateAiToggleRowState extends State<_PrivateAiToggleRow> {
+  bool _enabled = false;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final val = await VaultLock.getPrivateAiMode();
+    if (mounted) setState(() { _enabled = val; _loaded = true; });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded) return const SizedBox.shrink();
+    return SettingsRow(
+      icon: Icons.smart_toy_outlined,
+      title: context.t('Chế độ AI riêng tư'),
+      subtitle: _enabled
+          ? context.t('Nhật ký sẽ KHÔNG được gửi cho AI phân tích')
+          : context.t('AI có thể đọc nhật ký để gợi ý cảm xúc'),
+      trailing: Switch.adaptive(
+        value: _enabled,
+        activeTrackColor: RelaxColors.violet,
+        onChanged: (val) async {
+          await VaultLock.setPrivateAiMode(val);
+          setState(() => _enabled = val);
+        },
+      ),
+      onTap: () {},
+    );
+  }
+}
+
+class _ExportJournalsRow extends StatefulWidget {
+  @override
+  State<_ExportJournalsRow> createState() => _ExportJournalsRowState();
+}
+
+class _ExportJournalsRowState extends State<_ExportJournalsRow> {
+  bool _exporting = false;
+
+  Future<void> _export() async {
+    setState(() => _exporting = true);
+    try {
+      final res = await RelaxApi.instance
+          .get('/journals/me', query: {'limit': 999});
+      final data = res.data;
+      final items = data is Map ? data['items'] : data;
+      final journals = (items is List)
+          ? items
+              .whereType<Map>()
+              .map((e) => Map<String, dynamic>.from(e))
+              .toList()
+          : <Map<String, dynamic>>[];
+
+      if (journals.isEmpty) {
+        if (mounted) {
+          showSoftToast(context,
+              message: context.t('Không có nhật ký nào để xuất'),
+              tone: SoftToastTone.info);
+        }
+        return;
+      }
+
+      final text = await VaultLock.exportJournals(journals);
+
+      // Use share / clipboard as a simple export mechanism
+      await Clipboard.setData(ClipboardData(text: text));
+      if (mounted) {
+        showSoftToast(context,
+            message: context.t('Đã sao chép {count} nhật ký vào clipboard', {
+              'count': journals.length.toString(),
+            }),
+            tone: SoftToastTone.success);
+      }
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context,
+            message: e.toString(), tone: SoftToastTone.error);
+      }
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsRow(
+      icon: Icons.download_outlined,
+      title: context.t('Xuất nhật ký'),
+      subtitle: context.t('Sao chép toàn bộ nhật ký dạng văn bản'),
+      trailing: _exporting
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: RelaxColors.violet,
+              ),
+            )
+          : const Icon(Icons.chevron_right, color: RelaxColors.slate),
+      onTap: _exporting ? () {} : _export,
     );
   }
 }

@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/theme.dart';
+import '../../../core/vault_lock.dart';
 
 /// A single journal entry card with title, body preview, favourite toggle,
-/// and a delete button.
+/// and a delete button. Respects [VaultLock.hidePreview] to mask content.
 class JournalEntryCard extends StatelessWidget {
   const JournalEntryCard({
     super.key,
     required this.entry,
     required this.onToggleFavorite,
     required this.onDelete,
+    this.hidePreview = false,
   });
 
   final Map<String, dynamic> entry;
   final VoidCallback onToggleFavorite;
   final VoidCallback onDelete;
+  /// When true, content preview is replaced with a placeholder.
+  final bool hidePreview;
 
   @override
   Widget build(BuildContext context) {
     final fav = entry['isFavorite'] == true || entry['favorite'] == true;
     final title = (entry['title'] as String?) ?? '';
     final content = (entry['content'] as String?) ?? '';
+    final shouldHide = hidePreview;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -45,13 +50,14 @@ class JournalEntryCard extends StatelessWidget {
           if (content.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
-              content,
-              maxLines: 3,
+              shouldHide ? 'Nội dung đã ẩn' : content,
+              maxLines: shouldHide ? 1 : 3,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: RelaxColors.plum,
+              style: TextStyle(
+                color: shouldHide ? RelaxColors.slate : RelaxColors.plum,
                 fontSize: 13,
                 height: 1.4,
+                fontStyle: shouldHide ? FontStyle.italic : FontStyle.normal,
               ),
             ),
           ],

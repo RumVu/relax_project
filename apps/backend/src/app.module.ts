@@ -56,6 +56,9 @@ import { FeedModule } from './feed/feed.module';
 import { MeditationsModule } from './meditations/meditations.module';
 import { SleepModule } from './sleep/sleep.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
+import { ExperimentsModule } from './experiments/experiments.module';
+import { RecommendationsModule } from './recommendations/recommendations.module';
+import { CrisisModule } from './crisis/crisis.module';
 
 @Module({
   imports: [
@@ -158,6 +161,9 @@ import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
     MeditationsModule,
     SleepModule,
     FeatureFlagsModule,
+    ExperimentsModule,
+    RecommendationsModule,
+    CrisisModule,
   ],
   controllers: [AppController],
   providers: [

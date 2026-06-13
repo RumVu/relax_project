@@ -29,6 +29,7 @@ import 'screens/legal/legal_screen.dart';
 import 'screens/location/location_screen.dart';
 import 'screens/login/login_screen.dart';
 import 'screens/mood/mood_screen.dart';
+import 'screens/recommendations/recommendations_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
 import 'screens/register/register_screen.dart';
 import 'screens/relax/relax_screen.dart';
@@ -43,6 +44,8 @@ import 'screens/trigger_map/trigger_map_screen.dart';
 import 'screens/weather/weather_screen.dart';
 import 'screens/weekly_report/weekly_report_screen.dart';
 import 'screens/wellness_plan/wellness_plan_screen.dart';
+import 'screens/crisis/crisis_help_screen.dart';
+import 'screens/demo/demo_checklist_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -220,6 +223,11 @@ GoRouter _buildRouter(AuthState auth) {
         ),
       ),
       GoRoute(
+        path: '/recommendations',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const RecommendationsScreen()),
+      ),
+      GoRoute(
         path: '/breathing',
         pageBuilder: (context, state) => softPage(
           key: state.pageKey,
@@ -330,6 +338,16 @@ GoRouter _buildRouter(AuthState auth) {
       GoRoute(
         path: '/device-info',
         builder: (context, state) => const DeviceInfoScreen(),
+      ),
+      GoRoute(
+        path: '/crisis-help',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const CrisisHelpScreen()),
+      ),
+      GoRoute(
+        path: '/demo-guide',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const DemoChecklistScreen()),
       ),
     ],
   );

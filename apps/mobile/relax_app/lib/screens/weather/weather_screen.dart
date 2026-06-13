@@ -129,11 +129,14 @@ class _WeatherScreenState extends State<WeatherScreen> {
                                 const Icon(Icons.location_on,
                                     color: Colors.white70, size: 16),
                                 const SizedBox(width: 4),
-                                Text(
-                                  locName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
+                                Expanded(
+                                  child: Text(
+                                    locName,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ],

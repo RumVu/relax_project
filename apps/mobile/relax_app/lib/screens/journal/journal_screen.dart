@@ -29,10 +29,12 @@ class _JournalScreenState extends State<JournalScreen> {
   List<Map<String, dynamic>> _entries = [];
   final _titleCtrl = TextEditingController();
   final _bodyCtrl = TextEditingController();
+  bool _hidePreview = false;
 
   @override
   void initState() {
     super.initState();
+    _loadPrivacySettings();
     _checkVaultAndLoad();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
@@ -41,6 +43,11 @@ class _JournalScreenState extends State<JournalScreen> {
         auth.startRelaxSession('JOURNAL', context.t('Viết nhật ký'));
       }
     });
+  }
+
+  Future<void> _loadPrivacySettings() async {
+    final hide = await VaultLock.getHidePreview();
+    if (mounted) setState(() => _hidePreview = hide);
   }
 
   Future<void> _checkVaultAndLoad() async {
@@ -273,6 +280,7 @@ class _JournalScreenState extends State<JournalScreen> {
                     entry: e,
                     onToggleFavorite: () => _toggleFavorite(e),
                     onDelete: () => _delete(e),
+                    hidePreview: _hidePreview,
                   )),
           ],
         ),

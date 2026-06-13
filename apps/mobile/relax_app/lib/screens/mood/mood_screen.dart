@@ -28,6 +28,20 @@ class _MoodScreenState extends State<MoodScreen> {
   String? _selectedMood;
   double _intensity = 3;
   final _noteCtrl = TextEditingController();
+  final Set<String> _selectedTriggers = {};
+
+  static const _triggers = <String, String>{
+    'WORK': 'Công việc',
+    'DEADLINE': 'Deadline',
+    'FAMILY': 'Gia đình',
+    'MONEY': 'Tài chính',
+    'SLEEP': 'Giấc ngủ',
+    'RELATIONSHIP': 'Mối quan hệ',
+    'HEALTH': 'Sức khỏe',
+    'SOCIAL_MEDIA': 'Mạng xã hội',
+    'CRAVING': 'Cơn thèm',
+    'UNKNOWN': 'Không rõ',
+  };
 
   @override
   void initState() {
@@ -79,12 +93,15 @@ class _MoodScreenState extends State<MoodScreen> {
         'mood': _selectedMood,
         'intensity': _intensity.round(),
         if (_noteCtrl.text.trim().isNotEmpty) 'note': _noteCtrl.text.trim(),
+        if (_selectedTriggers.isNotEmpty)
+          'triggers': _selectedTriggers.toList(),
         'tags': ['mobile'],
       });
       if (!mounted) return;
       if (res.statusCode == 200 || res.statusCode == 201) {
         final savedMood = _selectedMood!;
         _noteCtrl.clear();
+        _selectedTriggers.clear();
         showSoftToast(
           context,
           message: context.t('Đã ghi lại cảm xúc của bạn ✦'),
@@ -161,7 +178,54 @@ class _MoodScreenState extends State<MoodScreen> {
                   hintText: context.t('Thêm vài dòng ghi chú (không bắt buộc)…'),
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 20),
+              Text(
+                context.t('Điều gì làm bạn cảm thấy vậy?'),
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                  color: context.appText,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                context.t('Chọn nguyên nhân (không bắt buộc)'),
+                style: TextStyle(fontSize: 12.5, color: context.mutedText),
+              ),
+              const SizedBox(height: 10),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: _triggers.entries.map((e) {
+                  final selected = _selectedTriggers.contains(e.key);
+                  return FilterChip(
+                    label: Text(context.t(e.value)),
+                    selected: selected,
+                    onSelected: (v) {
+                      setState(() {
+                        if (v) {
+                          _selectedTriggers.add(e.key);
+                        } else {
+                          _selectedTriggers.remove(e.key);
+                        }
+                      });
+                    },
+                    selectedColor: RelaxColors.violet.withValues(alpha: 0.15),
+                    checkmarkColor: RelaxColors.violet,
+                    side: BorderSide(
+                      color: selected
+                          ? RelaxColors.violet
+                          : context.fieldBorder,
+                    ),
+                    labelStyle: TextStyle(
+                      color: selected ? RelaxColors.violet : context.appText,
+                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 16),
               SizedBox(
                 height: 52,
                 child: ElevatedButton.icon(

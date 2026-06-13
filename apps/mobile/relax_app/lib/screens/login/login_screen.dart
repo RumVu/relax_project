@@ -47,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
           refreshToken: data['refreshToken'] as String?,
           user: data['user'] as Map<String, dynamic>?,
         );
-        if (mounted) context.go('/home');
+        if (mounted) context.go('/demo-guide');
       }
     } catch (e) {
       if (mounted) {

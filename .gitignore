@@ -45,3 +45,5 @@ backups/
 .tunnel-url
 apps/web/.vercel/
 scratch/
+tmp/
+openapitools.json

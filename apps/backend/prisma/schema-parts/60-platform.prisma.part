@@ -306,6 +306,43 @@ model FeatureFlag {
   @@map("feature_flags")
 }
 
+model Experiment {
+  id String @id @default(cuid())
+
+  key         String  @unique
+  name        String
+  description String?
+  variants    Json
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments ExperimentAssignment[]
+
+  @@index([key])
+  @@index([isActive])
+  @@map("experiments")
+}
+
+model ExperimentAssignment {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  experimentId String
+  experiment   Experiment @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  variant String
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, experimentId])
+  @@index([userId])
+  @@index([experimentId])
+  @@map("experiment_assignments")
+}
+
 /// Flexible raw app/client telemetry events.
 /// Promote events to PlatformEvent only after the backend contract is stable.
 model AppEvent {

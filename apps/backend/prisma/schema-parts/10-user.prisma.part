@@ -97,6 +97,7 @@ model User {
   rateLimitCounters     RateLimitCounter[]
   adminLogs             AdminLog[]               @relation("AdminActorLogs")
   quests                UserQuest[]
+  experimentAssignments ExperimentAssignment[]
 
   @@index([email])
   @@index([role])

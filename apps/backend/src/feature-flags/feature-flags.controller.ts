@@ -50,4 +50,11 @@ export class FeatureFlagsController {
   delete(@Param('key') key: string) {
     return this.service.delete(key);
   }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @Post('seed')
+  seed() {
+    return this.service.seedDefaults();
+  }
 }

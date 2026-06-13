@@ -12,7 +12,7 @@
 set -euo pipefail
 
 API_URL="${API_URL:-http://localhost:6823}"
-SPEC_URL="${API_URL}/v1/docs-json"
+SPEC_URL="${API_URL}/docs-json"
 OUTPUT_DIR="apps/mobile/relax_app/lib/generated/api"
 SPEC_FILE="tmp/openapi-spec.json"
 
@@ -51,7 +51,7 @@ ${GENERATOR} generate \
   -i "${SPEC_FILE}" \
   -g dart-dio \
   -o "${OUTPUT_DIR}" \
-  --additional-properties=pubName=relax_api_client,pubAuthor="Thi Ai Team" \
+  --additional-properties=pubName=relax_api_client,pubAuthor="Thi-Ai-Team" \
   --skip-validate-spec
 
 echo ""

@@ -1,144 +1,136 @@
-# Project Audit — May 2026
+# Project Audit — June 2026
 
-## Quy mô hiện tại
+## Current Scale
 
-| Hạng mục | Số liệu |
+| Category | Count |
 |---|---:|
-| Module backend (NestJS) | 34 |
-| Bảng Postgres (Prisma) | 61 |
-| HTTP endpoint | 161 |
-| Backend unit test | 41 ✅ |
-| Backend e2e test | 87 ✅ |
-| Trang web (Next.js routes) | 21 |
-| Web unit test (Vitest) | 25 |
-| Web e2e test (Playwright) | 8 |
+| Backend modules (NestJS) | 34 |
+| Postgres tables (Prisma) | 61 |
+| HTTP endpoints | 161 |
+| Backend unit tests | 41 |
+| Backend e2e tests | 87 |
+| Web pages (Next.js routes) | 21 |
+| Web unit tests (Vitest) | 25 |
+| Web e2e tests (Playwright) | 8 |
+| Mobile screens (Flutter) | 30+ |
 | TypeScript files | 304 |
-| GitHub Actions | ✅ Lint + Web + Backend all green |
+| GitHub Actions | Lint + Web + Backend all green |
 
-## Production topology (chốt)
+## Mobile App Status
+
+The Flutter app (`apps/mobile/relax_app`) is **fully connected to the backend API** with 30+ screens implemented:
+
+- Mood check-in with intensity, notes, tags, and triggers
+- Journal with privacy toggle, favorites, and auto-prompts
+- Breathing exercises and meditation sessions with timers
+- Ambient sounds player with sound mixer (multi-audio playback)
+- AI companion chat with mood-based messages and history
+- Weather integration for mood correlation
+- Billing and subscription tier management
+- Weekly wellness report (auto-generated)
+- Personal wellness plan
+- Achievement and gamification system
+- Trigger map for stress cause visualization
+- Smart recommendations based on mood, history, and time
+- Crisis safety layer with keyword detection, safe responses, and hotlines
+- Trusted buddy check-in with SOS messaging
+- Privacy vault (PIN lock, hide preview, private AI mode, data export)
+- Demo story mode with guided walkthrough and 14-day seed data
+
+### Offline Mode
+
+Hive-based local cache with a sync queue. Changes persist offline and sync automatically when connectivity is restored.
+
+### Push Notifications
+
+Configured with `flutter_local_notifications`. Supports smart reminders for mood check-ins and wellness activities.
+
+## Backend Systems
+
+### Recommendation Engine (Active)
+
+Smart recommendation engine that factors in current mood, activity history, time of day, and trigger patterns to suggest personalized activities.
+
+### Feature Flags (Operational)
+
+Predefined feature flag system with mobile remote config support. Flags control feature rollout across web and mobile.
+
+### A/B Testing Framework (Ready)
+
+Experiment management with variant assignment. Supports creating experiments, assigning users to variants, and tracking outcomes.
+
+### Safety Layer (Implemented)
+
+Crisis keyword detection with safe responses and emergency hotline information. Integrated with trusted buddy system for SOS alerts.
+
+### Weekly Wellness Report
+
+BullMQ scheduled job that generates weekly summaries of mood trends, activity effectiveness, and personalized insights.
+
+## Shared Packages
+
+### packages/shared-types
+
+Comprehensive TypeScript type definitions covering all major API responses:
+
+- Auth (AuthResponse, UserSummary)
+- Mood (MoodCheckin, MoodType, TriggerType)
+- Journal (JournalEntry)
+- Relax sessions (RelaxSession, RelaxActivityType, RelaxSessionStatus)
+- Recommendations (Recommendation, RecommendationResponse)
+- Content ratings (ContentRating)
+- Feature flags (FeatureFlag)
+- Billing (BillingPlan)
+- Notifications (AppNotification)
+- Experiments (Experiment, ExperimentAssignment)
+- Ops status (OpsStatus)
+- Paginated responses (PaginatedResponse)
+
+### packages/shared-utils, packages/ui-kit
+
+Minimal — utility and UI component packages available for future shared logic.
+
+## Production Topology
 
 ```
-┌──────────────────────────────────────────────┐
-│  Frontend                                    │
-│  https://relax-project-web-dashboard.vercel.app  │ ← Vercel (free, HTTPS, CI deploy)
-└──────────────────────────────────────────────┘
-                       │ HTTPS fetch
-                       ▼
-┌──────────────────────────────────────────────┐
-│  Cloudflare tunnel                           │
-│  https://<random>.trycloudflare.com          │ ← cloudflared quick tunnel (free)
-└──────────────────────────────────────────────┘
-                       │ HTTPS → HTTP
-                       ▼
-┌──────────────────────────────────────────────┐
-│  Backend NestJS (Docker, máy a)              │
-│  http://localhost:6823                       │
-│  + Postgres + Redis (docker compose)         │
-└──────────────────────────────────────────────┘
+Frontend (Vercel)
+  https://relax-project-web-dashboard.vercel.app
+          |
+          | HTTPS fetch
+          v
+Cloudflare Tunnel (free quick tunnel)
+  https://<random>.trycloudflare.com
+          |
+          | HTTPS -> HTTP
+          v
+Backend NestJS (Docker, local machine)
+  http://localhost:6823
+  + Postgres + Redis (docker compose)
 ```
 
-**Vì sao không deploy backend lên Vercel:** NestJS là long-running
-process với Socket.IO + BullMQ + Prisma pool + Redis persistent
-connection. Serverless function chết sau ~10s → 4 thứ này đều vỡ.
-`relax-project-backend.vercel.app` đã bị **đá ra khỏi chiến lược** —
-nên xoá khỏi Vercel dashboard cho đỡ nhầm lẫn.
+Backend runs as a long-running process with Socket.IO, BullMQ, Prisma connection pool, and Redis persistent connections. Serverless deployment is not viable for this architecture.
 
-## 1 lệnh để chạy production
+## Quick Commands
 
-```bash
-make share-vercel
-```
-
-Lệnh này:
-1. Khởi động backend + Postgres + Redis trong docker (profile `api`).
-2. Set `CORS_ORIGINS` allow Vercel URL.
-3. Chạy `cloudflared tunnel --url http://localhost:6823`.
-4. In hướng dẫn set `NEXT_PUBLIC_API_URL` trên Vercel.
-
-Sau đó vào Vercel dashboard:
-- Settings → Environment Variables
-- Set `NEXT_PUBLIC_API_URL` = URL `*.trycloudflare.com` vừa lấy
-- Set `NEXT_PUBLIC_GOOGLE_CLIENT_ID` =
-  `884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs.apps.googleusercontent.com`
-- Deployments → ⋯ → Redeploy
-
-## Google Sign-In — Client ID dùng chung
-
-| Vị trí | Key | Giá trị |
+| Flow | Command | Use Case |
 |---|---|---|
-| Backend (`.env`) | `GOOGLE_CLIENT_ID` | `884741112800-…apps.googleusercontent.com` |
-| Backend (`.env`) | `GOOGLE_CLIENT_SECRET` | secret của OAuth client mới |
-| Backend (`.env`) | `GOOGLE_REDIRECT_URI` | `https://relax-project-web-dashboard.vercel.app/auth/google/callback` |
-| Frontend Vercel (env) | `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | giống y |
-| Docker compose | mặc định | đã hard-code Client ID public |
+| Production | `make share-vercel` | Demo public, soft launch |
+| Local full-stack | `make up` | Dev offline, full stack locally |
+| LAN sharing | `make share` | Same wifi, no internet needed |
+| Tunnel web | `make tunnel` | Demo local web via trycloudflare |
 
-Flow hiện tại là **OAuth authorization code**:
-- Web redirect qua Google bằng client mới.
-- Google redirect về `/auth/google/callback`.
-- Web gửi `authorizationCode` + `redirectUri` cho backend.
-- Backend dùng `GOOGLE_CLIENT_SECRET` + `GOOGLE_REDIRECT_URI` để đổi code lấy
-  token rồi verify user.
+## Remaining Items
 
-Google Cloud OAuth client mới phải có:
-- Authorized JavaScript origins:
-  `https://relax-project-web-dashboard.vercel.app`
-  và `http://localhost:3233` nếu test local.
-- Authorized redirect URIs:
-  `https://relax-project-web-dashboard.vercel.app/auth/google/callback`
-  và `http://localhost:3233/auth/google/callback` nếu test local.
+- **Production deployment (Phase 6)** — AWS ECS/Fargate, RDS, ElastiCache, S3+CloudFront, CI/CD pipeline. Requires dedicated planning.
+- **HTTPS in dev** — Geolocation/Notification APIs need HTTPS or localhost. LAN users on HTTP cannot request browser permissions.
+- **App store deployment** — iOS App Store and Google Play submission pending Phase 7.
 
-OAuth client cũ không còn được dùng trong project.
-Sau khi rotate secret, cần cập nhật `GOOGLE_CLIENT_SECRET` trên backend env
-rồi restart/redeploy backend.
+## Checklist Before Sharing
 
-## Authorized JavaScript origins (Google Cloud)
-
-Đã cấu hình:
-- `https://relax-project-web-dashboard.vercel.app` ✅
-- `http://localhost:3233` ✅
-
-Khi nào cần thêm: nếu đổi Vercel custom domain hoặc test trên LAN
-HTTPS, vào Google Cloud Console → Credentials → Client → Authorized
-JavaScript origins.
-
-## Các flow khác (vẫn giữ)
-
-| Flow | Lệnh | Khi nào dùng |
-|---|---|---|
-| **Production (chốt)** | `make share-vercel` | Demo public, soft launch |
-| Local full-stack | `make up` | Dev offline, full stack ở local |
-| LAN sharing | `make share` | Khách cùng wifi, không cần internet |
-| Tunnel cả web | `make tunnel` | Demo web local qua trycloudflare |
-
-## Vấn đề secondary
-
-- **`apps/mobile/relax_app`** — Flutter scaffold chưa kết nối API
-  thật. Cần re-think hoặc xoá nếu không tiếp.
-- **`packages/{shared-types, shared-utils, ui-kit}`** — gần như rỗng.
-  Type/DTO chia sẻ đang duplicate ở backend + web.
-- **HTTPS dev** — không có. Geolocation/Notification cần HTTPS hoặc
-  localhost → user trên LAN HTTP không xin được quyền. Đã thêm
-  permissions panel giải thích nhưng vẫn là limitation.
-
-## Khi nào nâng cấp lên cloud thật
-
-Flow Vercel + tunnel chỉ phụ thuộc máy a bật. Nếu muốn backend tự
-sống 24/7 không cần máy a:
-
-| Option | Chi phí | Setup |
-|---|---|---|
-| **Railway** | ~$15-20/tháng | 10 phút, kết nối GitHub |
-| **Fly.io** | $0-10/tháng | Docker-native, dùng Dockerfile có sẵn |
-| **Cloudflare named tunnel** | Free | URL cố định, vẫn cần máy a bật |
-
-Em sẽ giúp setup khi a muốn — chỉ cần nói "đi Railway"/"named tunnel".
-
-## Checklist trước khi share Vercel URL cho người khác
-
-- [x] `make share-vercel` chạy ngon, tunnel URL có sẵn
-- [ ] Vercel env `NEXT_PUBLIC_API_URL` = tunnel URL → redeployed
-- [x] Vercel env `NEXT_PUBLIC_GOOGLE_CLIENT_ID` set → redeployed
-- [ ] **Rotate** Google Client Secret (đã lộ trong chat)
-- [ ] **Xoá** `relax-project-backend.vercel.app` ở Vercel dashboard
-- [x] CORS backend đã có Vercel URL trong allow-list
-- [x] Authorized JavaScript origins của Google đã có Vercel URL
+- [x] `make share-vercel` runs, tunnel URL available
+- [ ] Vercel env `NEXT_PUBLIC_API_URL` = tunnel URL, redeployed
+- [x] Vercel env `NEXT_PUBLIC_GOOGLE_CLIENT_ID` set, redeployed
+- [ ] Google Client Secret rotated (was exposed in chat)
+- [ ] Remove `relax-project-backend.vercel.app` from Vercel dashboard
+- [x] CORS backend has Vercel URL in allow-list
+- [x] Google authorized JavaScript origins has Vercel URL

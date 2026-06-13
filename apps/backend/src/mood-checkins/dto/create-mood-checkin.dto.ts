@@ -9,7 +9,7 @@ import {
   MaxLength,
   Min,
 } from 'class-validator';
-import { MoodType } from '@prisma/client';
+import { MoodType, TriggerType } from '@prisma/client';
 
 export class CreateMoodCheckinDto {
   @IsEnum(MoodType)
@@ -31,4 +31,8 @@ export class CreateMoodCheckinDto {
   @ArrayMaxSize(10)
   @IsString({ each: true })
   tags?: string[];
+
+  @IsOptional()
+  @IsEnum(TriggerType)
+  trigger?: TriggerType;
 }

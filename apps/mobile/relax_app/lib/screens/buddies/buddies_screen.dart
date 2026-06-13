@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/soft_toast.dart';
+import 'buddy_checkin_sheet.dart';
 
 /// Buddy system — add friends, see their streaks, gentle nudges.
 class BuddiesScreen extends StatefulWidget {
@@ -112,6 +113,77 @@ class _BuddiesScreenState extends State<BuddiesScreen> {
     );
   }
 
+  void _showCheckinPicker() {
+    if (_friends.length == 1) {
+      BuddyCheckinSheet.show(context, _friends.first);
+      return;
+    }
+    // Multiple friends — let the user pick one first.
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: Theme.of(ctx).scaffoldBackgroundColor,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                height: 4,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: ctx.fieldBorder,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.t('Gửi cho ai?'),
+              style: TextStyle(
+                color: ctx.appText,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ..._friends.map((f) {
+              final user = f['friend'] as Map? ?? f;
+              final name = user['name'] as String? ??
+                  (user['email'] as String?)?.split('@').first ??
+                  '?';
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor:
+                      RelaxColors.violet.withValues(alpha: 0.12),
+                  child: Text(
+                    name[0].toUpperCase(),
+                    style: const TextStyle(
+                      color: RelaxColors.violet,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                title: Text(name,
+                    style: TextStyle(
+                        color: ctx.appText, fontWeight: FontWeight.w600)),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  BuddyCheckinSheet.show(context, f);
+                },
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +211,20 @@ class _BuddiesScreenState extends State<BuddiesScreen> {
           ),
         ],
       ),
+      floatingActionButton: _friends.isNotEmpty
+          ? FloatingActionButton.extended(
+              backgroundColor: RelaxColors.violet,
+              onPressed: () => _showCheckinPicker(),
+              icon: const Icon(Icons.favorite_outline, color: Colors.white),
+              label: Text(
+                context.t('Check on me'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            )
+          : null,
       body: _loading
           ? const Center(
               child: CircularProgressIndicator(color: RelaxColors.violet))

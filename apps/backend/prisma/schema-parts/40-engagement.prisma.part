@@ -2,6 +2,19 @@
 // MOOD, JOURNAL, RELAXATION
 // ============================================================================
 
+enum TriggerType {
+  WORK
+  DEADLINE
+  FAMILY
+  MONEY
+  SLEEP
+  RELATIONSHIP
+  HEALTH
+  SOCIAL_MEDIA
+  CRAVING
+  UNKNOWN
+}
+
 model MoodCheckin {
   id     String @id @default(cuid())
   userId String
@@ -14,12 +27,14 @@ model MoodCheckin {
   scoredAt  DateTime?
   note      String? @db.Text
   tags      String[]
+  trigger   TriggerType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([mood])
+  @@index([trigger])
   @@index([createdAt])
   @@map("mood_checkins")
 }

@@ -4,16 +4,22 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'locale_controller.dart';
 import 'theme.dart';
 
-/// Private Vault — PIN lock for journal entries.
-/// Uses Hive to store hashed PIN locally. No biometric for simplicity,
-/// can add local_auth later.
+/// Private Vault — PIN lock + biometric + auto-lock + privacy controls
+/// for journal entries. Uses Hive for all local storage.
 class VaultLock {
   VaultLock._();
   static final VaultLock instance = VaultLock._();
 
   static const _boxName = 'vault_lock';
+  static const _settingsBoxName = 'vault_settings';
 
   Future<Box<dynamic>> get _box async => Hive.openBox(_boxName);
+  static Future<Box<dynamic>> get _settingsBox async =>
+      Hive.openBox(_settingsBoxName);
+
+  // ---------------------------------------------------------------------------
+  // PIN management
+  // ---------------------------------------------------------------------------
 
   Future<bool> get isEnabled async {
     final box = await _box;
@@ -36,11 +42,41 @@ class VaultLock {
     return stored == pin.hashCode.toString();
   }
 
-  /// Show PIN entry dialog. Returns true if unlocked, false if cancelled.
+  // ---------------------------------------------------------------------------
+  // Biometric support (stub — needs `local_auth` package)
+  // ---------------------------------------------------------------------------
+
+  /// Try biometric authentication.
+  /// TODO: Integrate `local_auth` package for real biometric support.
+  /// For now this always returns false so the caller falls back to PIN.
+  static Future<bool> unlockBiometric(BuildContext context) async {
+    // Stub implementation — always returns false.
+    // When local_auth is added to pubspec.yaml, replace with:
+    //   final localAuth = LocalAuthentication();
+    //   final canCheck = await localAuth.canCheckBiometrics;
+    //   if (!canCheck) return false;
+    //   return localAuth.authenticate(
+    //     localizedReason: 'Mở khóa nhật ký',
+    //     options: const AuthenticationOptions(biometricOnly: true),
+    //   );
+    return false;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Unlock — biometric first, then PIN fallback
+  // ---------------------------------------------------------------------------
+
+  /// Show PIN entry dialog. Tries biometric first, falls back to PIN.
+  /// Returns true if unlocked, false if cancelled.
   static Future<bool> unlock(BuildContext context) async {
     final enabled = await VaultLock.instance.isEnabled;
     if (!enabled) return true;
 
+    // Try biometric first
+    final biometricOk = await unlockBiometric(context);
+    if (biometricOk) return true;
+
+    // Fallback to PIN dialog
     final result = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -57,6 +93,142 @@ class VaultLock {
       builder: (ctx) => const _SetupPinDialog(),
     );
     return result == true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Auto-lock — lock after 60s in background
+  // ---------------------------------------------------------------------------
+
+  static const _autoLockDuration = Duration(seconds: 60);
+
+  /// Check whether the app should auto-lock (was in background > 60s).
+  static Future<bool> shouldAutoLock() async {
+    final box = await Hive.openBox(_boxName);
+    final lastActive = box.get('last_active_time') as int?;
+    if (lastActive == null) return false;
+    final elapsed =
+        DateTime.now().difference(DateTime.fromMillisecondsSinceEpoch(lastActive));
+    return elapsed > _autoLockDuration;
+  }
+
+  /// Call when the app is active / in foreground to refresh the timer.
+  static Future<void> markActive() async {
+    final box = await Hive.openBox(_boxName);
+    await box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
+  }
+
+  /// Call when the app goes to background to record the time.
+  static Future<void> markInactive() async {
+    final box = await Hive.openBox(_boxName);
+    await box.put('last_active_time', DateTime.now().millisecondsSinceEpoch);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Hide preview — hide journal content in list
+  // ---------------------------------------------------------------------------
+
+  /// When true, journal list should show "Nội dung đã ẩn" instead of preview.
+  static Future<bool> getHidePreview() async {
+    final box = await _settingsBox;
+    return box.get('hide_preview', defaultValue: false) as bool;
+  }
+
+  static bool get hidePreview {
+    final box = Hive.box(_settingsBoxName);
+    return box.get('hide_preview', defaultValue: false) as bool;
+  }
+
+  static Future<void> setHidePreview(bool value) async {
+    final box = await _settingsBox;
+    await box.put('hide_preview', value);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private AI mode — prevent journal content from being sent to AI
+  // ---------------------------------------------------------------------------
+
+  /// When true, journal content should NOT be sent to AI companion.
+  static Future<bool> getPrivateAiMode() async {
+    final box = await _settingsBox;
+    return box.get('private_ai_mode', defaultValue: false) as bool;
+  }
+
+  static bool get privateAiMode {
+    final box = Hive.box(_settingsBoxName);
+    return box.get('private_ai_mode', defaultValue: false) as bool;
+  }
+
+  static Future<void> setPrivateAiMode(bool value) async {
+    final box = await _settingsBox;
+    await box.put('private_ai_mode', value);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Export journals — formatted text output
+  // ---------------------------------------------------------------------------
+
+  static String _formatDate(DateTime dt) {
+    final d = dt.day.toString().padLeft(2, '0');
+    final m = dt.month.toString().padLeft(2, '0');
+    final h = dt.hour.toString().padLeft(2, '0');
+    final min = dt.minute.toString().padLeft(2, '0');
+    return '$d/$m/${dt.year} $h:$min';
+  }
+
+  /// Create a nicely formatted text export of all provided journals.
+  /// Returns the full text content ready to be saved or shared.
+  static Future<String> exportJournals(
+      List<Map<String, dynamic>> journals) async {
+    final buf = StringBuffer();
+    buf.writeln('═══════════════════════════════════════');
+    buf.writeln('  NHẬT KÝ CÁ NHÂN — Relax App');
+    buf.writeln('  Xuất ngày: ${_formatDate(DateTime.now())}');
+    buf.writeln('  Tổng số: ${journals.length} bài viết');
+    buf.writeln('═══════════════════════════════════════');
+    buf.writeln();
+
+    for (var i = 0; i < journals.length; i++) {
+      final j = journals[i];
+      final title = (j['title'] as String?) ?? 'Không tiêu đề';
+      final content = (j['content'] as String?) ?? '';
+      final createdAt = j['createdAt'] as String?;
+      final mood = (j['mood'] as String?) ?? '';
+      final fav = j['isFavorite'] == true || j['favorite'] == true;
+
+      String dateStr = '';
+      if (createdAt != null) {
+        try {
+          final dt = DateTime.parse(createdAt);
+          dateStr = _formatDate(dt);
+        } catch (_) {
+          dateStr = createdAt;
+        }
+      }
+
+      buf.writeln('───────────────────────────────────────');
+      buf.writeln('📝 #${i + 1}  ${fav ? '❤️ ' : ''}$title');
+      if (dateStr.isNotEmpty) buf.writeln('📅 $dateStr');
+      if (mood.isNotEmpty) buf.writeln('🎭 $mood');
+      buf.writeln('');
+      buf.writeln(content);
+      buf.writeln();
+    }
+
+    buf.writeln('═══════════════════════════════════════');
+    buf.writeln('  Hết.');
+    buf.writeln('═══════════════════════════════════════');
+
+    return buf.toString();
+  }
+
+  // ---------------------------------------------------------------------------
+  // Ensure vault_settings box is opened (call during app init)
+  // ---------------------------------------------------------------------------
+
+  /// Open the vault_settings box. Call this during app startup so that
+  /// synchronous getters (hidePreview, privateAiMode) work.
+  static Future<void> ensureInitialized() async {
+    await Hive.openBox(_settingsBoxName);
   }
 }
 

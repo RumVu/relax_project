@@ -1,17 +1,24 @@
-# relax_app
+# Thi Ai — Flutter App
 
-A new Flutter project.
+This is the Flutter project directory for the Thi Ai mobile app.
 
-## Getting Started
+For full documentation including screen list, offline behavior, push notifications, and build instructions, see the parent [README](../README.md).
 
-This project is a starting point for a Flutter application.
+## Quick Start
 
-A few resources to get you started if this is your first Flutter project:
+```bash
+flutter pub get
+flutter run
+```
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Build Release APK
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter build apk --release
+```
+
+## Run Tests
+
+```bash
+flutter test
+```
