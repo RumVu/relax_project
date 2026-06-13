@@ -985,6 +985,64 @@ async function seedBreathingExercises() {
   }
 }
 
+async function seedMeditationGuides() {
+  const guides = [
+    {
+      title: 'Thiền thở cơ bản',
+      description: 'Tập trung hoàn toàn vào hơi thở tự nhiên để làm dịu tâm trí, giảm bớt lo âu.',
+      duration: 5,
+      focusArea: 'BREATHING',
+      difficulty: 'BEGINNER',
+      audioUrl: 'https://assets.mixkit.co/music/preview/mixkit-serene-moments-27.mp3',
+      imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600',
+      instructor: 'Mochi Zen',
+      isActive: true,
+    },
+    {
+      title: 'Quan sát cơ thể (Body Scan)',
+      description: 'Quét chậm qua từng bộ phận trên cơ thể để nhận biết và giải tỏa sự căng thẳng tích tụ.',
+      duration: 10,
+      focusArea: 'BODY_SCAN',
+      difficulty: 'BEGINNER',
+      audioUrl: 'https://assets.mixkit.co/music/preview/mixkit-deep-meditation-109.mp3',
+      imageUrl: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=600',
+      instructor: 'Linh Thú Trà',
+      isActive: true,
+    },
+    {
+      title: 'Thiền tâm từ (Loving Kindness)',
+      description: 'Nuôi dưỡng lòng tốt và tình yêu thương hướng đến bản thân và những người xung quanh.',
+      duration: 8,
+      focusArea: 'LOVING_KINDNESS',
+      difficulty: 'INTERMEDIATE',
+      audioUrl: 'https://assets.mixkit.co/music/preview/mixkit-meditation-441.mp3',
+      imageUrl: 'https://images.unsplash.com/photo-1545389336-cf090694435e?w=600',
+      instructor: 'Thầy Yên Bình',
+      isActive: true,
+    },
+    {
+      title: 'Hình dung thư giãn (Visualization)',
+      description: 'Hình dung ra một không gian thiên nhiên tĩnh lặng để tìm lại cảm giác bình yên trong lòng.',
+      duration: 15,
+      focusArea: 'VISUALIZATION',
+      difficulty: 'INTERMEDIATE',
+      audioUrl: 'https://assets.mixkit.co/music/preview/mixkit-yoga-song-444.mp3',
+      imageUrl: 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?w=600',
+      instructor: 'Master Calm',
+      isActive: true,
+    },
+  ];
+
+  for (const guide of guides) {
+    await upsertByField(
+      prisma.meditationGuide,
+      'title',
+      guide.title,
+      guide,
+    );
+  }
+}
+
 async function seedCozyQuotes() {
   const quotes = [
     {
@@ -1957,6 +2015,7 @@ async function main() {
   await seedCompanionMessages();
   await seedAmbientSounds();
   await seedBreathingExercises();
+  await seedMeditationGuides();
   await seedCozyQuotes();
   await seedSearchIndex();
   await seedAdminUser();

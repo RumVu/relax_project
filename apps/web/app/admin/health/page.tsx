@@ -13,6 +13,7 @@ import { useTranslation } from '@/lib/i18n/i18n-provider';
 type HealthData = {
   status: string;
   uptime?: number;
+  uptimeSeconds?: number;
   timestamp?: string;
   users?: { total: number; active: number; newToday: number };
   sessions?: { active: number };
@@ -47,14 +48,15 @@ export default function HealthDashboardPage() {
     void load();
   }, [load]);
 
-  const uptimeFormatted = health?.uptime
-    ? formatUptime(health.uptime)
+  const uptimeFormatted = health?.uptimeSeconds
+    ? formatUptime(health.uptimeSeconds)
     : '-';
 
   const userMetrics = overview as Record<string, unknown> | null;
-  const totalUsers = (userMetrics?.totalUsers as number) ?? health?.users?.total ?? 0;
-  const activeUsers = (userMetrics?.activeUsersToday as number) ?? health?.users?.active ?? 0;
-  const newToday = (userMetrics?.newUsersToday as number) ?? health?.users?.newToday ?? 0;
+  const summaryCards = userMetrics?.summaryCards as Record<string, number> | undefined;
+  const totalUsers = summaryCards?.totalUsers ?? (userMetrics?.totalUsers as number) ?? health?.users?.total ?? 0;
+  const activeUsers = summaryCards?.activeUsers ?? (userMetrics?.activeUsersToday as number) ?? health?.users?.active ?? 0;
+  const newToday = summaryCards?.newUsers ?? (userMetrics?.newUsersToday as number) ?? health?.users?.newToday ?? 0;
 
   return (
     <DashboardShell admin eyebrow={t('admin.eyebrow')} title="System Health">
