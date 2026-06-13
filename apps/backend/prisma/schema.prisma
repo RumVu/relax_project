@@ -61,54 +61,54 @@ model User {
 
   lastLoginAt DateTime?
   deletedAt   DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  profile                UserProfile?
-  preferences            UserPreference?
-  companion              UserCompanion?
-  sessions               Session[]
-  moodCheckins           MoodCheckin[]
-  weeklyMoodStats        WeeklyMoodStat[]
-  userAchievements       UserAchievement[]
-  userBadges             UserBadge[]
-  userStreak             UserStreak?
-  userPoints             UserPoints?
-  userLevel              UserLevel?
-  friends                Friend[]                   @relation("UserFriends")
-  friendRequestsReceived Friend[]                   @relation("FriendRequests")
-  userChallenges         UserChallenge[]
-  leaderboardEntries     LeaderboardEntry[]
-  feedEntries            FeedEntry[]
-  journals               Journal[]
-  meditationSessions     MeditationSession[]
-  companionInteractions  CompanionInteraction[]
-  favoriteMessages       FavoriteCompanionMessage[]
-  reminders              Reminder[]
-  notifications          Notification[]
-  relaxSessions          RelaxSession[]
-  soundSessions          SoundSession[]
-  breathingSessions      BreathingSession[]
-  sleepSessions          SleepSession[]
-  subscriptions          Subscription[]
-  payments               Payment[]
-  feedbacks              Feedback[]
-  contentRatings         ContentRating[]
-  analyticsSnapshots     AnalyticsSnapshot[]
-  integrations           IntegrationLink[]
-  aiInsights             AIInsight[]
-  insightCards           Insight[]
-  recommendations        Recommendation[]
-  storageFiles           StorageFile[]
-  appEvents              AppEvent[]
-  platformEvents         PlatformEvent[]
-  messageLogs            CompanionMessageLog[]
-  accountTokens          AccountToken[]
-  pushDevices            PushDevice[]
-  rateLimitCounters      RateLimitCounter[]
-  adminLogs              AdminLog[]                 @relation("AdminActorLogs")
-  quests                 UserQuest[]
-  experimentAssignments  ExperimentAssignment[]
+  profile               UserProfile?
+  preferences           UserPreference?
+  companion             UserCompanion?
+  sessions              Session[]
+  moodCheckins          MoodCheckin[]
+  weeklyMoodStats       WeeklyMoodStat[]
+  userAchievements      UserAchievement[]
+  userBadges            UserBadge[]
+  userStreak            UserStreak?
+  userPoints            UserPoints?
+  userLevel             UserLevel?
+  friends               Friend[]                 @relation("UserFriends")
+  friendRequestsReceived Friend[]                @relation("FriendRequests")
+  userChallenges        UserChallenge[]
+  leaderboardEntries    LeaderboardEntry[]
+  feedEntries           FeedEntry[]
+  journals              Journal[]
+  meditationSessions    MeditationSession[]
+  companionInteractions CompanionInteraction[]
+  favoriteMessages      FavoriteCompanionMessage[]
+  reminders             Reminder[]
+  notifications         Notification[]
+  relaxSessions         RelaxSession[]
+  soundSessions         SoundSession[]
+  breathingSessions     BreathingSession[]
+  sleepSessions         SleepSession[]
+  subscriptions         Subscription[]
+  payments              Payment[]
+  feedbacks             Feedback[]
+  contentRatings        ContentRating[]
+  analyticsSnapshots    AnalyticsSnapshot[]
+  integrations          IntegrationLink[]
+  aiInsights            AIInsight[]
+  insightCards          Insight[]
+  recommendations       Recommendation[]
+  storageFiles          StorageFile[]
+  appEvents             AppEvent[]
+  platformEvents        PlatformEvent[]
+  messageLogs           CompanionMessageLog[]
+  accountTokens         AccountToken[]
+  pushDevices           PushDevice[]
+  rateLimitCounters     RateLimitCounter[]
+  adminLogs             AdminLog[]               @relation("AdminActorLogs")
+  quests                UserQuest[]
+  experimentAssignments ExperimentAssignment[]
 
   @@index([email])
   @@index([role])
@@ -122,9 +122,9 @@ model User {
 // reroll any single one for a fresh template, and rows complete
 // automatically when the user does the matching action.
 model UserQuest {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String    @id @default(cuid())
+  userId       String
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   templateCode String
   assignedAt   DateTime  @default(now())
@@ -140,10 +140,10 @@ model UserProfile {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  displayName   String?
-  bio           String?
-  birthday      DateTime?
-  zodiacSign    String?
+  displayName String?
+  bio         String?
+  birthday    DateTime?
+  zodiacSign  String?
   chineseZodiac String?
 
   totalMoodCheckins Int @default(0)
@@ -151,8 +151,8 @@ model UserProfile {
 
   /// Denormalized profile counters for quick setup/profile rendering.
   /// Mood analytics should derive streaks from MoodCheckin/WeeklyMoodStat.
-  currentStreak Int @default(0)
-  longestStreak Int @default(0)
+  currentStreak     Int @default(0)
+  longestStreak     Int @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -165,21 +165,21 @@ model UserPreference {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  language       String  @default("vi")
-  timezone       String  @default("Asia/Ho_Chi_Minh")
-  latitude       Float?
-  longitude      Float?
-  locationName   String?
+  language String @default("vi")
+  timezone String @default("Asia/Ho_Chi_Minh")
+  latitude Float?
+  longitude Float?
+  locationName String?
   weatherEnabled Boolean @default(true)
 
   themeMode ThemeMode @default(SYSTEM)
   themeId   String?
   theme     AppTheme? @relation(fields: [themeId], references: [id], onDelete: SetNull)
 
-  enableCompanionBubble     Boolean @default(true)
-  bubbleIntervalSeconds     Int     @default(30)
-  enableSound               Boolean @default(true)
-  enableHaptics             Boolean @default(true)
+  enableCompanionBubble   Boolean @default(true)
+  bubbleIntervalSeconds   Int     @default(30)
+  enableSound             Boolean @default(true)
+  enableHaptics           Boolean @default(true)
   pushNotificationsEnabled  Boolean @default(true)
   emailNotificationsEnabled Boolean @default(false)
 
@@ -213,11 +213,11 @@ model AccountToken {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  type       AccountTokenType
-  tokenHash  String           @unique
-  expiresAt  DateTime
+  type      AccountTokenType
+  tokenHash String           @unique
+  expiresAt DateTime
   consumedAt DateTime?
-  metadata   Json?
+  metadata  Json?
 
   createdAt DateTime @default(now())
 
@@ -350,16 +350,16 @@ model UserCompanion {
   assetId String?
   asset   CompanionAsset? @relation(fields: [assetId], references: [id], onDelete: SetNull)
 
-  name                String                       @default("Mon Leo")
-  type                CompanionType                @default(CAT)
+  name String @default("Mon Leo")
+  type CompanionType @default(CAT)
   personalizationMode CompanionPersonalizationMode @default(DEFAULT)
 
   mood   CompanionMood   @default(CHILL)
   action CompanionAction @default(IDLE)
 
-  level      Int       @default(1)
-  affection  Int       @default(0)
-  energy     Int       @default(100)
+  level      Int @default(1)
+  affection  Int @default(0)
+  energy     Int @default(100)
   lastSeenAt DateTime?
   lastFedAt  DateTime?
   lastMoodAt DateTime?
@@ -376,7 +376,7 @@ model UserCompanion {
 }
 
 model CompanionState {
-  id          String        @id @default(cuid())
+  id          String @id @default(cuid())
   companionId String
   companion   UserCompanion @relation(fields: [companionId], references: [id], onDelete: Cascade)
 
@@ -385,7 +385,7 @@ model CompanionState {
   animation String?
   metadata  Json?
 
-  startedAt DateTime  @default(now())
+  startedAt DateTime @default(now())
   endedAt   DateTime?
 
   @@index([companionId])
@@ -429,7 +429,7 @@ model CompanionMessageLog {
   user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   message CompanionMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
-  shownAt     DateTime  @default(now())
+  shownAt     DateTime @default(now())
   clickedAt   DateTime?
   dismissedAt DateTime?
 
@@ -500,7 +500,7 @@ model OnboardingSlide {
 
   imageUrl     String?
   animationUrl String?
-  displayOrder Int     @default(0)
+  displayOrder Int @default(0)
 
   isActive Boolean @default(true)
 
@@ -515,7 +515,7 @@ model OnboardingSlide {
 model AppTheme {
   id String @id @default(cuid())
 
-  name String    @unique
+  name String @unique
   mode ThemeMode
 
   backgroundColor String
@@ -561,14 +561,14 @@ model MoodCheckin {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  mood       MoodType
-  intensity  Int?
-  rawScore   Int?
+  mood      MoodType
+  intensity Int?
+  rawScore  Int?
   finalScore Int?
-  scoredAt   DateTime?
-  note       String?      @db.Text
-  tags       String[]
-  trigger    TriggerType?
+  scoredAt  DateTime?
+  note      String? @db.Text
+  tags      String[]
+  trigger   TriggerType?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -700,11 +700,11 @@ model UserStreak {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   currentStreak    Int       @default(0)
-  longestStreak    Int       @default(0)
-  streakType       String    @default("MOOD_TRACKING")
-  lastActivityDate DateTime?
-  startDate        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  longestStreak     Int       @default(0)
+  streakType        String    @default("MOOD_TRACKING")
+  lastActivityDate  DateTime?
+  startDate         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@map("user_streaks")
 }
@@ -714,7 +714,7 @@ model UserPoints {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  totalPoints Int      @default(0)
+  totalPoints Int @default(0)
   updatedAt   DateTime @updatedAt
 
   pointsHistory PointsTransaction[]
@@ -851,7 +851,7 @@ model Journal {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   title   String?
-  content String  @db.Text
+  content String @db.Text
 
   mood MoodType?
   tags String[]
@@ -899,7 +899,7 @@ model SoundSession {
   soundId String?
   sound   AmbientSound? @relation(fields: [soundId], references: [id], onDelete: SetNull)
 
-  startedAt DateTime  @default(now())
+  startedAt DateTime @default(now())
   endedAt   DateTime?
   duration  Int?
 
@@ -941,7 +941,7 @@ model BreathingSession {
   exerciseId String?
   exercise   BreathingExercise? @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
 
-  startedAt DateTime  @default(now())
+  startedAt DateTime @default(now())
   endedAt   DateTime?
   duration  Int?
 
@@ -1036,7 +1036,7 @@ model RelaxSession {
   resourceId String?
   title      String
 
-  startedAt DateTime  @default(now())
+  startedAt DateTime @default(now())
   endedAt   DateTime?
   duration  Int?
 
@@ -1080,9 +1080,9 @@ model SleepSession {
 model CozyQuote {
   id String @id @default(cuid())
 
-  content  String    @db.Text
-  author   String?
-  mood     MoodType?
+  content String @db.Text
+  author  String?
+  mood    MoodType?
   imageUrl String?
   lang     String    @default("vi")
 
@@ -1128,7 +1128,7 @@ model Reminder {
 
   scheduledAt DateTime
   repeatRule  String?
-  isActive    Boolean  @default(true)
+  isActive    Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1151,7 +1151,7 @@ model Notification {
   relatedEntity String?
   relatedId     String?
 
-  isRead Boolean   @default(false)
+  isRead Boolean @default(false)
   readAt DateTime?
 
   createdAt DateTime @default(now())
@@ -1225,7 +1225,7 @@ model AIInsight {
 
   type       String
   title      String
-  content    String   @db.Text
+  content    String @db.Text
   aiProvider String
   isUseful   Boolean?
 
@@ -1289,21 +1289,21 @@ enum BillingCycle {
 model SubscriptionTier {
   id String @id @default(cuid())
 
-  name         String       @unique
-  title        String? // display title — falls back to name when null
-  description  String?
-  price        Float
+  name          String       @unique
+  title         String?      // display title — falls back to name when null
+  description   String?
+  price         Float
   // Sale window — when salePrice is set and now is between saleStartsAt
   // and saleEndsAt, effective price is salePrice. Lets admin run
   // limited-time promos without overwriting price.
-  salePrice    Float?
-  saleLabel    String?
-  saleStartsAt DateTime?
-  saleEndsAt   DateTime?
-  currency     String       @default("VND")
-  billingCycle BillingCycle
-  displayOrder Int          @default(0)
-  isActive     Boolean      @default(true)
+  salePrice     Float?
+  saleLabel     String?
+  saleStartsAt  DateTime?
+  saleEndsAt    DateTime?
+  currency      String       @default("VND")
+  billingCycle  BillingCycle
+  displayOrder  Int          @default(0)
+  isActive      Boolean      @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1366,7 +1366,7 @@ model Subscription {
   price    Float  @default(0)
   currency String @default("VND")
 
-  startDate DateTime  @default(now())
+  startDate DateTime @default(now())
   endDate   DateTime?
 
   externalSubscriptionId String?
@@ -1386,7 +1386,7 @@ model Payment {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   amount   Int
-  currency String        @default("VND")
+  currency String @default("VND")
   status   PaymentStatus @default(PENDING)
 
   provider          String?
@@ -1425,13 +1425,13 @@ model IntegrationLink {
 }
 
 model Feedback {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   subject String?
-  message String  @db.Text
-  status  String  @default("OPEN")
+  message String @db.Text
+  status  String @default("OPEN")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1442,19 +1442,19 @@ model Feedback {
 }
 
 model StorageFile {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   filename  String
   mimetype  String
   size      Int
-  provider  String    @default("supabase")
+  provider  String @default("supabase")
   path      String?
   url       String
   publicUrl String?
   bucket    String?
-  isPublic  Boolean   @default(true)
+  isPublic  Boolean @default(true)
   expiresAt DateTime?
   metadata  Json?
 
@@ -1469,9 +1469,9 @@ model StorageFile {
 /// Typed backend-emitted platform audit events.
 /// Use this when the event maps to EventType.
 model PlatformEvent {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type EventType
   data Json?
@@ -1492,7 +1492,7 @@ model AdminLog {
   action     String
   targetId   String?
   targetType String?
-  details    String  @db.Text
+  details    String @db.Text
 
   createdAt DateTime @default(now())
 
@@ -1502,10 +1502,10 @@ model AdminLog {
 }
 
 model RateLimitCounter {
-  id         String  @id @default(cuid())
+  id         String @id @default(cuid())
   identifier String
   userId     String?
-  user       User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user       User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
   ipAddress  String?
 
   endpoint String
@@ -1519,7 +1519,7 @@ model RateLimitCounter {
 }
 
 model SearchIndex {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   entityType String
   entityId   String
   title      String
@@ -1599,9 +1599,9 @@ model ExperimentAssignment {
 /// Flexible raw app/client telemetry events.
 /// Promote events to PlatformEvent only after the backend contract is stable.
 model AppEvent {
-  id     String  @id @default(cuid())
+  id     String @id @default(cuid())
   userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   type String
   data Json?
