@@ -28,7 +28,6 @@ export const userSelect = {
           id: true,
           name: true,
           type: true,
-          key: true,
           chineseZodiac: true,
           zodiacSign: true,
           previewImageUrl: true,

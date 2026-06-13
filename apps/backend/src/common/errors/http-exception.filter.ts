@@ -32,7 +32,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const payload = this.toPayload(exception, request.url);
 
     if (payload.statusCode >= 500) {
-      this.logger.error(payload.message, exception);
+      console.error('SERVER ERROR:', exception);
+      this.logger.error(
+        payload.message,
+        exception instanceof Error ? exception.stack : exception,
+      );
     }
 
     response.status(payload.statusCode).json(payload);
