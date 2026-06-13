@@ -191,10 +191,9 @@ export class AuthService {
           mood: moods[moodIndex],
           intensity: 2 + (i % 4),
           tags: tags[moodIndex],
-          note:
-            triggers[i]
-              ? `Demo mood day -${i}: ${triggers[i]}`
-              : `Demo mood entry day -${i}`,
+          note: triggers[i]
+            ? `Demo mood day -${i}: ${triggers[i]}`
+            : `Demo mood entry day -${i}`,
           createdAt: date,
         },
       });
@@ -316,9 +315,27 @@ export class AuthService {
     try {
       await this.prisma.contentRating.createMany({
         data: [
-          { userId, contentType: 'GUIDE', contentId: 'breathing-101', rating: 5, review: 'Rất hữu ích!' },
-          { userId, contentType: 'GUIDE', contentId: 'meditation-basics', rating: 4, review: 'Hay' },
-          { userId, contentType: 'SOUND', contentId: 'rain-forest', rating: 5, review: 'Thư giãn tuyệt vời' },
+          {
+            userId,
+            contentType: 'GUIDE',
+            contentId: 'breathing-101',
+            rating: 5,
+            review: 'Rất hữu ích!',
+          },
+          {
+            userId,
+            contentType: 'GUIDE',
+            contentId: 'meditation-basics',
+            rating: 4,
+            review: 'Hay',
+          },
+          {
+            userId,
+            contentType: 'SOUND',
+            contentId: 'rain-forest',
+            rating: 5,
+            review: 'Thư giãn tuyệt vời',
+          },
         ],
       });
     } catch {

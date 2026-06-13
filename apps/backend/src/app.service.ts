@@ -1,8 +1,8 @@
 import { Injectable, Inject, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from './prisma/prisma.service';
-import { RedisService } from './redis/redis.service';
-import { QueuesService } from './queues/queues.service';
+import { RedisService, RedisHealth } from './redis/redis.service';
+import { QueuesService, QueueStatus } from './queues/queues.service';
 
 export interface ApiIndexResponse {
   name: string;
@@ -108,44 +108,89 @@ export class AppService {
       await this.prisma.$queryRaw`SELECT 1`;
       dbOk = true;
       dbLatency = Date.now() - dbStart;
-    } catch { /* */ }
+    } catch {
+      /* */
+    }
 
-    const redisHealth = this.redis ? await this.redis.ping().catch(() => ({
-      connected: false, configured: false, enabled: false, latencyMs: null,
-    })) : { connected: false, configured: false, enabled: false, latencyMs: null };
+    const redisHealth = this.redis
+      ? await this.redis.ping().catch(
+          () =>
+            ({
+              connected: false,
+              configured: false,
+              enabled: false,
+              latencyMs: null,
+            }) as unknown as RedisHealth,
+        )
+      : ({
+          connected: false,
+          configured: false,
+          enabled: false,
+          latencyMs: null,
+        } as unknown as RedisHealth);
 
-    const queueStatus = this.queues ? this.queues.getStatus() : {
-      configured: false, enabled: false, registeredQueues: [],
-    };
+    const queueStatus = this.queues
+      ? this.queues.getStatus()
+      : ({
+          configured: false,
+          enabled: false,
+          registeredQueues: [],
+        } as unknown as QueueStatus);
 
     const bucket = this.configService.get<string>('storage.supabaseBucket');
-    const pushConfigured = Boolean(this.configService.get<string>('FCM_SERVER_KEY') || this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT'));
-    const emailConfigured = Boolean(this.configService.get<string>('SMTP_HOST') || this.configService.get<string>('SENDGRID_API_KEY'));
-    const billingConfigured = Boolean(this.configService.get<string>('STRIPE_SECRET_KEY'));
+    const pushConfigured = Boolean(
+      this.configService.get<string>('FCM_SERVER_KEY') ||
+      this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT'),
+    );
+    const emailConfigured = Boolean(
+      this.configService.get<string>('SMTP_HOST') ||
+      this.configService.get<string>('SENDGRID_API_KEY'),
+    );
+    const billingConfigured = Boolean(
+      this.configService.get<string>('STRIPE_SECRET_KEY'),
+    );
 
     let userCount = 0;
     let activeToday = 0;
-    let lastWeeklyJob: { success: boolean; processedUsers: number; failedUsers: number; ranAt: string } | null = null;
+    let lastWeeklyJob: {
+      success: boolean;
+      processedUsers: number;
+      failedUsers: number;
+      ranAt: string;
+    } | null = null;
     try {
-      userCount = await this.prisma.user.count({ where: { isActive: true, deletedAt: null } });
-      const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
-      activeToday = await this.prisma.moodCheckin.groupBy({
-        by: ['userId'],
-        where: { createdAt: { gte: todayStart } },
-      }).then(r => r.length);
-    } catch { /* */ }
+      userCount = await this.prisma.user.count({
+        where: { isActive: true, deletedAt: null },
+      });
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      activeToday = await this.prisma.moodCheckin
+        .groupBy({
+          by: ['userId'],
+          where: { createdAt: { gte: todayStart } },
+        })
+        .then((r) => r.length);
+    } catch {
+      /* */
+    }
 
     try {
-      const latest = await this.prisma.weeklyMoodStat.findFirst({ orderBy: { createdAt: 'desc' } });
+      const latest = await this.prisma.weeklyMoodStat.findFirst({
+        orderBy: { createdAt: 'desc' },
+      });
       if (latest) {
         lastWeeklyJob = {
           success: true,
-          processedUsers: await this.prisma.weeklyMoodStat.count({ where: { weekStart: latest.weekStart } }),
+          processedUsers: await this.prisma.weeklyMoodStat.count({
+            where: { weekStart: latest.weekStart },
+          }),
           failedUsers: 0,
           ranAt: latest.createdAt.toISOString(),
         };
       }
-    } catch { /* */ }
+    } catch {
+      /* */
+    }
 
     return {
       status: dbOk ? 'ok' : 'degraded',
@@ -154,14 +199,14 @@ export class AppService {
       api: { status: 'online' },
       database: { connected: dbOk, latencyMs: dbLatency },
       redis: {
-        connected: (redisHealth as any).connected ?? false,
-        configured: (redisHealth as any).configured ?? false,
-        latencyMs: (redisHealth as any).latencyMs ?? null,
+        connected: redisHealth.connected,
+        configured: redisHealth.configured,
+        latencyMs: redisHealth.latencyMs,
       },
       queue: {
-        configured: (queueStatus as any).configured ?? false,
-        enabled: (queueStatus as any).enabled ?? false,
-        registeredQueues: (queueStatus as any).registeredQueues ?? [],
+        configured: queueStatus.configured,
+        enabled: queueStatus.enabled,
+        registeredQueues: queueStatus.registeredQueues,
       },
       providers: {
         push: { ready: pushConfigured },

@@ -21,7 +21,8 @@ export class RecommendationsController {
     summary: 'Get today smart recommendations for current user',
   })
   @ApiOkResponse({
-    description: 'Smart recommendations based on mood, history, time, triggers.',
+    description:
+      'Smart recommendations based on mood, history, time, triggers.',
   })
   @UseGuards(JwtAuthGuard)
   @Get('me/today')

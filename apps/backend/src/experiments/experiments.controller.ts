@@ -83,11 +83,10 @@ export class ExperimentsController {
   @Get('me/:key')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get my assignment for a specific experiment' })
-  @ApiOkResponse({ description: 'Experiment assignment (auto-assigns if needed)' })
-  getAssignment(
-    @CurrentUser() user: AuthUser,
-    @Param('key') key: string,
-  ) {
+  @ApiOkResponse({
+    description: 'Experiment assignment (auto-assigns if needed)',
+  })
+  getAssignment(@CurrentUser() user: AuthUser, @Param('key') key: string) {
     return this.service.getAssignment(user.id, key);
   }
 
@@ -95,10 +94,7 @@ export class ExperimentsController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Log an experiment event' })
   @ApiCreatedResponse({ description: 'Experiment event logged' })
-  logEvent(
-    @CurrentUser() user: AuthUser,
-    @Body() dto: LogExperimentEventDto,
-  ) {
+  logEvent(@CurrentUser() user: AuthUser, @Body() dto: LogExperimentEventDto) {
     return this.service.logEvent(user.id, dto);
   }
 }

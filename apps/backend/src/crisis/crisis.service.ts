@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  CrisisDetectionResult,
-  detectCrisisContent,
-} from './crisis-keywords';
+import { CrisisDetectionResult, detectCrisisContent } from './crisis-keywords';
 
 export interface Hotline {
   name: string;

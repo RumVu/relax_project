@@ -1,6 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { MoodType, TriggerType } from '@prisma/client';
+import {
+  MoodType,
+  TriggerType,
+  RelaxSession,
+  ContentRating,
+  RelaxActivityType,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+interface RecentTriggerInfo {
+  trigger: TriggerType | null;
+  mood: MoodType;
+  createdAt: Date;
+}
 
 @Injectable()
 export class RecommendationsService {
@@ -71,9 +83,9 @@ export class RecommendationsService {
     mood: MoodType,
     trigger: TriggerType | null | undefined,
     hour: number,
-    bestSessions: any[],
-    topRated: any[],
-    recentTriggers: any[],
+    bestSessions: RelaxSession[],
+    topRated: ContentRating[],
+    recentTriggers: RecentTriggerInfo[],
   ) {
     const items: Array<{
       type: string;
@@ -101,7 +113,7 @@ export class RecommendationsService {
     if (contextRec) items.push({ ...contextRec, score: 80 });
 
     // Fill to 3 if needed
-    const fallbacks = this.getFallbackRecs(mood);
+    const fallbacks = this.getFallbackRecs();
     while (items.length < 3 && fallbacks.length > 0) {
       const fb = fallbacks.shift()!;
       if (!items.find((i) => i.type === fb.type)) {
@@ -183,8 +195,8 @@ export class RecommendationsService {
 
   private getHistoryBasedRec(
     mood: MoodType,
-    sessions: any[],
-    ratings: any[],
+    sessions: RelaxSession[],
+    ratings: ContentRating[],
   ) {
     // Find sessions where moodBefore matches current mood and had good relief
     const matching = sessions.filter(
@@ -192,7 +204,7 @@ export class RecommendationsService {
     );
     if (matching.length > 0) {
       const best = matching[0];
-      const activityLabels: Record<string, string> = {
+      const activityLabels: Record<RelaxActivityType, string> = {
         BREATHING: 'Hít thở',
         MEDITATION: 'Thiền',
         MUSIC: 'Nghe nhạc',
@@ -200,7 +212,7 @@ export class RecommendationsService {
         PODCAST: 'Podcast',
         MYSTERY: 'Khám phá',
       };
-      const deepLinks: Record<string, string> = {
+      const deepLinks: Record<RelaxActivityType, string> = {
         BREATHING: 'relax://breathing-exercises',
         MEDITATION: 'relax://meditation',
         MUSIC: 'relax://ambient-sounds',
@@ -234,7 +246,7 @@ export class RecommendationsService {
     mood: MoodType,
     trigger: TriggerType | null | undefined,
     hour: number,
-    recentTriggers: any[],
+    recentTriggers: RecentTriggerInfo[],
   ) {
     // Time-based
     if (hour >= 22 || hour < 6) {
@@ -343,7 +355,7 @@ export class RecommendationsService {
     return null;
   }
 
-  private getFallbackRecs(mood: MoodType) {
+  private getFallbackRecs() {
     return [
       {
         type: 'BREATHING',
@@ -478,7 +490,7 @@ export class RecommendationsService {
     }
 
     // Find best activity for each trigger's mood
-    for (const [trigger, data] of Object.entries(triggerMap)) {
+    for (const [, data] of Object.entries(triggerMap)) {
       const dominantMood = this.getDominantMood(data.moods);
       const matchingSessions = sessions.filter(
         (s) => s.moodBefore === dominantMood,
