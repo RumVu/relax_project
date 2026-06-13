@@ -28,7 +28,8 @@ type Kind =
   | 'themes'
   | 'onboarding'
   | 'companion-assets'
-  | 'companion-messages';
+  | 'companion-messages'
+  | 'meditations';
 
 type FieldType = 'text' | 'textarea' | 'number' | 'select' | 'boolean' | 'color' | 'url';
 
@@ -294,6 +295,27 @@ const catalogConfig: Record<
       secondary: asString(item.type) ?? 'CAT',
       config: asString(item.primaryColor) ?? '-',
       status: isActive(item) ? (asBoolean(item.isDefault) ? 'default' : 'active') : 'draft',
+      active: isActive(item),
+    }),
+  },
+  'meditations': {
+    columns: ['Tên', 'Loại', 'Thời lượng', 'Trạng thái', 'Hành động'],
+    fields: [
+      { key: 'title', label: 'Tên', type: 'text', required: true, defaultValue: '' },
+      { key: 'description', label: 'Mô tả', type: 'textarea', defaultValue: '' },
+      { key: 'type', label: 'Loại', type: 'select', options: ['GUIDED', 'UNGUIDED', 'BODY_SCAN', 'LOVING_KINDNESS', 'VISUALIZATION'], defaultValue: 'GUIDED' },
+      { key: 'durationMinutes', label: 'Thời lượng (phút)', type: 'number', defaultValue: '5' },
+      { key: 'audioUrl', label: 'Audio URL', type: 'url', defaultValue: '' },
+      { key: 'imageUrl', label: 'Image URL', type: 'url', defaultValue: '' },
+      { key: 'isActive', label: 'Đang publish', type: 'boolean', defaultValue: true },
+    ],
+    buildRow: (item) => ({
+      id: itemId(item),
+      raw: item,
+      name: asString(item.title) ?? 'Meditation',
+      secondary: asString(item.type) ?? 'GUIDED',
+      config: `${asNumber(item.durationMinutes) ?? 0} phút`,
+      status: statusText(item),
       active: isActive(item),
     }),
   },

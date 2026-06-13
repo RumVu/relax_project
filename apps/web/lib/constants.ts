@@ -19,6 +19,7 @@ export const adminNav: NavItem[] = [
   { label: 'Sounds', href: '/admin/sounds' },
   { label: 'Podcasts', href: '/admin/podcasts' },
   { label: 'Exercises', href: '/admin/exercises' },
+  { label: 'Meditations', href: '/admin/meditations' },
   { label: 'Themes', href: '/admin/themes' },
   { label: 'Onboarding', href: '/admin/onboarding' },
   { label: 'Companion Assets', href: '/admin/companion-assets' },

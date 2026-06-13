@@ -56,6 +56,7 @@ const NAV_TRANSLATION_KEYS: Record<string, TranslationKey> = {
   Sounds: 'nav.sounds',
   Podcasts: 'nav.podcasts',
   Exercises: 'nav.exercises',
+  Meditations: 'nav.meditations',
   Themes: 'nav.themes',
   Onboarding: 'nav.onboarding',
   'Companion Assets': 'nav.companionAssets',

@@ -149,6 +149,25 @@ class SettingsScreen extends StatelessWidget {
                     subtitle: context.t('Model, hệ điều hành, phiên bản app'),
                     onTap: () => context.push('/device-info'),
                   ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.devices_outlined,
+                    title: context.t('Phiên đăng nhập'),
+                    subtitle: context.t('Xem & thu hồi thiết bị đã đăng nhập'),
+                    onTap: () => context.push('/sessions'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SectionLabel(context.t('Bạn đồng hành')),
+              SettingsCard(
+                children: [
+                  SettingsRow(
+                    icon: Icons.people_outline,
+                    title: context.t('Bạn đồng hành'),
+                    subtitle: context.t('Mời bạn bè, nhắc nhẹ, cùng theo dõi streak'),
+                    onTap: () => context.push('/buddies'),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
