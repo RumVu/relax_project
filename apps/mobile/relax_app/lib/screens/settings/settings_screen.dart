@@ -100,6 +100,20 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   const SettingsDivider(),
                   SettingsRow(
+                    icon: Icons.calendar_view_week_outlined,
+                    title: context.t('Báo cáo tuần'),
+                    subtitle: context.t('Tổng hợp cảm xúc & hoạt động 7 ngày'),
+                    onTap: () => context.push('/weekly-report'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.event_note_outlined,
+                    title: context.t('Kế hoạch tuần'),
+                    subtitle: context.t('Gợi ý hoạt động 7 ngày theo mood'),
+                    onTap: () => context.push('/wellness-plan'),
+                  ),
+                  const SettingsDivider(),
+                  SettingsRow(
                     icon: Icons.cloud_outlined,
                     title: context.t('Thời tiết'),
                     subtitle: context.t('Theo dõi thời tiết & dự báo'),

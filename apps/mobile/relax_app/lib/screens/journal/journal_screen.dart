@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
+import '../../core/safety_detector.dart';
 import '../../core/theme.dart';
 import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
@@ -73,6 +74,13 @@ class _JournalScreenState extends State<JournalScreen> {
 
   Future<void> _save() async {
     if (_bodyCtrl.text.trim().isEmpty) return;
+
+    // Safety check — show SOS if crisis keywords detected.
+    final fullText = '${_titleCtrl.text} ${_bodyCtrl.text}';
+    if (SafetyDetector.containsCrisisKeywords(fullText)) {
+      SafetyDetector.showSafetyDialog(context);
+    }
+
     setState(() => _saving = true);
     try {
       final res = await RelaxApi.instance.post('/journals/me', body: {

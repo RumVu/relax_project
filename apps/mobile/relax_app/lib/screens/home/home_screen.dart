@@ -17,6 +17,7 @@ import 'widgets/home_header.dart';
 import 'widgets/home_mood_grid.dart';
 import 'widgets/methods_card.dart';
 import 'widgets/mood_tracking_card.dart';
+import 'widgets/smart_recommendations.dart';
 import 'widgets/speech_bubble.dart';
 
 // Trang chu — loi chao theo thoi tiet, meo + bong bong
@@ -152,7 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _CalmNowButton(),
               const SizedBox(height: 10),
               _BreakButton(),
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
+              const SmartRecommendations(),
               if (_loading)
                 const Center(
                   child: Padding(

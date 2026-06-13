@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/locale_controller.dart';
@@ -18,8 +20,21 @@ class JournalComposer extends StatelessWidget {
   final bool saving;
   final VoidCallback onSave;
 
+  static final _prompts = [
+    'Điều gì khiến bạn mỉm cười hôm nay?',
+    'Nếu cảm xúc lúc này là thời tiết, nó là gì?',
+    'Một điều nhỏ bạn biết ơn hôm nay?',
+    'Điều gì đang chiếm nhiều tâm trí bạn nhất?',
+    'Nếu được bỏ 1 thứ khỏi hôm nay, bạn chọn gì?',
+    'Bạn muốn nói gì với bản thân sáng nay?',
+    'Ai khiến bạn cảm thấy an toàn nhất?',
+    'Một kỷ niệm đẹp bạn muốn giữ lại?',
+  ];
+
   @override
   Widget build(BuildContext context) {
+    final prompt = _prompts[Random().nextInt(_prompts.length)];
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -29,6 +44,40 @@ class JournalComposer extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Mood-based journal prompt.
+          GestureDetector(
+            onTap: () {
+              bodyController.text = '${context.t(prompt)}\n\n';
+              bodyController.selection = TextSelection.collapsed(
+                  offset: bodyController.text.length);
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: const EdgeInsets.only(bottom: 10),
+              decoration: BoxDecoration(
+                color: RelaxColors.violet.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Text('💡', style: TextStyle(fontSize: 16)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      context.t(prompt),
+                      style: TextStyle(
+                        color: context.mutedText,
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.add, color: context.mutedText, size: 16),
+                ],
+              ),
+            ),
+          ),
           TextField(
             controller: titleController,
             decoration: InputDecoration(

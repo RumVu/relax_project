@@ -35,6 +35,8 @@ import 'screens/relax/relax_screen.dart';
 import 'screens/settings/settings_screen.dart';
 import 'screens/sounds/sounds_screen.dart';
 import 'screens/weather/weather_screen.dart';
+import 'screens/weekly_report/weekly_report_screen.dart';
+import 'screens/wellness_plan/wellness_plan_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -274,6 +276,16 @@ GoRouter _buildRouter(AuthState auth) {
         path: '/break',
         pageBuilder: (context, state) =>
             softPage(key: state.pageKey, child: const CravingBreakScreen()),
+      ),
+      GoRoute(
+        path: '/weekly-report',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const WeeklyReportScreen()),
+      ),
+      GoRoute(
+        path: '/wellness-plan',
+        pageBuilder: (context, state) =>
+            softPage(key: state.pageKey, child: const WellnessPlanScreen()),
       ),
       GoRoute(
         path: '/location',
