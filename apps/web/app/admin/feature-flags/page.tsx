@@ -44,7 +44,7 @@ export default function FeatureFlagsPage() {
 
   const toggle = async (key: string) => {
     try {
-      await apiFetch(`/feature-flags/${key}/toggle`, undefined, { method: 'PATCH' });
+      await apiFetch(`/feature-flags/${key}/toggle`, { method: 'PATCH' });
       pushToast({ tone: 'success', title: `Toggled ${key}` });
       await load();
     } catch {
@@ -55,7 +55,7 @@ export default function FeatureFlagsPage() {
   const deleteFlag = async (key: string) => {
     if (!confirm(`Delete flag "${key}"?`)) return;
     try {
-      await apiFetch(`/feature-flags/${key}`, undefined, { method: 'DELETE' });
+      await apiFetch(`/feature-flags/${key}`, { method: 'DELETE' });
       pushToast({ tone: 'success', title: `Deleted ${key}` });
       await load();
     } catch {
@@ -68,7 +68,7 @@ export default function FeatureFlagsPage() {
     if (!key) return;
     const label = prompt('Label:') ?? key;
     try {
-      await apiFetch('/feature-flags', undefined, {
+      await apiFetch('/feature-flags', {
         method: 'POST',
         body: JSON.stringify({ key, label, description: '', enabled: false }),
       });
@@ -108,7 +108,7 @@ export default function FeatureFlagsPage() {
         />
         <div className="mt-5 space-y-3">
           {flags.length === 0 && !loading && (
-            <p className="text-sm text-slate py-8 text-center">No feature flags yet. Click "Add Flag" to create one.</p>
+            <p className="text-sm text-slate py-8 text-center">No feature flags yet. Click &quot;Add Flag&quot; to create one.</p>
           )}
           {flags.map((flag) => (
             <div

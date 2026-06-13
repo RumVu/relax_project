@@ -185,21 +185,24 @@ export class AuthService {
         {
           userId,
           title: 'Ngày đầu tiên',
-          content: 'Hôm nay mình bắt đầu dùng Thi Ái. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
+          content:
+            'Hôm nay mình bắt đầu dùng Thi Ái. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
           mood: 'CALM',
           tags: ['reflection', 'first-day'],
         },
         {
           userId,
           title: 'Buổi sáng đẹp trời',
-          content: 'Sáng nay dậy sớm, hít thở và thiền 5 phút. Không ngờ mình lại có thể duy trì được 3 ngày liên tiếp.',
+          content:
+            'Sáng nay dậy sớm, hít thở và thiền 5 phút. Không ngờ mình lại có thể duy trì được 3 ngày liên tiếp.',
           mood: 'HAPPY',
           tags: ['morning', 'meditation'],
         },
         {
           userId,
           title: 'Stress công việc',
-          content: 'Deadline dồn dập. Dùng breathing exercise 4-2-4 để bình tĩnh lại. Thấy hiệu quả thật.',
+          content:
+            'Deadline dồn dập. Dùng breathing exercise 4-2-4 để bình tĩnh lại. Thấy hiệu quả thật.',
           mood: 'ANXIOUS',
           tags: ['work', 'breathing'],
         },
