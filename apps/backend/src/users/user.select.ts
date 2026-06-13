@@ -13,6 +13,30 @@ export const userSelect = {
   updatedAt: true,
   profile: true,
   preferences: true,
+  companion: {
+    select: {
+      id: true,
+      name: true,
+      type: true,
+      mood: true,
+      action: true,
+      level: true,
+      affection: true,
+      energy: true,
+      asset: {
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          key: true,
+          chineseZodiac: true,
+          zodiacSign: true,
+          previewImageUrl: true,
+          idleAnimationUrl: true,
+        },
+      },
+    },
+  },
   subscriptions: {
     orderBy: { createdAt: 'desc' },
     take: 1,

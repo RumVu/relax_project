@@ -1928,6 +1928,7 @@ async function seedAdminUser() {
       data: {
         name: 'Dashboard Admin',
         password,
+        avatar: `${ASSET_BASE}/avatars/demo-thi-ai.png`,
         role: UserRole.ADMIN,
         authProvider: AuthProvider.LOCAL,
         emailVerified: true,
@@ -1977,6 +1978,7 @@ async function seedAdminUser() {
       email: ADMIN_USER_EMAIL,
       name: 'Dashboard Admin',
       password,
+      avatar: `${ASSET_BASE}/avatars/demo-thi-ai.png`,
       role: UserRole.ADMIN,
       authProvider: AuthProvider.LOCAL,
       emailVerified: true,

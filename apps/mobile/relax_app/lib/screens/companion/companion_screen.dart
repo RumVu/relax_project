@@ -329,13 +329,21 @@ class _CompanionScreenState extends State<CompanionScreen>
                                             width: 110,
                                             fit: BoxFit.contain,
                                             errorBuilder: (ctx, err, stack) => Text(
-                                              fallbackEmoji(companionType),
+                                              fallbackEmoji(
+                                                companionType,
+                                                assetKey: asset?['key'] as String?,
+                                                chineseZodiac: asset?['chineseZodiac'] as String?,
+                                              ),
                                               style: const TextStyle(fontSize: 56),
                                             ),
                                           ),
                                         )
                                       : Text(
-                                          fallbackEmoji(companionType),
+                                          fallbackEmoji(
+                                            companionType,
+                                            assetKey: asset?['key'] as String?,
+                                            chineseZodiac: asset?['chineseZodiac'] as String?,
+                                          ),
                                           style: const TextStyle(fontSize: 56),
                                         ),
                                 ),

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import '../../../core/locale_controller.dart';
 import '../../../core/tour_controller.dart';
 import '../../../core/theme.dart';
+import '../../../core/auth_state.dart';
 import '../../../widgets/cat_mascot.dart';
 
 // Mascot speech bubble card with quote and companion link.
@@ -19,6 +21,11 @@ class SpeechBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.watch<AuthState>();
+    final user = auth.user;
+    final companion = user?['companion'] as Map?;
+    final companionName = (companion?['name'] as String?) ?? context.t('linh thú');
+
     final line = quote?['content'] != null
         ? context.t(quote!['content'] as String)
         : context.t(
@@ -59,7 +66,7 @@ class SpeechBubble extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            context.t('Chạm vào mèo để thăm linh thú ✦'),
+            context.t('Chạm vào để thăm {name} ✦', {'name': companionName}),
             style: TextStyle(
               color: context.mutedText,
               fontSize: 11,
