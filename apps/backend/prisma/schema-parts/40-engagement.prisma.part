@@ -2,6 +2,60 @@
 // MOOD, JOURNAL, RELAXATION
 // ============================================================================
 
+// --- Craving / Smoke Break ---
+
+enum CravingReason {
+  SMOKE_CRAVING
+  STRESS
+  BOREDOM
+  SLEEPY
+  OVERWHELMED
+  LONELY
+  HABIT
+  SOCIAL
+  OTHER
+}
+
+model CravingLog {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  reason        CravingReason
+  intensityBefore Int
+  intensityAfter  Int?
+  duration        Int?
+  activityUsed    String?
+  resisted        Boolean @default(true)
+  note            String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([reason])
+  @@index([createdAt])
+  @@map("craving_logs")
+}
+
+model SmokingGoal {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dailyTarget     Int
+  currentDaily    Int
+  replacementGoal Int       @default(1)
+  startDate       DateTime  @default(now())
+  isActive        Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("smoking_goals")
+}
+
+// --- End Craving / Smoke Break ---
+
 enum TriggerType {
   WORK
   DEADLINE

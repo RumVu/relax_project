@@ -27,6 +27,41 @@ export class AmbientSoundsService {
     return buildPage(items, total, query);
   }
 
+  /**
+   * Admin listing — returns all sounds including inactive ones, with
+   * optional category filter.
+   */
+  async findAllAdmin(query: {
+    category?: string;
+    isActive?: boolean;
+    skip?: number;
+    limit?: number;
+  }) {
+    const where: Prisma.AmbientSoundWhereInput = {};
+
+    if (query.category?.trim()) {
+      where.category = query.category.trim().toUpperCase();
+    }
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.ambientSound.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip ?? 0,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.ambientSound.count({ where }),
+    ]);
+
+    return buildPage(items, total, {
+      skip: query.skip ?? 0,
+      limit: query.limit ?? 50,
+    });
+  }
+
   findByCategory(category: string) {
     return this.prisma.ambientSound.findMany({
       where: { category },
@@ -80,6 +115,16 @@ export class AmbientSoundsService {
 
     if (query.category?.trim()) {
       where.category = query.category.trim().toUpperCase();
+    }
+
+    if (query.excludeCategories?.trim()) {
+      const excluded = query.excludeCategories
+        .split(',')
+        .map((c) => c.trim().toUpperCase())
+        .filter(Boolean);
+      if (excluded.length) {
+        where.category = { ...((where.category as any) ?? {}), notIn: excluded };
+      }
     }
 
     return where;

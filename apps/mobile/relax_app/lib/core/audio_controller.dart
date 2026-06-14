@@ -23,6 +23,34 @@ class AudioController extends ChangeNotifier {
   final AudioPlayer _player = AudioPlayer();
   StreamSubscription<PlayerState>? _playerStateSub;
 
+  Timer? _sleepTimer;
+  int _sleepTimeRemaining = 0; // giây còn lại
+  int get sleepTimeRemaining => _sleepTimeRemaining;
+  bool get isSleepTimerActive => _sleepTimer != null;
+
+  void startSleepTimer(int minutes) {
+    _sleepTimer?.cancel();
+    _sleepTimeRemaining = minutes * 60;
+    notifyListeners();
+
+    _sleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_sleepTimeRemaining <= 1) {
+        stop();
+        cancelSleepTimer();
+      } else {
+        _sleepTimeRemaining--;
+        notifyListeners();
+      }
+    });
+  }
+
+  void cancelSleepTimer() {
+    _sleepTimer?.cancel();
+    _sleepTimer = null;
+    _sleepTimeRemaining = 0;
+    notifyListeners();
+  }
+
   /// Broadcast emit khi MỘT track phát xong. Sounds screen / mini-player
   /// có thể listen để hiện JourneyPrompt "Nghe bài khác?". Broadcast
   /// để nhiều listener cùng nghe được.
@@ -162,6 +190,7 @@ class AudioController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _sleepTimer?.cancel();
     _playerStateSub?.cancel();
     _completionCtrl.close();
     _player.dispose();

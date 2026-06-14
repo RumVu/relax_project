@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:just_audio/just_audio.dart';
+import 'dart:async';
 
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/soft_toast.dart';
 
 /// Adaptive Soundscape — layer multiple ambient sounds with individual volume.
 class SoundscapeScreen extends StatefulWidget {
-  const SoundscapeScreen({super.key});
+  const SoundscapeScreen({super.key, this.preset});
+  final String? preset;
 
   @override
   State<SoundscapeScreen> createState() => _SoundscapeScreenState();
@@ -22,20 +25,27 @@ class _SoundscapeScreenState extends State<SoundscapeScreen> {
   final Map<String, bool> _active = {};
   final Map<String, AudioPlayer> _players = {};
 
+  Timer? _localSleepTimer;
+  int _sleepTimeRemaining = 0; // seconds
+
   // ── Mood presets ───────────────────────────────────────────────────
   // Each preset maps a display name to a list of (category, volume) pairs.
   static const _moodPresets = <String, Map<String, double>>{
-    'Thư giãn': {'RAIN': 0.6, 'MUSIC': 0.4},
-    'Tập trung': {'WHITE_NOISE': 0.5, 'CAFE': 0.3},
-    'Ngủ sâu': {'WHITE_NOISE': 0.7, 'OCEAN': 0.5},
-    'Năng lượng': {'NATURE': 0.6, 'NATURE_BIRDS': 0.5},
+    'Lo âu': {'RAIN': 0.6, 'MUSIC': 0.4},
+    'Căng thẳng': {'WHITE_NOISE': 0.5, 'AMBIENT': 0.5},
+    'U sầu': {'MUSIC': 0.6, 'AMBIENT': 0.4},
+    'Mệt mỏi': {'NATURE': 0.6, 'OCEAN': 0.3},
+    'Tập trung': {'WHITE_NOISE': 0.4, 'MUSIC': 0.5},
+    'Buồn ngủ': {'OCEAN': 0.7, 'RAIN': 0.3},
   };
 
   static const _presetEmoji = <String, String>{
-    'Thư giãn': '😌',
+    'Lo âu': '😰',
+    'Căng thẳng': '🤯',
+    'U sầu': '😢',
+    'Mệt mỏi': '🥱',
     'Tập trung': '🎯',
-    'Ngủ sâu': '🌙',
-    'Năng lượng': '⚡',
+    'Buồn ngủ': '😴',
   };
 
   static const _categoryEmoji = <String, String>{
@@ -62,10 +72,45 @@ class _SoundscapeScreenState extends State<SoundscapeScreen> {
 
   @override
   void dispose() {
+    _localSleepTimer?.cancel();
     for (final p in _players.values) {
       p.dispose();
     }
     super.dispose();
+  }
+
+  void _startSleepTimer(int minutes) {
+    _localSleepTimer?.cancel();
+    setState(() {
+      _sleepTimeRemaining = minutes * 60;
+    });
+    _localSleepTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (_sleepTimeRemaining <= 1) {
+        _stopAllSounds();
+        _localSleepTimer?.cancel();
+        setState(() {
+          _localSleepTimer = null;
+          _sleepTimeRemaining = 0;
+        });
+        showSoftToast(context, message: context.t('Hết giờ! Đã tắt nhạc tự động 🌙'), tone: SoftToastTone.success);
+      } else {
+        setState(() {
+          _sleepTimeRemaining--;
+        });
+      }
+    });
+  }
+
+  void _stopAllSounds() {
+    for (final id in _active.keys.toList()) {
+      if (_active[id] == true) _stopSound(id);
+    }
+    setState(() {
+      _active.clear();
+      _volumes.clear();
+      _activePreset = null;
+    });
   }
 
   Future<void> _load() async {
@@ -81,7 +126,14 @@ class _SoundscapeScreenState extends State<SoundscapeScreen> {
               .toList()
           : [];
     } catch (_) {}
-    if (mounted) setState(() => _loading = false);
+    if (mounted) {
+      setState(() {
+        _loading = false;
+        if (widget.preset != null) {
+          _applyPreset(widget.preset!);
+        }
+      });
+    }
   }
 
   // ── Audio helpers ──────────────────────────────────────────────────
@@ -310,8 +362,52 @@ class _SoundscapeScreenState extends State<SoundscapeScreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ── Sound list header ──────────────────────
+                  Row(
+                    children: [
+                      Text(
+                        context.t('Hẹn giờ ngủ'),
+                        style: TextStyle(
+                          color: context.appText,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (_localSleepTimer != null)
+                        Text(
+                          '(${_sleepTimeRemaining ~/ 60}:${(_sleepTimeRemaining % 60).toString().padLeft(2, '0')})',
+                          style: const TextStyle(
+                            color: RelaxColors.violet,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
+                        ),
+                      const Spacer(),
+                      DropdownButton<int>(
+                        value: _localSleepTimer == null ? null : (_sleepTimeRemaining > 1800 ? 60 : (_sleepTimeRemaining > 900 ? 30 : 15)),
+                        hint: Text(context.t('Tắt')),
+                        underline: const SizedBox(),
+                        style: TextStyle(color: context.appText, fontSize: 13),
+                        onChanged: (val) {
+                          if (val == null) {
+                            _localSleepTimer?.cancel();
+                            setState(() {
+                              _localSleepTimer = null;
+                              _sleepTimeRemaining = 0;
+                            });
+                          } else {
+                            _startSleepTimer(val);
+                          }
+                        },
+                        items: [
+                          DropdownMenuItem<int>(value: 15, child: Text('15 ${context.t("phút")}')),
+                          DropdownMenuItem<int>(value: 30, child: Text('30 ${context.t("phút")}')),
+                          DropdownMenuItem<int>(value: 60, child: Text('60 ${context.t("phút")}')),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Text(

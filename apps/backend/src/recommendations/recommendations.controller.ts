@@ -30,6 +30,18 @@ export class RecommendationsController {
     return this.service.getTodayRecommendations(user.id);
   }
 
+  @ApiOperation({
+    summary: 'Get my personal mood toolkit based on current mood',
+  })
+  @ApiOkResponse({
+    description: 'Personal mood toolkit.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/toolkit')
+  getToolkit(@CurrentUser() user: AuthUser) {
+    return this.service.getPersonalToolkit(user.id);
+  }
+
   @ApiOperation({ summary: 'Refresh recommendations for current user' })
   @ApiOkResponse({ description: 'Fresh recommendations regenerated.' })
   @UseGuards(JwtAuthGuard)

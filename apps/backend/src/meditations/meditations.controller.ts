@@ -1,9 +1,22 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import type { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateMeditationSessionDto } from './dto/create-meditation-session.dto';
+import { CreateMeditationGuideDto } from './dto/create-meditation-guide.dto';
+import { UpdateMeditationGuideDto } from './dto/update-meditation-guide.dto';
 import { MeditationsService } from './meditations.service';
 
 @ApiTags('Meditations')
@@ -17,8 +30,34 @@ export class MeditationsController {
   findGuides(
     @Query('difficulty') difficulty?: string,
     @Query('focusArea') focusArea?: string,
+    @Query('admin') admin?: string,
   ) {
-    return this.meditationsService.findGuides(difficulty, focusArea);
+    return this.meditationsService.findGuides(
+      difficulty,
+      focusArea,
+      admin === 'true',
+    );
+  }
+
+  @ApiOperation({ summary: 'Create a new meditation guide' })
+  @AdminOnly()
+  @Post('guides')
+  createGuide(@Body() dto: CreateMeditationGuideDto) {
+    return this.meditationsService.createGuide(dto);
+  }
+
+  @ApiOperation({ summary: 'Update a meditation guide' })
+  @AdminOnly()
+  @Patch('guides/:id')
+  updateGuide(@Param('id') id: string, @Body() dto: UpdateMeditationGuideDto) {
+    return this.meditationsService.updateGuide(id, dto);
+  }
+
+  @ApiOperation({ summary: 'Delete a meditation guide' })
+  @AdminOnly()
+  @Delete('guides/:id')
+  deleteGuide(@Param('id') id: string) {
+    return this.meditationsService.deleteGuide(id);
   }
 
   @ApiOperation({ summary: 'Log a meditation session' })

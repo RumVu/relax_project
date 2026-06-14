@@ -128,7 +128,7 @@ class _RecCard extends StatelessWidget {
         context.push(route);
       },
       child: Container(
-        width: 160,
+        constraints: const BoxConstraints(minWidth: 140, maxWidth: 170),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: context.surface,

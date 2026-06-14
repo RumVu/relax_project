@@ -13,6 +13,7 @@ import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 
 import '../../core/vault_lock.dart';
+import '../../core/calendar_integration_service.dart';
 import 'helpers/account_deletion.dart';
 import 'widgets/settings_shared.dart';
 import 'widgets/notification_card.dart';
@@ -316,13 +317,26 @@ class SettingsScreen extends StatelessWidget {
               SectionLabel(context.t('Bảo mật nhật ký')),
               SettingsCard(
                 children: [
-                  _VaultToggleRow(),
-                  const SettingsDivider(),
-                  _HidePreviewToggleRow(),
-                  const SettingsDivider(),
                   _PrivateAiToggleRow(),
                   const SettingsDivider(),
                   _ExportJournalsRow(),
+                ],
+              ),
+              const SizedBox(height: 24),
+              SectionLabel(context.t('Tùy chỉnh & Lịch')),
+              SettingsCard(
+                children: [
+                  _CalendarSyncToggleRow(),
+                  const SettingsDivider(),
+                  _NotificationStyleRow(),
+                  const SettingsDivider(),
+                  SettingsRow(
+                    icon: Icons.feedback_outlined,
+                    title: context.t('Gửi phản hồi đóng góp'),
+                    subtitle: context.t('Báo lỗi, đề xuất tính năng cho phát triển'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/feedback'),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -383,6 +397,7 @@ class SettingsScreen extends StatelessWidget {
 
 
 
+  /*
   void _showSafetySheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -467,7 +482,9 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+  */
 
+  /*
   Widget _safetyRow(
       BuildContext ctx, String flag, String title, String number, String note) {
     return Container(
@@ -512,6 +529,7 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
+  */
 
   void _showAboutDialog(BuildContext context) {
     showAboutDialog(
@@ -520,98 +538,6 @@ class SettingsScreen extends StatelessWidget {
       applicationVersion: '1.1.1.0',
       applicationLegalese:
           context.t('Theo dõi cảm xúc, hít thở và nhật ký mỗi ngày — phần thưởng nhỏ cho người chịu khó chăm sóc bản thân.'),
-    );
-  }
-}
-
-class _VaultToggleRow extends StatefulWidget {
-  @override
-  State<_VaultToggleRow> createState() => _VaultToggleRowState();
-}
-
-class _VaultToggleRowState extends State<_VaultToggleRow> {
-  bool _enabled = false;
-  bool _loaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _check();
-  }
-
-  Future<void> _check() async {
-    final enabled = await VaultLock.instance.isEnabled;
-    if (mounted) setState(() { _enabled = enabled; _loaded = true; });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_loaded) return const SizedBox.shrink();
-    return SettingsRow(
-      icon: Icons.lock_outline,
-      title: context.t('Khóa nhật ký bằng PIN'),
-      subtitle: _enabled
-          ? context.t('Nhật ký được bảo vệ bằng mã PIN')
-          : context.t('Bật để yêu cầu PIN khi mở nhật ký'),
-      trailing: Switch.adaptive(
-        value: _enabled,
-        activeTrackColor: RelaxColors.violet,
-        onChanged: (val) async {
-          if (val) {
-            final ok = await VaultLock.setupPin(context);
-            if (ok) setState(() => _enabled = true);
-          } else {
-            final ok = await VaultLock.unlock(context);
-            if (ok) {
-              await VaultLock.instance.removePin();
-              setState(() => _enabled = false);
-            }
-          }
-        },
-      ),
-      onTap: () {},
-    );
-  }
-}
-
-class _HidePreviewToggleRow extends StatefulWidget {
-  @override
-  State<_HidePreviewToggleRow> createState() => _HidePreviewToggleRowState();
-}
-
-class _HidePreviewToggleRowState extends State<_HidePreviewToggleRow> {
-  bool _enabled = false;
-  bool _loaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    final val = await VaultLock.getHidePreview();
-    if (mounted) setState(() { _enabled = val; _loaded = true; });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_loaded) return const SizedBox.shrink();
-    return SettingsRow(
-      icon: Icons.visibility_off_outlined,
-      title: context.t('Ẩn nội dung nhật ký'),
-      subtitle: _enabled
-          ? context.t('Nội dung nhật ký đã được ẩn trong danh sách')
-          : context.t('Hiển thị nội dung xem trước trong danh sách'),
-      trailing: Switch.adaptive(
-        value: _enabled,
-        activeTrackColor: RelaxColors.violet,
-        onChanged: (val) async {
-          await VaultLock.setHidePreview(val);
-          setState(() => _enabled = val);
-        },
-      ),
-      onTap: () {},
     );
   }
 }
@@ -809,6 +735,174 @@ class _EmergencyContactRowState extends State<_EmergencyContactRow> {
           ? context.t('Thêm số người thân tin tưởng')
           : _contact,
       onTap: _edit,
+    );
+  }
+}
+
+class _CalendarSyncToggleRow extends StatefulWidget {
+  @override
+  State<_CalendarSyncToggleRow> createState() => _CalendarSyncToggleRowState();
+}
+
+class _CalendarSyncToggleRowState extends State<_CalendarSyncToggleRow> {
+  bool _syncing = false;
+  
+  @override
+  Widget build(BuildContext context) {
+    final service = CalendarIntegrationService.instance;
+    return SettingsRow(
+      icon: Icons.calendar_today_outlined,
+      title: context.t('Đồng bộ Lịch cá nhân'),
+      subtitle: service.isSynced
+          ? context.t('Đã đồng bộ. Gợi ý wellness sẽ cập nhật theo lịch làm việc.')
+          : context.t('Đồng bộ Google/Apple Calendar để tự động gợi ý bài tập'),
+      trailing: _syncing 
+          ? const SizedBox(
+              width: 20, 
+              height: 20, 
+              child: CircularProgressIndicator(strokeWidth: 2, color: RelaxColors.violet)
+            )
+          : Switch.adaptive(
+              value: service.isSynced,
+              activeTrackColor: RelaxColors.violet,
+              onChanged: (val) async {
+                setState(() => _syncing = true);
+                await service.toggleSync();
+                setState(() => _syncing = false);
+                if (mounted) {
+                  showSoftToast(
+                    context,
+                    message: service.isSynced 
+                        ? context.t('Đã đồng bộ lịch thành công 📅') 
+                        : context.t('Đã tắt đồng bộ lịch'),
+                    tone: SoftToastTone.success,
+                  );
+                }
+              },
+            ),
+      onTap: () {},
+    );
+  }
+}
+
+class _NotificationStyleRow extends StatefulWidget {
+  @override
+  State<_NotificationStyleRow> createState() => _NotificationStyleRowState();
+}
+
+class _NotificationStyleRowState extends State<_NotificationStyleRow> {
+  String _style = 'Gentle';
+  
+  final Map<String, String> _previews = {
+    'Gentle': '“Nghỉ một chút nha bạn ơi.”',
+    'Funny': '“Não bạn đang quá tải rồi, cho nó thở đi thôi!”',
+    'Minimal': '“2-minute break.”',
+    'Companion': '“Linh thú: Meow! Hãy dừng lại hít thở một tẹo nào.”',
+    'Silent': 'Chỉ hiện huy hiệu ứng dụng (Silent)',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return SettingsRow(
+      icon: Icons.notifications_active_outlined,
+      title: context.t('Phong cách thông báo'),
+      subtitle: '${context.t("Đang chọn")}: $_style',
+      trailing: const Icon(Icons.chevron_right),
+      onTap: () => _showStyleChooser(context),
+    );
+  }
+
+  void _showStyleChooser(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    context.t('Phong cách Thông báo (Lab) 🧪'),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: context.appText,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.t('Chọn phong cách nhắc nhở thư giãn phù hợp nhất với bạn.'),
+                    style: TextStyle(fontSize: 12, color: context.mutedText),
+                  ),
+                  const SizedBox(height: 16),
+                  ..._previews.keys.map((style) {
+                    final selected = _style == style;
+                    return InkWell(
+                      onTap: () {
+                        setState(() => _style = style);
+                        setModalState(() {});
+                        showSoftToast(
+                          context,
+                          message: '${context.t("Đã chuyển sang phong cách:")} $style 🔔',
+                          tone: SoftToastTone.success,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: selected ? RelaxColors.violet.withValues(alpha: 0.08) : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              selected ? Icons.radio_button_checked : Icons.radio_button_off,
+                              color: selected ? RelaxColors.violet : context.mutedText,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.t(style),
+                                    style: TextStyle(
+                                      fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                                      color: context.appText,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    context.t(_previews[style]!),
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontStyle: FontStyle.italic,
+                                      color: context.mutedText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

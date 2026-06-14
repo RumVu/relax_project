@@ -24,6 +24,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { CreateMoodCheckinDto } from './dto/create-mood-checkin.dto';
+import { CreateVoiceMoodCheckinDto } from './dto/create-voice-mood-checkin.dto';
 import { MoodAnalyticsQueryDto } from './dto/mood-analytics-query.dto';
 import { MoodCheckinQueryDto } from './dto/mood-checkin-query.dto';
 import {
@@ -170,6 +171,17 @@ export class MoodCheckinsController {
   @Post('me')
   createMine(@CurrentUser() user: AuthUser, @Body() dto: CreateMoodCheckinDto) {
     return this.moodCheckinsService.create(user.id, dto);
+  }
+
+  @ApiOperation({ summary: 'Analyze voice text via Gemini AI to draft check-in options' })
+  @ApiCreatedResponse({ description: 'AI voice check-in suggestion.' })
+  @UseGuards(JwtAuthGuard)
+  @Post('voice')
+  analyzeVoice(
+    @CurrentUser() user: AuthUser,
+    @Body() dto: CreateVoiceMoodCheckinDto,
+  ) {
+    return this.moodCheckinsService.analyzeVoice(user.id, dto.text);
   }
 
   @ApiOperation({ summary: 'List mood check-ins by user id (admin)' })

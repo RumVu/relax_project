@@ -57,13 +57,15 @@ class MethodsCard extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(m.$2, color: RelaxColors.violet),
-                        const SizedBox(height: 6),
+                        Icon(m.$2, color: RelaxColors.violet, size: 22),
+                        const SizedBox(height: 4),
                         Text(
                           context.t(m.$1),
                           textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 9,
                             fontWeight: FontWeight.w700,
                             color: context.appText,
                           ),

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../core/pdf_wellness_report.dart';
+import '../../widgets/soft_toast.dart';
 
 /// Weekly wellness report — summary tuần: mood trend, activities, streak.
 /// Data từ /mood-checkins/me/weekly-stats + /relax-sessions/me/stats.
@@ -48,6 +50,35 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
       }
     } catch (_) {}
     if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _exportPdf() async {
+    showSoftToast(context, message: context.t('Đang khởi tạo báo cáo PDF...'), tone: SoftToastTone.info);
+    
+    final data = {
+      'dominantMood': _weeklyStats.isNotEmpty ? (_weeklyStats[0]['topMood'] ?? 'Bình thường') : 'Bình thường',
+      'avgIntensity': _weeklyStats.isNotEmpty ? '${((_weeklyStats[0]['averageMoodScore'] as num?)?.toDouble() ?? 3).toStringAsFixed(1)}/5' : '3/5',
+      'streak': '${(_sessionStats['streak']?['current'] as num?)?.toInt() ?? 0} ngày',
+      'activities': (_sessionStats['favoriteActivities'] as List? ?? []).map((e) {
+        final m = e as Map;
+        return '${m['activityType']}: ${m['count']} lần';
+      }).toList(),
+      'aiRecommendation': 'Bạn đang duy trì một nhịp sống tốt. Hãy tiếp tục thực hành hít thở sâu và ghi chép cảm xúc hàng ngày để điều hòa căng thẳng.',
+    };
+
+    try {
+      final file = await PdfWellnessReport.generateReport(data);
+      if (!mounted) return;
+      showSoftToast(
+        context,
+        message: '${context.t("Đã lưu PDF tại:")} ${file.path}',
+        tone: SoftToastTone.success,
+      );
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context, message: e.toString(), tone: SoftToastTone.error);
+      }
+    }
   }
 
   @override
@@ -97,6 +128,30 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                     context,
                     title: context.t('Hoạt động yêu thích'),
                     child: _FavoriteActivities(stats: _sessionStats),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        elevation: 0,
+                      ),
+                      onPressed: _exportPdf,
+                      icon: const Icon(Icons.picture_as_pdf, color: Colors.white),
+                      label: Text(
+                        context.t('Xuất báo cáo PDF 📄'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),

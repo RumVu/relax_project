@@ -37,8 +37,14 @@ class _SoundsScreenState extends State<SoundsScreen> {
       _error = null;
     });
     try {
+      final query = <String, dynamic>{'limit': 100};
+      if (widget.category != null) {
+        query['category'] = widget.category;
+      } else {
+        query['excludeCategories'] = 'PODCAST,MEDITATION,BUDDHA,NOTIFICATION';
+      }
       final res = await RelaxApi.instance
-          .get('/ambient-sounds', query: {'limit': 40});
+          .get('/ambient-sounds', query: query);
       final data = res.data;
       final items = data is Map ? data['items'] : data;
       var list = (items is List)
@@ -48,17 +54,6 @@ class _SoundsScreenState extends State<SoundsScreen> {
               .where((e) => (e['soundUrl'] as String?)?.isNotEmpty == true)
               .toList()
           : <Map<String, dynamic>>[];
-      if (widget.category != null) {
-        list = list.where((e) => e['category'] == widget.category).toList();
-      } else {
-        list = list
-            .where((e) =>
-                e['category'] != 'PODCAST' &&
-                e['category'] != 'MEDITATION' &&
-                e['category'] != 'BUDDHA' &&
-                e['category'] != 'NOTIFICATION')
-            .toList();
-      }
       _tracks = list;
       if (mounted) context.read<AudioController>().setQueue(_tracks);
     } catch (e) {

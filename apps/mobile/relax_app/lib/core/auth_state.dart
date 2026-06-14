@@ -72,7 +72,7 @@ class AuthState extends ChangeNotifier {
 
     try {
       debugPrint('Bootstrap: Có token, gọi API /users/me...');
-      final res = await RelaxApi.instance.get('/users/me');
+      final res = await RelaxApi.instance.get('/auth/me');
       debugPrint('Bootstrap: Kết quả API /users/me = ${res.statusCode}');
       if (res.statusCode == 200 && res.data is Map) {
         _user = Map<String, dynamic>.from(res.data as Map);
@@ -279,7 +279,7 @@ class AuthState extends ChangeNotifier {
 
   Future<void> refreshUser() async {
     try {
-      final res = await RelaxApi.instance.get('/users/me');
+      final res = await RelaxApi.instance.get('/auth/me');
       if (res.statusCode == 200 && res.data is Map) {
         _user = Map<String, dynamic>.from(res.data as Map);
         await _mergeProfileName();

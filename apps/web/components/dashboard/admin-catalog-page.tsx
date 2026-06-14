@@ -661,6 +661,68 @@ export function AdminCatalogPage({
                   <RefreshCcw className="h-4 w-4" />
                   {t('catalog.refresh')}
                 </Button>
+                {['quotes', 'sounds', 'meditations'].includes(kind) ? (
+                  <span className="relative inline-flex">
+                    <input
+                      accept=".csv"
+                      className="absolute inset-0 cursor-pointer opacity-0"
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = async (e) => {
+                            const text = e.target?.result as string;
+                            if (text) {
+                              try {
+                                const endpointMap: Record<string, string> = {
+                                  quotes: '/content/import/quotes',
+                                  sounds: '/content/import/sounds',
+                                  meditations: '/content/import/meditations',
+                                };
+                                const impUrl = endpointMap[kind];
+                                if (!impUrl) return;
+
+                                const res = await apiFetch<{
+                                  imported: number;
+                                  skipped: number;
+                                  total: number;
+                                }>(impUrl, {
+                                  method: 'POST',
+                                  body: JSON.stringify({ csvData: text }),
+                                });
+
+                                pushToast({
+                                  tone: 'success',
+                                  title: t('catalog.toast.imported', {
+                                    count: String(res.imported),
+                                  }),
+                                  message: `Total: ${res.total}, Skipped: ${res.skipped}`,
+                                });
+                                void loadItems(false);
+                              } catch (err) {
+                                pushToast({
+                                  tone: 'error',
+                                  title: t('catalog.toast.importFailed'),
+                                  message:
+                                    err instanceof Error
+                                      ? err.message
+                                      : 'Unknown error',
+                                });
+                              }
+                            }
+                          };
+                          reader.readAsText(file);
+                        }
+                        event.currentTarget.value = '';
+                      }}
+                      type="file"
+                    />
+                    <Button variant="secondary">
+                      <UploadCloud className="h-4 w-4" />
+                      {t('admin.btn.importCsv')}
+                    </Button>
+                  </span>
+                ) : null}
                 <Button onClick={resetDraft}>
                   <Plus className="h-4 w-4" />
                   {t('catalog.create.new')}

@@ -41,7 +41,7 @@ class AppShell extends StatefulWidget {
   State<AppShell> createState() => _AppShellState();
 }
 
-class _AppShellState extends State<AppShell> {
+class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
   static const _tabCount = 4;
   late int _index = widget.initialTab.clamp(0, _tabCount - 1);
   final _built = <int, Widget>{};
@@ -53,6 +53,7 @@ class _AppShellState extends State<AppShell> {
     super.initState();
     // Listen audio completion ở shell level → JourneyPrompt fire dù
     // user đang ở tab nào. AppShell sống suốt session sau login.
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final audio = context.read<AudioController>();
       _audioCompletionSub = audio.onTrackCompleted.listen(_onAudioFinished);
@@ -112,7 +113,15 @@ class _AppShellState extends State<AppShell> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      context.read<AuthState>().refreshUser();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     TourController.instance.removeListener(_onTourStepChanged);
     _audioCompletionSub?.cancel();
     super.dispose();
@@ -284,18 +293,11 @@ class _AppShellState extends State<AppShell> {
   }
 
   Widget _screen(int i) {
-    return _built.putIfAbsent(i, () {
-      switch (i) {
-        case 0:
-          return const HomeScreen();
-        case 1:
-          return const RelaxScreen();
-        case 2:
-          return const AnalyticsScreen(embedded: true);
-        case 3:
-        default:
-          return const SettingsScreen();
-      }
+    if (i == 3) return const SettingsScreen();
+    return _built.putIfAbsent(i, () => switch (i) {
+      0 => const HomeScreen(),
+      1 => const RelaxScreen(),
+      _ => const AnalyticsScreen(embedded: true),
     });
   }
 
@@ -344,12 +346,12 @@ class _AppShellState extends State<AppShell> {
             bottomNavigationBar: NavigationBar(
               selectedIndex: _index,
               onDestinationSelected: (i) {
-                if (i == _index) return;
-                // Haptic nhẹ cho tap chính xác — không rung mạnh, chỉ nhỏ.
+                if (i == _index && i != 3) return;
+                if (i == _index) {
+                  context.read<AuthState>().refreshUser();
+                  return;
+                }
                 HapticFeedback.selectionClick();
-                // Flash veil 0 → 0.6 → 0 trong ~440ms để có cảm giác
-                // "chớp mắt" dịu dàng khi đổi tab — không reset state
-                // của tab cũ.
                 setState(() {
                   _veilOpacity = 0.6;
                   _index = i;

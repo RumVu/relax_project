@@ -1,0 +1,179 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { FriendRequestStatus } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
+import { StartGroupChallengeDto } from './dto/start-group-challenge.dto';
+
+@Injectable()
+export class BuddyCircleService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  /** Get user's circle members (accepted friends, limit 5). */
+  async getMyCircle(userId: string) {
+    const friendships = await this.prisma.friend.findMany({
+      where: {
+        OR: [
+          { userId, status: FriendRequestStatus.ACCEPTED },
+          { friendId: userId, status: FriendRequestStatus.ACCEPTED },
+        ],
+      },
+      take: 5,
+      include: {
+        user: {
+          select: { id: true, email: true, name: true, avatar: true },
+        },
+        friend: {
+          select: { id: true, email: true, name: true, avatar: true },
+        },
+      },
+    });
+
+    return friendships.map((f) => (f.userId === userId ? f.friend : f.user));
+  }
+
+  /** Send a calm nudge notification to a friend. */
+  async sendNudge(userId: string, targetUserId: string) {
+    // Verify they are actually friends
+    const friendship = await this.prisma.friend.findFirst({
+      where: {
+        OR: [
+          { userId, friendId: targetUserId },
+          { userId: targetUserId, friendId: userId },
+        ],
+        status: FriendRequestStatus.ACCEPTED,
+      },
+    });
+
+    if (!friendship) {
+      throw new BadRequestException(
+        'Bạn chỉ có thể gửi nhắc nhẹ cho bạn bè đã kết nối',
+      );
+    }
+
+    const sender = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true },
+    });
+
+    const senderName = sender?.name ?? sender?.email?.split('@')[0] ?? 'Bạn bè';
+
+    await this.prisma.notification.create({
+      data: {
+        userId: targetUserId,
+        title: 'Nhắc nhẹ từ ' + senderName + ' 💜',
+        message: 'Bạn ơi, nghỉ ngơi một chút đi 💜',
+        type: 'IN_APP',
+      },
+    });
+
+    return { success: true, message: 'Đã gửi nhắc nhẹ!' };
+  }
+
+  /** Get feed entries from circle members (PUBLIC, achievements/milestones only). */
+  async getCircleFeed(userId: string) {
+    const members = await this.getMyCircle(userId);
+    const memberIds = members.map((m) => m.id);
+    const userIds = [userId, ...memberIds];
+
+    return this.prisma.feedEntry.findMany({
+      where: {
+        userId: { in: userIds },
+        visibility: 'PUBLIC',
+        type: { in: ['ACHIEVEMENT', 'MILESTONE', 'STREAK', 'CHALLENGE'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      include: {
+        user: {
+          select: { id: true, name: true, avatar: true },
+        },
+      },
+    });
+  }
+
+  /** Start a group challenge and auto-join circle members. */
+  async startGroupChallenge(userId: string, dto: StartGroupChallengeDto) {
+    const members = await this.getMyCircle(userId);
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setDate(endDate.getDate() + dto.durationDays);
+
+    const challenge = await this.prisma.challenge.create({
+      data: {
+        title: dto.title,
+        description: dto.description,
+        type: 'GROUP',
+        difficulty: 'MEDIUM',
+        durationDays: dto.durationDays,
+        goal: dto.goal,
+        reward: dto.goal * 10,
+        createdBy: userId,
+        startDate: now,
+        endDate,
+        isActive: true,
+      },
+    });
+
+    // Auto-join creator + circle members
+    const allUserIds = [userId, ...members.map((m) => m.id)];
+    await this.prisma.userChallenge.createMany({
+      data: allUserIds.map((uid) => ({
+        userId: uid,
+        challengeId: challenge.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    return {
+      challenge,
+      participants: allUserIds.length,
+    };
+  }
+
+  /** Get circle stats: each member's streak and session count this week. */
+  async getCircleStats(userId: string) {
+    const members = await this.getMyCircle(userId);
+    const allIds = [userId, ...members.map((m) => m.id)];
+
+    const now = new Date();
+    const weekStart = new Date(now);
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+    weekStart.setHours(0, 0, 0, 0);
+
+    const [streaks, sessionCounts] = await Promise.all([
+      this.prisma.userStreak.findMany({
+        where: { userId: { in: allIds } },
+        select: {
+          userId: true,
+          currentStreak: true,
+          longestStreak: true,
+        },
+      }),
+      this.prisma.relaxSession.groupBy({
+        by: ['userId'],
+        where: {
+          userId: { in: allIds },
+          startedAt: { gte: weekStart },
+        },
+        _count: { id: true },
+      }),
+    ]);
+
+    const streakMap = new Map(streaks.map((s) => [s.userId, s]));
+    const sessionMap = new Map(
+      sessionCounts.map((s) => [s.userId, s._count.id]),
+    );
+
+    // Fetch user info for all members including self
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: allIds } },
+      select: { id: true, name: true, avatar: true, email: true },
+    });
+
+    return users.map((u) => ({
+      user: u,
+      currentStreak: streakMap.get(u.id)?.currentStreak ?? 0,
+      longestStreak: streakMap.get(u.id)?.longestStreak ?? 0,
+      sessionsThisWeek: sessionMap.get(u.id) ?? 0,
+    }));
+  }
+}

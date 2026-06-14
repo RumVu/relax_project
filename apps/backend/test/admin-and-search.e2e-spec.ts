@@ -234,4 +234,64 @@ describe('Admin modules and list search/filter (e2e)', () => {
         .expect(403);
     });
   });
+
+  describe('Feedbacks & Bug Reports', () => {
+    it('allows user to submit feedback', async () => {
+      await request(app.getHttpServer())
+        .post('/feedbacks')
+        .set('Authorization', auth(userToken))
+        .send({ subject: 'Bug report', message: `${tag} app crashed on home screen` })
+        .expect(201)
+        .expect(({ body }) => {
+          expect(body.id).toBeDefined();
+          expect(body.subject).toBe('Bug report');
+        });
+    });
+
+    it('allows admin to list feedbacks', async () => {
+      await request(app.getHttpServer())
+        .get('/feedbacks')
+        .set('Authorization', auth(adminToken))
+        .expect(200)
+        .expect(({ body }) => {
+          expect(Array.isArray(body)).toBe(true);
+          expect(body.some((fb: any) => fb.message.includes(tag))).toBe(true);
+        });
+    });
+  });
+
+  describe('AI Prompt Management & Content Quality', () => {
+    it('allows admin to get prompts config', async () => {
+      await request(app.getHttpServer())
+        .get('/admin/prompts')
+        .set('Authorization', auth(adminToken))
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.companion).toBeDefined();
+        });
+    });
+
+    it('allows admin to update prompts config', async () => {
+      await request(app.getHttpServer())
+        .post('/admin/prompts')
+        .set('Authorization', auth(adminToken))
+        .send({ companion: 'New companion prompt' })
+        .expect(201)
+        .expect(({ body }) => {
+          expect(body.success).toBe(true);
+          expect(body.prompts.companion).toBe('New companion prompt');
+        });
+    });
+
+    it('allows admin to get content quality review', async () => {
+      await request(app.getHttpServer())
+        .get('/admin/content-quality')
+        .set('Authorization', auth(adminToken))
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.popularSounds).toBeDefined();
+          expect(body.ratedItems).toBeDefined();
+        });
+    });
+  });
 });

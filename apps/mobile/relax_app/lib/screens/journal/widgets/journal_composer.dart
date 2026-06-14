@@ -31,6 +31,33 @@ class JournalComposer extends StatelessWidget {
     'Một kỷ niệm đẹp bạn muốn giữ lại?',
   ];
 
+  static final _templates = [
+    (
+      'Brain dump 🤯',
+      'Dành cho lúc đầu óc quá tải. Hãy viết ra tất cả những gì đang làm phiền bạn:\n- Có chuyện gì đang xảy ra?\n- Những suy nghĩ lộn xộn nào đang chạy qua?\n- Điều gì cần giải quyết ngay lập tức?\n- Những gì có thể bỏ qua lúc này?'
+    ),
+    (
+      'Gratitude 🙏',
+      'Dành cho lúc cần kéo mood lên. Hãy viết ra 3 điều tích cực:\n1. Hôm nay mình biết ơn điều gì?\n2. Ai đã làm điều tốt lành cho mình?\n3. Một việc nhỏ mình tự hào đã làm hôm nay?'
+    ),
+    (
+      'Anger release 🤬',
+      'Dành cho lúc tức giận. Trút bỏ năng lượng nóng nảy:\n- Ai hay điều gì khiến mình giận sôi người?\n- Thể chất mình đang có cảm giác gì (nóng mặt, nghiến răng...)?\n- Cách lành mạnh để xoa dịu ngọn lửa này là gì?'
+    ),
+    (
+      'Anxiety unpack 😰',
+      'Dành cho lúc lo lắng, bồn chồn:\n- Nguồn gốc của nỗi lo sợ này là gì?\n- Tình huống xấu nhất có thể xảy ra là gì? Nó có thực sự có khả năng xảy ra?\n- Nếu nó xảy ra, mình sẽ xử lý như thế nào?'
+    ),
+    (
+      'Sleep reflection 🌙',
+      'Dành cho trước khi ngủ để thư giãn:\n- Hôm nay điều gì đã kết thúc tốt đẹp?\n- Mình cần buông bỏ điều gì trước khi nhắm mắt?\n- Mong ước một giấc ngủ ngon như thế nào?'
+    ),
+    (
+      'Self-compassion 🌸',
+      'Dành cho khi tự trách bản thân:\n- Mình đang tự phê phán bản thân về điều gì?\n- Nếu một người bạn thân gặp chuyện này, mình sẽ an ủi họ thế nào?\n- Lời dịu dàng mình gửi cho chính mình lúc này?'
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     final prompt = _prompts[Random().nextInt(_prompts.length)];
@@ -43,7 +70,29 @@ class JournalComposer extends StatelessWidget {
         border: Border.all(color: context.fieldBorder),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Templates list
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: _templates.map((temp) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: ActionChip(
+                    label: Text(context.t(temp.$1), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                    backgroundColor: context.surface,
+                    side: BorderSide(color: context.fieldBorder),
+                    onPressed: () {
+                      bodyController.text = temp.$2;
+                      bodyController.selection = TextSelection.collapsed(offset: temp.$2.length);
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
           // Mood-based journal prompt.
           GestureDetector(
             onTap: () {

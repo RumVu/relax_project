@@ -1,5 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { MoodCheckin, MoodType, Prisma, UserRole } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
+import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
 import { buildPage } from '../common/pagination/page';
@@ -87,6 +89,7 @@ export class MoodCheckinsService {
     private readonly realtime: RealtimeService,
     private readonly achievementsService: AchievementsService,
     private readonly feedService: FeedService,
+    private readonly configService: ConfigService,
   ) {}
 
   // ============================================================
@@ -735,5 +738,171 @@ export class MoodCheckinsService {
       },
       update: { avgScore, stressReducePct, streakDays, dominantMood },
     });
+  }
+
+  async analyzeVoice(userId: string, text: string) {
+    await this.usersService.findOne(userId);
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+
+    let mood: MoodType = MoodType.NEUTRAL;
+    let intensity = 5;
+    const tags: string[] = ['voice'];
+    let journalDraft = `Hôm nay mình nói: "${text}"`;
+    let activitySuggestion = {
+      type: 'BreathingExercise',
+      id: 'default-breath',
+      name: 'Thở đều đặn',
+    };
+
+    if (apiKey) {
+      try {
+        const prompt = [
+          `Bạn là chuyên gia phân tích cảm xúc cho ứng dụng Relax.`,
+          `Người dùng vừa ghi âm hoặc nói đoạn nhật ký sau:`,
+          `"${text}"`,
+          ``,
+          `Hãy phân tích nội dung trên và trả về kết quả dưới dạng JSON có cấu trúc chính xác như sau:`,
+          `- mood: Một trong các giá trị: HAPPY, CALM, TIRED, SAD, ANXIOUS, STRESSED. Chọn mood phản ánh đúng nhất cảm xúc người dùng.`,
+          `- intensity: Cường độ cảm xúc từ 1 đến 10 (1 là nhẹ nhất, 10 là mạnh nhất).`,
+          `- tags: Mảng chứa tối đa 4 tag cảm xúc (ví dụ: sub:OVERWHELMED, sub:LONELY, sub:GRATEFUL, body:HEADACHE, body:FATIGUE...).`,
+          `- journalDraft: Một bản dịch/tóm tắt cảm xúc ngắn gọn (1-2 câu) giúp điền vào nhật ký người dùng.`,
+          `- activitySuggestion: Một hoạt động gợi ý phù hợp. Trả về cấu trúc: { type: "BreathingExercise" | "AmbientSound", id: string, name: string }.`,
+          ``,
+          `Chú ý:`,
+          `- Chỉ trả về đúng cấu trúc JSON được yêu cầu, không thêm văn bản khác.`,
+          `- Viết tiếng Việt tự nhiên, ấm áp.`
+        ].join('\n');
+
+        const genAI = new GoogleGenerativeAI(apiKey);
+        const model = genAI.getGenerativeModel({
+          model: 'gemini-1.5-flash',
+          generationConfig: {
+            responseMimeType: 'application/json',
+            responseSchema: {
+              type: SchemaType.OBJECT,
+              properties: {
+                mood: {
+                  type: SchemaType.STRING,
+                  format: 'enum',
+                  enum: ['HAPPY', 'CALM', 'TIRED', 'SAD', 'ANXIOUS', 'STRESSED'],
+                },
+                intensity: {
+                  type: SchemaType.INTEGER,
+                  minimum: 1,
+                  maximum: 10,
+                } as any,
+                tags: {
+                  type: SchemaType.ARRAY,
+                  items: { type: SchemaType.STRING },
+                },
+                journalDraft: {
+                  type: SchemaType.STRING,
+                },
+                activitySuggestion: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    type: {
+                      type: SchemaType.STRING,
+                      format: 'enum',
+                      enum: ['BreathingExercise', 'AmbientSound'],
+                    },
+                    id: { type: SchemaType.STRING },
+                    name: { type: SchemaType.STRING },
+                  },
+                  required: ['type', 'id', 'name'],
+                },
+              },
+              required: ['mood', 'intensity', 'tags', 'journalDraft', 'activitySuggestion'],
+            },
+          },
+        });
+
+        const result = await model.generateContent(prompt);
+        const resText = result.response.text();
+        const parsed = JSON.parse(resText);
+
+        if (parsed.mood) mood = parsed.mood as MoodType;
+        if (parsed.intensity) intensity = parsed.intensity;
+        if (parsed.tags) tags.push(...parsed.tags);
+        if (parsed.journalDraft) journalDraft = parsed.journalDraft;
+        if (parsed.activitySuggestion) activitySuggestion = parsed.activitySuggestion;
+      } catch (err) {
+        // Fallback to NLP
+        const lowercaseText = text.toLowerCase();
+        if (lowercaseText.includes('mệt') || lowercaseText.includes('uể oải') || lowercaseText.includes('đuối')) {
+          mood = MoodType.TIRED;
+          tags.push('sub:DRAINED', 'body:FATIGUE');
+          journalDraft = 'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
+        } else if (lowercaseText.includes('buồn') || lowercaseText.includes('chán') || lowercaseText.includes('khóc')) {
+          mood = MoodType.SAD;
+          tags.push('sub:LONELY');
+          journalDraft = 'Có vẻ bạn đang trải qua nỗi buồn hoặc sự cô đơn.';
+        } else if (lowercaseText.includes('lo') || lowercaseText.includes('sợ') || lowercaseText.includes('bất an')) {
+          mood = MoodType.ANXIOUS;
+          tags.push('sub:WORRIED');
+          journalDraft = 'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
+        } else if (lowercaseText.includes('stress') || lowercaseText.includes('áp lực') || lowercaseText.includes('quá tải')) {
+          mood = MoodType.STRESSED;
+          tags.push('sub:OVERWHELMED');
+          journalDraft = 'Áp lực đè nặng khiến bạn cảm thấy căng thẳng.';
+        } else if (lowercaseText.includes('vui') || lowercaseText.includes('tuyệt') || lowercaseText.includes('sướng')) {
+          mood = MoodType.HAPPY;
+          tags.push('sub:JOYFUL');
+          journalDraft = 'Một niềm vui nho nhỏ tràn đầy năng lượng hôm nay.';
+        } else {
+          mood = MoodType.CALM;
+          tags.push('sub:PEACEFUL');
+          journalDraft = 'Tâm trạng bình yên, cân bằng nhẹ nhàng.';
+        }
+      }
+    } else {
+      // Fallback
+      const lowercaseText = text.toLowerCase();
+      if (lowercaseText.includes('mệt') || lowercaseText.includes('uể oải') || lowercaseText.includes('đuối')) {
+        mood = MoodType.TIRED;
+        tags.push('sub:DRAINED', 'body:FATIGUE');
+        journalDraft = 'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
+      } else if (lowercaseText.includes('buồn') || lowercaseText.includes('chán') || lowercaseText.includes('khóc')) {
+        mood = MoodType.SAD;
+        tags.push('sub:LONELY');
+        journalDraft = 'Có vẻ bạn đang trải qua nỗi buồn hoặc sự cô đơn.';
+      } else if (lowercaseText.includes('lo') || lowercaseText.includes('sợ') || lowercaseText.includes('bất an')) {
+        mood = MoodType.ANXIOUS;
+        tags.push('sub:WORRIED');
+        journalDraft = 'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
+      } else if (lowercaseText.includes('stress') || lowercaseText.includes('áp lực') || lowercaseText.includes('quá tải')) {
+        mood = MoodType.STRESSED;
+        tags.push('sub:OVERWHELMED');
+        journalDraft = 'Áp lực đè nặng khiến bạn cảm thấy căng thẳng.';
+      } else if (lowercaseText.includes('vui') || lowercaseText.includes('tuyệt') || lowercaseText.includes('sướng')) {
+        mood = MoodType.HAPPY;
+        tags.push('sub:JOYFUL');
+        journalDraft = 'Một niềm vui nho nhỏ tràn đầy năng lượng hôm nay.';
+      } else {
+        mood = MoodType.CALM;
+        tags.push('sub:PEACEFUL');
+        journalDraft = 'Tâm trạng bình yên, cân bằng nhẹ nhàng.';
+      }
+    }
+
+    try {
+      const recExercise = await this.prisma.breathingExercise.findFirst({
+        where: { isActive: true },
+      });
+      if (recExercise) {
+        activitySuggestion.id = recExercise.id;
+        activitySuggestion.name = recExercise.title;
+      }
+    } catch {
+      // ignore
+    }
+
+    return {
+      mood,
+      intensity,
+      tags: Array.from(new Set(tags)),
+      journalDraft,
+      activitySuggestion,
+    };
   }
 }

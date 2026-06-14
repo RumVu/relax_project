@@ -98,6 +98,8 @@ model User {
   adminLogs             AdminLog[]               @relation("AdminActorLogs")
   quests                UserQuest[]
   experimentAssignments ExperimentAssignment[]
+  cravingLogs           CravingLog[]
+  smokingGoal           SmokingGoal?
 
   @@index([email])
   @@index([role])

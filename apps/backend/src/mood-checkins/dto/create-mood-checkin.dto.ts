@@ -18,7 +18,7 @@ export class CreateMoodCheckinDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @Max(5)
+  @Max(10)
   intensity?: number;
 
   @IsOptional()

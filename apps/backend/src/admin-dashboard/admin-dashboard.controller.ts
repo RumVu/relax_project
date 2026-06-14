@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AdminOnly } from '../auth/decorators/admin-only.decorator';
 import { AdminDashboardService } from './admin-dashboard.service';
@@ -33,5 +33,29 @@ export class AdminDashboardController {
   @Get('search')
   search(@Query() query: AdminSearchQueryDto) {
     return this.adminDashboardService.search(query);
+  }
+
+  @ApiOperation({ summary: 'Get current AI prompts config (admin)' })
+  @ApiOkResponse({ description: 'AI prompts configuration.' })
+  @AdminOnly()
+  @Get('prompts')
+  getPrompts() {
+    return this.adminDashboardService.getPrompts();
+  }
+
+  @ApiOperation({ summary: 'Update AI prompts config (admin)' })
+  @ApiOkResponse({ description: 'AI prompts configuration updated.' })
+  @AdminOnly()
+  @Post('prompts')
+  updatePrompts(@Body() prompts: Record<string, string>) {
+    return this.adminDashboardService.updatePrompts(prompts);
+  }
+
+  @ApiOperation({ summary: 'Get content quality review metrics (admin)' })
+  @ApiOkResponse({ description: 'Content quality metrics (popular, highly rated).' })
+  @AdminOnly()
+  @Get('content-quality')
+  getContentQuality() {
+    return this.adminDashboardService.getContentQuality();
   }
 }

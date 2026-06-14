@@ -58,7 +58,13 @@ import { SleepModule } from './sleep/sleep.module';
 import { FeatureFlagsModule } from './feature-flags/feature-flags.module';
 import { ExperimentsModule } from './experiments/experiments.module';
 import { RecommendationsModule } from './recommendations/recommendations.module';
+import { CravingModule } from './craving/craving.module';
 import { CrisisModule } from './crisis/crisis.module';
+import { AdaptivePlanModule } from './adaptive-plan/adaptive-plan.module';
+import { BuddyCircleModule } from './buddy-circle/buddy-circle.module';
+import { PrivacyModule } from './privacy/privacy.module';
+import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { EntitlementGuard } from './common/guards/entitlement.guard';
 
 @Module({
   imports: [
@@ -163,7 +169,12 @@ import { CrisisModule } from './crisis/crisis.module';
     FeatureFlagsModule,
     ExperimentsModule,
     RecommendationsModule,
+    CravingModule,
     CrisisModule,
+    AdaptivePlanModule,
+    BuddyCircleModule,
+    PrivacyModule,
+    FeedbacksModule,
   ],
   controllers: [AppController],
   providers: [
@@ -171,6 +182,10 @@ import { CrisisModule } from './crisis/crisis.module';
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: EntitlementGuard,
     },
     {
       provide: APP_INTERCEPTOR,

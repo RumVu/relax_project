@@ -3,7 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../../../core/audio_controller.dart';
 import '../../../core/locale_controller.dart';
 
 /// Ritual 3 phút: 4 steps tự động chạy — breathing → quote → ambient →
@@ -74,12 +76,34 @@ class _BreakRitualState extends State<BreakRitual>
 
     _startBreathing();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        try {
+          final audio = Provider.of<AudioController>(context, listen: false);
+          audio.setQueue([
+            {
+              'id': 'break_ambient',
+              'title': 'Trà tĩnh lặng',
+              'category': 'AMBIENT',
+              'soundUrl': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+              'duration': 180,
+            }
+          ]);
+          audio.playAt(0);
+        } catch (_) {}
+      }
+    });
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
     _breathCtrl.dispose();
+    try {
+      final audio = Provider.of<AudioController>(context, listen: false);
+      audio.stop();
+    } catch (_) {}
     super.dispose();
   }
 

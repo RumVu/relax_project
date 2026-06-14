@@ -59,13 +59,16 @@ class MoodTrackingCard extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 10),
                 child: Row(
                   children: [
-                    SizedBox(
-                      width: 90,
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 90),
                       child: Text(
                         context.t(label),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(fontSize: 12, color: context.appText),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(6),
@@ -79,16 +82,13 @@ class MoodTrackingCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    SizedBox(
-                      width: 38,
-                      child: Text(
-                        '${(pct * 100).round()}%',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: context.appText,
-                        ),
+                    Text(
+                      '${(pct * 100).round()}%',
+                      textAlign: TextAlign.right,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: context.appText,
                       ),
                     ),
                   ],

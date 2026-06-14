@@ -140,6 +140,21 @@ export default function AdminPage() {
                   {t('admin.btn.auditLogs')}
                 </Button>
               </Link>
+              <Link href="/admin/prompt-management">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  {t('admin.btn.promptManager')}
+                </Button>
+              </Link>
+              <Link href="/admin/content-quality">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  {t('admin.btn.contentQuality')}
+                </Button>
+              </Link>
+              <Link href="/admin/support-inbox">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  {t('admin.btn.supportInbox')}
+                </Button>
+              </Link>
             </div>
           }
         />

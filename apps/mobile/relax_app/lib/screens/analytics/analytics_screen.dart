@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/mood_line_chart/mood_line_chart.dart';
+import '../../widgets/soft_toast.dart';
 import 'models/mood_labels.dart';
 import 'widgets/activity_effectiveness.dart';
 import 'widgets/mood_distribution.dart';
@@ -35,6 +36,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
   // Activity effectiveness.
   List<Map<String, dynamic>> _favoriteActivities = [];
   int _averageRelief = 0;
+  Map<String, dynamic>? _forecast;
 
   @override
   void initState() {
@@ -107,6 +109,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         }
       } catch (_) {}
 
+      try {
+        final forecastRes = await RelaxApi.instance.get('/analytics/me/mood-forecast');
+        if (forecastRes.statusCode == 200) {
+          _forecast = Map<String, dynamic>.from(forecastRes.data);
+        }
+      } catch (_) {}
+
       if (mounted) {
         setState(() {
           _daily = daily;
@@ -154,6 +163,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 color: RelaxColors.violet,
                 onRefresh: _load,
                 child: ListView(
+                  addRepaintBoundaries: false,
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   children: [
                     Row(
@@ -183,6 +193,47 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                       ),
                     ),
+                    if (_forecast != null) ...[
+                      const SizedBox(height: 16),
+                      _card(
+                        context,
+                        title: context.t('Dự báo tâm trạng 🔮'),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.t(_forecast!['message'] ?? ''),
+                              style: TextStyle(color: context.appText, fontSize: 13, height: 1.4),
+                            ),
+                            if (_forecast!['suggestedTime'] != null) ...[
+                              const SizedBox(height: 12),
+                              ElevatedButton.icon(
+                                onPressed: () {
+                                  showSoftToast(
+                                    context,
+                                    message: '${context.t("Đã lên lịch routine vào lúc")} ${_forecast!['suggestedTime']} ⏰',
+                                    tone: SoftToastTone.success,
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: RelaxColors.violet.withValues(alpha: 0.1),
+                                  shadowColor: Colors.transparent,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: const BorderSide(color: RelaxColors.violet),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.alarm, color: RelaxColors.violet, size: 16),
+                                label: Text(
+                                  '${context.t("Đặt routine lúc")} ${_forecast!['suggestedTime']}',
+                                  style: const TextStyle(color: RelaxColors.violet, fontSize: 12, fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ]
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Container(
                       key: TourController.instance.targetKeys[7],
@@ -218,6 +269,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       height: 48,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () => context.push('/mood-calendar'),
+                        icon: const Icon(Icons.calendar_today, color: Colors.white),
+                        label: Text(
+                          context.t('Xem lịch cảm xúc 30 ngày qua ➜'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
                           backgroundColor: RelaxColors.violet,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14),
@@ -228,6 +303,30 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         icon: const Icon(Icons.edit_note, color: Colors.white),
                         label: Text(
                           context.t('Ghi chép cảm xúc chi tiết ➜'),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: RelaxColors.plum,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () => context.push('/mood-capsule'),
+                        icon: const Icon(Icons.archive_outlined, color: Colors.white),
+                        label: Text(
+                          context.t('Hộp ký ức cảm xúc (Capsule) ➜'),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,

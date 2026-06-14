@@ -27,6 +27,46 @@ export class CozyQuotesService {
     return buildPage(items, total, query);
   }
 
+  /**
+   * Admin listing — returns all quotes including inactive ones, with
+   * optional filtering by mood, lang, and isActive.
+   */
+  async findAllAdmin(query: {
+    mood?: string;
+    lang?: string;
+    isActive?: boolean;
+    skip?: number;
+    limit?: number;
+  }) {
+    const where: Prisma.CozyQuoteWhereInput = {};
+
+    if (query.mood) {
+      const mood = this.asMood(query.mood);
+      if (mood) where.mood = mood;
+    }
+    if (query.lang) {
+      where.lang = query.lang;
+    }
+    if (typeof query.isActive === 'boolean') {
+      where.isActive = query.isActive;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.cozyQuote.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip: query.skip ?? 0,
+        take: query.limit ?? 50,
+      }),
+      this.prisma.cozyQuote.count({ where }),
+    ]);
+
+    return buildPage(items, total, {
+      skip: query.skip ?? 0,
+      limit: query.limit ?? 50,
+    });
+  }
+
   async findRandom(lang?: string) {
     const where: Prisma.CozyQuoteWhereInput = { isActive: true };
     if (lang === 'en' || lang === 'vi') {

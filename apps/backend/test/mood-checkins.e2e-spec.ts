@@ -459,4 +459,42 @@ describe('Mood Check-ins APIs (e2e)', () => {
         ]);
       });
   });
+
+  describe('Voice Check-in & Mood Forecast', () => {
+    it('analyzes voice text to draft a check-in', async () => {
+      const registered = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: `${tag}-voice-check@example.com`, password, name: 'Voice Check User' })
+        .expect(201);
+      const accessToken = registered.body.accessToken as string;
+
+      await request(app.getHttpServer())
+        .post('/mood-checkins/voice')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send({ text: 'Mình thấy hơi mệt mỏi và uể oải sau ngày làm việc' })
+        .expect(201)
+        .expect(({ body }) => {
+          expect(body.mood).toBe(MoodType.TIRED);
+          expect(body.journalDraft).toContain('mệt mỏi');
+          expect(body.tags).toContain('body:FATIGUE');
+        });
+    });
+
+    it('returns a forecast message', async () => {
+      const registered = await request(app.getHttpServer())
+        .post('/auth/register')
+        .send({ email: `${tag}-forecast-check@example.com`, password, name: 'Forecast Check User' })
+        .expect(201);
+      const accessToken = registered.body.accessToken as string;
+
+      await request(app.getHttpServer())
+        .get('/analytics/me/mood-forecast')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(200)
+        .expect(({ body }) => {
+          expect(body.message).toBeDefined();
+          expect(body.suggestedTime).toBeDefined();
+        });
+    });
+  });
 });

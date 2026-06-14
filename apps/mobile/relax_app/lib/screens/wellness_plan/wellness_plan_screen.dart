@@ -152,6 +152,34 @@ class _WellnessPlanScreenState extends State<WellnessPlanScreen> {
                       ],
                     ),
                   ),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push('/routine-builder'),
+                          icon: const Icon(Icons.tune, size: 18),
+                          label: Text(context.t('Thiết lập Routine'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => context.push('/habit-stacking'),
+                          icon: const Icon(Icons.layers_outlined, size: 18),
+                          label: Text(context.t('Habit Stacking'), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          style: OutlinedButton.styleFrom(
+                            minimumSize: const Size(0, 48),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 ..._plan.map((day) => _DayCard(day: day)),
               ],
             ),

@@ -41,4 +41,46 @@ export class AnalyticsController {
   ) {
     return this.analyticsService.getOverview(user.id, query);
   }
+
+  @ApiOperation({ summary: 'Get current user mood recovery score and stats' })
+  @ApiOkResponse({
+    description: 'Mood recovery stats showing effectiveness of relax activities.',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/mood-recovery')
+  getMoodRecovery(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getMoodRecovery(user.id);
+  }
+
+  @ApiOperation({ summary: 'Get current user mood patterns analysis' })
+  @ApiOkResponse({ description: 'Mood patterns (by hour, weekday, trigger, activity).' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/mood-patterns')
+  getMoodPatterns(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getMoodPatterns(user.id);
+  }
+
+  @ApiOperation({ summary: 'Get current user monthly mood calendar data' })
+  @ApiOkResponse({ description: 'Monthly mood calendar data.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/mood-calendar')
+  getMoodCalendar(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getMoodCalendar(user.id);
+  }
+
+  @ApiOperation({ summary: 'Get current user burnout or overload wellbeing signal' })
+  @ApiOkResponse({ description: 'Wellbeing and burnout signals.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/burnout-signal')
+  getBurnoutSignal(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getBurnoutSignal(user.id);
+  }
+
+  @ApiOperation({ summary: 'Get current user mood forecast' })
+  @ApiOkResponse({ description: 'Mood forecast and stress prediction.' })
+  @UseGuards(JwtAuthGuard)
+  @Get('me/mood-forecast')
+  getMoodForecast(@CurrentUser() user: AuthUser) {
+    return this.analyticsService.getMoodForecast(user.id);
+  }
 }

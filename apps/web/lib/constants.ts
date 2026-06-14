@@ -28,4 +28,7 @@ export const adminNav: NavItem[] = [
   { label: 'User Locations', href: '/admin/user-locations' },
   { label: 'Feature Flags', href: '/admin/feature-flags' },
   { label: 'Health', href: '/admin/health' },
+  { label: 'Prompt Management', href: '/admin/prompt-management' },
+  { label: 'Content Quality', href: '/admin/content-quality' },
+  { label: 'Support Inbox', href: '/admin/support-inbox' },
 ];

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'core/api_client.dart';
 import 'core/audio_controller.dart';
 import 'core/offline_store.dart';
+import 'core/calendar_integration_service.dart';
 import 'core/auth_state.dart';
 import 'core/locale_controller.dart';
 import 'core/page_transitions.dart';
@@ -17,6 +18,7 @@ import 'widgets/soft_toast.dart';
 import 'screens/app_shell.dart';
 import 'screens/achievements/achievements_screen.dart';
 import 'screens/analytics/analytics_screen.dart';
+import 'screens/analytics/mood_calendar_screen.dart';
 import 'screens/billing/billing_screen.dart';
 import 'screens/breathing/breathing_screen.dart';
 import 'screens/buddies/buddies_screen.dart';
@@ -24,6 +26,8 @@ import 'screens/calm_now/calm_now_screen.dart';
 import 'screens/companion/companion_screen.dart';
 import 'screens/companion_chat/companion_chat_screen.dart';
 import 'screens/craving_break/craving_break_screen.dart';
+import 'screens/craving/craving_dashboard_screen.dart';
+import 'screens/craving/craving_flow_screen.dart';
 import 'screens/crisis/crisis_help_screen.dart';
 import 'screens/demo/demo_checklist_screen.dart';
 import 'screens/device_info/device_info_screen.dart';
@@ -47,12 +51,19 @@ import 'screens/trigger_map/trigger_map_screen.dart';
 import 'screens/weather/weather_screen.dart';
 import 'screens/weekly_report/weekly_report_screen.dart';
 import 'screens/wellness_plan/wellness_plan_screen.dart';
+import 'screens/wellness_plan/routine_builder_screen.dart';
+import 'screens/wellness_plan/routine_run_screen.dart';
+import 'screens/journal/cbt_thought_record_screen.dart';
+import 'screens/wellness_plan/habit_stacking_screen.dart';
+import 'screens/mood/mood_capsule_screen.dart';
+import 'screens/settings/feedback_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Translations.load();
   await LocalNotifications.init();
   await OfflineStore.instance.init();
+  await CalendarIntegrationService.instance.init();
   runApp(const RelaxApp());
 }
 
@@ -190,12 +201,23 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/sounds', const SoundsScreen()),
       _soft('/podcast', const SoundsScreen(category: 'PODCAST')),
       _soft('/analytics', const AnalyticsScreen()),
+      _soft('/mood-calendar', const MoodCalendarScreen()),
       _soft('/billing', const BillingScreen()),
       _soft('/legal', const LegalScreen()),
       _soft('/calm-now', const CalmNowScreen()),
       _soft('/break', const CravingBreakScreen()),
+      _soft('/craving-dashboard', const CravingDashboardScreen()),
+      _soft('/craving-flow', const CravingFlowScreen()),
       _soft('/weekly-report', const WeeklyReportScreen()),
       _soft('/wellness-plan', const WellnessPlanScreen()),
+      _soft('/routine-builder', const RoutineBuilderScreen()),
+      GoRoute(
+        path: '/routine-run',
+        pageBuilder: (c, s) => softPage(
+          key: s.pageKey,
+          child: RoutineRunScreen(routine: s.extra as Map<String, dynamic>),
+        ),
+      ),
       _soft('/sessions', const SessionsScreen()),
       _soft('/buddies', const BuddiesScreen()),
       _soft('/achievements', const AchievementsScreen()),
@@ -205,6 +227,10 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/recommendations', const RecommendationsScreen()),
       _soft('/crisis-help', const CrisisHelpScreen()),
       _soft('/demo-guide', const DemoChecklistScreen()),
+      _soft('/cbt-thought-record', const CbtThoughtRecordScreen()),
+      _soft('/habit-stacking', const HabitStackingScreen()),
+      _soft('/mood-capsule', const MoodCapsuleScreen()),
+      _soft('/feedback', const FeedbackScreen()),
 
       // Raw builder (no transition)
       GoRoute(path: '/location', builder: (c, s) => const LocationScreen()),

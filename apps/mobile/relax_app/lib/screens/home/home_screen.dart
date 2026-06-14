@@ -7,6 +7,7 @@ import '../../core/api_client.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../core/theme_controller.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import '../../widgets/mood_background/mood_background.dart';
 import '../../widgets/notification_sheet/notification_sheet.dart';
@@ -19,6 +20,8 @@ import 'widgets/methods_card.dart';
 import 'widgets/mood_tracking_card.dart';
 import 'widgets/smart_recommendations.dart';
 import 'widgets/speech_bubble.dart';
+import 'widgets/mood_toolkit_widget.dart';
+import 'widgets/mood_budget_widget.dart';
 
 // Trang chu — loi chao theo thoi tiet, meo + bong bong
 // thoai, luoi cam xuc, thanh theo doi cam xuc, va cac phuong thuc phu hop.
@@ -69,6 +72,35 @@ class _HomeScreenState extends State<HomeScreen> {
       _moodCounts = data.moodCounts;
       _moodTotal = data.moodTotal;
       _unreadCount = data.unreadCount;
+
+      final dominant = dominantMood(_moodCounts);
+      Color? moodColor;
+      switch (dominant) {
+        case 'HAPPY':
+          moodColor = RelaxColors.sun;
+          break;
+        case 'CALM':
+          moodColor = RelaxColors.mint;
+          break;
+        case 'STRESSED':
+        case 'ANGRY':
+          moodColor = RelaxColors.coral;
+          break;
+        case 'SAD':
+          moodColor = const Color(0xFFB084EE);
+          break;
+        case 'TIRED':
+          moodColor = const Color(0xFF6B7280);
+          break;
+        case 'ANXIOUS':
+          moodColor = RelaxColors.violet;
+          break;
+      }
+      if (moodColor != null && mounted) {
+        try {
+          context.read<ThemeController>().setAccent(moodColor);
+        } catch (_) {}
+      }
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -146,6 +178,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 unreadCount: _unreadCount,
                 onNotifications: _showNotifications,
               ),
+              const SizedBox(height: 8),
+              const BurnoutSignalWidget(),
               const SizedBox(height: 16),
               SpeechBubble(quote: _quote, name: name),
               const SizedBox(height: 20),
@@ -154,7 +188,10 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
               _BreakButton(),
               const SizedBox(height: 16),
+              const MoodBudgetWidget(),
+              const SizedBox(height: 16),
               const SmartRecommendations(),
+              const MoodToolkitWidget(),
               if (_loading)
                 const Center(
                   child: Padding(
