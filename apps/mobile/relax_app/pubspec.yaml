@@ -37,7 +37,7 @@ dependencies:
   # Lưu access/refresh token vào Keychain (iOS) / Keystore (Android).
   flutter_secure_storage: ^9.2.4
   # Router type-safe + deep-link friendly.
-  go_router: ^14.6.2
+  go_router: ^17.3.0
   # State management nhẹ — đủ cho 4 màn hình, không cần Bloc/Riverpod.
   provider: ^6.1.2
   # Phát nhạc nền / podcast streaming từ URL.
