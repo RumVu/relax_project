@@ -240,7 +240,10 @@ describe('Admin modules and list search/filter (e2e)', () => {
       await request(app.getHttpServer())
         .post('/feedbacks')
         .set('Authorization', auth(userToken))
-        .send({ subject: 'Bug report', message: `${tag} app crashed on home screen` })
+        .send({
+          subject: 'Bug report',
+          message: `${tag} app crashed on home screen`,
+        })
         .expect(201)
         .expect(({ body }) => {
           expect(body.id).toBeDefined();

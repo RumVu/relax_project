@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import {
@@ -20,6 +22,24 @@ import { EngagementAggregator } from './aggregators/engagement.aggregator';
 import { OperationsAggregator } from './aggregators/operations.aggregator';
 
 const ADMIN_DASHBOARD_CACHE_TTL_SECONDS = 60;
+
+type PromptsConfig = Record<string, string>;
+
+const DEFAULT_PROMPTS: PromptsConfig = {
+  companion: 'Bạn là Mon Leo, linh thú hệ mèo siêu dễ thương...',
+  weeklyReflection: 'Bạn là chuyên gia phân tích cảm xúc...',
+  journalSuggestion: 'Đọc nhật ký sau và đưa ra một lời khuyên...',
+  safetyResponse: 'Phát hiện từ khóa tự hại...',
+  recommendationExplanation: 'Giải thích lý do tại sao hoạt động...',
+};
+
+function isPromptsConfig(value: unknown): value is PromptsConfig {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value).every((item) => typeof item === 'string')
+  );
+}
 
 /**
  * AdminDashboardService — orchestrator. The heavy reads have moved into
@@ -219,9 +239,7 @@ export class AdminDashboardService {
     };
   }
 
-  private getPromptsPath() {
-    const path = require('path');
-    const fs = require('fs');
+  private getPromptsPath(): string {
     const paths = [
       path.join(process.cwd(), 'apps/backend/src/config/prompts.json'),
       path.join(process.cwd(), 'src/config/prompts.json'),
@@ -236,28 +254,23 @@ export class AdminDashboardService {
     return paths[0];
   }
 
-  getPrompts() {
+  getPrompts(): PromptsConfig {
     try {
-      const fs = require('fs');
       const filePath = this.getPromptsPath();
       if (fs.existsSync(filePath)) {
-        return JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        const parsed: unknown = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+        if (isPromptsConfig(parsed)) {
+          return parsed;
+        }
       }
     } catch {
       // ignore
     }
-    return {
-      companion: "Bạn là Mon Leo, linh thú hệ mèo siêu dễ thương...",
-      weeklyReflection: "Bạn là chuyên gia phân tích cảm xúc...",
-      journalSuggestion: "Đọc nhật ký sau và đưa ra một lời khuyên...",
-      safetyResponse: "Phát hiện từ khóa tự hại...",
-      recommendationExplanation: "Giải thích lý do tại sao hoạt động..."
-    };
+    return DEFAULT_PROMPTS;
   }
 
   updatePrompts(prompts: Record<string, string>) {
     try {
-      const fs = require('fs');
       const filePath = this.getPromptsPath();
       fs.writeFileSync(filePath, JSON.stringify(prompts, null, 2), 'utf8');
       return { success: true, prompts };
@@ -282,29 +295,35 @@ export class AdminDashboardService {
       select: { id: true, title: true, category: true },
     });
 
-    const soundMap = new Map(sounds.map(s => [s.id, s]));
+    const soundMap = new Map(sounds.map((s) => [s.id, s]));
 
-    const popularSounds = soundSessions.map(session => {
-      const sound = soundMap.get(session.soundId ?? '');
-      return {
-        id: session.soundId,
-        title: sound?.title ?? 'Unknown Sound',
-        category: sound?.category ?? 'AMBIENT',
-        listens: session._count.soundId,
-      };
-    }).sort((a, b) => b.listens - a.listens).slice(0, 10);
+    const popularSounds = soundSessions
+      .map((session) => {
+        const sound = soundMap.get(session.soundId ?? '');
+        return {
+          id: session.soundId,
+          title: sound?.title ?? 'Unknown Sound',
+          category: sound?.category ?? 'AMBIENT',
+          listens: session._count.soundId,
+        };
+      })
+      .sort((a, b) => b.listens - a.listens)
+      .slice(0, 10);
 
-    const ratedItems = ratings.map(r => {
-      const isSound = r.contentType === 'AmbientSound';
-      const sound = isSound ? soundMap.get(r.contentId) : null;
-      return {
-        contentType: r.contentType,
-        contentId: r.contentId,
-        title: sound?.title ?? `Content ${r.contentId}`,
-        avgRating: r._avg.rating ?? 0,
-        totalReviews: r._count.rating,
-      };
-    }).sort((a, b) => b.avgRating - a.avgRating).slice(0, 10);
+    const ratedItems = ratings
+      .map((r) => {
+        const isSound = r.contentType === 'AmbientSound';
+        const sound = isSound ? soundMap.get(r.contentId) : null;
+        return {
+          contentType: r.contentType,
+          contentId: r.contentId,
+          title: sound?.title ?? `Content ${r.contentId}`,
+          avgRating: r._avg.rating ?? 0,
+          totalReviews: r._count.rating,
+        };
+      })
+      .sort((a, b) => b.avgRating - a.avgRating)
+      .slice(0, 10);
 
     return {
       popularSounds,

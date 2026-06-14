@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { MoodType, RelaxActivityType, TriggerType } from '@prisma/client';
+import { RelaxActivityType, TriggerType } from '@prisma/client';
 import {
   getTimezoneOffsetMinutes,
   normalizeTimezone,
@@ -192,9 +192,14 @@ export class AnalyticsService {
       }
       if (score == null) {
         if (session.moodBefore && session.moodAfter) {
-          const isBeforeNegative = ['STRESSED', 'ANXIOUS', 'SAD', 'TIRED'].includes(session.moodBefore);
+          const isBeforeNegative = [
+            'STRESSED',
+            'ANXIOUS',
+            'SAD',
+            'TIRED',
+          ].includes(session.moodBefore);
           const isAfterPositive = ['HAPPY', 'CALM'].includes(session.moodAfter);
-          score = (isBeforeNegative && isAfterPositive) ? 80 : 40;
+          score = isBeforeNegative && isAfterPositive ? 80 : 40;
         } else {
           score = 50;
         }
@@ -231,9 +236,12 @@ export class AnalyticsService {
     activityStats.sort((a, b) => b.avgRecoveryScore - a.avgRecoveryScore);
 
     const overallRecoveryScore =
-      totalScoreCount > 0 ? Math.round((totalScoreSum / totalScoreCount) * 10) / 10 : 0;
+      totalScoreCount > 0
+        ? Math.round((totalScoreSum / totalScoreCount) * 10) / 10
+        : 0;
 
-    const bestActivity = activityStats.length > 0 ? activityStats[0].activityType : null;
+    const bestActivity =
+      activityStats.length > 0 ? activityStats[0].activityType : null;
 
     return {
       overallRecoveryScore,
@@ -254,7 +262,12 @@ export class AnalyticsService {
     });
 
     // 1. Mood by Hour
-    const hourlyMoods = { morning: [] as number[], afternoon: [] as number[], evening: [] as number[], night: [] as number[] };
+    const hourlyMoods = {
+      morning: [] as number[],
+      afternoon: [] as number[],
+      evening: [] as number[],
+      night: [] as number[],
+    };
     for (const c of checkins) {
       const hr = c.createdAt.getHours();
       const score = c.intensity ?? 5;
@@ -264,7 +277,10 @@ export class AnalyticsService {
       else hourlyMoods.night.push(score);
     }
 
-    const avgScore = (arr: number[]) => arr.length > 0 ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 5;
+    const avgScore = (arr: number[]) =>
+      arr.length > 0
+        ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10
+        : 5;
     const moodByHour = {
       morning: avgScore(hourlyMoods.morning),
       afternoon: avgScore(hourlyMoods.afternoon),
@@ -278,7 +294,15 @@ export class AnalyticsService {
       const day = c.createdAt.getDay(); // 0 is Sunday, 1 is Monday...
       weekdayMoods[day].push(c.intensity ?? 5);
     }
-    const weekdayNames = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+    const weekdayNames = [
+      'Chủ nhật',
+      'Thứ Hai',
+      'Thứ Ba',
+      'Thứ Tư',
+      'Thứ Năm',
+      'Thứ Sáu',
+      'Thứ Bảy',
+    ];
     const moodByWeekday = weekdayNames.map((name, index) => ({
       name,
       avgScore: avgScore(weekdayMoods[index]),
@@ -294,11 +318,13 @@ export class AnalyticsService {
         triggerMap.set(c.trigger, list);
       }
     }
-    const moodByTrigger = Array.from(triggerMap.entries()).map(([trigger, list]) => ({
-      trigger,
-      avgScore: avgScore(list),
-      count: list.length,
-    })).sort((a, b) => b.count - a.count);
+    const moodByTrigger = Array.from(triggerMap.entries())
+      .map(([trigger, list]) => ({
+        trigger,
+        avgScore: avgScore(list),
+        count: list.length,
+      }))
+      .sort((a, b) => b.count - a.count);
 
     // 4. Mood improvement by Activity
     const activityMap = new Map<RelaxActivityType, number[]>();
@@ -309,23 +335,46 @@ export class AnalyticsService {
         activityMap.set(s.activityType, list);
       }
     }
-    const moodByActivity = Array.from(activityMap.entries()).map(([activity, list]) => ({
-      activity,
-      avgReliefPercent: Math.round((list.reduce((a, b) => a + b, 0) / list.length) * 10) / 10,
-      count: list.length,
-    }));
+    const moodByActivity = Array.from(activityMap.entries()).map(
+      ([activity, list]) => ({
+        activity,
+        avgReliefPercent:
+          Math.round((list.reduce((a, b) => a + b, 0) / list.length) * 10) / 10,
+        count: list.length,
+      }),
+    );
 
     // 5. AI dynamic summary generator
-    let aiSummary = 'Bắt đầu check-in cảm xúc thường xuyên để linh thú Mon Leo tìm ra quy luật sức khoẻ tinh thần của bạn nhé!';
+    let aiSummary =
+      'Bắt đầu check-in cảm xúc thường xuyên để linh thú Mon Leo tìm ra quy luật sức khoẻ tinh thần của bạn nhé!';
     if (checkins.length >= 3) {
       // Find highest stress hour
-      const sortedHours = Object.entries(moodByHour).sort((a, b) => b[1] - a[1]);
+      const sortedHours = Object.entries(moodByHour).sort(
+        (a, b) => b[1] - a[1],
+      );
       const peakHour = sortedHours[0];
-      const peakHourLabel = peakHour[0] === 'night' ? 'sau 22h đêm' : peakHour[0] === 'evening' ? 'buổi tối (17h-22h)' : peakHour[0] === 'afternoon' ? 'buổi chiều (11h-17h)' : 'buổi sáng';
+      const peakHourLabel =
+        peakHour[0] === 'night'
+          ? 'sau 22h đêm'
+          : peakHour[0] === 'evening'
+            ? 'buổi tối (17h-22h)'
+            : peakHour[0] === 'afternoon'
+              ? 'buổi chiều (11h-17h)'
+              : 'buổi sáng';
 
       // Find best activity
-      const bestAct = moodByActivity.sort((a, b) => b.avgReliefPercent - a.avgReliefPercent)[0];
-      const bestActLabel = bestAct ? (bestAct.activity === 'BREATHING' ? 'Hít thở' : bestAct.activity === 'MEDITATION' ? 'Thiền định' : bestAct.activity === 'MUSIC' ? 'Âm thanh' : 'Nhật ký') : 'Hít thở';
+      const bestAct = moodByActivity.sort(
+        (a, b) => b.avgReliefPercent - a.avgReliefPercent,
+      )[0];
+      const bestActLabel = bestAct
+        ? bestAct.activity === 'BREATHING'
+          ? 'Hít thở'
+          : bestAct.activity === 'MEDITATION'
+            ? 'Thiền định'
+            : bestAct.activity === 'MUSIC'
+              ? 'Âm thanh'
+              : 'Nhật ký'
+        : 'Hít thở';
 
       aiSummary = `Bạn thường cảm thấy căng thẳng hơn vào ${peakHourLabel}. Lịch sử ghi nhận bạn hồi phục tốt hơn và giải toả áp lực hiệu quả nhất với hoạt động ${bestActLabel}.`;
     }
@@ -363,14 +412,29 @@ export class AnalyticsService {
       }),
     ]);
 
-    const calendarMap = new Map<string, { moods: string[]; hasJournal: boolean; hasRelaxSession: boolean; avgSleepQuality: number | null; stressLevel: number | null }>();
+    const calendarMap = new Map<
+      string,
+      {
+        moods: string[];
+        hasJournal: boolean;
+        hasRelaxSession: boolean;
+        avgSleepQuality: number | null;
+        stressLevel: number | null;
+      }
+    >();
 
     // Init 30 days
     for (let i = 0; i < 30; i++) {
       const date = new Date(thirtyDaysAgo);
       date.setDate(date.getDate() + i);
       const key = date.toISOString().split('T')[0];
-      calendarMap.set(key, { moods: [], hasJournal: false, hasRelaxSession: false, avgSleepQuality: null, stressLevel: null });
+      calendarMap.set(key, {
+        moods: [],
+        hasJournal: false,
+        hasRelaxSession: false,
+        avgSleepQuality: null,
+        stressLevel: null,
+      });
     }
 
     // Populate Moods
@@ -380,7 +444,10 @@ export class AnalyticsService {
       if (dayData) {
         dayData.moods.push(c.mood);
         if (c.intensity != null) {
-          dayData.stressLevel = dayData.stressLevel != null ? Math.round((dayData.stressLevel + c.intensity) / 2) : c.intensity;
+          dayData.stressLevel =
+            dayData.stressLevel != null
+              ? Math.round((dayData.stressLevel + c.intensity) / 2)
+              : c.intensity;
         }
       }
     }
@@ -418,7 +485,9 @@ export class AnalyticsService {
     for (const [key, list] of sleepMap.entries()) {
       const dayData = calendarMap.get(key);
       if (dayData && list.length > 0) {
-        dayData.avgSleepQuality = Math.round(list.reduce((a, b) => a + b, 0) / list.length);
+        dayData.avgSleepQuality = Math.round(
+          list.reduce((a, b) => a + b, 0) / list.length,
+        );
       }
     }
 
@@ -445,40 +514,54 @@ export class AnalyticsService {
 
     let hasSignal = false;
     let level = 'NONE';
-    let message = 'Tình trạng sức khỏe tinh thần của bạn hiện tại rất ổn định. Tiếp tục duy trì lối sống lành mạnh này nhé!';
+    let message =
+      'Tình trạng sức khỏe tinh thần của bạn hiện tại rất ổn định. Tiếp tục duy trì lối sống lành mạnh này nhé!';
     const details: string[] = [];
 
     // Rule 1: High stress for consecutive check-ins
-    const highStressCheckins = checkins.filter(c => c.intensity != null && c.intensity >= 7);
+    const highStressCheckins = checkins.filter(
+      (c) => c.intensity != null && c.intensity >= 7,
+    );
     if (highStressCheckins.length >= 3) {
-      details.push('Phát hiện 3 phiên check-in có mức độ căng thẳng cao liên tục.');
+      details.push(
+        'Phát hiện 3 phiên check-in có mức độ căng thẳng cao liên tục.',
+      );
     }
 
     // Rule 2: Consecutive negative moods
-    const negativeMoodsCount = checkins.filter(c => ['STRESSED', 'ANXIOUS', 'SAD', 'TIRED'].includes(c.mood)).length;
+    const negativeMoodsCount = checkins.filter((c) =>
+      ['STRESSED', 'ANXIOUS', 'SAD', 'TIRED'].includes(c.mood),
+    ).length;
     if (checkins.length >= 4 && negativeMoodsCount / checkins.length >= 0.75) {
       details.push('Hơn 75% số lần check-in ghi nhận tâm trạng tiêu cực.');
     }
 
     // Rule 3: Poor sleep quality
-    const poorSleepCount = sleep.filter(s => s.quality != null && s.quality <= 2).length;
+    const poorSleepCount = sleep.filter(
+      (s) => s.quality != null && s.quality <= 2,
+    ).length;
     if (poorSleepCount >= 2) {
-      details.push('Giấc ngủ của bạn có chất lượng kém trong nhiều đêm gần đây.');
+      details.push(
+        'Giấc ngủ của bạn có chất lượng kém trong nhiều đêm gần đây.',
+      );
     }
 
     // Calculate level & message
     if (details.length >= 3) {
       hasSignal = true;
       level = 'SEVERE';
-      message = 'Báo động: Cơ thể bạn đang phát đi những tín hiệu quá tải (Burnout) nghiêm trọng. Vui lòng tạm dừng công việc và dành ít nhất 5-10 phút hít thở sâu hoặc thiền ngay lập tức!';
+      message =
+        'Báo động: Cơ thể bạn đang phát đi những tín hiệu quá tải (Burnout) nghiêm trọng. Vui lòng tạm dừng công việc và dành ít nhất 5-10 phút hít thở sâu hoặc thiền ngay lập tức!';
     } else if (details.length === 2) {
       hasSignal = true;
       level = 'MODERATE';
-      message = 'Cảnh báo: Bạn đang có dấu hiệu quá tải và căng thẳng kéo dài. Hãy tự thưởng cho mình một buổi tối offline hoàn toàn và nghe nhạc nhẹ trước khi ngủ nhé.';
+      message =
+        'Cảnh báo: Bạn đang có dấu hiệu quá tải và căng thẳng kéo dài. Hãy tự thưởng cho mình một buổi tối offline hoàn toàn và nghe nhạc nhẹ trước khi ngủ nhé.';
     } else if (details.length === 1) {
       hasSignal = true;
       level = 'LIGHT';
-      message = 'Nhắc nhở nhẹ: Tuần này bạn đang làm việc hơi căng sức. Đừng quên mở một nhịp thở ngắn 3 phút giữa giờ làm việc để tái tạo năng lượng nhé.';
+      message =
+        'Nhắc nhở nhẹ: Tuần này bạn đang làm việc hơi căng sức. Đừng quên mở một nhịp thở ngắn 3 phút giữa giờ làm việc để tái tạo năng lượng nhé.';
     }
 
     return {
@@ -495,22 +578,32 @@ export class AnalyticsService {
       orderBy: { createdAt: 'asc' },
     });
 
-    let forecastMessage = 'Tâm trạng của bạn dự báo sẽ rất ổn định trong những ngày tới. Hãy duy trì thói quen check-in nhé!';
+    let forecastMessage =
+      'Tâm trạng của bạn dự báo sẽ rất ổn định trong những ngày tới. Hãy duy trì thói quen check-in nhé!';
     let suggestedTime = '20:30';
     let suggestedRoutine = 'Routine thư giãn tối';
     let peakStressDay = 'Chủ nhật';
     let hasPattern = false;
 
     if (checkins.length >= 5) {
-      const stressCheckins = checkins.filter(c => 
-        ['STRESSED', 'ANXIOUS', 'SAD'].includes(c.mood) || 
-        (c.intensity && c.intensity >= 6)
+      const stressCheckins = checkins.filter(
+        (c) =>
+          ['STRESSED', 'ANXIOUS', 'SAD'].includes(c.mood) ||
+          (c.intensity && c.intensity >= 6),
       );
 
       if (stressCheckins.length > 0) {
-        const days = ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        const days = [
+          'Chủ nhật',
+          'Thứ Hai',
+          'Thứ Ba',
+          'Thứ Tư',
+          'Thứ Năm',
+          'Thứ Sáu',
+          'Thứ Bảy',
+        ];
         const dayCounts: Record<number, number> = {};
-        stressCheckins.forEach(c => {
+        stressCheckins.forEach((c) => {
           const d = c.createdAt.getDay();
           dayCounts[d] = (dayCounts[d] ?? 0) + 1;
         });
@@ -526,7 +619,7 @@ export class AnalyticsService {
 
         peakStressDay = days[topDayNum];
         hasPattern = true;
-        
+
         if (topDayNum === 0 || topDayNum === 6) {
           forecastMessage = `Dựa trên lịch sử, tối ${peakStressDay} bạn thường dễ stress hơn. Muốn đặt routine nhẹ lúc 20:30 để thư giãn trước tuần mới không?`;
           suggestedTime = '20:30';
@@ -537,7 +630,8 @@ export class AnalyticsService {
         }
       }
     } else {
-      forecastMessage = 'Tối Chủ nhật bạn thường dễ stress và lo lắng hơn do chuẩn bị cho tuần mới. Muốn đặt routine nhẹ lúc 20:30 không?';
+      forecastMessage =
+        'Tối Chủ nhật bạn thường dễ stress và lo lắng hơn do chuẩn bị cho tuần mới. Muốn đặt routine nhẹ lúc 20:30 không?';
     }
 
     return {

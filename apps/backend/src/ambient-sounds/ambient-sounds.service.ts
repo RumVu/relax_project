@@ -113,18 +113,24 @@ export class AmbientSoundsService {
       where.isActive = query.isActive;
     }
 
-    if (query.category?.trim()) {
-      where.category = query.category.trim().toUpperCase();
-    }
-
+    const selectedCategory = query.category?.trim().toUpperCase();
     if (query.excludeCategories?.trim()) {
       const excluded = query.excludeCategories
         .split(',')
         .map((c) => c.trim().toUpperCase())
         .filter(Boolean);
       if (excluded.length) {
-        where.category = { ...((where.category as any) ?? {}), notIn: excluded };
+        if (selectedCategory) {
+          where.AND = [
+            { category: selectedCategory },
+            { category: { notIn: excluded } },
+          ];
+        } else {
+          where.category = { notIn: excluded };
+        }
       }
+    } else if (selectedCategory) {
+      where.category = selectedCategory;
     }
 
     return where;

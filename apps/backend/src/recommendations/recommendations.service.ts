@@ -542,48 +542,93 @@ export class RecommendationsService {
     });
     const currentMood = latestMood?.mood ?? MoodType.NEUTRAL;
 
-    const toolkits: Record<string, { mood: MoodType; title: string; description: string; activities: Array<{ type: string; title: string; deepLink: string }> }> = {
+    const toolkits: Record<
+      string,
+      {
+        mood: MoodType;
+        title: string;
+        description: string;
+        activities: Array<{ type: string; title: string; deepLink: string }>;
+      }
+    > = {
       STRESSED: {
         mood: MoodType.STRESSED,
         title: 'Bộ xoa dịu Căng thẳng',
-        description: '3 phút hít thở sâu và âm thanh mưa rơi sẽ giúp giảm cortisol nhanh chóng.',
+        description:
+          '3 phút hít thở sâu và âm thanh mưa rơi sẽ giúp giảm cortisol nhanh chóng.',
         activities: [
-          { type: 'BREATHING', title: 'Box Breathing 3 phút', deepLink: 'relax://breathing-exercises' },
-          { type: 'MUSIC', title: 'Rain sound', deepLink: 'relax://ambient-sounds?preset=rain' },
+          {
+            type: 'BREATHING',
+            title: 'Box Breathing 3 phút',
+            deepLink: 'relax://breathing-exercises',
+          },
+          {
+            type: 'MUSIC',
+            title: 'Rain sound',
+            deepLink: 'relax://ambient-sounds?preset=rain',
+          },
         ],
       },
       ANXIOUS: {
         mood: MoodType.ANXIOUS,
         title: 'Bộ kiểm soát Lo âu',
-        description: 'Thực hiện kỹ thuật tiếp đất Grounding 5-4-3-2-1 để neo giữ tâm trí vào hiện tại.',
+        description:
+          'Thực hiện kỹ thuật tiếp đất Grounding 5-4-3-2-1 để neo giữ tâm trí vào hiện tại.',
         activities: [
-          { type: 'BREATHING', title: 'Grounding 5-4-3-2-1', deepLink: 'relax://calm-now' },
+          {
+            type: 'BREATHING',
+            title: 'Grounding 5-4-3-2-1',
+            deepLink: 'relax://calm-now',
+          },
         ],
       },
       TIRED: {
         mood: MoodType.TIRED,
         title: 'Bộ tái tạo Năng lượng',
-        description: 'Tạm dừng công việc và lắng nghe những âm điệu nhẹ nhàng từ thiên nhiên.',
+        description:
+          'Tạm dừng công việc và lắng nghe những âm điệu nhẹ nhàng từ thiên nhiên.',
         activities: [
-          { type: 'MEDITATION', title: 'Thiền body scan', deepLink: 'relax://meditation' },
-          { type: 'MUSIC', title: 'Nhạc rừng xanh', deepLink: 'relax://ambient-sounds?preset=forest' },
+          {
+            type: 'MEDITATION',
+            title: 'Thiền body scan',
+            deepLink: 'relax://meditation',
+          },
+          {
+            type: 'MUSIC',
+            title: 'Nhạc rừng xanh',
+            deepLink: 'relax://ambient-sounds?preset=forest',
+          },
         ],
       },
       SAD: {
         mood: MoodType.SAD,
         title: 'Bộ vỗ về Nỗi buồn',
-        description: 'Viết ra những suy nghĩ của bạn và đọc một câu trích dẫn ấm áp.',
+        description:
+          'Viết ra những suy nghĩ của bạn và đọc một câu trích dẫn ấm áp.',
         activities: [
-          { type: 'JOURNAL', title: 'Nhật ký tự do', deepLink: 'relax://journals/new' },
-          { type: 'QUOTE', title: 'Cozy Quote', deepLink: 'relax://home?tab=0' },
+          {
+            type: 'JOURNAL',
+            title: 'Nhật ký tự do',
+            deepLink: 'relax://journals/new',
+          },
+          {
+            type: 'QUOTE',
+            title: 'Cozy Quote',
+            deepLink: 'relax://home?tab=0',
+          },
         ],
       },
       HAPPY: {
         mood: MoodType.HAPPY,
         title: 'Bộ lưu giữ Niềm vui',
-        description: 'Ghi lại khoảnh khắc tích cực hôm nay để trân trọng sau này.',
+        description:
+          'Ghi lại khoảnh khắc tích cực hôm nay để trân trọng sau này.',
         activities: [
-          { type: 'JOURNAL', title: 'Nhật ký biết ơn', deepLink: 'relax://journals/new' },
+          {
+            type: 'JOURNAL',
+            title: 'Nhật ký biết ơn',
+            deepLink: 'relax://journals/new',
+          },
         ],
       },
       CALM: {
@@ -591,39 +636,63 @@ export class RecommendationsService {
         title: 'Bộ giữ vững Bình yên',
         description: 'Tiếp tục duy trì sự cân bằng của tâm trí.',
         activities: [
-          { type: 'MEDITATION', title: 'Thiền sâu', deepLink: 'relax://meditation' },
+          {
+            type: 'MEDITATION',
+            title: 'Thiền sâu',
+            deepLink: 'relax://meditation',
+          },
         ],
       },
       EXCITED: {
         mood: MoodType.EXCITED,
         title: 'Bộ giữ vững Tập trung',
-        description: 'Nhịp thở cân bằng giúp chuyển hoá sự phấn khích thành năng lượng làm việc.',
+        description:
+          'Nhịp thở cân bằng giúp chuyển hoá sự phấn khích thành năng lượng làm việc.',
         activities: [
-          { type: 'BREATHING', title: 'Hít thở cân bằng', deepLink: 'relax://breathing-exercises' },
+          {
+            type: 'BREATHING',
+            title: 'Hít thở cân bằng',
+            deepLink: 'relax://breathing-exercises',
+          },
         ],
       },
       GRATEFUL: {
         mood: MoodType.GRATEFUL,
         title: 'Bộ lan toả Lòng biết ơn',
-        description: 'Cảm nhận sâu sắc hơn nữa sự trân quý cuộc sống bằng một vài dòng nhật ký.',
+        description:
+          'Cảm nhận sâu sắc hơn nữa sự trân quý cuộc sống bằng một vài dòng nhật ký.',
         activities: [
-          { type: 'JOURNAL', title: 'Ghi chép lòng biết ơn', deepLink: 'relax://journals/new' },
+          {
+            type: 'JOURNAL',
+            title: 'Ghi chép lòng biết ơn',
+            deepLink: 'relax://journals/new',
+          },
         ],
       },
       NEUTRAL: {
         mood: MoodType.NEUTRAL,
         title: 'Bộ cân bằng Hàng ngày',
-        description: 'Duy trì sự tập trung và chánh niệm với 5 phút thiền nhẹ nhàng.',
+        description:
+          'Duy trì sự tập trung và chánh niệm với 5 phút thiền nhẹ nhàng.',
         activities: [
-          { type: 'MEDITATION', title: 'Thiền chánh niệm', deepLink: 'relax://meditation' },
+          {
+            type: 'MEDITATION',
+            title: 'Thiền chánh niệm',
+            deepLink: 'relax://meditation',
+          },
         ],
       },
       LONELY: {
         mood: MoodType.LONELY,
         title: 'Bộ kết nối Yêu thương',
-        description: 'Trò chuyện cùng linh thú Mon Leo hoặc gửi lời nhắc ấm áp tới nhóm bạn.',
+        description:
+          'Trò chuyện cùng linh thú Mon Leo hoặc gửi lời nhắc ấm áp tới nhóm bạn.',
         activities: [
-          { type: 'COMPANION', title: 'Companion Chat', deepLink: 'relax://companion-chat' },
+          {
+            type: 'COMPANION',
+            title: 'Companion Chat',
+            deepLink: 'relax://companion-chat',
+          },
           { type: 'BUDDY', title: 'Nudge bạn bè', deepLink: 'relax://buddies' },
         ],
       },

@@ -464,7 +464,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
     it('analyzes voice text to draft a check-in', async () => {
       const registered = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: `${tag}-voice-check@example.com`, password, name: 'Voice Check User' })
+        .send({
+          email: `${tag}-voice-check@example.com`,
+          password,
+          name: 'Voice Check User',
+        })
         .expect(201);
       const accessToken = registered.body.accessToken as string;
 
@@ -483,7 +487,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
     it('returns a forecast message', async () => {
       const registered = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ email: `${tag}-forecast-check@example.com`, password, name: 'Forecast Check User' })
+        .send({
+          email: `${tag}-forecast-check@example.com`,
+          password,
+          name: 'Forecast Check User',
+        })
         .expect(201);
       const accessToken = registered.body.accessToken as string;
 

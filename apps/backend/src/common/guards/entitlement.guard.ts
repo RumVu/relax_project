@@ -50,7 +50,8 @@ export class EntitlementGuard implements CanActivate {
 
     throw new ForbiddenException({
       code: ErrorCode.AUTH_FORBIDDEN,
-      message: 'This feature is exclusive to Premium members. Please subscribe to unlock.',
+      message:
+        'This feature is exclusive to Premium members. Please subscribe to unlock.',
     });
   }
 }

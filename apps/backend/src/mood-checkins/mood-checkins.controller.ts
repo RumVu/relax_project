@@ -173,7 +173,9 @@ export class MoodCheckinsController {
     return this.moodCheckinsService.create(user.id, dto);
   }
 
-  @ApiOperation({ summary: 'Analyze voice text via Gemini AI to draft check-in options' })
+  @ApiOperation({
+    summary: 'Analyze voice text via Gemini AI to draft check-in options',
+  })
   @ApiCreatedResponse({ description: 'AI voice check-in suggestion.' })
   @UseGuards(JwtAuthGuard)
   @Post('voice')

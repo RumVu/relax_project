@@ -44,7 +44,8 @@ export class AnalyticsController {
 
   @ApiOperation({ summary: 'Get current user mood recovery score and stats' })
   @ApiOkResponse({
-    description: 'Mood recovery stats showing effectiveness of relax activities.',
+    description:
+      'Mood recovery stats showing effectiveness of relax activities.',
   })
   @UseGuards(JwtAuthGuard)
   @Get('me/mood-recovery')
@@ -53,7 +54,9 @@ export class AnalyticsController {
   }
 
   @ApiOperation({ summary: 'Get current user mood patterns analysis' })
-  @ApiOkResponse({ description: 'Mood patterns (by hour, weekday, trigger, activity).' })
+  @ApiOkResponse({
+    description: 'Mood patterns (by hour, weekday, trigger, activity).',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/mood-patterns')
   getMoodPatterns(@CurrentUser() user: AuthUser) {
@@ -68,7 +71,9 @@ export class AnalyticsController {
     return this.analyticsService.getMoodCalendar(user.id);
   }
 
-  @ApiOperation({ summary: 'Get current user burnout or overload wellbeing signal' })
+  @ApiOperation({
+    summary: 'Get current user burnout or overload wellbeing signal',
+  })
   @ApiOkResponse({ description: 'Wellbeing and burnout signals.' })
   @UseGuards(JwtAuthGuard)
   @Get('me/burnout-signal')

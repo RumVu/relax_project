@@ -5,6 +5,8 @@ import { AdminDashboardService } from './admin-dashboard.service';
 import { AdminDashboardQueryDto } from './dto/admin-dashboard-query.dto';
 import { AdminSearchQueryDto } from './dto/admin-search-query.dto';
 
+type PromptsConfig = Record<string, string>;
+
 @ApiTags('Admin Dashboard')
 @Controller('admin')
 export class AdminDashboardController {
@@ -39,7 +41,7 @@ export class AdminDashboardController {
   @ApiOkResponse({ description: 'AI prompts configuration.' })
   @AdminOnly()
   @Get('prompts')
-  getPrompts() {
+  getPrompts(): PromptsConfig {
     return this.adminDashboardService.getPrompts();
   }
 
@@ -52,7 +54,9 @@ export class AdminDashboardController {
   }
 
   @ApiOperation({ summary: 'Get content quality review metrics (admin)' })
-  @ApiOkResponse({ description: 'Content quality metrics (popular, highly rated).' })
+  @ApiOkResponse({
+    description: 'Content quality metrics (popular, highly rated).',
+  })
   @AdminOnly()
   @Get('content-quality')
   getContentQuality() {

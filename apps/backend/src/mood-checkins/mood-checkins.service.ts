@@ -68,6 +68,65 @@ type SystemMoodCheckinFields = {
 };
 
 type CreateMoodCheckinInput = CreateMoodCheckinDto & SystemMoodCheckinFields;
+type VoiceActivitySuggestion = {
+  type: 'BreathingExercise' | 'AmbientSound';
+  id: string;
+  name: string;
+};
+
+type VoiceMoodAnalysis = {
+  mood?: MoodType;
+  intensity?: number;
+  tags?: string[];
+  journalDraft?: string;
+  activitySuggestion?: VoiceActivitySuggestion;
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function isMoodType(value: unknown): value is MoodType {
+  return (
+    typeof value === 'string' &&
+    Object.values(MoodType).includes(value as MoodType)
+  );
+}
+
+function isVoiceActivitySuggestion(
+  value: unknown,
+): value is VoiceActivitySuggestion {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    (value.type === 'BreathingExercise' || value.type === 'AmbientSound') &&
+    typeof value.id === 'string' &&
+    typeof value.name === 'string'
+  );
+}
+
+function parseVoiceMoodAnalysis(value: unknown): VoiceMoodAnalysis {
+  if (!isRecord(value)) {
+    return {};
+  }
+
+  return {
+    mood: isMoodType(value.mood) ? value.mood : undefined,
+    intensity:
+      typeof value.intensity === 'number'
+        ? Math.min(Math.max(Math.round(value.intensity), 1), 10)
+        : undefined,
+    tags: Array.isArray(value.tags)
+      ? value.tags.filter((tag): tag is string => typeof tag === 'string')
+      : undefined,
+    journalDraft:
+      typeof value.journalDraft === 'string' ? value.journalDraft : undefined,
+    activitySuggestion: isVoiceActivitySuggestion(value.activitySuggestion)
+      ? value.activitySuggestion
+      : undefined,
+  };
+}
 
 /**
  * MoodCheckinsService — orchestrator mỏng.
@@ -748,7 +807,7 @@ export class MoodCheckinsService {
     let intensity = 5;
     const tags: string[] = ['voice'];
     let journalDraft = `Hôm nay mình nói: "${text}"`;
-    let activitySuggestion = {
+    let activitySuggestion: VoiceActivitySuggestion = {
       type: 'BreathingExercise',
       id: 'default-breath',
       name: 'Thở đều đặn',
@@ -770,7 +829,7 @@ export class MoodCheckinsService {
           ``,
           `Chú ý:`,
           `- Chỉ trả về đúng cấu trúc JSON được yêu cầu, không thêm văn bản khác.`,
-          `- Viết tiếng Việt tự nhiên, ấm áp.`
+          `- Viết tiếng Việt tự nhiên, ấm áp.`,
         ].join('\n');
 
         const genAI = new GoogleGenerativeAI(apiKey);
@@ -784,13 +843,18 @@ export class MoodCheckinsService {
                 mood: {
                   type: SchemaType.STRING,
                   format: 'enum',
-                  enum: ['HAPPY', 'CALM', 'TIRED', 'SAD', 'ANXIOUS', 'STRESSED'],
+                  enum: [
+                    'HAPPY',
+                    'CALM',
+                    'TIRED',
+                    'SAD',
+                    'ANXIOUS',
+                    'STRESSED',
+                  ],
                 },
                 intensity: {
                   type: SchemaType.INTEGER,
-                  minimum: 1,
-                  maximum: 10,
-                } as any,
+                },
                 tags: {
                   type: SchemaType.ARRAY,
                   items: { type: SchemaType.STRING },
@@ -812,40 +876,70 @@ export class MoodCheckinsService {
                   required: ['type', 'id', 'name'],
                 },
               },
-              required: ['mood', 'intensity', 'tags', 'journalDraft', 'activitySuggestion'],
+              required: [
+                'mood',
+                'intensity',
+                'tags',
+                'journalDraft',
+                'activitySuggestion',
+              ],
             },
           },
         });
 
         const result = await model.generateContent(prompt);
         const resText = result.response.text();
-        const parsed = JSON.parse(resText);
+        const parsed = parseVoiceMoodAnalysis(JSON.parse(resText) as unknown);
 
-        if (parsed.mood) mood = parsed.mood as MoodType;
+        if (parsed.mood) mood = parsed.mood;
         if (parsed.intensity) intensity = parsed.intensity;
         if (parsed.tags) tags.push(...parsed.tags);
         if (parsed.journalDraft) journalDraft = parsed.journalDraft;
-        if (parsed.activitySuggestion) activitySuggestion = parsed.activitySuggestion;
-      } catch (err) {
+        if (parsed.activitySuggestion) {
+          activitySuggestion = parsed.activitySuggestion;
+        }
+      } catch {
         // Fallback to NLP
         const lowercaseText = text.toLowerCase();
-        if (lowercaseText.includes('mệt') || lowercaseText.includes('uể oải') || lowercaseText.includes('đuối')) {
+        if (
+          lowercaseText.includes('mệt') ||
+          lowercaseText.includes('uể oải') ||
+          lowercaseText.includes('đuối')
+        ) {
           mood = MoodType.TIRED;
           tags.push('sub:DRAINED', 'body:FATIGUE');
-          journalDraft = 'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
-        } else if (lowercaseText.includes('buồn') || lowercaseText.includes('chán') || lowercaseText.includes('khóc')) {
+          journalDraft =
+            'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
+        } else if (
+          lowercaseText.includes('buồn') ||
+          lowercaseText.includes('chán') ||
+          lowercaseText.includes('khóc')
+        ) {
           mood = MoodType.SAD;
           tags.push('sub:LONELY');
           journalDraft = 'Có vẻ bạn đang trải qua nỗi buồn hoặc sự cô đơn.';
-        } else if (lowercaseText.includes('lo') || lowercaseText.includes('sợ') || lowercaseText.includes('bất an')) {
+        } else if (
+          lowercaseText.includes('lo') ||
+          lowercaseText.includes('sợ') ||
+          lowercaseText.includes('bất an')
+        ) {
           mood = MoodType.ANXIOUS;
           tags.push('sub:WORRIED');
-          journalDraft = 'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
-        } else if (lowercaseText.includes('stress') || lowercaseText.includes('áp lực') || lowercaseText.includes('quá tải')) {
+          journalDraft =
+            'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
+        } else if (
+          lowercaseText.includes('stress') ||
+          lowercaseText.includes('áp lực') ||
+          lowercaseText.includes('quá tải')
+        ) {
           mood = MoodType.STRESSED;
           tags.push('sub:OVERWHELMED');
           journalDraft = 'Áp lực đè nặng khiến bạn cảm thấy căng thẳng.';
-        } else if (lowercaseText.includes('vui') || lowercaseText.includes('tuyệt') || lowercaseText.includes('sướng')) {
+        } else if (
+          lowercaseText.includes('vui') ||
+          lowercaseText.includes('tuyệt') ||
+          lowercaseText.includes('sướng')
+        ) {
           mood = MoodType.HAPPY;
           tags.push('sub:JOYFUL');
           journalDraft = 'Một niềm vui nho nhỏ tràn đầy năng lượng hôm nay.';
@@ -858,23 +952,45 @@ export class MoodCheckinsService {
     } else {
       // Fallback
       const lowercaseText = text.toLowerCase();
-      if (lowercaseText.includes('mệt') || lowercaseText.includes('uể oải') || lowercaseText.includes('đuối')) {
+      if (
+        lowercaseText.includes('mệt') ||
+        lowercaseText.includes('uể oải') ||
+        lowercaseText.includes('đuối')
+      ) {
         mood = MoodType.TIRED;
         tags.push('sub:DRAINED', 'body:FATIGUE');
-        journalDraft = 'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
-      } else if (lowercaseText.includes('buồn') || lowercaseText.includes('chán') || lowercaseText.includes('khóc')) {
+        journalDraft =
+          'Bạn cảm thấy cơ thể và tinh thần mệt mỏi, cần nghỉ ngơi.';
+      } else if (
+        lowercaseText.includes('buồn') ||
+        lowercaseText.includes('chán') ||
+        lowercaseText.includes('khóc')
+      ) {
         mood = MoodType.SAD;
         tags.push('sub:LONELY');
         journalDraft = 'Có vẻ bạn đang trải qua nỗi buồn hoặc sự cô đơn.';
-      } else if (lowercaseText.includes('lo') || lowercaseText.includes('sợ') || lowercaseText.includes('bất an')) {
+      } else if (
+        lowercaseText.includes('lo') ||
+        lowercaseText.includes('sợ') ||
+        lowercaseText.includes('bất an')
+      ) {
         mood = MoodType.ANXIOUS;
         tags.push('sub:WORRIED');
-        journalDraft = 'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
-      } else if (lowercaseText.includes('stress') || lowercaseText.includes('áp lực') || lowercaseText.includes('quá tải')) {
+        journalDraft =
+          'Một sự lo lắng hoặc bồn chồn đang diễn ra trong lòng bạn.';
+      } else if (
+        lowercaseText.includes('stress') ||
+        lowercaseText.includes('áp lực') ||
+        lowercaseText.includes('quá tải')
+      ) {
         mood = MoodType.STRESSED;
         tags.push('sub:OVERWHELMED');
         journalDraft = 'Áp lực đè nặng khiến bạn cảm thấy căng thẳng.';
-      } else if (lowercaseText.includes('vui') || lowercaseText.includes('tuyệt') || lowercaseText.includes('sướng')) {
+      } else if (
+        lowercaseText.includes('vui') ||
+        lowercaseText.includes('tuyệt') ||
+        lowercaseText.includes('sướng')
+      ) {
         mood = MoodType.HAPPY;
         tags.push('sub:JOYFUL');
         journalDraft = 'Một niềm vui nho nhỏ tràn đầy năng lượng hôm nay.';
