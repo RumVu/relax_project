@@ -163,6 +163,12 @@ export default function AdminPage() {
                   Security Center
                 </Button>
               </Link>
+              <Link href="/admin/experiments">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  <Activity className="h-4 w-4" />
+                  Experiments
+                </Button>
+              </Link>
               <Link href="/admin/content-quality">
                 <Button className="h-8 px-3 text-xs" variant="secondary">
                   {t('admin.btn.contentQuality')}

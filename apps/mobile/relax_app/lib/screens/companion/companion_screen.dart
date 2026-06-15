@@ -466,6 +466,8 @@ class _CompanionScreenState extends State<CompanionScreen>
                             ),
                           ],
                         ),
+                        const SizedBox(height: 24),
+                        _CompanionMemoryCard(companionName: name),
                         const SizedBox(height: 32),
                         Text(
                           context.t('Chế độ hiển thị linh thú'),
@@ -509,5 +511,210 @@ class _CompanionScreenState extends State<CompanionScreen>
       ),
     );
   }
+}
 
+class _CompanionMemoryCard extends StatefulWidget {
+  final String companionName;
+  const _CompanionMemoryCard({required this.companionName});
+
+  @override
+  State<_CompanionMemoryCard> createState() => _CompanionMemoryCardState();
+}
+
+class _CompanionMemoryCardState extends State<_CompanionMemoryCard> {
+  Map<String, dynamic>? _weekly;
+  List<dynamic> _memories = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await Future.wait([
+        RelaxApi.instance.get('/user-companions/me/memory/weekly'),
+        RelaxApi.instance.get('/user-companions/me/memory'),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _weekly = res[0].data is Map ? Map<String, dynamic>.from(res[0].data as Map) : null;
+        final memData = res[1].data is Map ? res[1].data as Map : {};
+        _memories = (memData['memories'] as List?) ?? [];
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: context.surfaceAlt,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Center(
+          child: SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, color: RelaxColors.violet),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t('Ký ức của ${widget.companionName}'),
+          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          context.t('Những gì linh thú nhớ về bạn'),
+          style: TextStyle(color: context.mutedText, fontSize: 12),
+        ),
+        const SizedBox(height: 12),
+
+        // Weekly memory card
+        if (_weekly != null) ...[
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF7C3AED), Color(0xFFDB2777)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Text('💌', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 8),
+                    Text(
+                      context.t('Thư tuần này'),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                ...(_weekly!['messages'] as List? ?? []).map((msg) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Text(
+                    '$msg',
+                    style: const TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+                  ),
+                )),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    _WeeklyStatChip(
+                      label: 'Check-in',
+                      value: '${(_weekly!['summary'] as Map?)?['checkinCount'] ?? 0}',
+                    ),
+                    const SizedBox(width: 8),
+                    _WeeklyStatChip(
+                      label: 'Hoạt động',
+                      value: '${(_weekly!['summary'] as Map?)?['activityCount'] ?? 0}',
+                    ),
+                    const SizedBox(width: 8),
+                    _WeeklyStatChip(
+                      label: 'Stress TB',
+                      value: '${(_weekly!['summary'] as Map?)?['avgScore'] ?? 50}',
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+
+        // Memory insights
+        if (_memories.isNotEmpty)
+          ...(_memories).map((mem) {
+            final m = mem is Map ? mem : {};
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(
+                color: context.surfaceAlt,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: context.fieldBorder),
+              ),
+              child: Row(
+                children: [
+                  Text('${m['emoji'] ?? '💭'}', style: const TextStyle(fontSize: 18)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      '${m['text'] ?? ''}',
+                      style: TextStyle(
+                        color: context.appText,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
+
+        if (_memories.isEmpty && _weekly == null)
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: context.surfaceAlt,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text(
+                context.t('${widget.companionName} đang thu thập ký ức...hãy check-in thường xuyên nhé!'),
+                style: TextStyle(color: context.mutedText, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _WeeklyStatChip extends StatelessWidget {
+  final String label;
+  final String value;
+  const _WeeklyStatChip({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14)),
+          Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
+        ],
+      ),
+    );
+  }
 }

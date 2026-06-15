@@ -284,6 +284,12 @@ class _BuddiesScreenState extends State<BuddiesScreen> {
                     )
                   else
                     ..._friends.map((f) => _FriendCard(friend: f)),
+                  if (_friends.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    _MoodShareButton(onShared: _load),
+                    const SizedBox(height: 24),
+                    _BuddyMoodFeed(),
+                  ],
                 ],
               ),
             ),
@@ -460,5 +466,215 @@ class _PendingCard extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _MoodShareButton extends StatefulWidget {
+  final VoidCallback onShared;
+  const _MoodShareButton({required this.onShared});
+
+  @override
+  State<_MoodShareButton> createState() => _MoodShareButtonState();
+}
+
+class _MoodShareButtonState extends State<_MoodShareButton> {
+  bool _sharing = false;
+
+  Future<void> _share() async {
+    setState(() => _sharing = true);
+    try {
+      await RelaxApi.instance.post('/buddy-circle/share-mood');
+      if (mounted) {
+        showSoftToast(context,
+            message: context.t('Đã chia sẻ mood với bạn bè!'),
+            tone: SoftToastTone.success);
+        widget.onShared();
+      }
+    } catch (e) {
+      if (mounted) {
+        showSoftToast(context,
+            message: context.t('Cần check-in mood trước khi chia sẻ'),
+            tone: SoftToastTone.info);
+      }
+    } finally {
+      if (mounted) setState(() => _sharing = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _sharing ? null : _share,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF7C3AED), Color(0xFFDB2777)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (_sharing)
+              const SizedBox(
+                width: 18, height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              )
+            else ...[
+              const Icon(Icons.share_outlined, color: Colors.white, size: 18),
+              const SizedBox(width: 8),
+              Text(
+                context.t('Chia sẻ mood với bạn bè'),
+                style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.w800, fontSize: 14,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BuddyMoodFeed extends StatefulWidget {
+  @override
+  State<_BuddyMoodFeed> createState() => _BuddyMoodFeedState();
+}
+
+class _BuddyMoodFeedState extends State<_BuddyMoodFeed> {
+  List<Map<String, dynamic>> _feed = [];
+  bool _loading = true;
+
+  static const _moodEmoji = {
+    'HAPPY': '😊', 'CALM': '😌', 'TIRED': '😴', 'SAD': '😢',
+    'ANXIOUS': '😰', 'STRESSED': '😤', 'EXCITED': '🤩',
+    'GRATEFUL': '🙏', 'NEUTRAL': '😐', 'LONELY': '🥺', 'POOPING': '💩',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await RelaxApi.instance.get('/buddy-circle/feed');
+      final items = res.data is List ? res.data as List : [];
+      setState(() {
+        _feed = items.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+        _loading = false;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _react(String entryId, String emoji) async {
+    try {
+      await RelaxApi.instance.post('/buddy-circle/feed/$entryId/react', body: {'emoji': emoji});
+      await _load();
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: CircularProgressIndicator(color: RelaxColors.violet),
+        ),
+      );
+    }
+    if (_feed.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Text('✦ ', style: TextStyle(color: RelaxColors.violet)),
+            Text(
+              context.t('Mood của bạn bè'),
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15, color: context.appText),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        ..._feed.take(10).map((entry) {
+          final user = entry['user'] as Map? ?? {};
+          final name = user['name'] as String? ?? '?';
+          final title = entry['title'] as String? ?? '';
+          final meta = entry['metadata'] as Map? ?? {};
+          final mood = meta['mood'] as String? ?? 'NEUTRAL';
+          final emoji = _moodEmoji[mood] ?? '😐';
+          final created = DateTime.tryParse(entry['createdAt'] as String? ?? '');
+          final ago = created != null ? _timeAgo(DateTime.now().difference(created)) : '';
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: context.surfaceAlt,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: context.fieldBorder),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 14,
+                      backgroundColor: RelaxColors.violet.withValues(alpha: 0.12),
+                      child: Text(name[0].toUpperCase(),
+                          style: const TextStyle(color: RelaxColors.violet, fontWeight: FontWeight.w800, fontSize: 12)),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(title,
+                          style: TextStyle(color: context.appText, fontWeight: FontWeight.w600, fontSize: 13),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    Text(emoji, style: const TextStyle(fontSize: 20)),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Text(ago, style: TextStyle(color: context.mutedText, fontSize: 11)),
+                    const Spacer(),
+                    ...['❤️', '💪', '🤗'].map((e) => GestureDetector(
+                          onTap: () => _react(entry['id'] as String? ?? '', e),
+                          child: Container(
+                            margin: const EdgeInsets.only(left: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: context.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: context.fieldBorder),
+                            ),
+                            child: Text(e, style: const TextStyle(fontSize: 14)),
+                          ),
+                        )),
+                  ],
+                ),
+              ],
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  String _timeAgo(Duration d) {
+    if (d.inMinutes < 60) return '${d.inMinutes} phút trước';
+    if (d.inHours < 24) return '${d.inHours} giờ trước';
+    return '${d.inDays} ngày trước';
   }
 }

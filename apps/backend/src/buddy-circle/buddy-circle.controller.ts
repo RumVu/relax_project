@@ -40,4 +40,18 @@ export class BuddyCircleController {
   async getCircleStats(@CurrentUser() user: AuthUser) {
     return this.buddyCircleService.getCircleStats(user.id);
   }
+
+  @Post('share-mood')
+  async shareMood(@CurrentUser() user: AuthUser) {
+    return this.buddyCircleService.shareMood(user.id);
+  }
+
+  @Post('feed/:entryId/react')
+  async reactToFeed(
+    @CurrentUser() user: AuthUser,
+    @Param('entryId') entryId: string,
+    @Body('emoji') emoji: string,
+  ) {
+    return this.buddyCircleService.reactToFeed(user.id, entryId, emoji ?? '❤️');
+  }
 }

@@ -63,6 +63,9 @@ import 'screens/mood_forecast/mood_forecast_screen.dart';
 import 'screens/voice_checkin/voice_checkin_screen.dart';
 import 'screens/notification_lab/notification_lab_screen.dart';
 import 'screens/wellness_report/wellness_report_screen.dart';
+import 'screens/gratitude/gratitude_journal_screen.dart';
+import 'screens/focus_timer/focus_timer_screen.dart';
+import 'screens/data_privacy/data_privacy_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -243,6 +246,9 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/voice-checkin', const VoiceCheckinScreen()),
       _soft('/notification-lab', const NotificationLabScreen()),
       _soft('/wellness-report', const WellnessReportScreen()),
+      _soft('/gratitude', const GratitudeJournalScreen()),
+      _soft('/focus-timer', const FocusTimerScreen()),
+      _soft('/data-privacy', const DataPrivacyScreen()),
 
       // Raw builder (no transition)
       GoRoute(path: '/location', builder: (c, s) => const LocationScreen()),

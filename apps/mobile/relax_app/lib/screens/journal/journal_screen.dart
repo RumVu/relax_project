@@ -10,6 +10,7 @@ import '../../core/vault_lock.dart';
 import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import '../../widgets/soft_toast.dart';
+import 'package:go_router/go_router.dart';
 import 'widgets/journal_composer.dart';
 import 'widgets/journal_entry_card.dart';
 
@@ -239,6 +240,50 @@ class _JournalScreenState extends State<JournalScreen> {
               bodyController: _bodyCtrl,
               saving: _saving,
               onSave: _save,
+            ),
+            const SizedBox(height: 12),
+            InkWell(
+              onTap: () => context.push('/gratitude'),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      RelaxColors.violet.withValues(alpha: 0.08),
+                      RelaxColors.mint.withValues(alpha: 0.08),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: RelaxColors.violet.withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  children: [
+                    const Text('🙏', style: TextStyle(fontSize: 20)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.t('Nhật ký biết ơn'),
+                            style: TextStyle(
+                              color: context.appText,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                            ),
+                          ),
+                          Text(
+                            context.t('Ghi lại những điều bạn biết ơn mỗi ngày'),
+                            style: TextStyle(color: context.mutedText, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.chevron_right, color: context.mutedText, size: 20),
+                  ],
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Text(

@@ -129,6 +129,77 @@ export class BuddyCircleService {
     };
   }
 
+  /** Share mood to buddy circle feed. */
+  async shareMood(userId: string) {
+    const latestCheckin = await this.prisma.moodCheckin.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (!latestCheckin) {
+      throw new BadRequestException('Chưa có mood check-in nào để chia sẻ');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true },
+    });
+    const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Bạn';
+
+    const entry = await this.prisma.feedEntry.create({
+      data: {
+        userId,
+        type: 'MOOD_SHARE',
+        visibility: 'PUBLIC',
+        title: `${displayName} đang cảm thấy ${latestCheckin.mood.toLowerCase()}`,
+        content: latestCheckin.notes ?? '',
+        metadata: {
+          mood: latestCheckin.mood,
+          score: latestCheckin.finalScore ?? latestCheckin.rawScore,
+          intensity: latestCheckin.intensity,
+          checkinId: latestCheckin.id,
+        },
+      },
+      include: {
+        user: { select: { id: true, name: true, avatar: true } },
+      },
+    });
+
+    return entry;
+  }
+
+  /** React to a feed entry (emoji reaction). */
+  async reactToFeed(userId: string, feedEntryId: string, emoji: string) {
+    const entry = await this.prisma.feedEntry.findUnique({
+      where: { id: feedEntryId },
+    });
+    if (!entry) {
+      throw new BadRequestException('Không tìm thấy bài viết');
+    }
+
+    const existing = (entry.metadata as Record<string, unknown>)?.reactions;
+    const reactions = (existing && typeof existing === 'object')
+      ? { ...(existing as Record<string, string[]>) }
+      : {};
+
+    if (!reactions[emoji]) reactions[emoji] = [];
+    if (!(reactions[emoji] as string[]).includes(userId)) {
+      (reactions[emoji] as string[]).push(userId);
+    }
+
+    await this.prisma.feedEntry.update({
+      where: { id: feedEntryId },
+      data: {
+        metadata: {
+          ...(entry.metadata as Record<string, unknown>),
+          reactions,
+        },
+      },
+    });
+
+    return { success: true, reactions };
+  }
+
   /** Get circle stats: each member's streak and session count this week. */
   async getCircleStats(userId: string) {
     const members = await this.getMyCircle(userId);

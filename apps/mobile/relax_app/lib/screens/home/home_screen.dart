@@ -192,6 +192,8 @@ class _HomeScreenState extends State<HomeScreen> {
               _CalmNowButton(),
               const SizedBox(height: 10),
               _BreakButton(),
+              const SizedBox(height: 10),
+              _FocusTimerButton(),
               const SizedBox(height: 16),
               const MoodBudgetWidget(),
               const SizedBox(height: 16),
@@ -434,6 +436,62 @@ class _CalmNowButton extends StatelessWidget {
               color: Colors.white.withValues(alpha: 0.6),
               size: 18,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FocusTimerButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.mediumImpact();
+        context.push('/focus-timer');
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+        decoration: BoxDecoration(
+          color: context.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: context.fieldBorder),
+        ),
+        child: Row(
+          children: [
+            Container(
+              height: 40,
+              width: 40,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: RelaxColors.violet.withValues(alpha: 0.12),
+              ),
+              child: const Center(
+                child: Text('⏱️', style: TextStyle(fontSize: 20)),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    context.t('Focus Timer'),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      color: context.appText,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    context.t('Pomodoro — tập trung rồi nghỉ, lặp lại.'),
+                    style: TextStyle(color: context.mutedText, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios, color: context.mutedText, size: 14),
           ],
         ),
       ),

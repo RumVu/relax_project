@@ -486,6 +486,182 @@ export class UserCompanionsService {
     };
   }
 
+  async getMemoryInsights(userId: string) {
+    const companion = await this.ensureCompanion(userId);
+    const since = new Date();
+    since.setDate(since.getDate() - 30);
+
+    const [checkins, interactions, relaxSessions] = await Promise.all([
+      this.prisma.moodCheckin.findMany({
+        where: { userId, createdAt: { gte: since } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.companionInteraction.findMany({
+        where: { companionId: companion.id, createdAt: { gte: since } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.relaxSession.findMany({
+        where: { userId, createdAt: { gte: since } },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    const moodCounts: Record<string, number> = {};
+    const triggerCounts: Record<string, number> = {};
+    let totalScore = 0;
+
+    for (const c of checkins) {
+      moodCounts[c.mood] = (moodCounts[c.mood] || 0) + 1;
+      totalScore += c.finalScore ?? c.rawScore ?? 50;
+      if (c.triggers && Array.isArray(c.triggers)) {
+        for (const t of c.triggers) {
+          triggerCounts[String(t)] = (triggerCounts[String(t)] || 0) + 1;
+        }
+      }
+    }
+
+    const dominantMood = Object.entries(moodCounts)
+      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'NEUTRAL';
+    const topTriggers = Object.entries(triggerCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([trigger, count]) => ({ trigger, count }));
+    const avgScore = checkins.length > 0
+      ? Math.round(totalScore / checkins.length)
+      : 50;
+
+    const chatCount = interactions.filter(
+      (i) => i.type === 'CHAT',
+    ).length;
+    const totalInteractionCount = interactions.length;
+    const activityCount = relaxSessions.length;
+
+    const memories: Array<{ type: string; text: string; emoji: string }> = [];
+
+    if (checkins.length >= 7) {
+      memories.push({
+        type: 'streak',
+        text: `Bạn đã check-in ${checkins.length} lần trong 30 ngày qua`,
+        emoji: '🔥',
+      });
+    }
+    if (dominantMood === 'HAPPY' || dominantMood === 'CALM') {
+      memories.push({
+        type: 'positive',
+        text: `Mood chủ đạo của bạn là ${dominantMood.toLowerCase()} — rất tuyệt!`,
+        emoji: '✨',
+      });
+    }
+    if (topTriggers.length > 0) {
+      memories.push({
+        type: 'trigger',
+        text: `Trigger hay gặp nhất: ${topTriggers[0].trigger} (${topTriggers[0].count} lần)`,
+        emoji: '🎯',
+      });
+    }
+    if (chatCount >= 5) {
+      memories.push({
+        type: 'bond',
+        text: `${companion.name} đã trò chuyện với bạn ${chatCount} lần — thật thân thiết!`,
+        emoji: '💬',
+      });
+    }
+    if (activityCount >= 5) {
+      memories.push({
+        type: 'activity',
+        text: `Bạn đã hoàn thành ${activityCount} hoạt động thư giãn`,
+        emoji: '🧘',
+      });
+    }
+    if (avgScore < 40) {
+      memories.push({
+        type: 'care',
+        text: `${companion.name} nhận thấy bạn hay stress gần đây — hãy nghỉ ngơi nhiều hơn nhé`,
+        emoji: '🤗',
+      });
+    }
+
+    return {
+      companion: { name: companion.name, level: companion.level, affection: companion.affection },
+      period: { from: since.toISOString(), to: new Date().toISOString(), days: 30 },
+      stats: {
+        totalCheckins: checkins.length,
+        avgScore,
+        dominantMood,
+        topTriggers,
+        chatCount,
+        totalInteractions: totalInteractionCount,
+        activityCount,
+      },
+      memories,
+    };
+  }
+
+  async getWeeklyMemoryCard(userId: string) {
+    const companion = await this.ensureCompanion(userId);
+    const since = new Date();
+    since.setDate(since.getDate() - 7);
+
+    const [checkins, relaxSessions] = await Promise.all([
+      this.prisma.moodCheckin.findMany({
+        where: { userId, createdAt: { gte: since } },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.relaxSession.findMany({
+        where: { userId, createdAt: { gte: since } },
+      }),
+    ]);
+
+    const moodJourney = checkins.map((c) => ({
+      mood: c.mood,
+      score: c.finalScore ?? c.rawScore ?? 50,
+      date: c.createdAt,
+    }));
+
+    const bestDay = moodJourney.reduce(
+      (best, cur) => (cur.score < best.score ? cur : best),
+      moodJourney[0] || { mood: 'NEUTRAL', score: 50, date: new Date() },
+    );
+    const worstDay = moodJourney.reduce(
+      (worst, cur) => (cur.score > worst.score ? cur : worst),
+      moodJourney[0] || { mood: 'NEUTRAL', score: 50, date: new Date() },
+    );
+
+    const avgScore = moodJourney.length > 0
+      ? Math.round(moodJourney.reduce((s, m) => s + m.score, 0) / moodJourney.length)
+      : 50;
+
+    const messages: string[] = [];
+    if (checkins.length === 0) {
+      messages.push(`${companion.name} nhớ bạn lắm! Tuần này chưa thấy bạn check-in.`);
+    } else if (avgScore <= 35) {
+      messages.push(`Tuần này bạn khá ổn! ${companion.name} vui vì điều đó.`);
+    } else if (avgScore >= 65) {
+      messages.push(`${companion.name} thấy bạn hơi stress tuần này. Tuần tới mình thử thư giãn nhiều hơn nha!`);
+    } else {
+      messages.push(`Một tuần bình thường — ${companion.name} luôn ở đây bên bạn.`);
+    }
+
+    if (relaxSessions.length > 0) {
+      messages.push(`Bạn đã thực hành ${relaxSessions.length} hoạt động thư giãn — giỏi lắm!`);
+    }
+
+    return {
+      companionName: companion.name,
+      companionLevel: companion.level,
+      weekOf: since.toISOString(),
+      summary: {
+        checkinCount: checkins.length,
+        avgScore,
+        activityCount: relaxSessions.length,
+        bestDay: bestDay ? { mood: bestDay.mood, date: bestDay.date } : null,
+        worstDay: worstDay ? { mood: worstDay.mood, date: worstDay.date } : null,
+      },
+      moodJourney: moodJourney.slice(0, 14),
+      messages,
+    };
+  }
+
   async getChatHistory(userId: string) {
     const companion = await this.ensureCompanion(userId);
     const rows = await this.prisma.companionInteraction.findMany({
