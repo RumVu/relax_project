@@ -45,13 +45,13 @@ class HomeDataLoader {
         ? Map<String, dynamic>.from(results[1].data)
         : null;
 
-    // -- mood options (max 6) --
+    // -- mood options (max 7) --
     final opts = results[2].data;
     final moodOptions = (opts is List)
         ? opts
             .whereType<Map>()
             .map((e) => Map<String, dynamic>.from(e))
-            .take(6)
+            .take(7)
             .toList()
         : <Map<String, dynamic>>[];
 

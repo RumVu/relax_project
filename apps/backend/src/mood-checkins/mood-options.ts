@@ -136,6 +136,18 @@ export const MOOD_OPTIONS = [
     sortOrder: 100,
     recommendedActions: ['JOURNAL', 'MEDITATION', 'MUSIC'],
   },
+  {
+    mood: MoodType.POOPING,
+    label: 'Mắc ỉa',
+    shortLabel: 'Mắc ỉa',
+    description: 'Bụng đang gọi, cần giải quyết nhu cầu cấp bách.',
+    companionLine: 'Chúc bạn "giải phóng" thật nhẹ nhàng nha! 💩',
+    iconKey: 'cat-pooping',
+    color: '#8B4513',
+    darkColor: '#A0522D',
+    sortOrder: 110,
+    recommendedActions: ['BREATHING', 'MUSIC', 'MEDITATION'],
+  },
 ] satisfies MoodOption[];
 
 export const DEFAULT_MOOD_OPTION = MOOD_OPTIONS.find(

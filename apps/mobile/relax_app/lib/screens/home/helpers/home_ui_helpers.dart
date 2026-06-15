@@ -25,6 +25,8 @@ String moodEmoji(String mood) {
       return '🐱';
     case 'GRATEFUL':
       return '😻';
+    case 'POOPING':
+      return '💩';
     default:
       return '🐱';
   }
@@ -42,6 +44,8 @@ Color moodColor(String mood) {
     case 'CALM':
     case 'EXCITED':
       return RelaxColors.mint;
+    case 'POOPING':
+      return const Color(0xFF8B4513);
     default:
       return RelaxColors.violet;
   }

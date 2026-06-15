@@ -491,6 +491,7 @@ enum MoodType {
   NEUTRAL
   LONELY
   GRATEFUL
+  POOPING
 }
 
 model OnboardingSlide {

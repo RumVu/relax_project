@@ -19,6 +19,7 @@ export function getMoodScore(mood: MoodType): number {
     [MoodType.SAD]: 1,
     [MoodType.ANXIOUS]: 1,
     [MoodType.STRESSED]: 1,
+    [MoodType.POOPING]: 3,
   };
 
   return scores[mood];
@@ -40,6 +41,7 @@ export function scoreFromMood(mood: MoodType): number {
     [MoodType.GRATEFUL]: 20,
     [MoodType.HAPPY]: 15,
     [MoodType.CALM]: 10,
+    [MoodType.POOPING]: 50,
   };
 
   return stressScores[mood];
