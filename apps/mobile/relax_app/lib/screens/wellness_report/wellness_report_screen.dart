@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
@@ -86,7 +86,7 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
 
             // Summary section
             pw.Header(level: 1, text: 'Tong quan'),
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
               headers: ['Chi so', 'Gia tri'],
               data: [
@@ -101,7 +101,7 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
 
             // Mood summary
             pw.Header(level: 1, text: 'Cam xuc'),
-            pw.Table.fromTextArray(
+            pw.TableHelper.fromTextArray(
               headerStyle: pw.TextStyle(fontWeight: pw.FontWeight.bold),
               headers: ['Chi so', 'Gia tri'],
               data: [
@@ -391,6 +391,26 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
                             ),
                           ),
                         ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: () => Share.shareXFiles(
+                          [XFile(_pdfPath!)],
+                          text: 'Báo cáo sức khoẻ tinh thần - Thi Ái',
+                        ),
+                        icon: const Icon(Icons.share_outlined),
+                        label: Text(context.t('Chia sẻ PDF')),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: RelaxColors.violet,
+                          side: const BorderSide(color: RelaxColors.violet),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
                       ),
                     ),
                   ],

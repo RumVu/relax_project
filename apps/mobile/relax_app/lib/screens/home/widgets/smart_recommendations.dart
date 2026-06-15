@@ -99,6 +99,7 @@ class _RecCard extends StatelessWidget {
   static const _actionRoutes = {
     'BREATHING': '/breathing',
     'LISTEN_MUSIC': '/sounds',
+    'MUSIC': '/sounds',
     'JOURNAL': '/journal',
     'MEDITATION': '/meditation',
     'PODCAST': '/podcast',
@@ -108,6 +109,7 @@ class _RecCard extends StatelessWidget {
   static const _actionEmoji = {
     'BREATHING': '🌬️',
     'LISTEN_MUSIC': '🎵',
+    'MUSIC': '🎵',
     'JOURNAL': '✍️',
     'MEDITATION': '🧘',
     'PODCAST': '🎙️',
@@ -116,11 +118,11 @@ class _RecCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final action = rec['action'] as String? ?? '';
-    final title = rec['title'] as String? ?? action;
+    final type = rec['type'] as String? ?? rec['action'] as String? ?? '';
+    final title = rec['title'] as String? ?? type;
     final subtitle = rec['subtitle'] as String? ?? '';
-    final emoji = _actionEmoji[action] ?? '🌿';
-    final route = _actionRoutes[action] ?? '/relax';
+    final emoji = _actionEmoji[type] ?? '🌿';
+    final route = _actionRoutes[type] ?? '/home';
 
     return GestureDetector(
       onTap: () {

@@ -34,6 +34,55 @@ class LegalScreen extends StatelessWidget {
             ...kLegalTerms.map(
                 (t) => LegalSection(title: context.t(t.$1), body: context.t(t.$2))),
             const SizedBox(height: 8),
+            // Medical disclaimer
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: RelaxColors.coral.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: RelaxColors.coral.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.medical_information_outlined, color: RelaxColors.coral, size: 20),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.t('Miễn trừ trách nhiệm y tế'),
+                        style: TextStyle(
+                          color: context.appText,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    context.t('Thi Ái không phải là thiết bị y tế và không cung cấp '
+                        'chẩn đoán, điều trị hoặc dịch vụ cấp cứu. Ứng dụng chỉ hỗ trợ '
+                        'bạn theo dõi cảm xúc cá nhân, xây dựng thói quen thư giãn và '
+                        'ghi chép nhật ký sức khoẻ tinh thần.'),
+                    style: TextStyle(color: context.mutedText, fontSize: 13, height: 1.5),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    context.t('Nếu bạn đang gặp vấn đề sức khoẻ tâm thần nghiêm trọng, '
+                        'hãy liên hệ chuyên gia sức khoẻ tâm thần hoặc gọi đường dây nóng '
+                        '1800 599 920. Trong trường hợp khẩn cấp, gọi 115.'),
+                    style: TextStyle(
+                      color: context.appText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
             // Giấy phép nguồn mở — dùng trang built-in của Flutter.
             Container(
               decoration: BoxDecoration(
@@ -57,8 +106,8 @@ class LegalScreen extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right, color: context.mutedText),
                 onTap: () => showLicensePage(
                   context: context,
-                  applicationName: 'Relax',
-                  applicationVersion: '1.1.1.0',
+                  applicationName: 'Thi Ái',
+                  applicationVersion: '1.1.1+1',
                 ),
               ),
             ),

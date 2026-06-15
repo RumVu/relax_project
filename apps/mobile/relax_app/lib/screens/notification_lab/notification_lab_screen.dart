@@ -86,11 +86,20 @@ class NotificationLabScreen extends StatefulWidget {
 class _NotificationLabScreenState extends State<NotificationLabScreen> {
   late Box _box;
   bool _ready = false;
+  final _testMsgCtrl = TextEditingController(
+      text: 'Chào bạn! Dành 3 phút cùng Thi Ái hôm nay nhé! 🌸');
+  int _testDelaySeconds = 0; // 0, 5, 10, 30
 
   @override
   void initState() {
     super.initState();
     _init();
+  }
+
+  @override
+  void dispose() {
+    _testMsgCtrl.dispose();
+    super.dispose();
   }
 
   Future<void> _init() async {
@@ -198,14 +207,32 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
 
   Future<void> _testNotification() async {
     HapticFeedback.mediumImpact();
-    await LocalNotifications.showInstant(
-      title: 'Thi Ái',
-      body: 'Đây là thông báo thử nghiệm! 🎉',
-    );
-    if (mounted) {
-      showSoftToast(context,
-          message: context.t('Đã gửi thông báo thử!'),
-          tone: SoftToastTone.success);
+    final body = _testMsgCtrl.text.trim().isNotEmpty
+        ? _testMsgCtrl.text.trim()
+        : 'Đây là thông báo thử nghiệm! 🎉';
+
+    if (_testDelaySeconds == 0) {
+      await LocalNotifications.showInstant(
+        title: 'Thi Ái',
+        body: body,
+      );
+      if (mounted) {
+        showSoftToast(context,
+            message: context.t('Đã gửi thông báo thử!'),
+            tone: SoftToastTone.success);
+      }
+    } else {
+      await LocalNotifications.scheduleDelayed(
+        id: 9999,
+        title: 'Thi Ái',
+        body: body,
+        delay: Duration(seconds: _testDelaySeconds),
+      );
+      if (mounted) {
+        showSoftToast(context,
+            message: '${context.t("Thông báo sẽ hiển thị sau")} $_testDelaySeconds ${context.t("giây. Hãy khóa màn hình!")}',
+            tone: SoftToastTone.success);
+      }
     }
   }
 
@@ -351,23 +378,110 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
                 const SizedBox(height: 10),
                 ..._slots.map((slot) => _buildSlotCard(context, slot)),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                // Test button
-                Center(
-                  child: ElevatedButton.icon(
-                    onPressed: _testNotification,
-                    icon: const Icon(Icons.notifications_active, size: 18),
-                    label: Text(context.t('Gửi thông báo thử')),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: RelaxColors.violet,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
+                // Custom Notification Test Card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: context.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: context.fieldBorder),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(Icons.science_outlined, color: RelaxColors.violet, size: 20),
+                          const SizedBox(width: 8),
+                          Text(
+                            context.t('Thử nghiệm thông báo tức thì'),
+                            style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14,
+                              color: context.appText,
+                            ),
+                          ),
+                        ],
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14),
-                    ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        controller: _testMsgCtrl,
+                        maxLines: 2,
+                        style: TextStyle(fontSize: 13, color: context.appText),
+                        decoration: InputDecoration(
+                          hintText: context.t('Nhập nội dung thông báo thử...'),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                          filled: true,
+                          fillColor: context.surfaceAlt,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Text(
+                        context.t('Thời gian trễ:'),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: context.mutedText,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [0, 5, 10, 30].map((sec) {
+                          final selected = _testDelaySeconds == sec;
+                          final label = sec == 0 ? context.t('Ngay') : '$sec ${context.t('giây')}';
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 3.0),
+                              child: ChoiceChip(
+                                label: Text(
+                                  label,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                                    color: selected ? Colors.white : context.appText,
+                                  ),
+                                ),
+                                selected: selected,
+                                onSelected: (_) {
+                                  setState(() => _testDelaySeconds = sec);
+                                },
+                                selectedColor: RelaxColors.violet,
+                                backgroundColor: context.surfaceAlt,
+                                showCheckmark: false,
+                                padding: EdgeInsets.zero,
+                                labelPadding: const EdgeInsets.symmetric(vertical: 4),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _testNotification,
+                          icon: const Icon(Icons.send_rounded, size: 16),
+                          label: Text(context.t('Gửi thông báo thử')),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: RelaxColors.violet,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -432,7 +546,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
               Switch(
                 value: enabled,
                 onChanged: (v) => _toggle(slot.key, v, slot),
-                activeColor: RelaxColors.violet,
+                activeTrackColor: RelaxColors.violet,
               ),
             ],
           ),

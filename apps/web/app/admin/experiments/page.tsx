@@ -41,7 +41,7 @@ export default function ExperimentsPage() {
     setLoading(true);
     try {
       const data = await apiFetch<Experiment[] | { items: Experiment[] }>('/experiments');
-      const list = Array.isArray(data) ? data : (data.items ?? []);
+      const list = Array.isArray(data) ? data : ((data && typeof data === 'object' && 'items' in data) ? data.items ?? [] : []);
       setExperiments(list);
     } catch {
       setExperiments([]);

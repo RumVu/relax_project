@@ -1,4 +1,4 @@
-package com.example.relax_app
+package com.rumvu.relaxapp
 
 import io.flutter.embedding.android.FlutterActivity
 

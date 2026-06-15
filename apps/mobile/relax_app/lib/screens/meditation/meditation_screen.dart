@@ -130,7 +130,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
       _timer?.cancel();
       setState(() => _isPlaying = false);
     } else {
-      _startMeditation(_activeGuide!);
+      if (_activeGuide != null) _startMeditation(_activeGuide!);
     }
   }
 

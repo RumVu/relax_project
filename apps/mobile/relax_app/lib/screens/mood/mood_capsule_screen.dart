@@ -59,7 +59,7 @@ class _MoodCapsuleScreenState extends State<MoodCapsuleScreen> {
         } catch (_) {}
       }
     }
-    list.sort((a, b) => (b['createdAt'] as String).compareTo(a['createdAt'] as String));
+    list.sort((a, b) => (b['createdAt'] as String? ?? '').compareTo(a['createdAt'] as String? ?? ''));
     setState(() {
       _capsules = list;
       _loading = false;
@@ -232,7 +232,7 @@ class _MoodCapsuleScreenState extends State<MoodCapsuleScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _activity,
+                    initialValue: _activity,
                     isExpanded: true,
                     decoration: InputDecoration(labelText: context.t('Hoạt động')),
                     items: ['Đang nghỉ ngơi', 'Làm việc', 'Đi bộ', 'Chuẩn bị ngủ']
@@ -246,7 +246,7 @@ class _MoodCapsuleScreenState extends State<MoodCapsuleScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: DropdownButtonFormField<String>(
-                    value: _location,
+                    initialValue: _location,
                     isExpanded: true,
                     decoration: InputDecoration(labelText: context.t('Địa điểm')),
                     items: ['Ở nhà', 'Công ty', 'Quán cafe', 'Ngoài trời']

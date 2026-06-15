@@ -53,7 +53,7 @@ class _CbtThoughtRecordScreenState extends State<CbtThoughtRecordScreen> {
         } catch (_) {}
       }
     }
-    list.sort((a, b) => (b['createdAt'] as String).compareTo(a['createdAt'] as String));
+    list.sort((a, b) => (b['createdAt'] as String? ?? '').compareTo(a['createdAt'] as String? ?? ''));
     setState(() {
       _history = list;
       _loading = false;
@@ -300,7 +300,7 @@ class _CbtThoughtRecordScreenState extends State<CbtThoughtRecordScreen> {
         Text(context.t('Cảm xúc đi kèm'), style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: context.appText)),
         const SizedBox(height: 12),
         DropdownButtonFormField<String>(
-          value: _emotion,
+          initialValue: _emotion,
           decoration: InputDecoration(
             labelText: context.t('Chọn cảm xúc'),
           ),

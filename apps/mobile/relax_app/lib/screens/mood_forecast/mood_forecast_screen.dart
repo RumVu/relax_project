@@ -15,7 +15,6 @@ class MoodForecastScreen extends StatefulWidget {
 class _MoodForecastScreenState extends State<MoodForecastScreen> {
   bool _loading = true;
   List<Map<String, dynamic>> _forecast = [];
-  List<Map<String, dynamic>> _patterns = [];
   Map<String, dynamic>? _trend;
   List<Map<String, dynamic>> _triggers = [];
 
@@ -32,7 +31,6 @@ class _MoodForecastScreenState extends State<MoodForecastScreen> {
       final data = res.data as Map<String, dynamic>;
       setState(() {
         _forecast = (data['forecast'] as List?)?.cast<Map<String, dynamic>>() ?? [];
-        _patterns = (data['patterns'] as List?)?.cast<Map<String, dynamic>>() ?? [];
         _trend = data['recentTrend'] as Map<String, dynamic>?;
         _triggers = (data['topTriggers'] as List?)?.cast<Map<String, dynamic>>() ?? [];
         _loading = false;

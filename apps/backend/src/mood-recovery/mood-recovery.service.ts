@@ -3,7 +3,7 @@ import { MoodType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { scoreFromMood } from '../mood-checkins/helpers/mood-scoring';
 
-interface RecoverySession {
+export interface RecoverySession {
   id: string;
   activityType: string;
   title: string;
