@@ -35,7 +35,7 @@ dependencies:
   # HTTP client với interceptor cho auth/refresh token.
   dio: ^5.7.0
   # Lưu access/refresh token vào Keychain (iOS) / Keystore (Android).
-  flutter_secure_storage: ^9.2.4
+  flutter_secure_storage: ^10.3.1
   # Router type-safe + deep-link friendly.
   go_router: ^14.6.2
   # State management nhẹ — đủ cho 4 màn hình, không cần Bloc/Riverpod.
