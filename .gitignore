@@ -47,3 +47,4 @@ apps/web/.vercel/
 scratch/
 tmp/
 openapitools.json
+.vercel

@@ -95,6 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
         case 'ANXIOUS':
           moodColor = RelaxColors.violet;
           break;
+        case 'POOPING':
+          moodColor = const Color(0xFF8B4513);
+          break;
       }
       if (moodColor != null && mounted) {
         try {

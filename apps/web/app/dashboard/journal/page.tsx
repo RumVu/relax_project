@@ -38,6 +38,7 @@ const moodTypeOptions = [
   'NEUTRAL',
   'LONELY',
   'GRATEFUL',
+  'POOPING',
 ];
 
 export default function JournalPage() {

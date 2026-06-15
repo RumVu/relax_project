@@ -59,6 +59,8 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
         return RelaxColors.plum;
       case 'ANGRY':
         return const Color(0xFFEF4444);
+      case 'POOPING':
+        return const Color(0xFF8B4513);
       default:
         return Colors.transparent;
     }
@@ -80,6 +82,8 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
         return '😫';
       case 'ANGRY':
         return '😠';
+      case 'POOPING':
+        return '💩';
       default:
         return '😐';
     }

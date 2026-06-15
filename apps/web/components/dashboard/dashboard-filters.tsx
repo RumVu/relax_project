@@ -31,7 +31,7 @@ type DashboardFilterState = {
 const periodOptions = ['week', 'month', 'quarter', 'year'];
 const customPeriodOptions = [...periodOptions, 'custom'];
 const timezoneOptions = ['Asia/Ho_Chi_Minh', 'UTC', 'America/New_York', 'Europe/London', 'Asia/Tokyo'];
-const moodOptions = ['ALL', 'HAPPY', 'CALM', 'TIRED', 'SAD', 'ANXIOUS', 'STRESSED', 'EXCITED', 'NEUTRAL', 'LONELY', 'GRATEFUL'];
+const moodOptions = ['ALL', 'HAPPY', 'CALM', 'TIRED', 'SAD', 'ANXIOUS', 'STRESSED', 'EXCITED', 'NEUTRAL', 'LONELY', 'GRATEFUL', 'POOPING'];
 const activityOptions = ['ALL', 'MUSIC', 'PODCAST', 'JOURNAL', 'BREATHING', 'MYSTERY', 'MEDITATION'];
 const notificationOptions = ['ALL', 'IN_APP', 'PUSH', 'EMAIL', 'SMS'];
 

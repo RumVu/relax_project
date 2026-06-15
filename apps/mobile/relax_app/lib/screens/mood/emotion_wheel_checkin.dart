@@ -404,6 +404,9 @@ class _EmotionWheelCheckinState extends State<EmotionWheelCheckin> {
           case 'ANXIOUS':
             moodColor = RelaxColors.violet;
             break;
+          case 'POOPING':
+            moodColor = const Color(0xFF8B4513);
+            break;
         }
         if (moodColor != null) {
           try {

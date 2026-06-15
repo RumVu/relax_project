@@ -333,6 +333,7 @@ export const userDashboardData: UserDashboardData = {
     { type: 'EXCITED', label: 'Hào hứng', icon: 'sparkles', value: 75, color: '#7357f6' },
     { type: 'LONELY', label: 'Cô đơn', icon: 'cloud', value: 45, color: '#7c8cf8' },
     { type: 'GRATEFUL', label: 'Biết ơn', icon: 'sun', value: 30, color: '#f7c948' },
+    { type: 'POOPING', label: 'Mắc ỉa', icon: 'sparkles', value: 50, color: '#8B4513' },
   ],
   moodHistory: [],
   timeline: [],

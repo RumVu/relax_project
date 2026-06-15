@@ -73,6 +73,19 @@ List<JourneySuggestion> suggestionsForMood(String mood) {
           route: '/meditation',
         ),
       ];
+    case 'POOPING':
+      return const [
+        JourneySuggestion(
+          icon: Icons.air,
+          label: 'Hít thở sâu cho nhẹ bụng',
+          route: '/breathing',
+        ),
+        JourneySuggestion(
+          icon: Icons.headphones,
+          label: 'Nhạc thư giãn cho khoảnh khắc này',
+          route: '/sounds',
+        ),
+      ];
     case 'CALM':
     case 'NEUTRAL':
     default:
@@ -111,6 +124,8 @@ String subtitleForMood(String mood) {
       return 'Buồn cũng được. Mình ngồi lại với cảm xúc một chút nha.';
     case 'TIRED':
       return 'Mệt rồi đó. Nghỉ một nhịp đã, mọi thứ đợi được mà.';
+    case 'POOPING':
+      return 'Thả lỏng cơ thể, mọi thứ sẽ nhẹ nhàng thôi 💩';
     case 'CALM':
     case 'NEUTRAL':
     default:

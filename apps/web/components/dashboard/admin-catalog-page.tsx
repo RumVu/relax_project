@@ -60,6 +60,7 @@ const moodOptions = [
   'NEUTRAL',
   'LONELY',
   'GRATEFUL',
+  'POOPING',
 ];
 
 const companionMoods = [
