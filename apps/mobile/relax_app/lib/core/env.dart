@@ -8,14 +8,14 @@
 ///
 /// Production (mặc định nếu không truyền gì):
 ///   flutter run
-///   → dùng https://relax-backend.tail3e0c74.ts.net/v1
+///   → dùng https://backend-production-b8a5f.up.railway.app/v1
 class Env {
   Env._();
 
   /// API base URL — override bằng `--dart-define=API_BASE=...`
   static const String apiBase = String.fromEnvironment(
     'API_BASE',
-    defaultValue: 'https://relax-backend.tail3e0c74.ts.net/v1',
+    defaultValue: 'https://backend-production-b8a5f.up.railway.app/v1',
   );
 
   /// Google Server Client ID (Web Client ID) for Google Sign-In
