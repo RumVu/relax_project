@@ -25,6 +25,8 @@ import {
 } from '@/components/dashboard/dashboard-ui';
 import { CozyQuoteCard } from '@/components/dashboard/cozy-quote-card';
 import { QuestPanel } from '@/components/dashboard/quest-panel';
+import { MoodGoalsPanel } from '@/components/dashboard/mood-goals-panel';
+import { MoodForecastPanel } from '@/components/dashboard/mood-forecast-panel';
 import { OnboardingTour } from '@/components/dashboard/onboarding-tour';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { Badge } from '@/components/ui/badge';
@@ -175,8 +177,15 @@ export default function DashboardPage() {
         <WeeklyStatsChart data={safeWeeklyStats} />
       </div>
 
-      <div data-tour="quests">
-        <QuestPanel />
+      <div className="grid gap-4 xl:grid-cols-2">
+        <div data-tour="quests">
+          <QuestPanel />
+        </div>
+        <MoodGoalsPanel />
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-2">
+        <MoodForecastPanel />
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]" data-tour="recent-moments">

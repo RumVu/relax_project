@@ -57,6 +57,12 @@ import 'screens/journal/cbt_thought_record_screen.dart';
 import 'screens/wellness_plan/habit_stacking_screen.dart';
 import 'screens/mood/mood_capsule_screen.dart';
 import 'screens/settings/feedback_screen.dart';
+import 'screens/mood_goals/mood_goals_screen.dart';
+import 'screens/mood_recovery/mood_recovery_screen.dart';
+import 'screens/mood_forecast/mood_forecast_screen.dart';
+import 'screens/voice_checkin/voice_checkin_screen.dart';
+import 'screens/notification_lab/notification_lab_screen.dart';
+import 'screens/wellness_report/wellness_report_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -231,6 +237,12 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/habit-stacking', const HabitStackingScreen()),
       _soft('/mood-capsule', const MoodCapsuleScreen()),
       _soft('/feedback', const FeedbackScreen()),
+      _soft('/mood-goals', const MoodGoalsScreen()),
+      _soft('/mood-recovery', const MoodRecoveryScreen()),
+      _soft('/mood-forecast', const MoodForecastScreen()),
+      _soft('/voice-checkin', const VoiceCheckinScreen()),
+      _soft('/notification-lab', const NotificationLabScreen()),
+      _soft('/wellness-report', const WellnessReportScreen()),
 
       // Raw builder (no transition)
       GoRoute(path: '/location', builder: (c, s) => const LocationScreen()),

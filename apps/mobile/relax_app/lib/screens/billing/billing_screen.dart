@@ -218,9 +218,190 @@ class _BillingScreenState extends State<BillingScreen> {
                         label: Text(context.t('Lịch sử thanh toán'),
                             style: const TextStyle(color: RelaxColors.violet)),
                       ),
+                      const SizedBox(height: 24),
+                      const _FeatureComparisonSection(),
                     ],
                   ),
                 ),
+    );
+  }
+}
+
+class _FeatureComparisonSection extends StatefulWidget {
+  const _FeatureComparisonSection();
+
+  @override
+  State<_FeatureComparisonSection> createState() =>
+      _FeatureComparisonSectionState();
+}
+
+class _FeatureComparisonSectionState extends State<_FeatureComparisonSection> {
+  List<Map<String, dynamic>> _features = [];
+  String _plan = 'FREE';
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    try {
+      final res = await RelaxApi.instance.get('/entitlements/me');
+      if (res.data is Map && mounted) {
+        final data = res.data as Map<String, dynamic>;
+        setState(() {
+          _features = (data['features'] as List?)
+                  ?.cast<Map<String, dynamic>>() ??
+              [];
+          _plan = data['plan'] as String? ?? 'FREE';
+          _loaded = true;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loaded = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_loaded || _features.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          context.t('SO SÁNH TÍNH NĂNG'),
+          style: const TextStyle(
+            color: RelaxColors.slate,
+            fontWeight: FontWeight.w800,
+            fontSize: 11,
+            letterSpacing: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: context.surface,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: context.fieldBorder),
+          ),
+          child: Column(
+            children: [
+              // Header
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: RelaxColors.violet.withValues(alpha: 0.06),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(context.t('Tính năng'),
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                              color: context.appText)),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(context.t('Free'),
+                            style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 12,
+                                color: context.mutedText)),
+                      ),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text('Pro',
+                            style: TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 12,
+                                color: RelaxColors.violet)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              ..._features.map((f) {
+                final label = f['label'] as String? ?? '';
+                final free = f['free'] as bool? ?? false;
+                final premium = f['premium'] as bool? ?? false;
+                final unlocked = f['unlocked'] as bool? ?? false;
+
+                return Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    border: Border(
+                        top: BorderSide(color: context.fieldBorder, width: 0.5)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          context.t(label),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: unlocked
+                                ? context.appText
+                                : context.mutedText,
+                            fontWeight:
+                                unlocked ? FontWeight.w600 : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Icon(
+                            free
+                                ? Icons.check_circle
+                                : Icons.remove_circle_outline,
+                            color:
+                                free ? RelaxColors.mint : context.mutedText,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: Icon(
+                            premium
+                                ? Icons.check_circle
+                                : Icons.remove_circle_outline,
+                            color: premium
+                                ? RelaxColors.violet
+                                : context.mutedText,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Center(
+          child: Text(
+            '${context.t('Gói hiện tại:')} $_plan',
+            style: TextStyle(
+              color: context.mutedText,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

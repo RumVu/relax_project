@@ -55,6 +55,7 @@ dependencies:
   hive: ^2.2.3
   url_launcher: ^6.3.0
   connectivity_plus: ^6.1.4
+  speech_to_text: ^7.0.0
   pdf: ^3.10.8
   relax_api_client:
     path: lib/generated/api

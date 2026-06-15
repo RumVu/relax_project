@@ -8,6 +8,7 @@ import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../core/theme_controller.dart';
 import '../../widgets/soft_toast.dart';
+import 'widgets/body_map_widget.dart';
 
 class EmotionWheelCheckin extends StatefulWidget {
   const EmotionWheelCheckin({super.key});
@@ -26,6 +27,7 @@ class _EmotionWheelCheckinState extends State<EmotionWheelCheckin> {
   String? _energyLevel;
   String? _mentalClarity;
   String? _stressLoad;
+  final Set<String> _bodyZones = {};
 
   static const _primaryMoods = [
     ('STRESSED', 'Căng thẳng', '😫', RelaxColors.plum),
@@ -366,6 +368,7 @@ class _EmotionWheelCheckinState extends State<EmotionWheelCheckin> {
       if (_primaryMood == 'ANGRY') 'sub:ANGRY',
       if (_subMood != null) 'sub:$_subMood',
       ..._bodyFeelings.map((f) => 'body:$f'),
+      ..._bodyZones.map((z) => 'zone:$z'),
       if (_energyLevel != null) 'energy:$_energyLevel',
       if (_mentalClarity != null) 'clarity:$_mentalClarity',
       if (_stressLoad != null) 'stress:$_stressLoad',
@@ -628,6 +631,23 @@ class _EmotionWheelCheckinState extends State<EmotionWheelCheckin> {
                   ),
                 );
               }).toList(),
+            ),
+
+            const SizedBox(height: 24),
+            // Step 4b: Body map
+            _sectionHeader('4b. ${context.t('Bản đồ cơ thể')} ${context.t('(chạm vào vùng đau/khó chịu)')}'),
+            const SizedBox(height: 10),
+            BodyMapWidget(
+              selectedZones: _bodyZones,
+              onToggle: (zone) {
+                setState(() {
+                  if (_bodyZones.contains(zone)) {
+                    _bodyZones.remove(zone);
+                  } else {
+                    _bodyZones.add(zone);
+                  }
+                });
+              },
             ),
 
             const SizedBox(height: 24),

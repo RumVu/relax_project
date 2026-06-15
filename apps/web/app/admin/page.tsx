@@ -41,6 +41,7 @@ const catalogLinks = [
   { area: 'Sounds', href: '/admin/sounds' },
   { area: 'Podcasts', href: '/admin/podcasts' },
   { area: 'Exercises', href: '/admin/exercises' },
+  { area: 'Meditations', href: '/admin/meditations' },
   { area: 'Themes', href: '/admin/themes' },
   { area: 'Onboarding', href: '/admin/onboarding' },
   { area: 'Companion Assets', href: '/admin/companion-assets' },
@@ -143,6 +144,23 @@ export default function AdminPage() {
               <Link href="/admin/prompt-management">
                 <Button className="h-8 px-3 text-xs" variant="secondary">
                   {t('admin.btn.promptManager')}
+                </Button>
+              </Link>
+              <Link href="/admin/content-hub">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  Content Hub
+                </Button>
+              </Link>
+              <Link href="/admin/release-center">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  <ServerCog className="h-4 w-4" />
+                  Release Center
+                </Button>
+              </Link>
+              <Link href="/admin/security-center">
+                <Button className="h-8 px-3 text-xs" variant="secondary">
+                  <Database className="h-4 w-4" />
+                  Security Center
                 </Button>
               </Link>
               <Link href="/admin/content-quality">
@@ -477,6 +495,7 @@ function areaKey(area: string) {
     Onboarding: 'nav.onboarding',
     'Companion Assets': 'nav.companionAssets',
     'Companion Messages': 'nav.companionMessages',
+    Meditations: 'nav.meditations',
   };
   return keys[area] ?? 'admin.content.col.area';
 }

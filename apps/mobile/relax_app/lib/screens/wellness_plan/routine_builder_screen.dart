@@ -151,12 +151,16 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
     final List<Map<String, String>> selectedSteps = [];
 
     final stepTypes = [
-      {'type': 'quote', 'name': 'Đọc danh ngôn', 'icon': '💬'},
-      {'type': 'breathing', 'name': 'Tập hít thở', 'icon': '🌬️'},
-      {'type': 'checkin', 'name': 'Check-in cảm xúc', 'icon': '📊'},
-      {'type': 'soundscape', 'name': 'Âm thanh tự nhiên', 'icon': '🎵'},
-      {'type': 'journal', 'name': 'Viết nhật ký', 'icon': '✍️'},
-      {'type': 'grounding', 'name': 'Tập trung Grounding', 'icon': '⚓'},
+      {'type': 'quote', 'name': 'Đọc danh ngôn', 'icon': '💬', 'duration': '1'},
+      {'type': 'breathing', 'name': 'Tập hít thở', 'icon': '🌬️', 'duration': '3'},
+      {'type': 'checkin', 'name': 'Check-in cảm xúc', 'icon': '📊', 'duration': '2'},
+      {'type': 'soundscape', 'name': 'Âm thanh tự nhiên', 'icon': '🎵', 'duration': '5'},
+      {'type': 'journal', 'name': 'Viết nhật ký', 'icon': '✍️', 'duration': '5'},
+      {'type': 'grounding', 'name': 'Tập trung Grounding', 'icon': '⚓', 'duration': '3'},
+      {'type': 'meditation', 'name': 'Thiền tập', 'icon': '🧘', 'duration': '5'},
+      {'type': 'body_scan', 'name': 'Body scan', 'icon': '🫁', 'duration': '4'},
+      {'type': 'gratitude', 'name': 'Lòng biết ơn', 'icon': '🙏', 'duration': '3'},
+      {'type': 'stretch', 'name': 'Giãn cơ nhẹ', 'icon': '🤸', 'duration': '3'},
     ];
 
     showModalBottomSheet(
@@ -250,6 +254,7 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
                         selectedSteps.add({
                           'type': st['type']!,
                           'title': st['name']!,
+                          'duration': st['duration'] ?? '3',
                         });
                       });
                     },
@@ -269,12 +274,22 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
                     color: context.surfaceAlt,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: ListView.builder(
+                  child: ReorderableListView.builder(
                     shrinkWrap: true,
+                    buildDefaultDragHandles: true,
                     itemCount: selectedSteps.length,
+                    onReorder: (oldIdx, newIdx) {
+                      setModalState(() {
+                        if (newIdx > oldIdx) newIdx--;
+                        final item = selectedSteps.removeAt(oldIdx);
+                        selectedSteps.insert(newIdx, item);
+                      });
+                    },
                     itemBuilder: (c, idx) {
                       final s = selectedSteps[idx];
+                      final dur = s['duration'] ?? '3';
                       return ListTile(
+                        key: ValueKey('step_$idx'),
                         dense: true,
                         leading: CircleAvatar(
                           radius: 12,
@@ -285,6 +300,7 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
                           ),
                         ),
                         title: Text(context.t(s['title']!)),
+                        subtitle: Text('${dur} ${context.t('phút')}', style: TextStyle(fontSize: 11, color: context.mutedText)),
                         trailing: IconButton(
                           icon: const Icon(Icons.remove_circle, color: RelaxColors.coral, size: 18),
                           onPressed: () {

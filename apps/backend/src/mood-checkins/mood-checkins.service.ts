@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { MoodCheckin, MoodType, Prisma, UserRole } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
@@ -26,6 +26,7 @@ import { UpdateMoodCheckinDto } from './dto/update-mood-checkin.dto';
 import { getMoodOption, MOOD_OPTIONS, MoodActionType } from './mood-options';
 import { AchievementsService } from '../achievements/achievements.service';
 import { FeedService } from '../feed/feed.service';
+import { MoodGoalsService } from '../mood-goals/mood-goals.service';
 
 // Helpers (pure)
 import {
@@ -149,6 +150,8 @@ export class MoodCheckinsService {
     private readonly achievementsService: AchievementsService,
     private readonly feedService: FeedService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => MoodGoalsService))
+    private readonly moodGoalsService: MoodGoalsService,
   ) {}
 
   // ============================================================
@@ -290,8 +293,10 @@ export class MoodCheckinsService {
         `đã ghi nhận cảm xúc: "${checkin.mood}" với cường độ ${checkin.intensity}/5.`,
         checkin.id,
       );
+
+      await this.moodGoalsService.onMoodCheckin(userId, checkin.mood);
     } catch {
-      // Don't block flow if achievements/feed fails
+      // Don't block flow if achievements/feed/goals fails
     }
 
     return checkin;

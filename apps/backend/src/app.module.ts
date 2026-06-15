@@ -64,6 +64,10 @@ import { AdaptivePlanModule } from './adaptive-plan/adaptive-plan.module';
 import { BuddyCircleModule } from './buddy-circle/buddy-circle.module';
 import { PrivacyModule } from './privacy/privacy.module';
 import { FeedbacksModule } from './feedbacks/feedbacks.module';
+import { MoodGoalsModule } from './mood-goals/mood-goals.module';
+import { MoodRecoveryModule } from './mood-recovery/mood-recovery.module';
+import { MoodForecastModule } from './mood-forecast/mood-forecast.module';
+import { EntitlementsModule } from './entitlements/entitlements.module';
 import { EntitlementGuard } from './common/guards/entitlement.guard';
 
 @Module({
@@ -175,6 +179,10 @@ import { EntitlementGuard } from './common/guards/entitlement.guard';
     BuddyCircleModule,
     PrivacyModule,
     FeedbacksModule,
+    MoodGoalsModule,
+    MoodRecoveryModule,
+    MoodForecastModule,
+    EntitlementsModule,
   ],
   controllers: [AppController],
   providers: [

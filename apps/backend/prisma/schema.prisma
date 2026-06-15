@@ -111,6 +111,7 @@ model User {
   experimentAssignments ExperimentAssignment[]
   cravingLogs           CravingLog[]
   smokingGoal           SmokingGoal?
+  moodGoals             MoodGoal[]
 
   @@index([email])
   @@index([role])
@@ -599,6 +600,73 @@ model SmokingGoal {
 }
 
 // --- End Craving / Smoke Break ---
+
+// --- Mood Goals ---
+
+enum MoodGoalType {
+  TARGET_MOOD
+  REDUCE_MOOD
+  STREAK
+  CHECKIN_COUNT
+}
+
+enum MoodGoalStatus {
+  ACTIVE
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+model MoodGoal {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  type        MoodGoalType
+  status      MoodGoalStatus @default(ACTIVE)
+
+  targetMood     MoodType?
+  targetCount    Int?
+  targetDays     Int?
+  currentCount   Int       @default(0)
+  currentStreak  Int       @default(0)
+
+  startDate DateTime @default(now())
+  endDate   DateTime?
+
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  milestones MoodGoalMilestone[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([type])
+  @@index([startDate])
+  @@map("mood_goals")
+}
+
+model MoodGoalMilestone {
+  id     String @id @default(cuid())
+
+  goalId String
+  goal   MoodGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  title      String
+  target     Int
+  reached    Boolean  @default(false)
+  reachedAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([goalId])
+  @@map("mood_goal_milestones")
+}
+
+// --- End Mood Goals ---
 
 enum TriggerType {
   WORK

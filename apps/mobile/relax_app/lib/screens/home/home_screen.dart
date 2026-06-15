@@ -22,6 +22,8 @@ import 'widgets/smart_recommendations.dart';
 import 'widgets/speech_bubble.dart';
 import 'widgets/mood_toolkit_widget.dart';
 import 'widgets/mood_budget_widget.dart';
+import 'widgets/mood_goals_widget.dart';
+import 'widgets/mood_forecast_widget.dart';
 
 // Trang chu — loi chao theo thoi tiet, meo + bong bong
 // thoai, luoi cam xuc, thanh theo doi cam xuc, va cac phuong thuc phu hop.
@@ -193,6 +195,8 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 16),
               const MoodBudgetWidget(),
               const SizedBox(height: 16),
+              const MoodGoalsWidget(),
+              const MoodForecastWidget(),
               const SmartRecommendations(),
               const MoodToolkitWidget(),
               if (_loading)
@@ -213,17 +217,40 @@ class _HomeScreenState extends State<HomeScreen> {
                   onLogMood: _logMood,
                 ),
                 const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: () => context.push('/mood'),
-                  child: Text(
-                    context.t('Chi tiết hơn với ghi chú & cường độ ➜'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: RelaxColors.violet,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.push('/mood'),
+                      child: Text(
+                        context.t('Chi tiết hơn ➜'),
+                        style: const TextStyle(
+                          color: RelaxColors.violet,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    GestureDetector(
+                      onTap: () => context.push('/voice-checkin'),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.mic, color: RelaxColors.coral, size: 16),
+                          const SizedBox(width: 4),
+                          Text(
+                            context.t('Nói để check-in'),
+                            style: const TextStyle(
+                              color: RelaxColors.coral,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 24),
                 MoodTrackingCard(
