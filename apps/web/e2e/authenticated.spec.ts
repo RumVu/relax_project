@@ -140,6 +140,11 @@ function payloadFor(path: string) {
     };
   }
 
+  if (path.includes('/mood-goals/me/summary'))
+    return { active: 0, completed: 0, completionRate: 0 };
+  if (path.includes('/mood-goals/me/progress')) return [];
+  if (path.includes('/mood-forecast/me/predictions'))
+    return { forecast: [], recentTrend: null };
   if (path.includes('/unread-count')) return { count: 0 };
   if (path.includes('/stats')) return {};
   if (path.includes('/profile')) return { displayName: 'Playwright User' };

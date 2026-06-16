@@ -78,7 +78,8 @@ export function MoodGoalsPanel() {
         apiFetch<MoodGoal[]>('/mood-goals/me/progress'),
         apiFetch<GoalSummary>('/mood-goals/me/summary'),
       ]);
-      if (goalsRes.status === 'fulfilled') setGoals(goalsRes.value);
+      if (goalsRes.status === 'fulfilled' && Array.isArray(goalsRes.value))
+        setGoals(goalsRes.value);
       if (summaryRes.status === 'fulfilled') setSummary(summaryRes.value);
     } catch {
       // silent
