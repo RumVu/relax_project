@@ -58,7 +58,8 @@ export class BuddyCircleController {
   @Post('report')
   async reportContent(
     @CurrentUser() user: AuthUser,
-    @Body() body: { targetUserId?: string; feedEntryId?: string; reason: string },
+    @Body()
+    body: { targetUserId?: string; feedEntryId?: string; reason: string },
   ) {
     return this.buddyCircleService.reportContent(user.id, body);
   }

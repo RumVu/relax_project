@@ -17,13 +17,12 @@ import { MoodRecoveryService } from './mood-recovery.service';
 export class MoodRecoveryController {
   constructor(private readonly recoveryService: MoodRecoveryService) {}
 
-  @ApiOperation({ summary: 'Get mood recovery history (before/after sessions)' })
+  @ApiOperation({
+    summary: 'Get mood recovery history (before/after sessions)',
+  })
   @ApiOkResponse({ description: 'Recovery session list with deltas.' })
   @Get('me/history')
-  getHistory(
-    @CurrentUser() user: AuthUser,
-    @Query('days') days?: string,
-  ) {
+  getHistory(@CurrentUser() user: AuthUser, @Query('days') days?: string) {
     return this.recoveryService.getRecoveryHistory(
       user.id,
       days ? parseInt(days, 10) : 30,
@@ -31,12 +30,11 @@ export class MoodRecoveryController {
   }
 
   @ApiOperation({ summary: 'Get mood recovery summary analytics' })
-  @ApiOkResponse({ description: 'Recovery summary with trends and best activity.' })
+  @ApiOkResponse({
+    description: 'Recovery summary with trends and best activity.',
+  })
   @Get('me/summary')
-  getSummary(
-    @CurrentUser() user: AuthUser,
-    @Query('days') days?: string,
-  ) {
+  getSummary(@CurrentUser() user: AuthUser, @Query('days') days?: string) {
     return this.recoveryService.getRecoverySummary(
       user.id,
       days ? parseInt(days, 10) : 30,

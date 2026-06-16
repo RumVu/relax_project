@@ -8,7 +8,13 @@ import { FeedModule } from '../feed/feed.module';
 import { MoodGoalsModule } from '../mood-goals/mood-goals.module';
 
 @Module({
-  imports: [AuthCoreModule, UsersModule, AchievementsModule, FeedModule, forwardRef(() => MoodGoalsModule)],
+  imports: [
+    AuthCoreModule,
+    UsersModule,
+    AchievementsModule,
+    FeedModule,
+    forwardRef(() => MoodGoalsModule),
+  ],
   controllers: [MoodCheckinsController],
   providers: [MoodCheckinsService],
   exports: [MoodCheckinsService],

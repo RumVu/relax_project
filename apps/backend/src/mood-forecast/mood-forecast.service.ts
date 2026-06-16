@@ -57,7 +57,11 @@ export class MoodForecastService {
       );
 
       const predictedMood = this.scoreToMood(predictedScore);
-      const suggestion = this.getSuggestion(riskLevel, dayOfWeek, triggerAnalysis);
+      const suggestion = this.getSuggestion(
+        riskLevel,
+        dayOfWeek,
+        triggerAnalysis,
+      );
 
       forecast.push({
         date: dateStr,
@@ -146,7 +150,8 @@ export class MoodForecastService {
     const diff = avgRecent - avgOlder;
 
     if (diff > 5) return { direction: 'improving' as const, magnitude: diff };
-    if (diff < -5) return { direction: 'declining' as const, magnitude: Math.abs(diff) };
+    if (diff < -5)
+      return { direction: 'declining' as const, magnitude: Math.abs(diff) };
     return { direction: 'stable' as const, magnitude: Math.abs(diff) };
   }
 
@@ -202,7 +207,15 @@ export class MoodForecastService {
     dayOfWeek: number,
     triggers: { trigger: string; negativeRate: number }[],
   ): string {
-    const dayNames = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+    const dayNames = [
+      'Chủ nhật',
+      'Thứ 2',
+      'Thứ 3',
+      'Thứ 4',
+      'Thứ 5',
+      'Thứ 6',
+      'Thứ 7',
+    ];
 
     if (risk === 'HIGH') {
       const topTrigger = triggers[0];

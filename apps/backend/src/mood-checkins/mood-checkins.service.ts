@@ -1,4 +1,9 @@
-import { ForbiddenException, Inject, Injectable, forwardRef } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { MoodCheckin, MoodType, Prisma, UserRole } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';

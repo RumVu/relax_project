@@ -514,23 +514,22 @@ export class UserCompanionsService {
       moodCounts[c.mood] = (moodCounts[c.mood] || 0) + 1;
       totalScore += c.finalScore ?? c.rawScore ?? 50;
       if (c.trigger) {
-        triggerCounts[String(c.trigger)] = (triggerCounts[String(c.trigger)] || 0) + 1;
+        triggerCounts[String(c.trigger)] =
+          (triggerCounts[String(c.trigger)] || 0) + 1;
       }
     }
 
-    const dominantMood = Object.entries(moodCounts)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'NEUTRAL';
+    const dominantMood =
+      Object.entries(moodCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ||
+      'NEUTRAL';
     const topTriggers = Object.entries(triggerCounts)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
       .map(([trigger, count]) => ({ trigger, count }));
-    const avgScore = checkins.length > 0
-      ? Math.round(totalScore / checkins.length)
-      : 50;
+    const avgScore =
+      checkins.length > 0 ? Math.round(totalScore / checkins.length) : 50;
 
-    const chatCount = interactions.filter(
-      (i) => i.type === 'CHAT',
-    ).length;
+    const chatCount = interactions.filter((i) => i.type === 'CHAT').length;
     const totalInteractionCount = interactions.length;
     const activityCount = relaxSessions.length;
 
@@ -580,8 +579,16 @@ export class UserCompanionsService {
     }
 
     return {
-      companion: { name: companion.name, level: companion.level, affection: companion.affection },
-      period: { from: since.toISOString(), to: new Date().toISOString(), days: 30 },
+      companion: {
+        name: companion.name,
+        level: companion.level,
+        affection: companion.affection,
+      },
+      period: {
+        from: since.toISOString(),
+        to: new Date().toISOString(),
+        days: 30,
+      },
       stats: {
         totalCheckins: checkins.length,
         avgScore,
@@ -625,23 +632,34 @@ export class UserCompanionsService {
       moodJourney[0] || { mood: 'NEUTRAL', score: 50, date: new Date() },
     );
 
-    const avgScore = moodJourney.length > 0
-      ? Math.round(moodJourney.reduce((s, m) => s + m.score, 0) / moodJourney.length)
-      : 50;
+    const avgScore =
+      moodJourney.length > 0
+        ? Math.round(
+            moodJourney.reduce((s, m) => s + m.score, 0) / moodJourney.length,
+          )
+        : 50;
 
     const messages: string[] = [];
     if (checkins.length === 0) {
-      messages.push(`${companion.name} nhớ bạn lắm! Tuần này chưa thấy bạn check-in.`);
+      messages.push(
+        `${companion.name} nhớ bạn lắm! Tuần này chưa thấy bạn check-in.`,
+      );
     } else if (avgScore <= 35) {
       messages.push(`Tuần này bạn khá ổn! ${companion.name} vui vì điều đó.`);
     } else if (avgScore >= 65) {
-      messages.push(`${companion.name} thấy bạn hơi stress tuần này. Tuần tới mình thử thư giãn nhiều hơn nha!`);
+      messages.push(
+        `${companion.name} thấy bạn hơi stress tuần này. Tuần tới mình thử thư giãn nhiều hơn nha!`,
+      );
     } else {
-      messages.push(`Một tuần bình thường — ${companion.name} luôn ở đây bên bạn.`);
+      messages.push(
+        `Một tuần bình thường — ${companion.name} luôn ở đây bên bạn.`,
+      );
     }
 
     if (relaxSessions.length > 0) {
-      messages.push(`Bạn đã thực hành ${relaxSessions.length} hoạt động thư giãn — giỏi lắm!`);
+      messages.push(
+        `Bạn đã thực hành ${relaxSessions.length} hoạt động thư giãn — giỏi lắm!`,
+      );
     }
 
     return {
@@ -653,7 +671,9 @@ export class UserCompanionsService {
         avgScore,
         activityCount: relaxSessions.length,
         bestDay: bestDay ? { mood: bestDay.mood, date: bestDay.date } : null,
-        worstDay: worstDay ? { mood: worstDay.mood, date: worstDay.date } : null,
+        worstDay: worstDay
+          ? { mood: worstDay.mood, date: worstDay.date }
+          : null,
       },
       moodJourney: moodJourney.slice(0, 14),
       messages,

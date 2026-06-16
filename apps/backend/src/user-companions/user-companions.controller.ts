@@ -116,7 +116,9 @@ export class UserCompanionsController {
   }
 
   @ApiOperation({ summary: 'Get companion memory insights (30-day analysis)' })
-  @ApiOkResponse({ description: 'Companion memory insights with pattern analysis.' })
+  @ApiOkResponse({
+    description: 'Companion memory insights with pattern analysis.',
+  })
   @UseGuards(JwtAuthGuard)
   @Get('me/memory')
   getMemoryInsights(@CurrentUser() user: AuthUser) {

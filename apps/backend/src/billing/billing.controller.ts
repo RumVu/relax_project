@@ -96,10 +96,7 @@ export class BillingController {
   @ApiCreatedResponse({ description: 'Subscription downgraded successfully.' })
   @UseGuards(JwtAuthGuard)
   @Post('me/downgrade')
-  downgrade(
-    @CurrentUser() user: AuthUser,
-    @Body() body: { planName: string },
-  ) {
+  downgrade(@CurrentUser() user: AuthUser, @Body() body: { planName: string }) {
     return this.billingService.downgrade(user.id, body.planName);
   }
 

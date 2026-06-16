@@ -93,7 +93,12 @@ export class MoodGoalsService {
       this.prisma.moodGoal.count({ where: { userId } }),
     ]);
 
-    return { active, completed, total, completionRate: total > 0 ? completed / total : 0 };
+    return {
+      active,
+      completed,
+      total,
+      completionRate: total > 0 ? completed / total : 0,
+    };
   }
 
   async onMoodCheckin(userId: string, mood: MoodType) {
@@ -154,7 +159,13 @@ export class MoodGoalsService {
 
   private async calculateProgress(
     userId: string,
-    goal: { type: string; targetMood: MoodType | null; targetCount: number | null; currentCount: number; startDate: Date },
+    goal: {
+      type: string;
+      targetMood: MoodType | null;
+      targetCount: number | null;
+      currentCount: number;
+      startDate: Date;
+    },
   ) {
     const since = goal.startDate;
 
@@ -165,7 +176,9 @@ export class MoodGoalsService {
       return {
         current: count,
         target: goal.targetCount ?? 0,
-        percentage: goal.targetCount ? Math.min(100, Math.round((count / goal.targetCount) * 100)) : 0,
+        percentage: goal.targetCount
+          ? Math.min(100, Math.round((count / goal.targetCount) * 100))
+          : 0,
       };
     }
 
@@ -176,7 +189,9 @@ export class MoodGoalsService {
       return {
         current: count,
         target: goal.targetCount ?? 0,
-        percentage: goal.targetCount ? Math.min(100, Math.round((count / goal.targetCount) * 100)) : 0,
+        percentage: goal.targetCount
+          ? Math.min(100, Math.round((count / goal.targetCount) * 100))
+          : 0,
       };
     }
 
@@ -184,7 +199,10 @@ export class MoodGoalsService {
       current: goal.currentCount,
       target: goal.targetCount ?? 0,
       percentage: goal.targetCount
-        ? Math.min(100, Math.round((goal.currentCount / goal.targetCount) * 100))
+        ? Math.min(
+            100,
+            Math.round((goal.currentCount / goal.targetCount) * 100),
+          )
         : 0,
     };
   }

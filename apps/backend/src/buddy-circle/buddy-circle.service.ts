@@ -178,13 +178,14 @@ export class BuddyCircleService {
     }
 
     const existing = (entry.metadata as Record<string, unknown>)?.reactions;
-    const reactions = (existing && typeof existing === 'object')
-      ? { ...(existing as Record<string, string[]>) }
-      : {};
+    const reactions =
+      existing && typeof existing === 'object'
+        ? { ...(existing as Record<string, string[]>) }
+        : {};
 
     if (!reactions[emoji]) reactions[emoji] = [];
-    if (!(reactions[emoji] as string[]).includes(userId)) {
-      (reactions[emoji] as string[]).push(userId);
+    if (!reactions[emoji].includes(userId)) {
+      reactions[emoji].push(userId);
     }
 
     await this.prisma.feedEntry.update({
@@ -206,7 +207,9 @@ export class BuddyCircleService {
     data: { targetUserId?: string; feedEntryId?: string; reason: string },
   ) {
     if (!data.targetUserId && !data.feedEntryId) {
-      throw new BadRequestException('Cần chỉ định user hoặc bài viết để báo cáo');
+      throw new BadRequestException(
+        'Cần chỉ định user hoặc bài viết để báo cáo',
+      );
     }
 
     await this.prisma.notification.create({
@@ -229,10 +232,11 @@ export class BuddyCircleService {
         where: { id: data.feedEntryId },
         data: {
           metadata: {
-            ...(
-              (await this.prisma.feedEntry.findUnique({ where: { id: data.feedEntryId } }))
-                ?.metadata as Record<string, unknown> ?? {}
-            ),
+            ...(((
+              await this.prisma.feedEntry.findUnique({
+                where: { id: data.feedEntryId },
+              })
+            )?.metadata as Record<string, unknown>) ?? {}),
             reported: true,
             reportedBy: userId,
           },
@@ -240,7 +244,10 @@ export class BuddyCircleService {
       });
     }
 
-    return { success: true, message: 'Báo cáo đã được ghi nhận. Chúng tôi sẽ xem xét.' };
+    return {
+      success: true,
+      message: 'Báo cáo đã được ghi nhận. Chúng tôi sẽ xem xét.',
+    };
   }
 
   /** Block a user — removes friendship and hides from feed. */

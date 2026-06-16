@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/theme.dart';
 import '../../../core/api_client.dart';
 import '../../../core/locale_controller.dart';
+import '../../../core/premium_gate.dart';
 import '../../../widgets/mood_line_chart/mood_line_chart.dart';
-import '../../../widgets/premium_blur.dart';
 
 /// Thống kê tình trạng — biểu đồ cảm xúc 7 ngày + ước lượng giảm stress,
 /// tính từ check-in cảm xúc gần nhất.
@@ -88,8 +89,78 @@ class _StatsCardState extends State<StatsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return PremiumBlur(
-      child: Container(
+    if (!PremiumGate.isPremium(context)) return _buildLockedCard(context);
+    return _buildStatsContent(context);
+  }
+
+  Widget _buildLockedCard(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            RelaxColors.violet.withValues(alpha: 0.08),
+            RelaxColors.violet.withValues(alpha: 0.03),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: RelaxColors.violet.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: RelaxColors.violet.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.bar_chart_rounded, color: RelaxColors.violet, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.t('Biểu đồ cảm xúc & stress'),
+                  style: TextStyle(fontWeight: FontWeight.w700, color: context.appText, fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  context.t('Dành cho meow thủ Premium'),
+                  style: TextStyle(color: context.mutedText, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: () => context.push('/billing'),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: RelaxColors.violet,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.lock_open_rounded, color: Colors.white, size: 14),
+                  const SizedBox(width: 4),
+                  Text(context.t('Mở'), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatsContent(BuildContext context) {
+    return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.surface,
@@ -181,7 +252,6 @@ class _StatsCardState extends State<StatsCard> {
           ],
         ],
       ),
-    ),
     );
   }
 }

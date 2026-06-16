@@ -21,7 +21,10 @@ export interface RecoverySession {
 export class MoodRecoveryService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRecoveryHistory(userId: string, days = 30): Promise<RecoverySession[]> {
+  async getRecoveryHistory(
+    userId: string,
+    days = 30,
+  ): Promise<RecoverySession[]> {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
@@ -85,9 +88,17 @@ export class MoodRecoveryService {
     const improved = history.filter((s) => s.delta > 0);
     const recoveryRate = Math.round((improved.length / history.length) * 100);
 
-    const byActivityMap = new Map<string, { total: number; count: number; relief: number; reliefCount: number }>();
+    const byActivityMap = new Map<
+      string,
+      { total: number; count: number; relief: number; reliefCount: number }
+    >();
     for (const s of history) {
-      const entry = byActivityMap.get(s.activityType) ?? { total: 0, count: 0, relief: 0, reliefCount: 0 };
+      const entry = byActivityMap.get(s.activityType) ?? {
+        total: 0,
+        count: 0,
+        relief: 0,
+        reliefCount: 0,
+      };
       entry.total += s.delta;
       entry.count++;
       if (s.stressReliefPercent != null) {
@@ -102,7 +113,8 @@ export class MoodRecoveryService {
         activityType: type,
         sessions: data.count,
         avgDelta: Math.round((data.total / data.count) * 10) / 10,
-        avgRelief: data.reliefCount > 0 ? Math.round(data.relief / data.reliefCount) : 0,
+        avgRelief:
+          data.reliefCount > 0 ? Math.round(data.relief / data.reliefCount) : 0,
       }))
       .sort((a, b) => b.avgDelta - a.avgDelta);
 

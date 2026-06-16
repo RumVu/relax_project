@@ -16,16 +16,51 @@ const FEATURE_MAP: FeatureAccess[] = [
   { key: 'companion', label: 'Companion cơ bản', free: true, premium: true },
   { key: 'calm_now', label: 'Dịu lại ngay', free: true, premium: true },
   { key: 'mood_calendar', label: 'Lịch cảm xúc', free: true, premium: true },
-  { key: 'voice_checkin', label: 'Check-in giọng nói', free: false, premium: true },
+  {
+    key: 'voice_checkin',
+    label: 'Check-in giọng nói',
+    free: false,
+    premium: true,
+  },
   { key: 'mood_forecast', label: 'Dự báo cảm xúc', free: false, premium: true },
-  { key: 'mood_recovery', label: 'Phân tích hồi phục', free: false, premium: true },
+  {
+    key: 'mood_recovery',
+    label: 'Phân tích hồi phục',
+    free: false,
+    premium: true,
+  },
   { key: 'wellness_report', label: 'Báo cáo PDF', free: false, premium: true },
-  { key: 'advanced_breathing', label: 'Bài tập thở nâng cao', free: false, premium: true },
-  { key: 'meditation', label: 'Thiền định có hướng dẫn', free: false, premium: true },
-  { key: 'soundscape', label: 'Soundscape tuỳ chỉnh', free: false, premium: true },
-  { key: 'routine_builder', label: 'Routine Builder 2.0', free: false, premium: true },
+  {
+    key: 'advanced_breathing',
+    label: 'Bài tập thở nâng cao',
+    free: false,
+    premium: true,
+  },
+  {
+    key: 'meditation',
+    label: 'Thiền định có hướng dẫn',
+    free: false,
+    premium: true,
+  },
+  {
+    key: 'soundscape',
+    label: 'Soundscape tuỳ chỉnh',
+    free: false,
+    premium: true,
+  },
+  {
+    key: 'routine_builder',
+    label: 'Routine Builder 2.0',
+    free: false,
+    premium: true,
+  },
   { key: 'ai_insights', label: 'AI Insights', free: false, premium: true },
-  { key: 'notification_lab', label: 'Notification Lab', free: false, premium: true },
+  {
+    key: 'notification_lab',
+    label: 'Notification Lab',
+    free: false,
+    premium: true,
+  },
 ];
 
 @Injectable()
