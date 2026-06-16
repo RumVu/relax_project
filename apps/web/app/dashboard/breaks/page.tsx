@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, Headphones, Pause, PenLine, Play, Shuffle, Volume2, Wind } from 'lucide-react';
+import { CheckCircle2, Pause, Play, Volume2, Wind } from 'lucide-react';
+import { activityIcons, formatTrackDuration } from './breaks-utils';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   DataTable,
@@ -23,21 +24,6 @@ import { AmbientSoundPlayer } from '@/components/dashboard/ambient-sound-player'
 import { AnimatedBreathingCircle } from '@/components/dashboard/animated-breathing-circle';
 import { PremiumGate } from '@/components/dashboard/premium-gate';
 
-const activityIcons = {
-  MUSIC: Headphones,
-  PODCAST: Headphones,
-  JOURNAL: PenLine,
-  BREATHING: Wind,
-  MYSTERY: Shuffle,
-  MEDITATION: CheckCircle2,
-};
-
-function formatTrackDuration(seconds?: number | null) {
-  if (!seconds) return '';
-  const minutes = Math.floor(seconds / 60);
-  const rest = seconds % 60;
-  return `${minutes}:${String(rest).padStart(2, '0')}`;
-}
 
 export default function BreaksPage() {
   const router = useRouter();

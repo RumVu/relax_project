@@ -18,73 +18,8 @@ import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { useUiStore } from '@/stores/use-ui-store';
-
-type BillingCycle = 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | 'LIFETIME';
-
-interface Tier {
-  id: string;
-  name: string;
-  title: string | null;
-  description: string | null;
-  price: number;
-  salePrice: number | null;
-  saleLabel: string | null;
-  saleStartsAt: string | null;
-  saleEndsAt: string | null;
-  currency: string;
-  billingCycle: BillingCycle;
-  displayOrder: number;
-  isActive: boolean;
-}
-
-interface EditDraft {
-  id?: string;
-  name: string;
-  title: string;
-  description: string;
-  price: string;
-  salePrice: string;
-  saleLabel: string;
-  saleStartsAt: string;
-  saleEndsAt: string;
-  currency: string;
-  billingCycle: BillingCycle;
-  displayOrder: string;
-  isActive: boolean;
-}
-
-const EMPTY_DRAFT: EditDraft = {
-  name: '',
-  title: '',
-  description: '',
-  price: '0',
-  salePrice: '',
-  saleLabel: '',
-  saleStartsAt: '',
-  saleEndsAt: '',
-  currency: 'VND',
-  billingCycle: 'MONTHLY',
-  displayOrder: '0',
-  isActive: true,
-};
-
-function toDraft(tier: Tier): EditDraft {
-  return {
-    id: tier.id,
-    name: tier.name,
-    title: tier.title ?? '',
-    description: tier.description ?? '',
-    price: String(tier.price ?? 0),
-    salePrice: tier.salePrice == null ? '' : String(tier.salePrice),
-    saleLabel: tier.saleLabel ?? '',
-    saleStartsAt: tier.saleStartsAt ? tier.saleStartsAt.slice(0, 16) : '',
-    saleEndsAt: tier.saleEndsAt ? tier.saleEndsAt.slice(0, 16) : '',
-    currency: tier.currency,
-    billingCycle: tier.billingCycle,
-    displayOrder: String(tier.displayOrder ?? 0),
-    isActive: tier.isActive,
-  };
-}
+import type { BillingCycle, Tier, EditDraft } from './pricing-types';
+import { EMPTY_DRAFT, toDraft } from './pricing-utils';
 
 export default function AdminPricingPage() {
   const { t, locale } = useTranslation();
