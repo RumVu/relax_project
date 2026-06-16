@@ -73,19 +73,22 @@ export default function SettingsPage() {
   }, [pushToast]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.location.hash === '#billing') {
-      const handleScroll = () => {
+    if (typeof window === 'undefined') return;
+
+    const handleScroll = () => {
+      if (window.location.hash === '#billing' || window.location.href.includes('#billing')) {
         const el = document.getElementById('billing');
         if (el) {
           el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      };
-      handleScroll();
-      const timers = [100, 300, 600, 1000, 1500, 2000].map((t) => setTimeout(handleScroll, t));
-      return () => {
-        timers.forEach(clearTimeout);
-      };
-    }
+      }
+    };
+
+    handleScroll();
+    const timers = [100, 300, 600, 1000, 1500, 2000].map((t) => setTimeout(handleScroll, t));
+    return () => {
+      timers.forEach(clearTimeout);
+    };
   }, [isLoading, settings]);
 
   useEffect(() => {
