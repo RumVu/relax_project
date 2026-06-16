@@ -41,6 +41,7 @@ export default function SettingsPage() {
   const settings = useUserDashboardData({ refreshKey: refreshNonce + refreshKey }).settings;
   const pushToast = useUiStore((state) => state.pushToast);
 
+  const [isLoading, setIsLoading] = useState(true);
   const [billingPlans, setBillingPlans] = useState<BillingPlan[]>([]);
   const [companion, setCompanion] = useState<CompanionState | null>(null);
   const [companionOptions, setCompanionOptions] = useState<CompanionOptionGroup[]>([]);
@@ -72,7 +73,24 @@ export default function SettingsPage() {
   }, [pushToast]);
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash === '#billing') {
+      const handleScroll = () => {
+        const el = document.getElementById('billing');
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      };
+      handleScroll();
+      const timers = [100, 300, 600, 1000, 1500, 2000].map((t) => setTimeout(handleScroll, t));
+      return () => {
+        timers.forEach(clearTimeout);
+      };
+    }
+  }, [isLoading, settings]);
+
+  useEffect(() => {
     let cancelled = false;
+    setIsLoading(true);
 
     void Promise.allSettled([
       apiFetch('/billing/plans'),
@@ -232,6 +250,7 @@ export default function SettingsPage() {
           preferences.themeId ? String(preferences.themeId) : null,
         );
       }
+      setIsLoading(false);
     });
 
     return () => {

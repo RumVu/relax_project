@@ -81,7 +81,7 @@ export function PremiumGate({
           <Button
             className="mt-5"
             onClick={() => {
-              if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/settings') {
+              if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard/settings')) {
                 const el = document.getElementById('billing');
                 if (el) {
                   el.scrollIntoView({ behavior: 'smooth', block: 'start' });
