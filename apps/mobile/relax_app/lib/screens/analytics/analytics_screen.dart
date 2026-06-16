@@ -167,7 +167,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
                   children: [
                     Row(
-                      key: TourController.instance.targetKeys[6],
+                      key: widget.embedded ? TourController.instance.targetKeys[6] : null,
                       children: [
                         StatTile(
                             value: '$_total',
@@ -236,7 +236,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     ],
                     const SizedBox(height: 16),
                     Container(
-                      key: TourController.instance.targetKeys[7],
+                      key: widget.embedded ? TourController.instance.targetKeys[7] : null,
                       child: _card(
                         context,
                         title: context.t('Biểu đồ cảm xúc 7 ngày qua'),

@@ -631,6 +631,50 @@ export class BillingService {
       .join(' ');
   }
 
+  async downgrade(userId: string, planName: string) {
+    await this.usersService.findOne(userId);
+    const plan = await this.resolvePlan(planName);
+
+    if (plan.price !== 0) {
+      throw new AppException(
+        ErrorCode.VALIDATION_FAILED,
+        'Only free plans can be downgraded to without payment',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const startDate = new Date();
+
+    const subscription = await this.prisma.$transaction(async (tx) => {
+      await tx.subscription.updateMany({
+        where: { userId, status: SubscriptionStatus.ACTIVE },
+        data: { status: SubscriptionStatus.CANCELLED, endDate: startDate },
+      });
+
+      return tx.subscription.create({
+        data: {
+          userId,
+          tierId: plan.tier?.id ?? null,
+          status: SubscriptionStatus.ACTIVE,
+          planName: plan.name,
+          price: 0,
+          currency: plan.currency,
+          startDate,
+        },
+      });
+    });
+
+    return {
+      subscription,
+      plan: {
+        name: plan.name,
+        title: plan.title,
+        price: plan.price,
+        currency: plan.currency,
+      },
+    };
+  }
+
   async getMyPayments(userId: string) {
     await this.usersService.findOne(userId);
     return this.prisma.payment.findMany({

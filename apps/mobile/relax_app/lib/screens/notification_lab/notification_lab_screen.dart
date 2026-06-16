@@ -121,6 +121,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
   Future<void> _toggle(String key, bool value, _ReminderSlot slot) async {
     await _box.put('${key}_enabled', value);
     if (value) {
+      await LocalNotifications.requestPermissions();
       final hour = _getHour(key, slot.defaultHour);
       final minute = _getMinute(key, slot.defaultMinute);
       final message = _getMessage(key, slot.defaultMessage);
@@ -207,6 +208,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
 
   Future<void> _testNotification() async {
     HapticFeedback.mediumImpact();
+    await LocalNotifications.requestPermissions();
     final body = _testMsgCtrl.text.trim().isNotEmpty
         ? _testMsgCtrl.text.trim()
         : 'Đây là thông báo thử nghiệm! 🎉';

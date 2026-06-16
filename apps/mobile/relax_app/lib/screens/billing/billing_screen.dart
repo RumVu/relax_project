@@ -72,6 +72,14 @@ class _BillingScreenState extends State<BillingScreen> {
       return;
     }
 
+    final price = plan['price'] ?? plan['amount'] ?? 0;
+    final isFree = price == 0 || price == '0' || planSlug.toUpperCase() == 'FREE';
+
+    if (isFree) {
+      await _confirmDowngrade(planSlug);
+      return;
+    }
+
     // Show loading
     if (!mounted) return;
     final nav = Navigator.of(context);
@@ -124,6 +132,47 @@ class _BillingScreenState extends State<BillingScreen> {
     } catch (e) {
       if (context.mounted) {
         nav.pop(); // Close loading
+        showSoftToast(context,
+            message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
+      }
+    }
+  }
+
+  Future<void> _confirmDowngrade(String planSlug) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(ctx.t('Xác nhận hạ gói')),
+        content: Text(ctx.t(
+            'Bạn đồng ý với việc hạ gói chứ? Điều này sẽ không thể hoàn tác đâu nha.')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(ctx.t('Huỷ')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(ctx.t('Xác nhận'),
+                style: const TextStyle(color: RelaxColors.coral, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await RelaxApi.instance.post(
+        '/billing/me/downgrade',
+        body: {'planName': planSlug},
+      );
+      if (mounted) {
+        showSoftToast(context,
+            message: context.t('Đã hạ gói thành công!'),
+            tone: SoftToastTone.success);
+        _load();
+      }
+    } catch (e) {
+      if (mounted) {
         showSoftToast(context,
             message: '${context.t('Lỗi:')} $e', tone: SoftToastTone.error);
       }
