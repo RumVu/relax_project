@@ -95,6 +95,8 @@ const vi = {
   // ===== Account menu =====
   'account.profile': 'Quản lý hồ sơ',
   'account.profile.hint': 'Tên, ảnh đại diện, mật khẩu',
+  'account.tour': 'Xem lại hướng dẫn',
+  'account.tour.hint': 'Bắt đầu chuyến tham quan giao diện',
   'account.sessions': 'Lịch sử đăng nhập',
   'account.sessions.hint': 'Thiết bị, địa chỉ IP, trình duyệt',
   'account.adminConsole': 'Vào trang quản trị',
@@ -1435,6 +1437,8 @@ const en: Record<keyof typeof vi, string> = {
   // ===== Account menu =====
   'account.profile': 'Manage profile',
   'account.profile.hint': 'Name, avatar, password',
+  'account.tour': 'Replay Tour',
+  'account.tour.hint': 'Start the interface walkthrough',
   'account.sessions': 'Login history',
   'account.sessions.hint': 'Devices, IP, browser',
   'account.adminConsole': 'Open admin console',

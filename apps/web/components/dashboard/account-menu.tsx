@@ -20,6 +20,7 @@ import {
   History,
   User as UserIcon,
   Check,
+  Sparkles,
 } from 'lucide-react';
 import {
   apiFetch,
@@ -233,6 +234,19 @@ export function AccountMenu() {
                 onClick={() => {
                   setOpen(false);
                   setSessionsOpen(true);
+                }}
+              />
+              <MenuItem
+                icon={Sparkles}
+                label={t('account.tour') || 'Xem lại hướng dẫn'}
+                hint={t('account.tour.hint') || 'Bắt đầu chuyến tham quan giao diện'}
+                onClick={() => {
+                  setOpen(false);
+                  const cached = localStorage.getItem('relax_account_profile');
+                  const email = cached ? JSON.parse(cached).email : '';
+                  const key = email ? `relax_onboarding_seen:${email}` : 'relax_onboarding_seen';
+                  localStorage.removeItem(key);
+                  window.location.href = '/dashboard?tour=true';
                 }}
               />
               {isAdmin ? (
