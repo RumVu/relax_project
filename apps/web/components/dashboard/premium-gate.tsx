@@ -80,7 +80,18 @@ export function PremiumGate({
           </p>
           <Button
             className="mt-5"
-            onClick={() => router.push('/dashboard/settings#billing')}
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.location.pathname === '/dashboard/settings') {
+                const el = document.getElementById('billing');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } else {
+                  router.push('/dashboard/settings#billing');
+                }
+              } else {
+                router.push('/dashboard/settings#billing');
+              }
+            }}
           >
             <Sparkles className="h-4 w-4" />
             {t('premium.cta')}

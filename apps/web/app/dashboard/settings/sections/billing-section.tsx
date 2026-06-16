@@ -35,12 +35,13 @@ export function BillingSection({
 
   return (
     <>
-      <Card>
-        <SectionTitle
-          title={copy.billingTitle}
-          copy={copy.billingCopy}
-          action={<CreditCard className="h-5 w-5 text-violet" />}
-        />
+      <div id="billing" className="scroll-mt-6">
+        <Card>
+          <SectionTitle
+            title={copy.billingTitle}
+            copy={copy.billingCopy}
+            action={<CreditCard className="h-5 w-5 text-violet" />}
+          />
         <div className="mt-5 rounded-lg border border-lilac/70 bg-white/75 p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate">
             {copy.currentPlan}
@@ -108,6 +109,7 @@ export function BillingSection({
           )}
         </div>
       </Card>
+    </div>
 
       {checkoutPlan ? (
         <CheckoutModal

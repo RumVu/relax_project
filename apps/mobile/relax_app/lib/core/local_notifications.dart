@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotifications {
   static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  static const _androidSmallIcon = 'ic_notification';
 
   static Future<void> init() async {
     tz.initializeTimeZones();
@@ -15,7 +16,7 @@ class LocalNotifications {
       // Fallback
     }
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings(_androidSmallIcon);
     const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -99,7 +100,7 @@ class LocalNotifications {
       body,
       scheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _androidScheduleMode(),
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
@@ -140,7 +141,7 @@ class LocalNotifications {
       body,
       scheduledDate,
       details,
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: await _androidScheduleMode(),
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
     );
@@ -172,5 +173,25 @@ class LocalNotifications {
 
   static Future<void> cancel(int id) async {
     await _plugin.cancel(id);
+  }
+
+  static Future<AndroidScheduleMode> _androidScheduleMode() async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      return AndroidScheduleMode.exactAllowWhileIdle;
+    }
+
+    try {
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      final canScheduleExact =
+          await android?.canScheduleExactNotifications() ?? false;
+      if (canScheduleExact) {
+        return AndroidScheduleMode.exactAllowWhileIdle;
+      }
+    } catch (e) {
+      debugPrint('Check exact alarm permission failed: $e');
+    }
+
+    return AndroidScheduleMode.inexactAllowWhileIdle;
   }
 }
