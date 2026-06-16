@@ -240,13 +240,13 @@ export class BillingService {
         Boolean(secretKey) &&
         Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
 
-      const bankId = this.configService.get<string>('ADMIN_BANK_ID') || 'MB';
+      const bankId = (this.configService.get<string>('ADMIN_BANK_ID') || 'MB').trim();
       const accountNo =
-        this.configService.get<string>('ADMIN_BANK_ACCOUNT') || '0969966969';
+        (this.configService.get<string>('ADMIN_BANK_ACCOUNT') || '0969966969').trim();
       const accountName =
-        this.configService.get<string>('ADMIN_BANK_HOLDER') || 'NGUYEN VAN A';
+        (this.configService.get<string>('ADMIN_BANK_HOLDER') || 'NGUYEN VAN A').trim();
       const bankName =
-        this.configService.get<string>('ADMIN_BANK_NAME') || 'MB Bank';
+        (this.configService.get<string>('ADMIN_BANK_NAME') || 'MB Bank').trim();
       const transferContent = `RELAX${payment.id}`;
       const amount = planAmount;
       const qrUrl = `https://img.vietqr.io/image/${bankId}-${accountNo}-compact.png?amount=${amount}&addInfo=${transferContent}&accountName=${encodeURIComponent(accountName)}`;
