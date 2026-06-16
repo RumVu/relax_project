@@ -436,8 +436,26 @@ export class UserCompanionsService {
           newAction = parsed.action as CompanionAction;
         }
       } catch {
-        // Fallback to default reply on model/api error
+        const localRes = this.getLocalFallbackReply(
+          message,
+          companion.name || 'Linh thú',
+          companion.mood,
+          companion.action,
+        );
+        reply = localRes.reply;
+        newMood = localRes.mood;
+        newAction = localRes.action;
       }
+    } else {
+      const localRes = this.getLocalFallbackReply(
+        message,
+        companion.name || 'Linh thú',
+        companion.mood,
+        companion.action,
+      );
+      reply = localRes.reply;
+      newMood = localRes.mood;
+      newAction = localRes.action;
     }
 
     const [userMsgRow, companionMsgRow, updated] =
@@ -484,6 +502,158 @@ export class UserCompanionsService {
       userMessage: userMsgRow,
       companionMessage: companionMsgRow,
     };
+  }
+
+  private getLocalFallbackReply(
+    message: string,
+    name: string,
+    currentMood: CompanionMood,
+    currentAction: CompanionAction,
+  ): { reply: string; mood: CompanionMood; action: CompanionAction } {
+    const msg = message.toLowerCase().trim();
+    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let mood = currentMood;
+    let action = currentAction;
+
+    if (
+      msg.includes('hello') ||
+      msg.includes('hi') ||
+      msg.includes('chào') ||
+      msg.includes('alo') ||
+      msg.includes('chao')
+    ) {
+      const replies = [
+        `Chào anh/chị meow! Hôm nay anh/chị thế nào rồi? Cần ${name} em lắng nghe gì không?`,
+        `Meow chào anh/chị! Chúc anh/chị có một ngày thật bình yên nhé!`,
+        `Xin chào meow! Rất vui được trò chuyện với anh/chị. Hôm nay anh/chị có gì vui kể em nghe đi!`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HAPPY;
+      action = CompanionAction.LOOKING;
+    } else if (
+      msg.includes('buồn') ||
+      msg.includes('buon') ||
+      msg.includes('chán') ||
+      msg.includes('chan') ||
+      msg.includes('tệ') ||
+      msg.includes('te') ||
+      msg.includes('khóc') ||
+      msg.includes('khoc') ||
+      msg.includes('sad') ||
+      msg.includes('depress')
+    ) {
+      const replies = [
+        `Đừng buồn nha meow... Có em ở đây luôn lắng nghe anh/chị nè! Để em ôm một cái meow meow~`,
+        `Thương anh/chị nhiều meow... Hãy hít thở thật sâu nhé, mọi chuyện rồi sẽ ổn thôi mà!`,
+        `Meow~ Anh/chị có chuyện gì kể em nghe đi, đừng giữ một mình trong lòng nha.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SAD;
+      action = CompanionAction.SITTING;
+    } else if (
+      msg.includes('mệt') ||
+      msg.includes('met') ||
+      msg.includes('tired') ||
+      msg.includes('oải') ||
+      msg.includes('oai') ||
+      msg.includes('stress')
+    ) {
+      const replies = [
+        `Anh/chị đã vất vả nhiều rồi meow... Hãy dành chút thời gian uống nước và nghỉ ngơi đi ạ.`,
+        `Nghe anh/chị nói mệt em xót quá meow... Mình tạm gác công việc qua một bên và nghỉ xíu nha.`,
+        `Cần em mát-xa chân bằng đệm thịt meow meow không? Nghỉ ngơi chút đi anh/chị ơi.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SLEEPY;
+      action = CompanionAction.SITTING;
+    } else if (
+      msg.includes('vui') ||
+      msg.includes('khỏe') ||
+      msg.includes('khoe') ||
+      msg.includes('tốt') ||
+      msg.includes('tot') ||
+      msg.includes('good') ||
+      msg.includes('happy') ||
+      msg.includes('tuyệt') ||
+      msg.includes('tuyet')
+    ) {
+      const replies = [
+        `Nghe vậy em cũng thấy vui lây meow! Anh/chị thật tuyệt vời, cùng meow tận hưởng ngày hôm nay nhé!`,
+        `Hihi tuyệt vời quá meow! Mong niềm vui này sẽ ở bên anh/chị suốt cả ngày.`,
+        `Meow meow! Anh/chị cười lên trông đáng yêu lắm đó, hãy luôn vui vẻ thế này nha!`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.PLAYFUL;
+      action = CompanionAction.PLAYING;
+    } else if (
+      msg.includes('ăn') ||
+      msg.includes('an') ||
+      msg.includes('đói') ||
+      msg.includes('doi') ||
+      msg.includes('hungry') ||
+      msg.includes('food') ||
+      msg.includes('cơm') ||
+      msg.includes('com') ||
+      msg.includes('thèm') ||
+      msg.includes('them')
+    ) {
+      const replies = [
+        `Nhoàm nhoàm... anh/chị có gì ngon cho em ăn không meow? Nhắc tới ăn em cũng thấy đói bụng rồi nè!`,
+        `Meow~ Ăn uống đầy đủ mới có sức khỏe nha anh/chị! Nhớ ăn món gì thật ngon đấy.`,
+        `Hôm nay ăn món gì ngon kể em nghe với meow! Em thèm pate quá đi mất thôi.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HUNGRY;
+      action = CompanionAction.SITTING;
+    } else if (
+      msg.includes('ngủ') ||
+      msg.includes('ngu') ||
+      msg.includes('sleep') ||
+      msg.includes('night') ||
+      msg.includes('bed') ||
+      msg.includes('mơ') ||
+      msg.includes('mo')
+    ) {
+      const replies = [
+        `Khò khò... chúc anh/chị ngủ ngon và có những giấc mơ thật đẹp meow~ Em đi ngủ đây...`,
+        `Chúc anh/chị ngủ thật ngon meow~ Mai thức dậy sẽ lại tràn đầy năng lượng!`,
+        `Ngoan nào, đi ngủ thôi meow~ Để em nằm cạnh sưởi ấm cho anh/chị nha.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SLEEPY;
+      action = CompanionAction.SLEEPING;
+    } else if (
+      msg.includes('yêu') ||
+      msg.includes('yeu') ||
+      msg.includes('thương') ||
+      msg.includes('thuong') ||
+      msg.includes('love') ||
+      msg.includes('cute') ||
+      msg.includes('thích') ||
+      msg.includes('thich') ||
+      msg.includes('like')
+    ) {
+      const replies = [
+        `Hihi meow meow~ Em cũng yêu anh/chị nhiều lắm! Cảm ơn anh/chị đã luôn chăm sóc em.`,
+        `Được anh/chị yêu thương là hạnh phúc lớn nhất của em meow! Moa~`,
+        `Meow meow! Trái tim em đang đập thình thịch vì ngượng nè hihi.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HAPPY;
+      action = CompanionAction.LOOKING;
+    } else {
+      const fallbacks = [
+        `Meow~ Anh/chị nói tiếp đi, em vẫn đang chăm chú lắng nghe nè!`,
+        `Em hiểu rồi meow! Đôi khi chỉ cần chia sẻ ra là lòng sẽ nhẹ nhõm hơn nhiều đó.`,
+        `Meow meow! Anh/chị hôm nay có mệt lắm không? Đừng quên nghỉ ngơi và uống nước nhé.`,
+        `Meow~ Em luôn ở đây đồng hành cùng anh/chị trên mọi nẻo đường!`,
+        `Thật vậy hả anh/chị meow? Kể thêm cho em nghe đi.`,
+      ];
+      reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      action = Math.random() > 0.5 ? CompanionAction.LOOKING : CompanionAction.IDLE;
+    }
+
+    return { reply, mood, action };
   }
 
   async getMemoryInsights(userId: string) {
