@@ -161,15 +161,24 @@ class _BillingScreenState extends State<BillingScreen> {
     if (confirmed != true || !mounted) return;
 
     try {
-      await RelaxApi.instance.post(
+      final res = await RelaxApi.instance.post(
         '/billing/me/downgrade',
         body: {'planName': planSlug},
       );
       if (mounted) {
+        if (res.data is Map) {
+          final data = Map<String, dynamic>.from(res.data as Map);
+          setState(() {
+            _subscription = {
+              'subscription': data['subscription'],
+              'providerStatus': _subscription?['providerStatus'],
+            };
+          });
+        }
         showSoftToast(context,
             message: context.t('Đã hạ gói thành công!'),
             tone: SoftToastTone.success);
-        _load();
+        await _load();
       }
     } catch (e) {
       if (mounted) {
