@@ -61,4 +61,4 @@ jobs:
       - run: npm --workspace apps/backend test -- --runInBand
       - run: npm --workspace apps/backend run test:e2e -- --runInBand
       - run: npm --workspace apps/backend run build
-      - run: npm audit --workspace apps/backend --audit-level=moderate
+      - run: npm audit --workspace apps/backend --audit-level=high
