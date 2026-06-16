@@ -69,7 +69,7 @@ const vi = {
   // ===== Brand / Shell =====
   'brand.cozyControl': 'Bảng điều khiển thư giãn',
   'brand.adminConsole': 'Bảng điều khiển quản trị',
-  'brand.tagline': 'Nghỉ thư giãn',
+  'brand.tagline': 'Relax Time !',
   'shell.openMenu': 'Mở thực đơn',
   'shell.closeMenu': 'Đóng thực đơn',
   'shell.notifications.count': '{{count}} thông báo',
@@ -1408,7 +1408,7 @@ const en: Record<keyof typeof vi, string> = {
   // ===== Brand / Shell =====
   'brand.cozyControl': 'Cozy Control',
   'brand.adminConsole': 'Admin Console',
-  'brand.tagline': 'Digital Break',
+  'brand.tagline': 'Relax Time !',
   'shell.openMenu': 'Open menu',
   'shell.closeMenu': 'Close menu',
   'shell.notifications.count': '{{count}} notifications',

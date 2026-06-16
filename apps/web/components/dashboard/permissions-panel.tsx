@@ -94,9 +94,9 @@ export function PermissionsPanel() {
               title: t('permissions.granted.notification'),
             });
             try {
-              new Notification('Digital Cigarette Break', {
+              new Notification('Relax Time !', {
                 body: t('permissions.demo.notification.body'),
-                icon: '/favicon.ico',
+                icon: '/logo.jpg',
               });
             } catch {
               /* ignore */

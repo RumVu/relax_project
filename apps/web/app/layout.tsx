@@ -12,8 +12,11 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: 'Digital Cigarette Break',
+  title: 'Relax Time !',
   description: 'Mood tracking, mindful breaks, journaling, and recovery rituals.',
+  icons: {
+    icon: '/logo.jpg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
