@@ -94,6 +94,16 @@ type CheckoutResult = {
     note?: string;
     checkoutUrl?: string;
     checkoutFormfields?: Record<string, string>;
+    qrUrl?: string;
+    qrCodeUrl?: string;
+    transferContent?: string;
+    bankId?: string;
+    bankName?: string;
+    accountNo?: string;
+    bankAccount?: string;
+    accountName?: string;
+    amount?: number;
+    paymentId?: string;
   };
 };
 
@@ -2635,7 +2645,17 @@ export default function SettingsPage() {
                 return;
               }
 
-              // Path B: No external URL — auto-confirm via /confirm endpoint.
+              // Path B1: Backend returned QR code for bank transfer — show QR in modal, wait for webhook confirmation.
+              if (result.checkout?.qrUrl) {
+                pushToast({
+                  tone: 'info',
+                  title: copy.intentCreated(checkoutPlan.title),
+                  message: locale === 'en' ? 'Scan QR to pay via bank transfer.' : 'Quét mã QR để chuyển khoản thanh toán.',
+                });
+                return;
+              }
+
+              // Path B2: No external URL and no QR — auto-confirm via /confirm endpoint.
               try {
                 const activated = (await apiFetch(
                   `/billing/me/payments/${paymentId}/confirm`,
@@ -2950,6 +2970,8 @@ function CheckoutModal({
     result?.checkout?.checkoutUrl &&
     result?.checkout?.checkoutFormfields;
 
+  const hasQrCode = !hasSepayCheckout && !!result?.checkout?.qrUrl;
+
   const isDowngradeToFree = currentPlanName !== 'FREE' && plan.name === 'FREE';
 
   return (
@@ -2958,7 +2980,7 @@ function CheckoutModal({
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet">
-              {hasSepayCheckout ? '💳 SePay Payment' : 'Checkout intent'}
+              {hasSepayCheckout ? '💳 SePay Payment' : hasQrCode ? '💳 Chuyển khoản' : 'Checkout intent'}
             </p>
             <h2 className="mt-2 text-2xl font-extrabold">{copy.checkoutTitle}</h2>
             <p className="mt-1 text-sm font-medium text-[var(--app-muted)]">
@@ -3098,6 +3120,79 @@ function CheckoutModal({
                   <span>Bảo mật bởi SePay Payment Gateway</span>
                 </div>
               </div>
+            ) : hasQrCode ? (
+              <div className="rounded-xl border-2 border-violet/30 bg-gradient-to-br from-violet/5 via-transparent to-violet/10 p-5">
+                <div className="mb-4 text-center">
+                  <p className="text-sm font-bold text-violet uppercase tracking-wider">
+                    {locale === 'en' ? 'Bank Transfer Payment' : 'Thanh toán chuyển khoản'}
+                  </p>
+                  <p className="mt-2 text-3xl font-extrabold text-[var(--app-text)]">
+                    {formatPlanPrice(
+                      result.checkout?.amount ?? result.payment?.amount ?? plan.price,
+                      result.payment?.currency ?? plan.currency,
+                      locale,
+                    )}
+                  </p>
+                  <p className="mt-1 text-xs font-medium text-[var(--app-muted)]">
+                    {locale === 'en' ? `Plan ${plan.title} • Bank transfer` : `Gói ${plan.title} • Chuyển khoản ngân hàng`}
+                  </p>
+                </div>
+
+                {/* QR Code */}
+                <div className="flex justify-center">
+                  <div className="rounded-xl border border-[var(--field-border)] bg-white p-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt="QR chuyển khoản"
+                      className="h-56 w-56 object-contain"
+                      src={result.checkout!.qrUrl!}
+                    />
+                  </div>
+                </div>
+
+                {/* Bank details */}
+                <div className="mt-4 space-y-2 rounded-lg border border-[var(--field-border)] bg-[var(--panel-bg)] p-4 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[var(--app-muted)]">
+                      {locale === 'en' ? 'Bank' : 'Ngân hàng'}
+                    </span>
+                    <span className="font-bold">{result.checkout?.bankName ?? 'MB Bank'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[var(--app-muted)]">
+                      {locale === 'en' ? 'Account number' : 'Số tài khoản'}
+                    </span>
+                    <span className="font-bold font-mono tracking-wide">{result.checkout?.accountNo ?? result.checkout?.bankAccount}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-[var(--app-muted)]">
+                      {locale === 'en' ? 'Account holder' : 'Chủ tài khoản'}
+                    </span>
+                    <span className="font-bold">{result.checkout?.accountName}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-[var(--field-border)] pt-2">
+                    <span className="font-medium text-[var(--app-muted)]">
+                      {locale === 'en' ? 'Transfer content' : 'Nội dung CK'}
+                    </span>
+                    <span className="font-bold font-mono text-violet">{result.checkout?.transferContent}</span>
+                  </div>
+                </div>
+
+                <div className="mt-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-3 text-center">
+                  <p className="text-xs font-semibold text-amber-600">
+                    {locale === 'en'
+                      ? '⚡ After transferring, your plan will be activated automatically within a few minutes.'
+                      : '⚡ Sau khi chuyển khoản, gói cước sẽ được kích hoạt tự động trong vài phút.'}
+                  </p>
+                </div>
+
+                <div className="mt-3 flex items-center justify-center gap-1.5 text-xs font-medium text-[var(--app-muted)]">
+                  <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+                  </svg>
+                  <span>{locale === 'en' ? 'Secured by VietQR & SePay' : 'Bảo mật bởi VietQR & SePay'}</span>
+                </div>
+              </div>
             ) : (
               <p className="text-sm font-medium text-[var(--app-muted)]">
                 {result.checkout?.note ?? copy.paymentPendingNote}
@@ -3110,7 +3205,7 @@ function CheckoutModal({
           <Button onClick={onClose} type="button" variant="secondary">
             {t('common.close')}
           </Button>
-          {!hasSepayCheckout && (
+          {!hasSepayCheckout && !hasQrCode && (
             <Button
               disabled={creating || currentPlan}
               onClick={async () => {
