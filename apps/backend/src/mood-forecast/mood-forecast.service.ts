@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { scoreFromMood } from '../mood-checkins/helpers/mood-scoring';
 
-interface DayPattern {
+export interface DayPattern {
   dayOfWeek: number;
   avgScore: number;
   dominantMood: string;
   count: number;
 }
 
-interface ForecastDay {
+export interface ForecastDay {
   date: string;
   dayOfWeek: number;
   predictedScore: number;

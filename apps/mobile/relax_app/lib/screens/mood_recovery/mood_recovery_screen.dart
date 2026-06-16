@@ -172,7 +172,7 @@ class _MoodRecoveryScreenState extends State<MoodRecoveryScreen> {
 
   Widget _buildActivityBreakdown(BuildContext context) {
     final activities =
-        (_summary!['byActivity'] as List).cast<Map<String, dynamic>>();
+        (_summary?['byActivity'] as List?)?.whereType<Map<String, dynamic>>().toList() ?? [];
 
     return Container(
       padding: const EdgeInsets.all(16),

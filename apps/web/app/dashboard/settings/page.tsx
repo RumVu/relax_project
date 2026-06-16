@@ -2536,30 +2536,47 @@ export default function SettingsPage() {
             setBillingState(checkoutPlan.name);
             setCheckoutResult(null);
             try {
+              const isDowngradeToFree = checkoutPlan.price === 0 || checkoutPlan.name.toUpperCase() === 'FREE';
+
+              if (isDowngradeToFree) {
+                const downgradeResult = (await apiFetch('/billing/me/downgrade', {
+                  method: 'POST',
+                  body: JSON.stringify({ planName: checkoutPlan.name }),
+                })) as { subscription?: { planName?: string; status?: string } };
+                setCheckoutResult({
+                  checkout: {
+                    status: 'ACTIVATED',
+                    note: copy.activatedNote(
+                      downgradeResult.subscription?.planName ?? checkoutPlan.title,
+                      downgradeResult.subscription?.status ?? 'ACTIVE',
+                    ),
+                  },
+                });
+                setRefreshKey((current) => current + 1);
+                triggerRefresh();
+                pushToast({
+                  tone: 'success',
+                  title: copy.activatedTitle(checkoutPlan.title),
+                  message: locale === 'en' ? 'Plan has been downgraded.' : 'Đã hạ gói thành công!',
+                });
+                return;
+              }
+
               const redirectOrigin = window.location.origin;
-              // FREE plan → MANUAL provider (no real payment). Mọi plan khác
-              // → SEPAY (production). Downgrade từ ANNUAL → MONTHLY cũng
-              // dùng SEPAY vì backend sẽ resolve plan từ planName.
-              const isDowngradeToFree = checkoutPlan.name === 'FREE';
               const result = (await apiFetch('/billing/me/checkout-session', {
                 method: 'POST',
                 body: JSON.stringify({
                   planName: checkoutPlan.name,
-                  provider: isDowngradeToFree ? 'MANUAL' : 'SEPAY',
-                  description: isDowngradeToFree
-                    ? `Downgrade to ${checkoutPlan.title}`
-                    : `Upgrade intent from dashboard to ${checkoutPlan.title}`,
+                  provider: 'SEPAY',
+                  description: `Upgrade intent from dashboard to ${checkoutPlan.title}`,
                   successUrl: `${redirectOrigin}/dashboard/settings?payment=success&plan=${encodeURIComponent(checkoutPlan.name)}`,
                   errorUrl: `${redirectOrigin}/dashboard/settings?payment=error`,
                   cancelUrl: `${redirectOrigin}/dashboard/settings?payment=cancel`,
                 }),
               })) as CheckoutResult & {
                 checkout?: {
-                  // SePay PG SDK trả checkoutUrl (form action) + checkoutFormfields
-                  // (hidden POST fields). Browser cần build <form> rồi submit POST.
                   checkoutUrl?: string;
                   checkoutFormfields?: Record<string, string | number>;
-                  // Provider khác (Stripe / mock) có thể trả url đơn giản cho GET redirect.
                   url?: string;
                 };
               };
@@ -2577,17 +2594,12 @@ export default function SettingsPage() {
               }
 
               // Path A1: SePay PG SDK shape — `checkoutUrl` + `checkoutFormfields`.
-              // Browser KHÔNG redirect GET được — phải build <form method=POST>
-              // submit để SePay nhận đủ fields cần thiết (order_invoice_number,
-              // amount, currency, success/error/cancel URLs...). Sau đó SePay
-              // sẽ redirect user qua QR/banking page.
               const sepayUrl = result.checkout?.checkoutUrl;
               const sepayFields = result.checkout?.checkoutFormfields;
               if (
                 sepayUrl &&
                 sepayFields &&
-                Object.keys(sepayFields).length > 0 &&
-                !isDowngradeToFree
+                Object.keys(sepayFields).length > 0
               ) {
                 pushToast({
                   tone: 'info',
@@ -2610,10 +2622,9 @@ export default function SettingsPage() {
                 return;
               }
 
-              // Path A2: Simple GET redirect URL (Stripe/mock). Đây là path em
-              // dùng cho mock-checkout dev, không phải SePay PG.
+              // Path A2: Simple GET redirect URL (Stripe/mock).
               const externalUrl = result.checkout?.url;
-              if (externalUrl && !isDowngradeToFree) {
+              if (externalUrl) {
                 pushToast({
                   tone: 'info',
                   title: copy.intentCreated(checkoutPlan.title),
@@ -2624,8 +2635,7 @@ export default function SettingsPage() {
                 return;
               }
 
-              // Path B: Không có URL HOẶC downgrade-to-FREE. Auto-confirm
-              // qua /confirm endpoint để activate subscription.
+              // Path B: No external URL — auto-confirm via /confirm endpoint.
               try {
                 const activated = (await apiFetch(
                   `/billing/me/payments/${paymentId}/confirm`,
@@ -2671,7 +2681,6 @@ export default function SettingsPage() {
                 });
               }
             } catch (checkoutErr) {
-              // Surface real error message thay vì generic "Kiểm tra backend".
               const reason =
                 checkoutErr instanceof Error
                   ? checkoutErr.message

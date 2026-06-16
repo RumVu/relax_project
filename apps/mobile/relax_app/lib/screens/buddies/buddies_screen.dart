@@ -384,9 +384,135 @@ class _FriendCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () => _showFriendOptions(context, user),
+            child: Icon(Icons.more_vert, color: context.mutedText, size: 18),
+          ),
         ],
       ),
     );
+  }
+
+  void _showFriendOptions(BuildContext context, Map user) {
+    final userId = user['id'] as String? ?? '';
+    final name = user['name'] as String? ??
+        (user['email'] as String?)?.split('@').first ??
+        '?';
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: context.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 4, width: 40,
+              decoration: BoxDecoration(
+                color: ctx.fieldBorder,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.flag_outlined, color: RelaxColors.coral),
+              title: Text(context.t('Báo cáo $name')),
+              subtitle: Text(
+                context.t('Báo cáo hành vi không phù hợp'),
+                style: TextStyle(fontSize: 12, color: context.mutedText),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _reportUser(context, userId, name);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.block, color: RelaxColors.coral),
+              title: Text(context.t('Chặn $name')),
+              subtitle: Text(
+                context.t('Xoá bạn bè và ẩn khỏi feed'),
+                style: TextStyle(fontSize: 12, color: context.mutedText),
+              ),
+              onTap: () {
+                Navigator.pop(ctx);
+                _blockUser(context, userId, name);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _reportUser(BuildContext context, String userId, String name) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.t('Báo cáo $name?')),
+        content: Text(context.t(
+          'Báo cáo sẽ được gửi đến đội ngũ quản trị để xem xét.',
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.t('Hủy')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.t('Báo cáo'), style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    try {
+      await RelaxApi.instance.post('/buddy-circle/report', body: {
+        'targetUserId': userId,
+        'reason': 'User reported via mobile app',
+      });
+      if (context.mounted) {
+        showSoftToast(context,
+            message: context.t('Đã gửi báo cáo. Cảm ơn bạn!'),
+            tone: SoftToastTone.success);
+      }
+    } catch (_) {}
+  }
+
+  void _blockUser(BuildContext context, String userId, String name) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.t('Chặn $name?')),
+        content: Text(context.t(
+          'Bạn sẽ bị xoá khỏi danh sách bạn bè và không thấy nhau trên feed nữa. Hành động không thể hoàn tác.',
+        )),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.t('Hủy')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.t('Chặn'), style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    try {
+      await RelaxApi.instance.post('/buddy-circle/block/$userId');
+      if (context.mounted) {
+        showSoftToast(context,
+            message: context.t('Đã chặn $name'),
+            tone: SoftToastTone.success);
+      }
+    } catch (_) {}
   }
 }
 
@@ -574,6 +700,39 @@ class _BuddyMoodFeedState extends State<_BuddyMoodFeed> {
     }
   }
 
+  Future<void> _reportFeedEntry(BuildContext context, String entryId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(context.t('Báo cáo bài viết?')),
+        content: Text(context.t('Bài viết sẽ được đánh dấu để đội ngũ quản trị xem xét.')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(context.t('Hủy')),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: RelaxColors.coral),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(context.t('Báo cáo'), style: const TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true || !context.mounted) return;
+    try {
+      await RelaxApi.instance.post('/buddy-circle/report', body: {
+        'feedEntryId': entryId,
+        'reason': 'Reported via mobile app',
+      });
+      if (context.mounted) {
+        showSoftToast(context,
+            message: context.t('Đã gửi báo cáo. Cảm ơn bạn!'),
+            tone: SoftToastTone.success);
+      }
+    } catch (_) {}
+  }
+
   Future<void> _react(String entryId, String emoji) async {
     try {
       await RelaxApi.instance.post('/buddy-circle/feed/$entryId/react', body: {'emoji': emoji});
@@ -642,6 +801,11 @@ class _BuddyMoodFeedState extends State<_BuddyMoodFeed> {
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                     Text(emoji, style: const TextStyle(fontSize: 20)),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () => _reportFeedEntry(context, entry['id'] as String? ?? ''),
+                      child: Icon(Icons.more_horiz, color: context.mutedText, size: 16),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 8),

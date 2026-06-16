@@ -47,7 +47,7 @@ export class EntitlementsService {
       },
       select: {
         id: true,
-        plan: true,
+        planName: true,
         status: true,
         startDate: true,
         endDate: true,

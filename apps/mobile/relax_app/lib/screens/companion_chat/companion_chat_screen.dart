@@ -105,7 +105,7 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
           setState(() {
             _messages.add({
               'sender': 'companion',
-              'text': data['reply'] as String,
+              'text': (data['reply'] as String?) ?? '...',
               'createdAt': DateTime.now().toUtc().toIso8601String(),
             });
           });

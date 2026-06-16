@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Relax App</string>
+	<string>Thi Ái</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>relax_app</string>
+	<string>Thi Ái</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -91,11 +91,9 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và địa điểm thư giãn phù hợp gần bạn.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>Ứng dụng cần quyền truy cập vị trí liên tục để cập nhật thông tin thời tiết phù hợp.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và địa điểm thư giãn phù hợp gần bạn.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>Ứng dụng cần quyền truy cập vị trí để gợi ý thời tiết và các địa điểm phù hợp gần bạn.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Ứng dụng cần quyền sử dụng microphone để bạn check-in cảm xúc bằng giọng nói.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Ứng dụng cần quyền nhận diện giọng nói để phân tích cảm xúc từ lời nói của bạn.</string>
 </dict>
 </plist>

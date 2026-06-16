@@ -513,10 +513,8 @@ export class UserCompanionsService {
     for (const c of checkins) {
       moodCounts[c.mood] = (moodCounts[c.mood] || 0) + 1;
       totalScore += c.finalScore ?? c.rawScore ?? 50;
-      if (c.triggers && Array.isArray(c.triggers)) {
-        for (const t of c.triggers) {
-          triggerCounts[String(t)] = (triggerCounts[String(t)] || 0) + 1;
-        }
+      if (c.trigger) {
+        triggerCounts[String(c.trigger)] = (triggerCounts[String(c.trigger)] || 0) + 1;
       }
     }
 

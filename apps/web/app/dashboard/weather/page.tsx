@@ -29,10 +29,13 @@ import {
 } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { apiFetch } from '@/lib/api';
 import { isSecureContext, requestGeolocation } from '@/lib/permissions';
+import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import { useUserDashboardData } from '@/lib/live-dashboard';
 import type { TranslationKey } from '@/lib/i18n/dictionaries';
 
 type TranslationFn = (key: TranslationKey, params?: Record<string, string | number>) => string;
@@ -92,6 +95,9 @@ type WeatherForecast = {
 export default function WeatherPage() {
   const { t, locale } = useTranslation();
   const pushToast = useUiStore((state) => state.pushToast);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
+  const dashData = useUserDashboardData({});
+  const planName = dashData.settings.billing.planName;
   const [current, setCurrent] = useState<WeatherCurrent | null>(null);
   const [forecast, setForecast] = useState<WeatherForecast | null>(null);
   const [loading, setLoading] = useState(true);
@@ -390,6 +396,8 @@ export default function WeatherPage() {
         </ul>
       </Card>
 
+      <PremiumGate planName={planName} role={accountRole}>
+      <div className="flex flex-col gap-4">
       <Card>
         <SectionTitle
           title={t('weather.forecast.title')}
@@ -489,6 +497,8 @@ export default function WeatherPage() {
           ) : null}
         </div>
       </Card>
+      </div>
+      </PremiumGate>
     </DashboardShell>
   );
 }

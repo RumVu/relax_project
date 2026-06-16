@@ -415,9 +415,11 @@ model FeedEntry {
   type        String
   title       String
   description String?
+  content     String?
   relatedId   String?
   visibility  String   @default("PUBLIC")
   likes       Int      @default(0)
+  metadata    Json?
   createdAt   DateTime @default(now())
 
   @@index([userId])

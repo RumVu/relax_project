@@ -163,8 +163,8 @@ class _MoodToolkitWidgetState extends State<MoodToolkitWidget> {
 
   Future<void> _load() async {
     try {
-      final res = await RelaxApi.instance.get('/recommendations/toolkit');
-      if (res.data is Map) {
+      final res = await RelaxApi.instance.get('/recommendations/me/toolkit');
+      if (res.data is Map && res.statusCode == 200) {
         setState(() {
           _toolkit = res.data as Map<String, dynamic>;
         });

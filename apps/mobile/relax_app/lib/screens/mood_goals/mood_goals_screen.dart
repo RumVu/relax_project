@@ -374,7 +374,7 @@ class _MoodGoalsScreenState extends State<MoodGoalsScreen> {
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<String>(
-                    value: selectedType,
+                    initialValue: selectedType,
                     decoration: InputDecoration(
                       labelText: ctx.t('Loại mục tiêu'),
                       border: OutlineInputBorder(

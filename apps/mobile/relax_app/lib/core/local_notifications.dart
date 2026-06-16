@@ -106,6 +106,46 @@ class LocalNotifications {
     );
   }
 
+  static Future<void> scheduleDelayed({
+    required int id,
+    required String title,
+    required String body,
+    required Duration delay,
+  }) async {
+    await _plugin.cancel(id);
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
+
+    const androidDetails = AndroidNotificationDetails(
+      'delayed_channel',
+      'Delayed Notifications',
+      channelDescription: 'Testing delayed notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
+      presentBadge: true,
+      presentSound: true,
+    );
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: iosDetails,
+    );
+
+    await _plugin.zonedSchedule(
+      id,
+      title,
+      body,
+      scheduledDate,
+      details,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
+    );
+  }
+
   static Future<void> showInstant({
     required String title,
     required String body,

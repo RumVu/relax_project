@@ -92,6 +92,17 @@ export class BillingController {
     return this.billingService.confirmPayment(user.id, id, dto);
   }
 
+  @ApiOperation({ summary: 'Downgrade to a free plan without payment' })
+  @ApiCreatedResponse({ description: 'Subscription downgraded successfully.' })
+  @UseGuards(JwtAuthGuard)
+  @Post('me/downgrade')
+  downgrade(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { planName: string },
+  ) {
+    return this.billingService.downgrade(user.id, body.planName);
+  }
+
   @ApiOperation({ summary: 'Get current user payment history' })
   @UseGuards(JwtAuthGuard)
   @Get('me/payments')

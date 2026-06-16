@@ -27,7 +27,7 @@ class _MoodGoalsWidgetState extends State<MoodGoalsWidget> {
       final res = await RelaxApi.instance.get('/mood-goals/me/progress');
       if (res.data is List && mounted) {
         setState(() {
-          _goals = (res.data as List).cast<Map<String, dynamic>>();
+          _goals = (res.data as List).whereType<Map<String, dynamic>>().toList();
           _loaded = true;
         });
       }

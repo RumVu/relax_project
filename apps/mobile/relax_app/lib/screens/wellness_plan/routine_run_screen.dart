@@ -42,7 +42,6 @@ class _RoutineRunScreenState extends State<RoutineRunScreen> {
 
   // Step state: Grounding
   int _groundingSubStep = 5; // 5 -> 4 -> 3 -> 2 -> 1
-  final List<String> _groundingInputs = List.generate(5, (_) => '');
 
   // Step state: Check-in
   String _selectedMood = 'NEUTRAL';

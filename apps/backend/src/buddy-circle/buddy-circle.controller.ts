@@ -54,4 +54,20 @@ export class BuddyCircleController {
   ) {
     return this.buddyCircleService.reactToFeed(user.id, entryId, emoji ?? '❤️');
   }
+
+  @Post('report')
+  async reportContent(
+    @CurrentUser() user: AuthUser,
+    @Body() body: { targetUserId?: string; feedEntryId?: string; reason: string },
+  ) {
+    return this.buddyCircleService.reportContent(user.id, body);
+  }
+
+  @Post('block/:userId')
+  async blockUser(
+    @CurrentUser() user: AuthUser,
+    @Param('userId') targetUserId: string,
+  ) {
+    return this.buddyCircleService.blockUser(user.id, targetUserId);
+  }
 }

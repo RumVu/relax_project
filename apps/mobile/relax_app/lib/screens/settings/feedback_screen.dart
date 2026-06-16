@@ -95,7 +95,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             ),
             const SizedBox(height: 24),
             DropdownButtonFormField<String>(
-              value: _type,
+              initialValue: _type,
               decoration: InputDecoration(
                 labelText: context.t('Loại phản hồi'),
               ),

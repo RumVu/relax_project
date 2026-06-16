@@ -152,7 +152,7 @@ export class BuddyCircleService {
         type: 'MOOD_SHARE',
         visibility: 'PUBLIC',
         title: `${displayName} đang cảm thấy ${latestCheckin.mood.toLowerCase()}`,
-        content: latestCheckin.notes ?? '',
+        content: latestCheckin.note ?? '',
         metadata: {
           mood: latestCheckin.mood,
           score: latestCheckin.finalScore ?? latestCheckin.rawScore,
@@ -198,6 +198,80 @@ export class BuddyCircleService {
     });
 
     return { success: true, reactions };
+  }
+
+  /** Report a feed entry or user for abusive content. */
+  async reportContent(
+    userId: string,
+    data: { targetUserId?: string; feedEntryId?: string; reason: string },
+  ) {
+    if (!data.targetUserId && !data.feedEntryId) {
+      throw new BadRequestException('Cần chỉ định user hoặc bài viết để báo cáo');
+    }
+
+    await this.prisma.notification.create({
+      data: {
+        userId: 'ADMIN',
+        title: 'Content Report',
+        message: JSON.stringify({
+          reporterId: userId,
+          targetUserId: data.targetUserId,
+          feedEntryId: data.feedEntryId,
+          reason: data.reason,
+          createdAt: new Date().toISOString(),
+        }),
+        type: 'IN_APP',
+      },
+    });
+
+    if (data.feedEntryId) {
+      await this.prisma.feedEntry.update({
+        where: { id: data.feedEntryId },
+        data: {
+          metadata: {
+            ...(
+              (await this.prisma.feedEntry.findUnique({ where: { id: data.feedEntryId } }))
+                ?.metadata as Record<string, unknown> ?? {}
+            ),
+            reported: true,
+            reportedBy: userId,
+          },
+        },
+      });
+    }
+
+    return { success: true, message: 'Báo cáo đã được ghi nhận. Chúng tôi sẽ xem xét.' };
+  }
+
+  /** Block a user — removes friendship and hides from feed. */
+  async blockUser(userId: string, targetUserId: string) {
+    if (userId === targetUserId) {
+      throw new BadRequestException('Không thể tự block chính mình');
+    }
+
+    await this.prisma.friend.deleteMany({
+      where: {
+        OR: [
+          { userId, friendId: targetUserId },
+          { userId: targetUserId, friendId: userId },
+        ],
+      },
+    });
+
+    await this.prisma.notification.create({
+      data: {
+        userId: 'ADMIN',
+        title: 'User Blocked',
+        message: JSON.stringify({
+          blockerId: userId,
+          blockedId: targetUserId,
+          createdAt: new Date().toISOString(),
+        }),
+        type: 'IN_APP',
+      },
+    });
+
+    return { success: true, message: 'Đã chặn người dùng' };
   }
 
   /** Get circle stats: each member's streak and session count this week. */
