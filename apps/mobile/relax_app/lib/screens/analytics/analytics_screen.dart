@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/mood_line_chart/mood_line_chart.dart';
+import '../../widgets/premium_blur.dart';
 import '../../widgets/soft_toast.dart';
 import 'models/mood_labels.dart';
 import 'widgets/activity_effectiveness.dart';
@@ -193,6 +194,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                       ),
                     ),
+                    PremiumBlur(
+                      child: Column(
+                        children: [
                     if (_forecast != null) ...[
                       const SizedBox(height: 16),
                       _card(
@@ -261,6 +265,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       child: ActivityEffectiveness(
                         activities: _favoriteActivities,
                         averageRelief: _averageRelief,
+                      ),
+                    ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 24),

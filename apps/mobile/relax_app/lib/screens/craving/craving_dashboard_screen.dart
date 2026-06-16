@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/premium_blur.dart';
 
 /// Craving dashboard: stats, hourly chart, top triggers, best activities,
 /// wellness streak, and craving reduction goal card.
@@ -111,6 +112,9 @@ class _CravingDashboardScreenState extends State<CravingDashboardScreen> {
                 children: [
                   _buildStatsCards(context),
                   const SizedBox(height: 16),
+                  PremiumBlur(
+                    child: Column(
+                      children: [
                   _buildHourlyChart(context),
                   const SizedBox(height: 16),
                   _buildTopTriggers(context),
@@ -118,6 +122,9 @@ class _CravingDashboardScreenState extends State<CravingDashboardScreen> {
                   _buildBestActivities(context),
                   const SizedBox(height: 16),
                   _buildGoalCard(context),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 32),
                 ],
               ),

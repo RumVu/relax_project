@@ -4,6 +4,7 @@ import '../../../core/theme.dart';
 import '../../../core/api_client.dart';
 import '../../../core/locale_controller.dart';
 import '../../../widgets/mood_line_chart/mood_line_chart.dart';
+import '../../../widgets/premium_blur.dart';
 
 /// Thống kê tình trạng — biểu đồ cảm xúc 7 ngày + ước lượng giảm stress,
 /// tính từ check-in cảm xúc gần nhất.
@@ -87,7 +88,8 @@ class _StatsCardState extends State<StatsCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return PremiumBlur(
+      child: Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: context.surface,
@@ -179,6 +181,7 @@ class _StatsCardState extends State<StatsCard> {
           ],
         ],
       ),
+    ),
     );
   }
 }

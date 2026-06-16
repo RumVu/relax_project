@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api_client.dart';
 import '../../../core/locale_controller.dart';
 import '../../../core/theme.dart';
+import '../../../widgets/premium_blur.dart';
 
 class MoodForecastWidget extends StatefulWidget {
   const MoodForecastWidget({super.key});
@@ -45,7 +46,8 @@ class _MoodForecastWidgetState extends State<MoodForecastWidget> {
   Widget build(BuildContext context) {
     if (!_loaded) return const SizedBox.shrink();
 
-    return Column(
+    return PremiumBlur(
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         GestureDetector(
@@ -190,6 +192,7 @@ class _MoodForecastWidgetState extends State<MoodForecastWidget> {
           ),
         const SizedBox(height: 16),
       ],
+    ),
     );
   }
 

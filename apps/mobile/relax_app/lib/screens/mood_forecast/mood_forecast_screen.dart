@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/premium_blur.dart';
 
 class MoodForecastScreen extends StatefulWidget {
   const MoodForecastScreen({super.key});
@@ -68,6 +69,10 @@ class _MoodForecastScreenState extends State<MoodForecastScreen> {
               : ListView(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                   children: [
+                    PremiumBlur(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     _buildTrendCard(context),
                     const SizedBox(height: 16),
                     _buildForecastChart(context),
@@ -89,6 +94,9 @@ class _MoodForecastScreenState extends State<MoodForecastScreen> {
                       _buildEmptyState(context)
                     else
                       ..._forecast.map((f) => _buildDayCard(context, f)),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
         ),

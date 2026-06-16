@@ -10,6 +10,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/premium_blur.dart';
 import '../../widgets/soft_toast.dart';
 
 class WellnessReportScreen extends StatefulWidget {
@@ -269,6 +270,10 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
                   ),
                   const SizedBox(height: 20),
 
+                  PremiumBlur(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                   // Period selector
                   Text(
                     context.t('Kỳ báo cáo'),
@@ -414,6 +419,9 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
                       ),
                     ),
                   ],
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 32),
                 ],
               ),

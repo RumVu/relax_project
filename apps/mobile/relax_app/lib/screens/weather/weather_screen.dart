@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/premium_blur.dart';
 import '../../widgets/weather_chart/weather_chart.dart';
 import 'widgets/forecast_day_card.dart';
 import 'widgets/mini_stat.dart';
@@ -182,6 +183,10 @@ class _WeatherScreenState extends State<WeatherScreen> {
                       ],
                     ),
                     const SizedBox(height: 24),
+                    PremiumBlur(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     WeatherForecastChart(forecast: _forecast),
                     const SizedBox(height: 24),
                     Text(
@@ -201,6 +206,9 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     else
                       ..._forecast.map(
                           (d) => ForecastDayCard(day: d)),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

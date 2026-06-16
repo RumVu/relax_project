@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/premium_blur.dart';
 
 class MoodCalendarScreen extends StatefulWidget {
   const MoodCalendarScreen({super.key});
@@ -173,6 +174,10 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             children: [
+              PremiumBlur(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
               // Month nav
               _buildMonthNav(context),
               const SizedBox(height: 16),
@@ -204,6 +209,9 @@ class _MoodCalendarScreenState extends State<MoodCalendarScreen> {
 
               // Day detail
               if (_selectedDay != null) _buildDayDetail(context),
+                  ],
+                ),
+              ),
 
               const SizedBox(height: 24),
             ],
