@@ -103,7 +103,7 @@ export default function JournalPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <Card>
+        <Card data-tour="journal-list">
           <SectionTitle
             title={t('journal.list.title')}
             copy={t('journal.list.copy')}

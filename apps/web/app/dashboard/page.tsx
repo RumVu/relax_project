@@ -27,7 +27,6 @@ import { CozyQuoteCard } from '@/components/dashboard/cozy-quote-card';
 import { QuestPanel } from '@/components/dashboard/quest-panel';
 import { MoodGoalsPanel } from '@/components/dashboard/mood-goals-panel';
 import { MoodForecastPanel } from '@/components/dashboard/mood-forecast-panel';
-import { OnboardingTour } from '@/components/dashboard/onboarding-tour';
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -70,7 +69,6 @@ export default function DashboardPage() {
 
   return (
     <DashboardShell eyebrow={t('dashboard.eyebrow')} title={title}>
-      <OnboardingTour />
       <CozyQuoteCard currentMood={data.overview.mood.currentMood} />
       <DashboardFilterBar {...overviewFilters} title={t('dashboard.filters.title')} />
 

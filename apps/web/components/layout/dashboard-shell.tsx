@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { RealtimeStatusBadge } from '@/components/dashboard/dashboard-ui';
 import { AccountMenu } from '@/components/dashboard/account-menu';
+import { OnboardingTour } from '@/components/dashboard/onboarding-tour';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
@@ -522,6 +523,7 @@ export function DashboardShell({
             </div>
           ) : null}
           {children}
+          <OnboardingTour />
         </section>
       </div>
     </main>

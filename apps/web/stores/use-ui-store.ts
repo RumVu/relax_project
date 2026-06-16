@@ -15,6 +15,10 @@ type UiStore = {
   toasts: ToastItem[];
   pushToast: (toast: Omit<ToastItem, 'id'>) => void;
   removeToast: (id: string) => void;
+  tourActive: boolean;
+  tourStep: number;
+  setTourActive: (active: boolean) => void;
+  setTourStep: (step: number) => void;
 };
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -33,4 +37,8 @@ export const useUiStore = create<UiStore>((set) => ({
     set((state) => ({
       toasts: state.toasts.filter((toast) => toast.id !== id),
     })),
+  tourActive: false,
+  tourStep: 0,
+  setTourActive: (active) => set({ tourActive: active }),
+  setTourStep: (step) => set({ tourStep: step }),
 }));

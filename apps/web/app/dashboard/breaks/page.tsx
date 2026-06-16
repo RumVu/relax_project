@@ -244,7 +244,7 @@ export default function BreaksPage() {
           </div>
         </Card>
 
-        <Card className="bg-night text-white">
+        <Card className="bg-night text-white" data-tour="breaks-session-player">
           <SectionTitle
             title={t('breaks.session.heading')}
             copy={t('breaks.session.start')}

@@ -20,6 +20,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   BookOpenText,
   CheckCircle2,
@@ -32,6 +33,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+import { useUiStore } from '@/stores/use-ui-store';
 
 const STORAGE_KEY = 'relax_onboarding_seen';
 
@@ -41,6 +43,7 @@ interface Step {
   body: string;
   /** `data-tour` selector — null = centred welcome / done card with no target. */
   targetSelector: string | null;
+  path?: string;
 }
 
 interface Rect {
@@ -148,8 +151,14 @@ function placeCard(rect: Rect | null, vw: number, vh: number) {
 
 export function OnboardingTour() {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [stepIdx, setStepIdx] = useState(0);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const open = useUiStore((state) => state.tourActive);
+  const setOpen = useUiStore((state) => state.setTourActive);
+  const stepIdx = useUiStore((state) => state.tourStep);
+  const setStepIdx = useUiStore((state) => state.setTourStep);
+
   const [rect, setRect] = useState<Rect | null>(null);
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
 
@@ -170,7 +179,7 @@ export function OnboardingTour() {
         return () => window.clearTimeout(id);
       }
     }
-  }, []);
+  }, [setOpen, setStepIdx]);
 
   const steps: Step[] = [
     {
@@ -178,36 +187,49 @@ export function OnboardingTour() {
       title: t('onboarding.step1.title'),
       body: t('onboarding.step1.body'),
       targetSelector: null,
+      path: '/dashboard',
     },
     {
       icon: HeartPulse,
       title: t('onboarding.step2.title'),
       body: t('onboarding.step2.body'),
       targetSelector: '[data-tour="mood-hero"]',
-    },
-    {
-      icon: Wind,
-      title: t('onboarding.step3.title'),
-      body: t('onboarding.step3.body'),
-      targetSelector: '[data-tour="tour-nav-breaks"]',
-    },
-    {
-      icon: BookOpenText,
-      title: t('onboarding.step4.title'),
-      body: t('onboarding.step4.body'),
-      targetSelector: '[data-tour="tour-nav-journal"]',
+      path: '/dashboard',
     },
     {
       icon: CheckCircle2,
       title: t('onboarding.step5.title'),
       body: t('onboarding.step5.body'),
       targetSelector: '[data-tour="quests"]',
+      path: '/dashboard',
+    },
+    {
+      icon: Wind,
+      title: t('onboarding.step3.title'),
+      body: t('onboarding.step3.body'),
+      targetSelector: '[data-tour="breaks-session-player"]',
+      path: '/dashboard/breaks',
+    },
+    {
+      icon: BookOpenText,
+      title: t('onboarding.step4.title'),
+      body: t('onboarding.step4.body'),
+      targetSelector: '[data-tour="journal-list"]',
+      path: '/dashboard/journal',
     },
     {
       icon: Settings,
       title: t('onboarding.step6.title'),
       body: t('onboarding.step6.body'),
-      targetSelector: '[data-tour="tour-nav-settings"]',
+      targetSelector: '[data-tour="settings-profile"]',
+      path: '/dashboard/settings',
+    },
+    {
+      icon: Sparkles,
+      title: t('onboarding.step7.title'),
+      body: t('onboarding.step7.body'),
+      targetSelector: '[data-tour="account-menu-trigger"]',
+      path: '/dashboard/settings',
     },
   ];
 
@@ -215,13 +237,34 @@ export function OnboardingTour() {
     markSeen();
     setOpen(false);
     setStepIdx(0);
-  }, []);
+  }, [setOpen, setStepIdx]);
+
+  const handleNavigate = useCallback(
+    (newIdx: number) => {
+      if (newIdx < 0 || newIdx >= steps.length) return;
+      const targetStep = steps[newIdx];
+      setStepIdx(newIdx);
+      if (targetStep.path && pathname !== targetStep.path) {
+        router.push(targetStep.path);
+      }
+    },
+    [pathname, router, setStepIdx, steps]
+  );
 
   // Measure the target every time the step or viewport changes. Scroll the
   // target into view first so off-screen anchors get caught.
   useEffect(() => {
     if (!open) return;
     const step = steps[stepIdx];
+
+    // If we are on the wrong path, trigger navigation
+    if (step.path && pathname !== step.path) {
+      router.push(step.path);
+      return;
+    }
+
+    const observer = new ResizeObserver(() => measure());
+
     const measure = () => {
       setViewport({ w: window.innerWidth, h: window.innerHeight });
       if (!step.targetSelector) {
@@ -242,28 +285,42 @@ export function OnboardingTour() {
       });
     };
 
-    // Smooth-scroll into view, then measure (single rAF tick is enough).
-    if (step.targetSelector) {
+    const checkAndMeasure = () => {
+      measure();
+      if (!step.targetSelector) return true;
       const el = document.querySelector<HTMLElement>(step.targetSelector);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (el) {
+        observer.observe(el);
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return true;
+      }
+      return false;
+    };
+
+    // Run first check
+    const isFoundInitial = checkAndMeasure();
+
+    // Setup interval in case element mounts later (e.g. after page load)
+    let intervalId: any = null;
+    if (!isFoundInitial && step.targetSelector) {
+      intervalId = window.setInterval(() => {
+        const found = checkAndMeasure();
+        if (found && intervalId) {
+          window.clearInterval(intervalId);
+        }
+      }, 100);
     }
-    const raf = window.requestAnimationFrame(measure);
-    const observer = new ResizeObserver(measure);
-    if (step.targetSelector) {
-      const el = document.querySelector<HTMLElement>(step.targetSelector);
-      if (el) observer.observe(el);
-    }
+
     window.addEventListener('resize', measure);
     window.addEventListener('scroll', measure, true);
     return () => {
-      window.cancelAnimationFrame(raf);
+      if (intervalId) window.clearInterval(intervalId);
       window.removeEventListener('resize', measure);
       window.removeEventListener('scroll', measure, true);
       observer.disconnect();
     };
-    // steps recompute each render from t(); only re-measure when index/open changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, stepIdx]);
+  }, [open, stepIdx, pathname, router]);
 
   if (!open) return null;
 
@@ -288,9 +345,9 @@ export function OnboardingTour() {
             isFirst={isFirst}
             isLast={isLast}
             onClose={close}
-            onJump={setStepIdx}
-            onNext={() => setStepIdx((s) => Math.min(steps.length - 1, s + 1))}
-            onPrev={() => setStepIdx((s) => Math.max(0, s - 1))}
+            onJump={handleNavigate}
+            onNext={() => handleNavigate(stepIdx + 1)}
+            onPrev={() => handleNavigate(stepIdx - 1)}
             totalSteps={steps.length}
             text={step.body}
             title={step.title}
@@ -364,9 +421,9 @@ export function OnboardingTour() {
           isFirst={isFirst}
           isLast={isLast}
           onClose={close}
-          onJump={setStepIdx}
-          onNext={() => setStepIdx((s) => Math.min(steps.length - 1, s + 1))}
-          onPrev={() => setStepIdx((s) => Math.max(0, s - 1))}
+          onJump={handleNavigate}
+          onNext={() => handleNavigate(stepIdx + 1)}
+          onPrev={() => handleNavigate(stepIdx - 1)}
           totalSteps={steps.length}
           text={step.body}
           title={step.title}
