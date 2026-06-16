@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Save, Navigation, Bell, MapPin, Moon, Repeat } from 'lucide-react';
+import { Save, Navigation, Bell, MapPin, Moon, Repeat, Sparkles } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { SectionTitle } from '@/components/dashboard/dashboard-ui';
@@ -377,6 +377,19 @@ export function PreferencesSection({
         >
           <Bell className="h-4 w-4" />
           {t('settings.btn.testNotification')}
+        </Button>
+        <Button
+          onClick={() => {
+            const cached = localStorage.getItem('relax_account_profile');
+            const email = cached ? JSON.parse(cached).email : '';
+            const key = email ? `relax_onboarding_seen:${email}` : 'relax_onboarding_seen';
+            localStorage.removeItem(key);
+            window.location.href = '/dashboard?tour=true';
+          }}
+          variant="secondary"
+        >
+          <Sparkles className="h-4 w-4 text-sun" />
+          {t('onboarding.action.replay') || 'Xem lại hướng dẫn'}
         </Button>
       </div>
     </Card>

@@ -542,8 +542,18 @@ function NavLink({
   const translationKey = NAV_TRANSLATION_KEYS[label];
   const translated = translationKey ? t(translationKey) : label;
 
+  const tourId =
+    label === 'Breaks'
+      ? 'tour-nav-breaks'
+      : label === 'Journal'
+        ? 'tour-nav-journal'
+        : label === 'Settings'
+          ? 'tour-nav-settings'
+          : undefined;
+
   return (
     <Link
+      data-tour={tourId}
       className={cn(
         'flex min-w-fit items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition',
         active

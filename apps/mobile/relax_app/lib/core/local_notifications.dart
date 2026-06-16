@@ -4,7 +4,8 @@ import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class LocalNotifications {
-  static final FlutterLocalNotificationsPlugin _plugin = FlutterLocalNotificationsPlugin();
+  static final FlutterLocalNotificationsPlugin _plugin =
+      FlutterLocalNotificationsPlugin();
   static const _androidSmallIcon = 'ic_notification';
 
   static Future<void> init() async {
@@ -39,12 +40,16 @@ class LocalNotifications {
   static Future<void> requestPermissions() async {
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
-        final android = _plugin.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
+        final android = _plugin
+            .resolvePlatformSpecificImplementation<
+              AndroidFlutterLocalNotificationsPlugin
+            >();
         await android?.requestNotificationsPermission();
       } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-        final ios = _plugin.resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin>();
+        final ios = _plugin
+            .resolvePlatformSpecificImplementation<
+              IOSFlutterLocalNotificationsPlugin
+            >();
         await ios?.requestPermissions(alert: true, badge: true, sound: true);
       }
     } catch (e) {
@@ -181,8 +186,10 @@ class LocalNotifications {
     }
 
     try {
-      final android = _plugin.resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>();
+      final android = _plugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
       final canScheduleExact =
           await android?.canScheduleExactNotifications() ?? false;
       if (canScheduleExact) {

@@ -154,9 +154,21 @@ export function OnboardingTour() {
   const [viewport, setViewport] = useState({ w: 0, h: 0 });
 
   useEffect(() => {
-    if (!hasSeen()) {
-      const id = window.setTimeout(() => setOpen(true), 250);
-      return () => window.clearTimeout(id);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const forceTour = params.get('tour') === 'true';
+      if (forceTour || !hasSeen()) {
+        if (forceTour) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('tour');
+          window.history.replaceState({}, '', url.pathname + url.search);
+        }
+        const id = window.setTimeout(() => {
+          setStepIdx(0);
+          setOpen(true);
+        }, 250);
+        return () => window.clearTimeout(id);
+      }
     }
   }, []);
 
@@ -177,13 +189,13 @@ export function OnboardingTour() {
       icon: Wind,
       title: t('onboarding.step3.title'),
       body: t('onboarding.step3.body'),
-      targetSelector: '[data-tour="relax-activities"]',
+      targetSelector: '[data-tour="tour-nav-breaks"]',
     },
     {
       icon: BookOpenText,
       title: t('onboarding.step4.title'),
       body: t('onboarding.step4.body'),
-      targetSelector: '[data-tour="recent-moments"]',
+      targetSelector: '[data-tour="tour-nav-journal"]',
     },
     {
       icon: CheckCircle2,
@@ -195,7 +207,7 @@ export function OnboardingTour() {
       icon: Settings,
       title: t('onboarding.step6.title'),
       body: t('onboarding.step6.body'),
-      targetSelector: null,
+      targetSelector: '[data-tour="tour-nav-settings"]',
     },
   ];
 
