@@ -32,6 +32,7 @@ import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   const { t } = useTranslation();
   const overviewFilters = useDashboardFilters('/analytics/me/overview', 'overview');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
+  const accountRole = useDashboardStore((state) => state.accountProfile?.role);
   const data = useUserDashboardData({
     refreshKey: refreshNonce,
     overviewQuery: overviewFilters.query,
@@ -158,6 +160,8 @@ export default function DashboardPage() {
         <CompanionStatusCard companion={data.overview.companion} />
       </div>
 
+      <PremiumGate planName={data.settings.billing.planName} role={accountRole}>
+      <div className="flex flex-col gap-4">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(340px,0.8fr)]">
         <MoodAreaDashboardChart data={safeTimeline} />
         <Card>
@@ -215,6 +219,8 @@ export default function DashboardPage() {
       </div>
 
       <DistributionChart data={safeDistribution} />
+      </div>
+      </PremiumGate>
     </DashboardShell>
   );
 }
