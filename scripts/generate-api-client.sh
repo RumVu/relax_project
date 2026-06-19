@@ -16,7 +16,7 @@ SPEC_URL="${API_URL}/docs-json"
 OUTPUT_DIR="apps/mobile/relax_app/lib/generated/api"
 SPEC_FILE="tmp/openapi-spec.json"
 
-echo "=== Thi Ái API Client Generator ==="
+echo "=== Relax Time API Client Generator ==="
 echo "Fetching OpenAPI spec from: ${SPEC_URL}"
 
 mkdir -p tmp

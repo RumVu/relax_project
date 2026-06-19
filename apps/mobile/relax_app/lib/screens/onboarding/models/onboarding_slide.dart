@@ -32,6 +32,6 @@ const kOnboardingSlides = [
   OnboardingSlide(
     emoji: '✦',
     title: 'Sẵn sàng\nbắt đầu chưa?',
-    body: 'Đăng nhập để Thi Ái nâng niu trút bỏ nỗi buồn của bạn nha ~',
+    body: 'Đăng nhập để Relax Time nâng niu trút bỏ nỗi buồn của bạn nha ~',
   ),
 ];

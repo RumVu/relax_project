@@ -239,14 +239,18 @@ tunnel-web: ## Web-only Cloudflare tunnel
 
 .PHONY: lint
 lint: ## Lint backend + web
-	-npm --workspace apps/backend run lint
-	-npm --workspace apps/web run lint
+	npm --workspace apps/backend run lint
+	npm --workspace apps/web run lint
 
 .PHONY: test
 test: backend-test ## Alias: backend unit tests
 
+.PHONY: web-test
+web-test: ## Web unit tests (Vitest)
+	npm --workspace apps/web run test
+
 .PHONY: test-all
-test-all: backend-test backend-test-e2e web-test-e2e ## Run every test suite
+test-all: backend-test backend-test-e2e web-test web-test-e2e mobile-test ## Run every test suite
 
 .PHONY: clean
 clean: ## Remove build artefacts
@@ -283,7 +287,7 @@ mobile-test: ## Run Flutter unit & widget tests
 
 .PHONY: mobile-analyze
 mobile-analyze: ## Run Flutter static analysis
-	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) analyze
+	cd $(FLUTTER_DIR) && $(FLUTTER_BIN) analyze --no-fatal-infos
 
 .PHONY: mobile-build-apk
 mobile-build-apk: ## Build release APK (production API)

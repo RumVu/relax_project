@@ -48,7 +48,7 @@ class SafetyDetector {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              ctx.t('Thi Ái nhận thấy bạn có thể đang trải qua giai đoạn khó khăn. Bạn không đơn độc.'),
+              ctx.t('Relax Time nhận thấy bạn có thể đang trải qua giai đoạn khó khăn. Bạn không đơn độc.'),
               style: TextStyle(color: ctx.mutedText, height: 1.5),
             ),
             const SizedBox(height: 16),

@@ -87,7 +87,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
   late Box _box;
   bool _ready = false;
   final _testMsgCtrl = TextEditingController(
-      text: 'Chào bạn! Dành 3 phút cùng Thi Ái hôm nay nhé! 🌸');
+      text: 'Chào bạn! Dành 3 phút cùng Relax Time hôm nay nhé! 🌸');
   int _testDelaySeconds = 0; // 0, 5, 10, 30
 
   @override
@@ -127,7 +127,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
       final message = _getMessage(key, slot.defaultMessage);
       await LocalNotifications.scheduleDaily(
         id: _slotId(key),
-        title: 'Thi Ái',
+        title: 'Relax Time',
         body: message,
         hour: hour,
         minute: minute,
@@ -150,7 +150,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
     if (_isEnabled(key)) {
       await LocalNotifications.scheduleDaily(
         id: _slotId(key),
-        title: 'Thi Ái',
+        title: 'Relax Time',
         body: _getMessage(key, slot.defaultMessage),
         hour: picked.hour,
         minute: picked.minute,
@@ -191,7 +191,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
       if (_isEnabled(key)) {
         await LocalNotifications.scheduleDaily(
           id: _slotId(key),
-          title: 'Thi Ái',
+          title: 'Relax Time',
           body: result,
           hour: _getHour(key, slot.defaultHour),
           minute: _getMinute(key, slot.defaultMinute),
@@ -215,7 +215,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
 
     if (_testDelaySeconds == 0) {
       await LocalNotifications.showInstant(
-        title: 'Thi Ái',
+        title: 'Relax Time',
         body: body,
       );
       if (mounted) {
@@ -226,7 +226,7 @@ class _NotificationLabScreenState extends State<NotificationLabScreen> {
     } else {
       await LocalNotifications.scheduleDelayed(
         id: 9999,
-        title: 'Thi Ái',
+        title: 'Relax Time',
         body: body,
         delay: Duration(seconds: _testDelaySeconds),
       );

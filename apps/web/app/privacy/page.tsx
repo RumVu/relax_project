@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy — Thi Ái',
-  description: 'Chính sách quyền riêng tư của ứng dụng Thi Ái.',
+  title: 'Privacy Policy — Relax Time',
+  description: 'Chính sách quyền riêng tư của ứng dụng Relax Time.',
 };
 
 export default function PrivacyPage() {
@@ -108,7 +108,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="rounded-xl border border-[var(--field-border,#e5e7eb)] bg-[var(--field-bg,#f9fafb)] p-4 text-xs text-[var(--app-muted,#6b7280)]">
-          <strong>Miễn trừ trách nhiệm:</strong> Thi Ái không phải là thiết bị y
+          <strong>Miễn trừ trách nhiệm:</strong> Relax Time không phải là thiết bị y
           tế và không cung cấp chẩn đoán, điều trị hay dịch vụ cấp cứu. Nếu bạn
           đang trong tình trạng khẩn cấp, hãy liên hệ đường dây nóng sức khoẻ
           tâm thần hoặc gọi 115.

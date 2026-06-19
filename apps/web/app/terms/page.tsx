@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service — Thi Ái',
-  description: 'Điều khoản sử dụng ứng dụng Thi Ái.',
+  title: 'Terms of Service — Relax Time',
+  description: 'Điều khoản sử dụng ứng dụng Relax Time.',
 };
 
 export default function TermsPage() {
@@ -19,7 +19,7 @@ export default function TermsPage() {
         <div>
           <h2 className="text-lg font-bold">1. Chấp nhận điều khoản</h2>
           <p className="mt-2 text-[var(--app-muted,#6b7280)]">
-            Khi sử dụng ứng dụng Thi Ái (&quot;Dịch vụ&quot;), bạn đồng ý tuân
+            Khi sử dụng ứng dụng Relax Time (&quot;Dịch vụ&quot;), bạn đồng ý tuân
             thủ các điều khoản này. Nếu bạn không đồng ý, vui lòng ngừng sử dụng
             Dịch vụ.
           </p>
@@ -28,7 +28,7 @@ export default function TermsPage() {
         <div>
           <h2 className="text-lg font-bold">2. Mô tả Dịch vụ</h2>
           <p className="mt-2 text-[var(--app-muted,#6b7280)]">
-            Thi Ái là ứng dụng hỗ trợ chăm sóc sức khoẻ tinh thần cá nhân, bao
+            Relax Time là ứng dụng hỗ trợ chăm sóc sức khoẻ tinh thần cá nhân, bao
             gồm theo dõi cảm xúc, nhật ký, bài tập thư giãn, thiền, âm thanh và
             linh thú đồng hành. Dịch vụ{' '}
             <strong>không phải là dịch vụ y tế</strong> và không thay thế tư vấn
@@ -81,7 +81,7 @@ export default function TermsPage() {
           <h2 className="text-lg font-bold">7. Miễn trừ trách nhiệm</h2>
           <p className="mt-2 text-[var(--app-muted,#6b7280)]">
             Dịch vụ được cung cấp &quot;nguyên trạng&quot; (as-is). Chúng tôi
-            không đảm bảo Dịch vụ hoạt động liên tục không gián đoạn. Thi Ái{' '}
+            không đảm bảo Dịch vụ hoạt động liên tục không gián đoạn. Relax Time{' '}
             <strong>không phải thiết bị y tế</strong>, không cung cấp chẩn đoán,
             điều trị hoặc dịch vụ cấp cứu.
           </p>

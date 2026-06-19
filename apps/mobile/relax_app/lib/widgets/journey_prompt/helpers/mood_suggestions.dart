@@ -118,7 +118,7 @@ String subtitleForMood(String mood) {
       return 'Niềm vui nho nhỏ này đáng được giữ lại nha ✦';
     case 'STRESSED':
     case 'ANXIOUS':
-      return 'Hơi căng nhỉ. Để Thi Ái cùng bạn hạ nhịp lại một chút.';
+      return 'Hơi căng nhỉ. Để Relax Time cùng bạn hạ nhịp lại một chút.';
     case 'SAD':
     case 'LONELY':
       return 'Buồn cũng được. Mình ngồi lại với cảm xúc một chút nha.';

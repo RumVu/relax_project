@@ -312,7 +312,7 @@ class _VoiceCheckinScreenState extends State<VoiceCheckinScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              ctx.t('Dựa trên những gì bạn chia sẻ, Thi Ái đoán bạn đang cảm thấy:'),
+              ctx.t('Dựa trên những gì bạn chia sẻ, Relax Time đoán bạn đang cảm thấy:'),
               textAlign: TextAlign.center,
               style: TextStyle(color: context.mutedText, fontSize: 13),
             ),

@@ -340,7 +340,6 @@ function TierEditor({
     >
       <Card
         className="max-h-[90vh] w-full max-w-2xl overflow-y-auto"
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       >
         <div onClick={(e) => e.stopPropagation()}>
         <SectionTitle

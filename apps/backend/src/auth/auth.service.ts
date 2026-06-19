@@ -206,7 +206,7 @@ export class AuthService {
           userId,
           title: 'Ngày đầu tiên',
           content:
-            'Hôm nay mình bắt đầu dùng Thi Ái. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
+            'Hôm nay mình bắt đầu dùng Relax Time. Cảm thấy nhẹ nhõm hơn sau khi viết ra những suy nghĩ.',
           mood: 'CALM',
           tags: ['reflection', 'first-day'],
           isPrivate: true,

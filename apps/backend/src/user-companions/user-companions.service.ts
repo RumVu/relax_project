@@ -650,7 +650,8 @@ export class UserCompanionsService {
         `Thật vậy hả anh/chị meow? Kể thêm cho em nghe đi.`,
       ];
       reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-      action = Math.random() > 0.5 ? CompanionAction.LOOKING : CompanionAction.IDLE;
+      action =
+        Math.random() > 0.5 ? CompanionAction.LOOKING : CompanionAction.IDLE;
     }
 
     return { reply, mood, action };

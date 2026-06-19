@@ -168,7 +168,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         ),
         content: Text(
           ctx.t(
-              'Cho phép Thi Ái biết vị trí của bạn để gợi ý thời tiết và địa điểm phù hợp nhé? 🌤️'),
+              'Cho phép Relax Time biết vị trí của bạn để gợi ý thời tiết và địa điểm phù hợp nhé? 🌤️'),
           style: const TextStyle(fontSize: 14, height: 1.5),
         ),
         actions: [

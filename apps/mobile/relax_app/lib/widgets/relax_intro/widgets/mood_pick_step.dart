@@ -40,7 +40,7 @@ class MoodPickStep extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            context.t('Chọn một cảm xúc gần nhất với bạn lúc này — để Thi Ái đề xuất hoạt động phù hợp.'),
+            context.t('Chọn một cảm xúc gần nhất với bạn lúc này — để Relax Time đề xuất hoạt động phù hợp.'),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: context.appText.withValues(alpha: 0.6),

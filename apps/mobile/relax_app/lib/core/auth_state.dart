@@ -33,7 +33,7 @@ class AuthState extends ChangeNotifier {
   String? get activeSessionId => _activeSessionId;
   String? get activeActivityType => _activeActivityType;
 
-  /// Minimum thời gian giữ splash để brand "Thi Ái" hiển thị đủ lâu
+  /// Minimum thời gian giữ splash để brand "Relax Time" hiển thị đủ lâu
   /// — không bị flash quá nhanh trên máy nhanh.
   static const _minSplashDuration = Duration(seconds: 3);
 

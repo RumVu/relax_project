@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Support — Thi Ái',
-  description: 'Hỗ trợ và liên hệ ứng dụng Thi Ái.',
+  title: 'Support — Relax Time',
+  description: 'Hỗ trợ và liên hệ ứng dụng Relax Time.',
 };
 
 export default function SupportPage() {
@@ -70,7 +70,7 @@ export default function SupportPage() {
         <div className="rounded-xl border border-amber-200 bg-amber-50 p-6 dark:border-amber-800 dark:bg-amber-950">
           <h2 className="text-lg font-bold">🆘 Khẩn cấp</h2>
           <p className="mt-2 text-sm text-[var(--app-muted,#6b7280)]">
-            Thi Ái <strong>không phải dịch vụ cấp cứu</strong>. Nếu bạn hoặc
+            Relax Time <strong>không phải dịch vụ cấp cứu</strong>. Nếu bạn hoặc
             người thân đang trong tình trạng nguy hiểm:
           </p>
           <ul className="mt-2 space-y-1 text-sm font-semibold">

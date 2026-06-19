@@ -77,7 +77,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
               "img-src 'self' data: blob: https:; " +
               "media-src 'self' data: blob: https:; " +
-              "connect-src 'self' http: https: ws: wss: https://accounts.google.com https://www.google-analytics.com; " +
+              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823'} ${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823').replace(/^http/, 'ws')} https://accounts.google.com https://www.google-analytics.com; ` +
               "frame-src 'self' https://accounts.google.com; " +
               "frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://pay.sepay.vn https://*.sepay.vn",
           },

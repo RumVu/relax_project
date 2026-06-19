@@ -1640,7 +1640,7 @@ async function seedDemoUserData() {
   const demoUser = await prisma.user.create({
     data: {
       email: DEMO_USER_EMAIL,
-      name: 'Thi Ái Demo',
+      name: 'Relax Time Demo',
       avatar: `${ASSET_BASE}/avatars/demo-thi-ai.png`,
       password,
       role: UserRole.USER,
@@ -1650,7 +1650,7 @@ async function seedDemoUserData() {
       lastLoginAt: daysAgo(0, 9, 15),
       profile: {
         create: {
-          displayName: 'Thi Ái',
+          displayName: 'Relax Time',
           bio: 'Tài khoản demo có dữ liệu mood, journal và relax để dựng dashboard.',
           birthday: new Date('2002-05-14T00:00:00.000Z'),
           zodiacSign: 'Taurus',

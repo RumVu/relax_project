@@ -465,7 +465,7 @@ class SettingsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              ctx.t('Thi Ái là ứng dụng hỗ trợ thư giãn, KHÔNG thay thế bác sĩ hoặc chuyên gia tâm lý. Nếu bạn đang cảm thấy quá sức chịu đựng, hãy liên hệ ngay:'),
+              ctx.t('Relax Time là ứng dụng hỗ trợ thư giãn, KHÔNG thay thế bác sĩ hoặc chuyên gia tâm lý. Nếu bạn đang cảm thấy quá sức chịu đựng, hãy liên hệ ngay:'),
               style: TextStyle(
                 color: ctx.mutedText,
                 fontSize: 14,

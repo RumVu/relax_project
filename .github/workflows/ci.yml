@@ -90,6 +90,13 @@ jobs:
         working-directory: apps/backend
         run: npm run test:e2e -- --ci
 
+      - name: Backend build
+        working-directory: apps/backend
+        run: npm run build
+
+      - name: Audit backend deps
+        run: npm audit --workspace apps/backend --audit-level=high || true
+
   # ---------------------------------------------------------------------------
   # Web: build + Playwright smoke
   # ---------------------------------------------------------------------------

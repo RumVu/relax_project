@@ -1,6 +1,6 @@
 process.env.SEPAY_WEBHOOK_API_KEY = 'test-sepay-key';
 process.env.SEPAY_MERCHANT_ID = 'SP-TEST-VN95276B';
-process.env.SEPAY_SECRET_KEY = 'spsk_test_PGD3VPwwsGfAiTKSCiEDEE3LapHHiQPE';
+process.env.SEPAY_SECRET_KEY = 'spsk_test_dummy_key_for_e2e_tests';
 process.env.SEPAY_ENV = 'sandbox';
 
 import { Test, TestingModule } from '@nestjs/testing';

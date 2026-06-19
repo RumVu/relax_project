@@ -158,7 +158,7 @@ class _DemoChecklistScreenState extends State<DemoChecklistScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    context.t('Khám phá các tính năng của Thi Ái'),
+                    context.t('Khám phá các tính năng của Relax Time'),
                     style: TextStyle(
                       color: context.mutedText,
                       fontSize: 14,

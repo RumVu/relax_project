@@ -395,7 +395,7 @@ async function bootstrap() {
     .setDescription(
       'Backend API for auth, users, catalog content, storage, and wellness app configuration.',
     )
-    .setVersion('1.0.0')
+    .setVersion(process.env.npm_package_version ?? '0.0.0')
     .addBearerAuth(
       {
         type: 'http',

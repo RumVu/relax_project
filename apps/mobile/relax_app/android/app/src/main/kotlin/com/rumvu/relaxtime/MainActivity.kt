@@ -1,4 +1,4 @@
-package com.rumvu.relax_app
+package com.rumvu.relaxtime
 
 import io.flutter.embedding.android.FlutterActivity
 

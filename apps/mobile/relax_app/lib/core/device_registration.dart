@@ -55,7 +55,7 @@ class DeviceRegistration {
     if (Platform.isMacOS) return 'Mac';
     if (Platform.isWindows) return 'Windows PC';
     if (Platform.isLinux) return 'Linux PC';
-    return 'Thi Ái app';
+    return 'Relax Time app';
   }
 
   /// Gọi sau khi login/register thành công. Best-effort: nếu fail

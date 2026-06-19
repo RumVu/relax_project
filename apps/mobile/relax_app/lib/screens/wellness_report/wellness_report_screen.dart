@@ -404,7 +404,7 @@ class _WellnessReportScreenState extends State<WellnessReportScreen> {
                       child: OutlinedButton.icon(
                         onPressed: () => Share.shareXFiles(
                           [XFile(_pdfPath!)],
-                          text: 'Báo cáo sức khoẻ tinh thần - Thi Ái',
+                          text: 'Báo cáo sức khoẻ tinh thần - Relax Time',
                         ),
                         icon: const Icon(Icons.share_outlined),
                         label: Text(context.t('Chia sẻ PDF')),

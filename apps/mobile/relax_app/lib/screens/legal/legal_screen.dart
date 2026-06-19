@@ -61,7 +61,7 @@ class LegalScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    context.t('Thi Ái không phải là thiết bị y tế và không cung cấp '
+                    context.t('Relax Time không phải là thiết bị y tế và không cung cấp '
                         'chẩn đoán, điều trị hoặc dịch vụ cấp cứu. Ứng dụng chỉ hỗ trợ '
                         'bạn theo dõi cảm xúc cá nhân, xây dựng thói quen thư giãn và '
                         'ghi chép nhật ký sức khoẻ tinh thần.'),
@@ -106,7 +106,7 @@ class LegalScreen extends StatelessWidget {
                 trailing: Icon(Icons.chevron_right, color: context.mutedText),
                 onTap: () => showLicensePage(
                   context: context,
-                  applicationName: 'Thi Ái',
+                  applicationName: 'Relax Time',
                   applicationVersion: '1.1.1+1',
                 ),
               ),

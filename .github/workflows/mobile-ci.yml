@@ -27,7 +27,7 @@ jobs:
           channel: 'stable'
           cache: true
       - run: flutter pub get
-      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter analyze --no-fatal-infos
 
   test:
     name: Flutter test
@@ -65,11 +65,20 @@ jobs:
           channel: 'stable'
           cache: true
       - run: flutter pub get
-      - run: flutter build apk --debug
+      - name: Create signing config
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+            echo "$KEY_PROPERTIES" > android/key.properties
+          fi
+      - run: flutter build appbundle --release
       - uses: actions/upload-artifact@v4
         with:
-          name: relax-app-debug-apk
-          path: apps/mobile/relax_app/build/app/outputs/flutter-apk/app-debug.apk
+          name: relax-app-release-aab
+          path: apps/mobile/relax_app/build/app/outputs/bundle/release/app-release.aab
           retention-days: 14
 
   build-ios:

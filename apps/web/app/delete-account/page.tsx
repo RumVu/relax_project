@@ -43,7 +43,7 @@ export default function DeleteAccountPage() {
         <div className="rounded-xl border border-[var(--field-border,#e5e7eb)] p-5">
           <h2 className="font-bold">Cách xoá nhanh trong app</h2>
           <p className="mt-2 text-sm text-[var(--app-muted,#6b7280)]">
-            Mở app Thi Ái → <strong>Cài đặt</strong> →{' '}
+            Mở app Relax Time → <strong>Cài đặt</strong> →{' '}
             <strong>Dữ liệu & Quyền riêng tư</strong> → chọn loại dữ liệu muốn
             xoá hoặc xuất toàn bộ trước khi xoá.
           </p>

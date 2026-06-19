@@ -349,7 +349,7 @@ class _SplashState extends State<_Splash> with SingleTickerProviderStateMixin {
                 ),
                 const SizedBox(height: 22),
                 Text(
-                  'Thi Ái',
+                  'Relax Time',
                   style: TextStyle(
                     color: context.appText,
                     fontSize: 28,
