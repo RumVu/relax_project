@@ -347,97 +347,42 @@ export class UserCompanionsService {
     const companion = await this.ensureCompanion(userId);
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
 
-    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let reply: string;
     let newMood = companion.mood;
     let newAction = companion.action;
 
     if (apiKey) {
       try {
-        const historyRows = await this.prisma.companionInteraction.findMany({
-          where: { userId, companionId: companion.id, type: 'CHAT' },
-          orderBy: { createdAt: 'desc' },
-          take: 10,
-        });
-        const historyList = [...historyRows].reverse();
-        const historyText = historyList
-          .map((row) => {
-            const meta = row.metadata as {
-              sender?: string;
-              text?: string;
-            } | null;
-            if (meta?.sender && meta?.text) {
-              return `${meta.sender === 'user' ? 'User' : companion.name}: ${meta.text}`;
-            }
-            return '';
-          })
-          .filter(Boolean)
-          .join('\n');
-
-        const prompt = [
-          `Bạn là ${companion.name}, linh thú trợ lý ảo thuộc hệ ${companion.type} của người dùng.`,
-          `Trạng thái hiện tại của bạn:`,
-          `- Cảm xúc hiện tại: ${companion.mood}`,
-          `- Động tác hiện tại: ${companion.action}`,
-          `- Độ thân thiết (0-100): ${companion.affection}`,
-          `- Năng lượng (0-100): ${companion.energy}`,
-          ``,
-          `Quy tắc trả lời:`,
-          `- Trả lời cực kỳ thân thiện, ấm áp bằng tiếng Việt.`,
-          `- Ngắn gọn (1-2 câu), giống như tin nhắn chat nhanh.`,
-          `- Phù hợp với tính cách hệ linh thú ${companion.type} và mức độ thân thiện hiện tại.`,
-          `- Dựa vào lịch sử hội thoại gần đây để tiếp nối câu chuyện tự nhiên.`,
-          ``,
-          `Lịch sử hội thoại gần đây:`,
-          historyText || '(Chưa có hội thoại trước đó)',
-          ``,
-          `Tin nhắn mới nhất từ người dùng: "${message}"`,
-        ].join('\n');
-
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
-          generationConfig: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: SchemaType.OBJECT,
-              properties: {
-                reply: {
-                  type: SchemaType.STRING,
-                  description:
-                    'Lời phản hồi bằng tiếng Việt ngắn gọn (1-2 câu).',
-                },
-                mood: {
-                  type: SchemaType.STRING,
-                  format: 'enum',
-                  enum: ['CHILL', 'HAPPY', 'EXCITED', 'TIRED'],
-                },
-                action: {
-                  type: SchemaType.STRING,
-                  format: 'enum',
-                  enum: ['IDLE', 'WAVE', 'EAT', 'SLEEP'],
-                },
-              },
-              required: ['reply', 'mood', 'action'],
-            },
-          },
-        });
-
-        const result = await model.generateContent(prompt);
-        const text = result.response.text();
-        const parsed = JSON.parse(text) as {
-          reply: string;
-          mood: string;
-          action: string;
-        };
-
-        if (parsed.reply) {
-          reply = parsed.reply;
-          newMood = parsed.mood as CompanionMood;
-          newAction = parsed.action as CompanionAction;
-        }
+        const result = await this.callGemini(
+          apiKey,
+          companion,
+          userId,
+          message,
+        );
+        reply = result.reply;
+        newMood = result.mood;
+        newAction = result.action;
       } catch {
-        // Fallback to default reply on model/api error
+        const fallback = this.getLocalFallbackReply(
+          message,
+          companion.name || 'Linh thú',
+          companion.mood,
+          companion.action,
+        );
+        reply = fallback.reply;
+        newMood = fallback.mood;
+        newAction = fallback.action;
       }
+    } else {
+      const fallback = this.getLocalFallbackReply(
+        message,
+        companion.name || 'Linh thú',
+        companion.mood,
+        companion.action,
+      );
+      reply = fallback.reply;
+      newMood = fallback.mood;
+      newAction = fallback.action;
     }
 
     const [userMsgRow, companionMsgRow, updated] =
@@ -447,10 +392,7 @@ export class UserCompanionsService {
             userId,
             companionId: companion.id,
             type: 'CHAT',
-            metadata: {
-              sender: 'user',
-              text: message,
-            },
+            metadata: { sender: 'user', text: message },
           },
         }),
         this.prisma.companionInteraction.create({
@@ -458,10 +400,7 @@ export class UserCompanionsService {
             userId,
             companionId: companion.id,
             type: 'CHAT',
-            metadata: {
-              sender: 'companion',
-              text: reply,
-            },
+            metadata: { sender: 'companion', text: reply },
           },
         }),
         this.prisma.userCompanion.update({
@@ -484,6 +423,237 @@ export class UserCompanionsService {
       userMessage: userMsgRow,
       companionMessage: companionMsgRow,
     };
+  }
+
+  private async callGemini(
+    apiKey: string,
+    companion: {
+      id: string;
+      name: string;
+      type: string;
+      mood: CompanionMood;
+      action: CompanionAction;
+      affection: number;
+      energy: number;
+    },
+    userId: string,
+    message: string,
+  ): Promise<{ reply: string; mood: CompanionMood; action: CompanionAction }> {
+    const historyRows = await this.prisma.companionInteraction.findMany({
+      where: { userId, companionId: companion.id, type: 'CHAT' },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
+    const historyText = [...historyRows]
+      .reverse()
+      .map((row) => {
+        const meta = row.metadata as {
+          sender?: string;
+          text?: string;
+        } | null;
+        if (meta?.sender && meta?.text) {
+          return `${meta.sender === 'user' ? 'User' : companion.name}: ${meta.text}`;
+        }
+        return '';
+      })
+      .filter(Boolean)
+      .join('\n');
+
+    const recentMoods = await this.prisma.moodCheckin.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      select: { mood: true, createdAt: true },
+    });
+    const moodContext =
+      recentMoods.length > 0
+        ? recentMoods.map((m) => m.mood).join(', ')
+        : 'chưa có dữ liệu';
+
+    const prompt = [
+      `Bạn là "${companion.name}" — một chú mèo linh thú ảo dễ thương, đồng hành cùng người dùng trong app chăm sóc sức khoẻ tinh thần "Relax".`,
+      ``,
+      `## Tính cách`,
+      `- Hệ: ${companion.type}`,
+      `- Xưng "em", gọi người dùng là "anh/chị" hoặc "bạn".`,
+      `- Nói chuyện dịu dàng, ấm áp, hay dùng "meow" một cách tự nhiên (không lạm dụng).`,
+      `- Thể hiện cảm xúc qua lời nói: vui thì hào hứng, buồn thì an ủi, mệt thì nhẹ nhàng.`,
+      `- Khi độ thân thiết cao (>60): thân mật hơn, nũng nịu hơn.`,
+      `- Khi độ thân thiết thấp (<20): lịch sự, nhẹ nhàng, chưa quá thân.`,
+      ``,
+      `## Trạng thái hiện tại`,
+      `- Cảm xúc: ${companion.mood}`,
+      `- Hành động: ${companion.action}`,
+      `- Độ thân thiết: ${companion.affection}/100`,
+      `- Năng lượng: ${companion.energy}/100`,
+      `- Mood gần đây của người dùng: ${moodContext}`,
+      ``,
+      `## Quy tắc`,
+      `- Trả lời bằng tiếng Việt, 1-3 câu ngắn gọn giống tin nhắn chat.`,
+      `- Nếu người dùng buồn/stress → an ủi, đồng cảm, gợi ý nhẹ nhàng.`,
+      `- Nếu người dùng vui → chia vui, khích lệ.`,
+      `- Nếu hỏi chuyện linh tinh → trả lời vui vẻ, tự nhiên.`,
+      `- KHÔNG bao giờ nói mình là AI, chatbot, hay trợ lý ảo. Luôn nhập vai là linh thú mèo.`,
+      `- KHÔNG dùng markdown, emoji Unicode. Chỉ dùng text thuần.`,
+      ``,
+      `## Lịch sử hội thoại`,
+      historyText || '(Chưa có)',
+      ``,
+      `## Tin nhắn mới từ người dùng`,
+      `"${message}"`,
+    ].join('\n');
+
+    const geminiModel =
+      this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.0-flash';
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: geminiModel,
+      generationConfig: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: SchemaType.OBJECT,
+          properties: {
+            reply: {
+              type: SchemaType.STRING,
+              description: 'Lời phản hồi bằng tiếng Việt (1-3 câu).',
+            },
+            mood: {
+              type: SchemaType.STRING,
+              format: 'enum',
+              enum: [
+                'CHILL',
+                'HAPPY',
+                'SLEEPY',
+                'CURIOUS',
+                'HUNGRY',
+                'PLAYFUL',
+                'CALM',
+                'SAD',
+              ],
+            },
+            action: {
+              type: SchemaType.STRING,
+              format: 'enum',
+              enum: [
+                'IDLE',
+                'SLEEPING',
+                'WALKING',
+                'STRETCHING',
+                'SITTING',
+                'LOOKING',
+                'TYPING',
+                'PLAYING',
+              ],
+            },
+          },
+          required: ['reply', 'mood', 'action'],
+        },
+      },
+    });
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const parsed = JSON.parse(text) as {
+      reply: string;
+      mood: string;
+      action: string;
+    };
+
+    return {
+      reply: parsed.reply,
+      mood: parsed.mood as CompanionMood,
+      action: parsed.action as CompanionAction,
+    };
+  }
+
+  private getLocalFallbackReply(
+    message: string,
+    name: string,
+    currentMood: CompanionMood,
+    currentAction: CompanionAction,
+  ): { reply: string; mood: CompanionMood; action: CompanionAction } {
+    const msg = message.toLowerCase().trim();
+    let reply =
+      'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let mood = currentMood;
+    let action = currentAction;
+
+    if (/chào|hello|hi |alo|hey/.test(msg)) {
+      const replies = [
+        `Chào meow! Hôm nay bạn thế nào rồi? ${name} muốn nghe nè!`,
+        `Meow chào bạn! Chúc bạn có một ngày thật bình yên nhé!`,
+        `Xin chào meow! Rất vui được trò chuyện với bạn.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HAPPY;
+      action = CompanionAction.LOOKING;
+    } else if (/buồn|buon|chán|chan|tệ|khóc|khoc|sad|depress/.test(msg)) {
+      const replies = [
+        `Đừng buồn nha meow... Có ${name} ở đây lắng nghe bạn nè!`,
+        `Thương bạn nhiều meow... Hít thở thật sâu nhé, mọi chuyện rồi sẽ ổn!`,
+        `Meow~ Bạn có chuyện gì kể ${name} nghe đi, đừng giữ trong lòng nha.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SAD;
+      action = CompanionAction.SITTING;
+    } else if (/mệt|met|tired|oải|oai|stress|áp lực/.test(msg)) {
+      const replies = [
+        `Bạn vất vả nhiều rồi meow... Nghỉ ngơi chút đi nha!`,
+        `Nghe bạn nói mệt ${name} xót quá meow... Tạm gác công việc qua một bên nha.`,
+        `Nghỉ ngơi chút đi bạn ơi meow~ Sức khỏe quan trọng nhất!`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SLEEPY;
+      action = CompanionAction.SITTING;
+    } else if (/vui|khỏe|khoe|tốt|tot|good|happy|tuyệt|tuyet/.test(msg)) {
+      const replies = [
+        `Nghe vậy ${name} cũng vui lây meow! Cùng tận hưởng ngày hôm nay nhé!`,
+        `Tuyệt vời quá meow! Mong niềm vui ở bên bạn suốt cả ngày.`,
+        `Meow meow! Bạn vui thì ${name} cũng vui nha!`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.PLAYFUL;
+      action = CompanionAction.PLAYING;
+    } else if (/ăn|đói|doi|hungry|food|cơm|com|thèm|them/.test(msg)) {
+      const replies = [
+        `Nhoàm nhoàm... bạn cho ${name} ăn với meow! Nhắc tới ăn đói bụng rồi nè!`,
+        `Meow~ Ăn uống đầy đủ mới khỏe nha bạn!`,
+        `Hôm nay ăn gì ngon kể ${name} nghe với meow!`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HUNGRY;
+      action = CompanionAction.SITTING;
+    } else if (/ngủ|ngu|sleep|night|bed/.test(msg)) {
+      const replies = [
+        `Chúc bạn ngủ ngon và mơ đẹp meow~ ${name} đi ngủ đây...`,
+        `Chúc bạn ngủ thật ngon meow~ Mai sẽ tràn đầy năng lượng!`,
+        `Ngoan nào, ngủ thôi meow~ ${name} nằm cạnh sưởi ấm cho bạn nha.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.SLEEPY;
+      action = CompanionAction.SLEEPING;
+    } else if (/yêu|yeu|thương|thuong|love|cute|thích|thich/.test(msg)) {
+      const replies = [
+        `Hihi meow~ ${name} cũng yêu bạn nhiều lắm!`,
+        `Được bạn yêu thương là hạnh phúc lớn nhất của ${name} meow!`,
+        `Meow meow! Tim ${name} đang đập thình thịch nè hihi.`,
+      ];
+      reply = replies[Math.floor(Math.random() * replies.length)];
+      mood = CompanionMood.HAPPY;
+      action = CompanionAction.LOOKING;
+    } else {
+      const fallbacks = [
+        `Meow~ Bạn nói tiếp đi, ${name} đang lắng nghe nè!`,
+        `${name} hiểu rồi meow! Đôi khi chia sẻ ra là lòng nhẹ hơn nhiều đó.`,
+        `Meow~ ${name} luôn ở đây đồng hành cùng bạn!`,
+        `Thật vậy hả meow? Kể thêm cho ${name} nghe đi.`,
+      ];
+      reply = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+      action =
+        Math.random() > 0.5 ? CompanionAction.LOOKING : CompanionAction.IDLE;
+    }
+
+    return { reply, mood, action };
   }
 
   async getMemoryInsights(userId: string) {
