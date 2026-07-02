@@ -14,7 +14,7 @@ import { CreateCompanionInteractionDto } from './dto/create-companion-interactio
 import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-personalization.dto';
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenAI, Type } from '@google/genai';
 
 @Injectable()
 export class UserCompanionsService {
@@ -343,18 +343,36 @@ export class UserCompanionsService {
     return 0;
   }
 
+  private buildGenAIClient(): GoogleGenAI | null {
+    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
+    if (projectId) {
+      const location =
+        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
+      return new GoogleGenAI({
+        vertexai: true,
+        project: projectId,
+        location,
+      });
+    }
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    if (apiKey) {
+      return new GoogleGenAI({ apiKey });
+    }
+    return null;
+  }
+
   async chatWithCompanion(userId: string, message: string) {
     const companion = await this.ensureCompanion(userId);
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    const ai = this.buildGenAIClient();
 
     let reply: string;
     let newMood = companion.mood;
     let newAction = companion.action;
 
-    if (apiKey) {
+    if (ai) {
       try {
         const result = await this.callGemini(
-          apiKey,
+          ai,
           companion,
           userId,
           message,
@@ -426,7 +444,7 @@ export class UserCompanionsService {
   }
 
   private async callGemini(
-    apiKey: string,
+    ai: GoogleGenAI,
     companion: {
       id: string;
       name: string;
@@ -504,21 +522,22 @@ export class UserCompanionsService {
     ].join('\n');
 
     const geminiModel =
-      this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.0-flash';
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
+      this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.5-flash';
+
+    const result = await ai.models.generateContent({
       model: geminiModel,
-      generationConfig: {
+      contents: prompt,
+      config: {
         responseMimeType: 'application/json',
         responseSchema: {
-          type: SchemaType.OBJECT,
+          type: Type.OBJECT,
           properties: {
             reply: {
-              type: SchemaType.STRING,
+              type: Type.STRING,
               description: 'Lời phản hồi bằng tiếng Việt (1-3 câu).',
             },
             mood: {
-              type: SchemaType.STRING,
+              type: Type.STRING,
               format: 'enum',
               enum: [
                 'CHILL',
@@ -532,7 +551,7 @@ export class UserCompanionsService {
               ],
             },
             action: {
-              type: SchemaType.STRING,
+              type: Type.STRING,
               format: 'enum',
               enum: [
                 'IDLE',
@@ -551,8 +570,7 @@ export class UserCompanionsService {
       },
     });
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = result.text ?? '';
     const parsed = JSON.parse(text) as {
       reply: string;
       mood: string;

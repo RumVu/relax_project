@@ -33,8 +33,8 @@ describe('UserCompanionsService — chatWithCompanion', () => {
 
   beforeEach(async () => {
     configGet = jest.fn((key: string) => {
-      if (key === 'GEMINI_API_KEY') return undefined;
-      if (key === 'GEMINI_MODEL') return 'gemini-2.0-flash';
+      if (key === 'VERTEX_PROJECT_ID') return undefined;
+      if (key === 'GEMINI_MODEL') return 'gemini-2.5-flash';
       return undefined;
     });
 
@@ -85,7 +85,7 @@ describe('UserCompanionsService — chatWithCompanion', () => {
     service = module.get(UserCompanionsService);
   });
 
-  it('should return a local fallback reply when GEMINI_API_KEY is not set', async () => {
+  it('should return a local fallback reply when VERTEX_PROJECT_ID is not set', async () => {
     const result = await service.chatWithCompanion('user-1', 'chào bạn');
 
     expect(result).toHaveProperty('reply');

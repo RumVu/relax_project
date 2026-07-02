@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenAI, Type } from '@google/genai';
 import {
   InsightDraft,
   InsightGenerationResult,
@@ -8,48 +8,39 @@ import {
   RecommendationDraft,
 } from '../ai-insights.types';
 
-/**
- * Gemini provider — asks gemini-1.5-flash (default) for personalized
- * insights + recommendations. Output is constrained via `responseSchema`
- * (Structured Outputs) so the model is guaranteed to return valid JSON
- * matching our exact schema — no regex/manual parsing needed.
- *
- * Fallback behavior: if the model errors, AiInsightsService catches
- * and falls back to the deterministic provider automatically.
- */
 export class GeminiInsightProvider implements InsightProvider {
   readonly name = 'gemini';
   private readonly logger = new Logger('AiInsights:gemini');
-  private readonly client: GoogleGenerativeAI;
+  private readonly ai: GoogleGenAI;
   private readonly modelName: string;
 
-  constructor(apiKey: string, modelName?: string) {
-    this.client = new GoogleGenerativeAI(apiKey);
-    this.modelName = modelName ?? 'gemini-1.5-flash';
+  constructor(ai: GoogleGenAI, modelName?: string) {
+    this.ai = ai;
+    this.modelName = modelName ?? 'gemini-2.5-flash';
   }
 
   async generate(
     ctx: InsightProviderContext,
   ): Promise<InsightGenerationResult> {
-    const model = this.client.getGenerativeModel({
+    const prompt = this.buildPrompt(ctx);
+    const res = await this.ai.models.generateContent({
       model: this.modelName,
-      generationConfig: {
+      contents: prompt,
+      config: {
         responseMimeType: 'application/json',
         temperature: 0.6,
-        // Structured Outputs: ép buộc model trả về đúng schema JSON —
-        // không cần regex/parse thủ công, không lo hallucination sai format.
         responseSchema: {
-          type: SchemaType.OBJECT,
+          type: Type.OBJECT,
           properties: {
             insights: {
-              type: SchemaType.ARRAY,
+              type: Type.ARRAY,
               description:
                 'Danh sách 3 nhận định cảm xúc cho người dùng (tiếng Việt tự nhiên).',
               items: {
-                type: SchemaType.OBJECT,
+                type: Type.OBJECT,
                 properties: {
                   type: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     format: 'enum',
                     description:
                       'Loại insight: weekly-summary | mood-pattern | risk-flag | celebration',
@@ -61,52 +52,48 @@ export class GeminiInsightProvider implements InsightProvider {
                     ],
                   },
                   title: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     description: 'Tiêu đề ngắn gọn (tối đa 60 ký tự).',
                   },
                   content: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     description:
                       'Nội dung nhận định, 2-3 câu, giọng ấm áp không phán xét.',
                   },
                 },
                 required: ['type', 'title', 'content'],
               },
-              minItems: 3,
-              maxItems: 3,
             },
             recommendations: {
-              type: SchemaType.ARRAY,
+              type: Type.ARRAY,
               description:
                 'Danh sách 2-3 gợi ý hoạt động dựa trên dữ liệu cảm xúc.',
               items: {
-                type: SchemaType.OBJECT,
+                type: Type.OBJECT,
                 properties: {
                   contentType: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     format: 'enum',
                     description:
                       'Loại nội dung: BreathingExercise | AmbientSound',
                     enum: ['BreathingExercise', 'AmbientSound'],
                   },
                   contentId: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     description:
                       'ID phải lấy chính xác từ danh sách catalog được cung cấp trong prompt.',
                   },
                   reason: {
-                    type: SchemaType.STRING,
+                    type: Type.STRING,
                     description: 'Lý do gợi ý, 1 câu ngắn gọn bằng tiếng Việt.',
                   },
                   score: {
-                    type: SchemaType.NUMBER,
+                    type: Type.NUMBER,
                     description: 'Điểm phù hợp từ 0.0 đến 1.0.',
                   },
                 },
                 required: ['contentType', 'contentId', 'reason', 'score'],
               },
-              minItems: 2,
-              maxItems: 3,
             },
           },
           required: ['insights', 'recommendations'],
@@ -114,12 +101,8 @@ export class GeminiInsightProvider implements InsightProvider {
       },
     });
 
-    const prompt = this.buildPrompt(ctx);
-    const res = await model.generateContent(prompt);
-    const text = res.response.text();
+    const text = res.text ?? '';
 
-    // Với Structured Outputs, JSON đã được đảm bảo hợp lệ từ phía Gemini.
-    // Vẫn parse để lấy typed object, nhưng không cần fallback regex nữa.
     let parsed: { insights?: unknown[]; recommendations?: unknown[] };
     try {
       parsed = JSON.parse(text) as {
@@ -222,7 +205,6 @@ export class GeminiInsightProvider implements InsightProvider {
         const reason = typeof r.reason === 'string' ? r.reason : null;
         const score = typeof r.score === 'number' ? r.score : 0.5;
         if (!contentType || !contentId || !reason) return null;
-        // Xác minh lại id từ catalog dù Structured Outputs đã giảm thiểu hallucination.
         if (
           contentType === 'BreathingExercise' &&
           !validBreathingIds.has(contentId)
