@@ -41,7 +41,7 @@ dependencies:
   # State management nhẹ — đủ cho 4 màn hình, không cần Bloc/Riverpod.
   provider: ^6.1.2
   # Phát nhạc nền / podcast streaming từ URL.
-  just_audio: ^0.9.42
+  just_audio: ^0.10.5
   audio_session: ^0.1.25
   image_picker: ^1.2.2
   google_sign_in: ^6.2.1
