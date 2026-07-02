@@ -49,9 +49,7 @@ export class AiInsightsService {
       ai = new GoogleGenAI({ apiKey });
     }
 
-    this.geminiProvider = ai
-      ? new GeminiInsightProvider(ai, modelName)
-      : null;
+    this.geminiProvider = ai ? new GeminiInsightProvider(ai, modelName) : null;
     if (this.geminiProvider) {
       this.logger.log(
         `AiInsightsService: Gemini provider active (model=${modelName})`,

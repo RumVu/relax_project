@@ -371,12 +371,7 @@ export class UserCompanionsService {
 
     if (ai) {
       try {
-        const result = await this.callGemini(
-          ai,
-          companion,
-          userId,
-          message,
-        );
+        const result = await this.callGemini(ai, companion, userId, message);
         reply = result.reply;
         newMood = result.mood;
         newAction = result.action;
@@ -591,8 +586,7 @@ export class UserCompanionsService {
     currentAction: CompanionAction,
   ): { reply: string; mood: CompanionMood; action: CompanionAction } {
     const msg = message.toLowerCase().trim();
-    let reply =
-      'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
     let mood = currentMood;
     let action = currentAction;
 

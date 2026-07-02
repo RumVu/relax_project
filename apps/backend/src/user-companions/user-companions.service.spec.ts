@@ -58,9 +58,9 @@ describe('UserCompanionsService — chatWithCompanion', () => {
       companionAsset: {
         findFirst: jest.fn().mockResolvedValue(null),
       },
-      $transaction: jest.fn().mockImplementation((ops: Promise<unknown>[]) =>
-        Promise.all(ops),
-      ),
+      $transaction: jest
+        .fn()
+        .mockImplementation((ops: Promise<unknown>[]) => Promise.all(ops)),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -119,10 +119,7 @@ describe('UserCompanionsService — chatWithCompanion', () => {
   });
 
   it('should return generic fallback for unrecognized messages', async () => {
-    const result = await service.chatWithCompanion(
-      'user-1',
-      'dksjfhsdkjfhsdf',
-    );
+    const result = await service.chatWithCompanion('user-1', 'dksjfhsdkjfhsdf');
 
     expect(result.reply).toBeTruthy();
     expect(result.companion).toBeDefined();
