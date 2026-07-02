@@ -11,8 +11,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: '#171334',
-        night: '#0f1028',
+        ink: '#1a1a1a',
+        night: '#242424',
         plum: '#4b36a8',
         violet: '#7357f6',
         lilac: '#dcd6ff',
@@ -24,7 +24,7 @@ const config: Config = {
         slate: '#536071',
       },
       boxShadow: {
-        panel: '0 18px 50px rgba(23, 19, 52, 0.12)',
+        panel: '0 18px 50px rgba(0, 0, 0, 0.12)',
       },
       backgroundImage: {
         grain:

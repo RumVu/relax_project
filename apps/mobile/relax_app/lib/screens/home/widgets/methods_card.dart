@@ -11,11 +11,11 @@ class MethodsCard extends StatelessWidget {
   final String name;
 
   static const _methods = [
-    ('Thiền định', 'assets/hinh_phuong_thuc/hinh-thien.png', '/meditation'),
-    ('Hít thở', 'assets/hinh_phuong_thuc/hinh-hit-tho.png', '/breathing'),
-    ('Nhật ký', 'assets/hinh_phuong_thuc/hinh-viet-nhat-ki.png', '/journal'),
-    ('Nhạc', 'assets/hinh_phuong_thuc/hinh-nghe-nhac.png', '/sounds'),
-    ('Podcast', 'assets/hinh_phuong_thuc/hinh-podcast.png', '/podcast'),
+    ('Thiền định', 'assets/hinh_phuong_thuc/hinh-thien.png', '/meditation', Color(0xFFF0F7EE)),
+    ('Hít thở', 'assets/hinh_phuong_thuc/hinh-hit-tho.png', '/breathing', Color(0xFFE8F4F8)),
+    ('Nhật ký', 'assets/hinh_phuong_thuc/hinh-viet-nhat-ki.png', '/journal', Color(0xFFFFF8EC)),
+    ('Nhạc', 'assets/hinh_phuong_thuc/hinh-nghe-nhac.png', '/sounds', Color(0xFFF0ECFF)),
+    ('Podcast', 'assets/hinh_phuong_thuc/hinh-podcast.png', '/podcast', Color(0xFFFDE8F0)),
   ];
 
   @override
@@ -50,16 +50,15 @@ class MethodsCard extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
-                      color: context.surfaceAlt,
+                      color: m.$4,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: context.fieldBorder),
                     ),
                     child: Column(
                       children: [
                         Image.asset(
                           m.$2,
-                          width: 36,
-                          height: 36,
+                          width: 44,
+                          height: 44,
                           fit: BoxFit.contain,
                         ),
                         const SizedBox(height: 4),
@@ -68,10 +67,10 @@ class MethodsCard extends StatelessWidget {
                           textAlign: TextAlign.center,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
-                            color: context.appText,
+                            color: Color(0xFF2D2D3A),
                           ),
                         ),
                       ],

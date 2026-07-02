@@ -38,8 +38,8 @@ export default function GlobalError({
           style={{
             alignItems: 'center',
             background:
-              'linear-gradient(135deg, #101425 0%, #171c2f 52%, #201a3a 100%)',
-            color: '#eef1ff',
+              'linear-gradient(135deg, #242424 0%, #2c2c2c 52%, #363636 100%)',
+            color: '#ebebeb',
             display: 'flex',
             minHeight: '100vh',
             justifyContent: 'center',
@@ -48,8 +48,8 @@ export default function GlobalError({
         >
           <section
             style={{
-              background: 'rgba(26,31,52,0.92)',
-              border: '1px solid rgba(238,241,255,0.14)',
+              background: 'rgba(54,54,54,0.92)',
+              border: '1px solid rgba(235,235,235,0.14)',
               borderRadius: 28,
               boxShadow: '0 24px 70px rgba(0,0,0,0.28)',
               maxWidth: 560,
@@ -59,7 +59,7 @@ export default function GlobalError({
             <AlertOctagon color="#ef767a" size={36} />
             <p
               style={{
-                color: '#dcd6ff',
+                color: '#d0d0d0',
                 fontSize: 12,
                 fontWeight: 800,
                 letterSpacing: '0.2em',
@@ -72,11 +72,11 @@ export default function GlobalError({
             <h1 style={{ fontSize: 36, lineHeight: 1.05, margin: '12px 0' }}>
               {copy.title}
             </h1>
-            <p style={{ color: '#aab4c7', fontWeight: 600 }}>
+            <p style={{ color: '#a0a0a0', fontWeight: 600 }}>
               {error.message || copy.fallback}
             </p>
             {error.digest ? (
-              <p style={{ color: '#dcd6ff', fontFamily: 'monospace' }}>
+              <p style={{ color: '#d0d0d0', fontFamily: 'monospace' }}>
                 digest: {error.digest}
               </p>
             ) : null}

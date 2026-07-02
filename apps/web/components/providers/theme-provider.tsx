@@ -203,10 +203,23 @@ export function ThemeProvider() {
               : [];
           const nextMode = String(preferences.themeMode ?? 'SYSTEM').toLowerCase();
           if (nextMode === 'light' || nextMode === 'dark' || nextMode === 'system') {
-            const nextPalette = (themes.find(
-              (theme) => String(theme.id) === String(preferences.themeId),
-            ) ??
-              themes.find((theme) => Boolean(theme.isDefault)) ??
+            const resolvedMode =
+              nextMode === 'system'
+                ? window.matchMedia('(prefers-color-scheme: dark)').matches
+                  ? 'DARK'
+                  : 'LIGHT'
+                : nextMode.toUpperCase();
+            const userTheme = preferences.themeId
+              ? themes.find(
+                  (theme) => String(theme.id) === String(preferences.themeId),
+                )
+              : undefined;
+            const nextPalette = (userTheme ??
+              themes.find(
+                (theme) =>
+                  Boolean(theme.isDefault) &&
+                  String(theme.mode).toUpperCase() === resolvedMode,
+              ) ??
               null) as DashboardThemePalette | null;
             setThemeMode(nextMode);
             setThemePalette(nextPalette);

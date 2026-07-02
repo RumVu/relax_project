@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 
-/// Bảng màu khớp với web dashboard — copy từ `apps/web/tailwind.config.ts`
-/// nên app + web có cùng "tông Relax".
+/// Bảng màu khớp với web dashboard — neutral gray dark mode.
 class RelaxColors {
   static const violet = Color(0xFF7357F6);
   static const lilac = Color(0xFFDCD6FF);
   static const mint = Color(0xFF40C9A2);
   static const coral = Color(0xFFEF767A);
   static const sun = Color(0xFFF7C948);
-  static const ink = Color(0xFF14122E);
-  static const night = Color(0xFF1F1736);
+  static const ink = Color(0xFF1A1A1A);
+  static const night = Color(0xFF242424);
   static const plum = Color(0xFF4B3360);
   static const mist = Color(0xFFEEEAF6);
   static const slate = Color(0xFF94A3B8);
 
   static const bgLight = Color(0xFFF5F3FF);
 
-  // Dark-mode surfaces — navy sâu giống mockup.
-  static const bgDark = Color(0xFF0E0C1F);
-  static const surfaceDark = Color(0xFF1A1733);
-  static const surfaceDark2 = Color(0xFF221E3D);
-  static const borderDark = Color(0xFF2E2A4A);
-  static const textDark = Color(0xFFE8E4F6);
-  static const mutedDark = Color(0xFF9A93BE);
+  // Dark-mode surfaces — neutral gray tông #363636.
+  static const bgDark = Color(0xFF2C2C2C);
+  static const surfaceDark = Color(0xFF363636);
+  static const surfaceDark2 = Color(0xFF404040);
+  static const borderDark = Color(0xFF505050);
+  static const textDark = Color(0xFFEBEBEB);
+  static const mutedDark = Color(0xFF9E9E9E);
 }
 
 InputDecorationTheme _inputTheme({
@@ -92,7 +91,7 @@ ThemeData buildRelaxTheme({Color accent = RelaxColors.violet}) {
   );
 }
 
-/// Theme tối — navy sâu khớp mockup dark mode.
+/// Theme tối — neutral gray dark mode.
 ThemeData buildRelaxDarkTheme({Color accent = RelaxColors.violet}) {
   final base = ThemeData(
     useMaterial3: true,

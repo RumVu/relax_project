@@ -81,17 +81,21 @@ class LocalNotifications {
     }
 
     const androidDetails = AndroidNotificationDetails(
-      'daily_reminders_channel',
+      'daily_reminders_meow',
       'Daily Reminders',
       channelDescription: 'Gentle reminders to rest and check-in',
       importance: Importance.max,
       priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound('meow_notif'),
     );
 
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
+      presentBanner: true,
+      presentList: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'meow_notif.caf',
     );
 
     const details = NotificationDetails(
@@ -122,17 +126,21 @@ class LocalNotifications {
     final scheduledDate = tz.TZDateTime.now(tz.local).add(delay);
 
     const androidDetails = AndroidNotificationDetails(
-      'delayed_channel',
+      'delayed_meow',
       'Delayed Notifications',
       channelDescription: 'Testing delayed notifications',
       importance: Importance.max,
       priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound('meow_notif'),
     );
 
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
+      presentBanner: true,
+      presentList: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'meow_notif.caf',
     );
 
     const details = NotificationDetails(
@@ -158,16 +166,20 @@ class LocalNotifications {
     int id = 9999,
   }) async {
     const androidDetails = AndroidNotificationDetails(
-      'instant_channel',
+      'instant_meow',
       'Instant Notifications',
       channelDescription: 'Immediate notifications',
       importance: Importance.high,
       priority: Priority.high,
+      sound: RawResourceAndroidNotificationSound('meow_notif'),
     );
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
+      presentBanner: true,
+      presentList: true,
       presentBadge: true,
       presentSound: true,
+      sound: 'meow_notif.caf',
     );
     const details = NotificationDetails(
       android: androidDetails,

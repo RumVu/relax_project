@@ -7,7 +7,7 @@ html[data-theme='light'] {
   color-scheme: light;
   --app-bg-start: #faf9ff;
   --app-bg-end: #eef1f8;
-  --app-text: #171334;
+  --app-text: #1a1a1a;
   --app-muted: #536071;
   --panel-bg: rgba(255, 255, 255, 0.9);
   --panel-strong: #ffffff;
@@ -25,19 +25,19 @@ html[data-theme='light'] {
 
 html[data-theme='dark'] {
   color-scheme: dark;
-  --app-bg-start: #101425;
-  --app-bg-end: #171c2f;
-  --app-text: #eef1ff;
-  --app-muted: #aab4c7;
-  --panel-bg: rgba(26, 31, 52, 0.86);
-  --panel-strong: #202642;
-  --panel-border: rgba(238, 241, 255, 0.12);
-  --field-bg: #151a2d;
-  --field-border: rgba(180, 166, 255, 0.32);
+  --app-bg-start: #242424;
+  --app-bg-end: #2c2c2c;
+  --app-text: #ebebeb;
+  --app-muted: #a0a0a0;
+  --panel-bg: rgba(54, 54, 54, 0.86);
+  --panel-strong: #363636;
+  --panel-border: rgba(235, 235, 235, 0.12);
+  --field-bg: #2e2e2e;
+  --field-border: rgba(200, 200, 200, 0.25);
   --hero-bg:
-    radial-gradient(circle at top left, rgba(115, 87, 246, 0.2), transparent 32%),
-    radial-gradient(circle at top right, rgba(64, 201, 162, 0.13), transparent 28%),
-    rgba(26, 31, 52, 0.82);
+    radial-gradient(circle at top left, rgba(115, 87, 246, 0.15), transparent 32%),
+    radial-gradient(circle at top right, rgba(64, 201, 162, 0.10), transparent 28%),
+    rgba(54, 54, 54, 0.82);
   --brand-primary: #8574ff;
   --brand-secondary: #40c9a2;
   --brand-accent: #ff9b8a;
@@ -163,8 +163,8 @@ a:focus-visible {
 /* Slightly softer panel border on dark theme — looks less harsh against
  * the deep navy background. */
 html[data-theme='dark'] {
-  --panel-border: rgba(238, 241, 255, 0.08);
-  --field-border: rgba(180, 166, 255, 0.22);
+  --panel-border: rgba(235, 235, 235, 0.08);
+  --field-border: rgba(200, 200, 200, 0.18);
 }
 
 /* Subtle backdrop tint behind any modal/overlay using bg-ink/55 */
