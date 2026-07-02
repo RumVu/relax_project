@@ -106,15 +106,17 @@ class ActivityCard extends StatelessWidget {
               height: 54,
               width: 54,
               decoration: BoxDecoration(
-                color: isRunning
-                    ? RelaxColors.mint.withValues(alpha: 0.12)
-                    : RelaxColors.violet.withValues(alpha: 0.12),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                activity.icon,
-                color: isRunning ? RelaxColors.mint : RelaxColors.violet,
-                size: 26,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  activity.image,
+                  width: 42,
+                  height: 42,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
             const SizedBox(width: 14),

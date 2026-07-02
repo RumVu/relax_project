@@ -32,46 +32,57 @@ class SpeechBubble extends StatelessWidget {
             'Stress quá mới tìm đến toi hở? {name} nói cho toi nghe đi nè!',
             {'name': name},
           );
-    return Container(
-      key: TourController.instance.targetKeys[2],
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: context.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: context.fieldBorder),
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: () => context.push('/companion'),
+      child: Stack(
+        clipBehavior: Clip.none,
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            key: TourController.instance.targetKeys[2],
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
             decoration: BoxDecoration(
-              color: RelaxColors.violet
-                  .withValues(alpha: context.isDark ? 0.16 : 0.08),
-              borderRadius: BorderRadius.circular(16),
+              color: context.surface,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: context.fieldBorder),
             ),
-            child: Text(
-              line,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: context.appText,
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-              ),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: RelaxColors.violet
+                        .withValues(alpha: context.isDark ? 0.16 : 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    line,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: context.appText,
+                      fontWeight: FontWeight.w600,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const CatMascot(size: 80, variant: CatVariant.stand, glow: false),
+                const SizedBox(height: 8),
+                Text(
+                  context.t('Chạm vào để thăm {name} ✦', {'name': companionName}),
+                  style: TextStyle(
+                    color: context.mutedText,
+                    fontSize: 11,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 14),
-          GestureDetector(
-            onTap: () => context.push('/companion'),
-            child: const CatMascot(size: 130, emoji: '😺'),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            context.t('Chạm vào để thăm {name} ✦', {'name': companionName}),
-            style: TextStyle(
-              color: context.mutedText,
-              fontSize: 11,
-              fontStyle: FontStyle.italic,
-            ),
+          Positioned(
+            right: 10,
+            bottom: -28,
+            child: CatMascot(size: 64, variant: CatVariant.sleep, glow: false),
           ),
         ],
       ),

@@ -31,6 +31,7 @@ import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
@@ -70,6 +71,9 @@ export default function DashboardPage() {
   return (
     <DashboardShell eyebrow={t('dashboard.eyebrow')} title={title}>
       <CozyQuoteCard currentMood={data.overview.mood.currentMood} />
+      <div className="flex justify-center lg:hidden">
+        <CatMascot variant="sleep" size="lg" />
+      </div>
       <DashboardFilterBar {...overviewFilters} title={t('dashboard.filters.title')} />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -139,19 +143,8 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
-            <div className="flex items-end justify-center rounded-lg border border-white/10 bg-[linear-gradient(180deg,rgba(115,87,246,0.22),rgba(64,201,162,0.08))] p-4">
-              <div className="relative h-56 w-56">
-                <div className="absolute left-8 top-8 h-16 w-16 rotate-[-18deg] rounded-lg bg-[#b88b6a]" />
-                <div className="absolute right-8 top-8 h-16 w-16 rotate-[18deg] rounded-lg bg-[#b88b6a]" />
-                <div className="absolute inset-x-6 bottom-7 h-36 rounded-[42%] border-4 border-[#4b3428] bg-[#caa083]" />
-                <div className="absolute left-12 top-24 h-12 w-12 rounded-full bg-[#fff4dd]" />
-                <div className="absolute right-12 top-24 h-12 w-12 rounded-full bg-[#fff4dd]" />
-                <div className="absolute left-[74px] top-[124px] h-5 w-5 rounded-full bg-ink" />
-                <div className="absolute right-[74px] top-[124px] h-5 w-5 rounded-full bg-ink" />
-                <div className="absolute bottom-0 left-14 h-16 w-28 rounded-lg bg-violet shadow-panel" />
-                <Sparkles className="absolute right-4 top-6 h-6 w-6 text-sun" />
-                <Sparkles className="absolute bottom-16 left-2 h-5 w-5 text-mint" />
-              </div>
+            <div className="flex items-center justify-center rounded-lg border border-white/10 bg-[linear-gradient(180deg,rgba(115,87,246,0.22),rgba(64,201,162,0.08))] p-4">
+              <CatMascot variant="stand" size="lg" className="h-44 w-44" />
             </div>
           </div>
         </Card>
@@ -171,6 +164,9 @@ export default function DashboardPage() {
           <div className="mt-5">
             <ProgressList items={safeDistribution} />
           </div>
+          <div className="mt-4 flex justify-end">
+            <CatMascot variant="sleep" size="sm" className="opacity-60" />
+          </div>
         </Card>
       </div>
 
@@ -180,14 +176,27 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <div data-tour="quests">
+        <div data-tour="quests" className="relative">
           <QuestPanel />
+          <div className="absolute -right-2 -top-2 hidden xl:block">
+            <CatMascot variant="right" size="sm" className="opacity-70" />
+          </div>
         </div>
-        <MoodGoalsPanel />
+        <div className="relative">
+          <MoodGoalsPanel />
+          <div className="absolute -right-2 -top-2 hidden xl:block">
+            <CatMascot variant="right" size="sm" className="opacity-70" />
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-2">
-        <MoodForecastPanel />
+        <div className="relative">
+          <MoodForecastPanel />
+          <div className="absolute -right-2 -top-2 hidden xl:block">
+            <CatMascot variant="sleep" size="sm" className="opacity-60" />
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(360px,0.8fr)_minmax(0,1.2fr)]" data-tour="recent-moments">
@@ -213,10 +222,18 @@ export default function DashboardPage() {
               ])}
             />
           </div>
+          <div className="mt-4 flex justify-end">
+            <CatMascot variant="sleep" size="sm" className="opacity-60" />
+          </div>
         </Card>
       </div>
 
-      <DistributionChart data={safeDistribution} />
+      <div className="relative">
+        <DistributionChart data={safeDistribution} />
+        <div className="absolute bottom-4 right-4">
+          <CatMascot variant="sleep" size="md" className="opacity-50" />
+        </div>
+      </div>
       </div>
       </PremiumGate>
     </DashboardShell>

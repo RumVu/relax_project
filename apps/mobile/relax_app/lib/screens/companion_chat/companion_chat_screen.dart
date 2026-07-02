@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/chat_bubble.dart';
 
@@ -183,11 +184,16 @@ class _CompanionChatScreenState extends State<CompanionChatScreen> {
                         )
                       : _messages.isEmpty
                           ? Center(
-                              child: Text(
-                                context.t(
-                                    'Hãy gửi lời chào đầu tiên tới linh thú nhé!'),
-                                style: TextStyle(
-                                    color: context.mutedText, fontSize: 13),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const CatMascot(size: 90, variant: CatVariant.stand),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    context.t('Hãy gửi lời chào đầu tiên tới linh thú nhé!'),
+                                    style: TextStyle(color: context.mutedText, fontSize: 13),
+                                  ),
+                                ],
                               ),
                             )
                           : ListView.builder(

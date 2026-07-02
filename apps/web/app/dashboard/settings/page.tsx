@@ -7,6 +7,7 @@ import {
   MapPin,
   UserRound,
 } from 'lucide-react';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { MetricCard } from '@/components/dashboard/dashboard-ui';
 import { PermissionsPanel } from '@/components/dashboard/permissions-panel';
@@ -407,6 +408,9 @@ export default function SettingsPage() {
             copy={copy}
             settings={settings}
           />
+          <div className="flex justify-center py-2">
+            <CatMascot variant="stand" size="md" className="opacity-60" />
+          </div>
         </div>
       </DashboardShell>
     </>

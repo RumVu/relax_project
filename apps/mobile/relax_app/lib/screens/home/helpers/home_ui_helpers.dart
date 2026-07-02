@@ -32,6 +32,34 @@ String moodEmoji(String mood) {
   }
 }
 
+const _moodImageMap = <String, String>{
+  'HAPPY': 'hinh-vui',
+  'SAD': 'hinh-buon',
+  'STRESSED': 'hinh-stress',
+  'TIRED': 'hinh-chan',
+  'ANXIOUS': 'hinh-lo',
+  'NEUTRAL': 'hinh-on',
+  'CALM': 'hinh-yen',
+  'EXCITED': 'hinh-hung',
+  'LONELY': 'hinh-co-don',
+  'GRATEFUL': 'hinh-biet-on',
+  'POOPING': 'hinh-mac-ia',
+};
+
+const _afterName = <String, String>{
+  'POOPING': 'hinh-mac-ia',
+};
+
+String moodImageBefore(String mood) {
+  final base = _moodImageMap[mood] ?? 'hinh-vui';
+  return 'assets/hinh_fill_cam_xuc_truoc/$base-truoc.png';
+}
+
+String moodImageAfter(String mood) {
+  final base = _afterName[mood] ?? '${_moodImageMap[mood] ?? 'hinh-vui'}-sau';
+  return 'assets/hinh_fill_cam_xuc_sau/$base.png';
+}
+
 // Mood color mapping for tracking bars.
 Color moodColor(String mood) {
   switch (mood) {

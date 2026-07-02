@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../../core/locale_controller.dart';
 import '../../../core/theme.dart';
+import '../../home/helpers/home_ui_helpers.dart';
 import '../models/relax_activity.dart';
 
 class PreActivitySheet extends StatelessWidget {
@@ -16,12 +17,12 @@ class PreActivitySheet extends StatelessWidget {
   final ValueChanged<String> onConfirmed;
 
   static const _moods = [
-    {'mood': 'HAPPY', 'label': 'Vui', 'emoji': '😺'},
-    {'mood': 'SAD', 'label': 'Buồn', 'emoji': '😿'},
-    {'mood': 'STRESSED', 'label': 'Stress', 'emoji': '🙀'},
-    {'mood': 'TIRED', 'label': 'Chán', 'emoji': '😾'},
-    {'mood': 'ANXIOUS', 'label': 'Lo', 'emoji': '😼'},
-    {'mood': 'NEUTRAL', 'label': 'Ổn', 'emoji': '😐'},
+    {'mood': 'HAPPY', 'label': 'Vui'},
+    {'mood': 'SAD', 'label': 'Buồn'},
+    {'mood': 'STRESSED', 'label': 'Stress'},
+    {'mood': 'TIRED', 'label': 'Chán'},
+    {'mood': 'ANXIOUS', 'label': 'Lo'},
+    {'mood': 'NEUTRAL', 'label': 'Ổn'},
   ];
 
   @override
@@ -69,7 +70,6 @@ class PreActivitySheet extends StatelessWidget {
             children: _moods.map((m) {
               final mood = m['mood']!;
               final label = context.t(m['label']!);
-              final emoji = m['emoji']!;
               return GestureDetector(
                 onTap: () {
                   HapticFeedback.lightImpact();
@@ -84,7 +84,21 @@ class PreActivitySheet extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(emoji, style: const TextStyle(fontSize: 30)),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.all(2),
+                        child: Image.asset(
+                          moodImageBefore(mood),
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                       const SizedBox(height: 6),
                       Text(
                         label,

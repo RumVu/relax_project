@@ -22,6 +22,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   MetricCard,
@@ -446,6 +447,9 @@ export default function WeatherPage() {
       </Card>
       </div>
       </PremiumGate>
+      <div className="flex justify-center py-2">
+        <CatMascot variant="stand" size="md" className="opacity-60" />
+      </div>
     </DashboardShell>
   );
 }

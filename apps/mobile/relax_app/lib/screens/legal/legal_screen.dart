@@ -125,7 +125,7 @@ class LegalScreen extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const CatMascot(size: 72, emoji: '😻', glow: false),
+                  const CatMascot(size: 72, variant: CatVariant.stand, glow: false),
                   const SizedBox(height: 12),
                   Text(
                     context.t(

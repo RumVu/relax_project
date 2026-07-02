@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/wake_up_dialog.dart';
 
@@ -120,7 +121,9 @@ class _SleepScreenState extends State<SleepScreen> {
                   color: _isSleeping ? Colors.indigo[200] : Colors.amber[200],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
+              const CatMascot(size: 80, variant: CatVariant.sleep, opacity: 0.85),
+              const SizedBox(height: 20),
               Text(
                 _isSleeping ? context.t('Chúc ngủ ngon...') : context.t('Đã đến lúc nghỉ ngơi rồi'),
                 style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),

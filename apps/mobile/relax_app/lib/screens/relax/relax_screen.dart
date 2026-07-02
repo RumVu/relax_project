@@ -82,7 +82,7 @@ class _RelaxScreenState extends State<RelaxScreen> {
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16),
-            child: CatMascot(size: 44, emoji: '🐈', glow: false),
+            child: CatMascot(size: 44, variant: CatVariant.stand, glow: false),
           ),
         ],
       ),

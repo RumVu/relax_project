@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { AuthForm } from '@/components/auth/auth-form';
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { Card } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
@@ -35,6 +36,9 @@ export default function RegisterPage() {
             {t('auth.signIn')}
           </Link>
         </p>
+        <div className="mt-4 flex justify-center">
+          <CatMascot variant="stand" size="lg" className="opacity-80" />
+        </div>
       </Card>
     </main>
   );

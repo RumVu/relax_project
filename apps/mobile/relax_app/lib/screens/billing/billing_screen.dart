@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'helpers/billing_formatters.dart';
 import 'helpers/payment_confirmation.dart';
@@ -237,8 +238,9 @@ class _BillingScreenState extends State<BillingScreen> {
                         subscription: _subscription,
                         tierName: (tier) => tierDisplayName(context, tier),
                       ),
-                      const SizedBox(height: 28),
-                      // Available plans
+                      const SizedBox(height: 16),
+                      const Center(child: CatMascot(size: 60, variant: CatVariant.right, glow: false)),
+                      const SizedBox(height: 16),
                       Text(
                         context.t('CHỌN GÓI'),
                         style: const TextStyle(

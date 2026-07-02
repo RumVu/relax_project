@@ -32,6 +32,7 @@ import {
   X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { useUiStore } from '@/stores/use-ui-store';
 
@@ -518,10 +519,13 @@ function TourCard({
       </div>
 
       <div className="mt-5 flex flex-wrap justify-between gap-2">
-        <Button disabled={isFirst} onClick={onPrev} variant="ghost">
-          {t('onboarding.action.back')}
-        </Button>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-1">
+          <CatMascot variant="left" size="sm" />
+          <Button disabled={isFirst} onClick={onPrev} variant="ghost">
+            {t('onboarding.action.back')}
+          </Button>
+        </div>
+        <div className="flex items-center gap-1">
           <Button onClick={onClose} variant="ghost">
             {t('onboarding.action.skip')}
           </Button>
@@ -531,7 +535,10 @@ function TourCard({
               {t('onboarding.action.done')}
             </Button>
           ) : (
-            <Button onClick={onNext}>{t('onboarding.action.next')}</Button>
+            <>
+              <Button onClick={onNext}>{t('onboarding.action.next')}</Button>
+              <CatMascot variant="right" size="sm" />
+            </>
           )}
         </div>
       </div>

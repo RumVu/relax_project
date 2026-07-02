@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { CheckCircle2, XCircle, Loader2, ArrowLeft, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 
 type PaymentStatus = 'success' | 'error' | 'cancel' | 'loading' | null;
 
@@ -111,6 +112,10 @@ function BillingStatus() {
               </Link>
             )}
           </div>
+        </div>
+
+        <div className="mt-4 flex justify-center">
+          <CatMascot variant="right" size="md" className="opacity-70" />
         </div>
 
         {/* Footer note */}

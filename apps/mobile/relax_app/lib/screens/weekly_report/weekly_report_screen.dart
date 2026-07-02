@@ -6,6 +6,7 @@ import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../core/pdf_wellness_report.dart';
 import '../../widgets/premium_blur.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 
 /// Weekly wellness report — summary tuần: mood trend, activities, streak.
@@ -114,7 +115,9 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
                 children: [
                   // Session summary.
                   _SummaryCard(stats: _sessionStats),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+                  const Center(child: CatMascot(size: 60, variant: CatVariant.sleep, glow: false, opacity: 0.7)),
+                  const SizedBox(height: 12),
                   PremiumBlur(
                     child: Column(
                       children: [

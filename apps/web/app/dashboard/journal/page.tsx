@@ -11,6 +11,7 @@ import {
   Star,
   Trash2,
 } from 'lucide-react';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   MetricCard,
@@ -393,6 +394,9 @@ export default function JournalPage() {
         </Card>
 
         <QuestPanel />
+      </div>
+      <div className="flex justify-center py-2">
+        <CatMascot variant="stand" size="md" className="opacity-60" />
       </div>
     </DashboardShell>
   );

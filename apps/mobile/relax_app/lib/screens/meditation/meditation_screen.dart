@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/active_session_view.dart';
 import 'widgets/guide_card.dart';
@@ -183,10 +184,16 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   )
                 : _guides.isEmpty
                     ? Center(
-                        child: Text(
-                          context.t('Không có bài thiền nào khả dụng.'),
-                          style: TextStyle(
-                              color: context.mutedText, fontSize: 13),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CatMascot(size: 80, variant: CatVariant.sleep),
+                            const SizedBox(height: 12),
+                            Text(
+                              context.t('Không có bài thiền nào khả dụng.'),
+                              style: TextStyle(color: context.mutedText, fontSize: 13),
+                            ),
+                          ],
                         ),
                       )
                     : ListView.builder(

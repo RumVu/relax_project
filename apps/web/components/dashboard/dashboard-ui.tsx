@@ -33,6 +33,7 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { useMounted } from '@/hooks/use-mounted';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
@@ -551,9 +552,7 @@ export function CompanionStatusCard({
             Mood: {companion.mood} • Action: {companion.action}
           </p>
         </div>
-        <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-violet">
-          <Sparkles className="h-7 w-7" />
-        </div>
+        <CatMascot variant="stand" size="md" className="rounded-lg" />
       </div>
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <DarkProgress label="Affection" value={companion.affection} />
@@ -584,7 +583,10 @@ export function WeatherCard({
           <h3 className="mt-4 text-xl font-extrabold text-ink">{weather.greeting.title}</h3>
           <p className="mt-1 text-sm text-slate">{weather.greeting.subtitle}</p>
         </div>
-        <p className="text-4xl font-extrabold text-violet">{weather.current.temperature}°</p>
+        <div className="flex items-start gap-3">
+          <p className="text-4xl font-extrabold text-violet">{weather.current.temperature}°</p>
+          <CatMascot variant="stand" size="sm" className="opacity-70" />
+        </div>
       </div>
       <div className="mt-5 grid grid-cols-7 gap-2">
         {weather.forecast.map((day) => (

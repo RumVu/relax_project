@@ -187,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const BurnoutSignalWidget(),
               const SizedBox(height: 16),
               SpeechBubble(quote: _quote, name: name),
-              const SizedBox(height: 20),
+              const SizedBox(height: 40),
               // ===== Nút "Calm Now" + "I Need a Break" — nổi bật nhất trên Home =====
               _CalmNowButton(),
               const SizedBox(height: 10),

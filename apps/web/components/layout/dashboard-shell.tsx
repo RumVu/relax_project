@@ -31,6 +31,7 @@ import { apiFetch, getStoredRole } from '@/lib/api';
 import { requestNotificationPermission } from '@/lib/permissions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { RealtimeStatusBadge } from '@/components/dashboard/dashboard-ui';
 import { AccountMenu } from '@/components/dashboard/account-menu';
 import { OnboardingTour } from '@/components/dashboard/onboarding-tour';
@@ -134,6 +135,7 @@ export function DashboardShell({
     id: string;
     title: string;
     time: string;
+    type?: string;
   } | null>(null);
   const lastRealtimeRefreshRef = useRef(0);
 
@@ -212,6 +214,7 @@ export function DashboardShell({
           id: String(firstReminder.id ?? 'reminder'),
           title: String(firstReminder.title ?? 'Reminder'),
           time: formatReminderTime(scheduledAt, locale),
+          type: String(firstReminder.type ?? ''),
         });
       }
     } catch {
@@ -341,7 +344,11 @@ export function DashboardShell({
               type="button"
             >
               <div className="flex items-center gap-2 text-sm font-semibold">
-                <Moon className="h-4 w-4 text-lilac" />
+                {nextReminder?.type === 'SLEEP' ? (
+                  <CatMascot variant="sleep" size="sm" />
+                ) : (
+                  <Moon className="h-4 w-4 text-lilac" />
+                )}
                 {nextReminder?.time ?? '21:00'}
               </div>
               <p className="mt-1 text-xs text-mist/60">

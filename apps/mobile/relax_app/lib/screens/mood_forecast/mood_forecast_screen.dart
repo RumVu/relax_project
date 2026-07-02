@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/premium_blur.dart';
 
 class MoodForecastScreen extends StatefulWidget {
@@ -81,6 +82,8 @@ class _MoodForecastScreenState extends State<MoodForecastScreen> {
                       _buildTriggerWarnings(context),
                       const SizedBox(height: 16),
                     ],
+                    const Center(child: CatMascot(size: 56, variant: CatVariant.sleep, glow: false, opacity: 0.7)),
+                    const SizedBox(height: 12),
                     Text(
                       context.t('Chi tiết 7 ngày tới'),
                       style: TextStyle(

@@ -80,7 +80,7 @@ class SettingsScreen extends StatelessWidget {
                       style: TextStyle(color: context.mutedText, fontSize: 13),
                     ),
                   ),
-                  const CatMascot(size: 56, emoji: '😺', glow: false),
+                  const CatMascot(size: 56, variant: CatVariant.stand, glow: false),
                 ],
               ),
               const SizedBox(height: 16),

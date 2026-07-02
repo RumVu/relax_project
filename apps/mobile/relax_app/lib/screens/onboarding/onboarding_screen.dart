@@ -68,7 +68,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CatMascot(size: 180, emoji: s.emoji),
+                        CatMascot(size: 180, variant: s.variant),
                         const SizedBox(height: 40),
                         Text(
                           context.t(s.title),

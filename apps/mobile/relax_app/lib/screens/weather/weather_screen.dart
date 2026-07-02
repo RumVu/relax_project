@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/premium_blur.dart';
 import '../../widgets/weather_chart/weather_chart.dart';
 import 'widgets/forecast_day_card.dart';
@@ -111,56 +112,65 @@ class _WeatherScreenState extends State<WeatherScreen> {
                         ),
                       ),
                     // Current hero
-                    Container(
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [RelaxColors.violet, RelaxColors.plum],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (locName != null)
-                            Row(
-                              children: [
-                                const Icon(Icons.location_on,
-                                    color: Colors.white70, size: 16),
-                                const SizedBox(width: 4),
-                                Expanded(
-                                  child: Text(
-                                    locName,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w600,
+                    Stack(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(22),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [RelaxColors.violet, RelaxColors.plum],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (locName != null)
+                                Row(
+                                  children: [
+                                    const Icon(Icons.location_on,
+                                        color: Colors.white70, size: 16),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        locName,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
                                     ),
+                                  ],
+                                ),
+                              const SizedBox(height: 12),
+                              Text(
+                                temp != null ? '$temp°' : '—',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 56,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                              if (feels != null)
+                                Text(
+                                  context.t('Cảm giác như {temp}°',
+                                      {'temp': '$feels'}),
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.8),
                                   ),
                                 ),
-                              ],
-                            ),
-                          const SizedBox(height: 12),
-                          Text(
-                            temp != null ? '$temp°' : '—',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 56,
-                              fontWeight: FontWeight.w800,
-                            ),
+                            ],
                           ),
-                          if (feels != null)
-                            Text(
-                              context.t('Cảm giác như {temp}°',
-                                  {'temp': '$feels'}),
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.8),
-                              ),
-                            ),
-                        ],
-                      ),
+                        ),
+                        const Positioned(
+                          right: 10,
+                          bottom: 10,
+                          child: CatMascot(size: 52, variant: CatVariant.stand, glow: false, opacity: 0.9),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                     Row(

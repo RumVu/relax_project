@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../core/vault_lock.dart';
 import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'package:go_router/go_router.dart';
 import 'widgets/journal_composer.dart';
@@ -234,7 +235,9 @@ class _JournalScreenState extends State<JournalScreen> {
               context.t('Viết vài dòng để sau này nhìn lại.'),
               style: const TextStyle(color: RelaxColors.slate),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            const Center(child: CatMascot(size: 60, variant: CatVariant.stand, glow: false)),
+            const SizedBox(height: 12),
             JournalComposer(
               titleController: _titleCtrl,
               bodyController: _bodyCtrl,

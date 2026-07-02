@@ -4,6 +4,7 @@ import '../../core/locale_controller.dart';
 import '../../core/api_client.dart';
 import '../../core/theme.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/mood_grid.dart';
 import 'widgets/intensity_slider.dart';
@@ -139,9 +140,16 @@ class _MoodScreenState extends State<MoodScreen> {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            Text(
-              context.t('Hôm nay bạn thấy thế nào?'),
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.appText),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    context.t('Hôm nay bạn thấy thế nào?'),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: context.appText),
+                  ),
+                ),
+                const CatMascot(size: 48, variant: CatVariant.stand, glow: false),
+              ],
             ),
             const SizedBox(height: 4),
             Text(

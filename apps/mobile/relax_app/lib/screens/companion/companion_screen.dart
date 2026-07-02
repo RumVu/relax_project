@@ -7,8 +7,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/api_client.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
-import 'helpers/companion_helpers.dart';
 import 'widgets/action_button.dart';
 import 'widgets/companion_error_box.dart';
 import 'widgets/custom_assets_grid.dart';
@@ -266,10 +266,6 @@ class _CompanionScreenState extends State<CompanionScreen>
     final affection = (_companion?['affection'] as num?)?.toInt() ?? 0;
     final energy = (_companion?['energy'] as num?)?.toInt() ?? 0;
     final mood = (_companion?['mood'] as String?) ?? 'CHILL';
-    final companionType = (_companion?['type'] as String?) ?? 'CAT';
-
-    final asset = _companion?['asset'] as Map?;
-    final previewUrl = asset?['previewImageUrl'] as String?;
     final currentMode = (_companion?['personalizationMode'] as String?) ?? 'DEFAULT';
     final currentAssetId = _companion?['assetId'] as String?;
 
@@ -313,40 +309,7 @@ class _CompanionScreenState extends State<CompanionScreen>
                             children: [
                               ScaleTransition(
                                 scale: _bounce,
-                                child: Container(
-                                  height: 120,
-                                  width: 120,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: previewUrl != null && previewUrl.isNotEmpty
-                                      ? ClipOval(
-                                          child: Image.network(
-                                            previewUrl,
-                                            height: 110,
-                                            width: 110,
-                                            fit: BoxFit.contain,
-                                            errorBuilder: (ctx, err, stack) => Text(
-                                              fallbackEmoji(
-                                                companionType,
-                                                assetKey: asset?['key'] as String?,
-                                                chineseZodiac: asset?['chineseZodiac'] as String?,
-                                              ),
-                                              style: const TextStyle(fontSize: 56),
-                                            ),
-                                          ),
-                                        )
-                                      : Text(
-                                          fallbackEmoji(
-                                            companionType,
-                                            assetKey: asset?['key'] as String?,
-                                            chineseZodiac: asset?['chineseZodiac'] as String?,
-                                          ),
-                                          style: const TextStyle(fontSize: 56),
-                                        ),
-                                ),
+                                child: const CatMascot(variant: CatVariant.stand, size: 120),
                               ),
                               const SizedBox(height: 16),
                               Row(
@@ -482,29 +445,70 @@ class _CompanionScreenState extends State<CompanionScreen>
                           style: TextStyle(color: context.mutedText, fontSize: 12),
                         ),
                         const SizedBox(height: 16),
-                        PersonalizationModes(
-                          currentMode: currentMode,
-                          busy: _busy,
-                          customAssets: _customAssets,
-                          onChangeMode: _changePersonalizationMode,
+                        Container(
+                          decoration: BoxDecoration(
+                            color: context.surface,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: context.fieldBorder),
+                          ),
+                          child: Column(
+                            children: [
+                              Opacity(
+                                opacity: 0.45,
+                                child: AbsorbPointer(
+                                  child: Column(
+                                    children: [
+                                      PersonalizationModes(
+                                        currentMode: currentMode,
+                                        busy: _busy,
+                                        customAssets: _customAssets,
+                                        onChangeMode: _changePersonalizationMode,
+                                      ),
+                                      if (currentMode == 'CUSTOM' && _customAssets.isNotEmpty) ...[
+                                        const SizedBox(height: 24),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                                          child: Text(
+                                            context.t('Kho linh thú tự chọn'),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w800,
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 12),
+                                        CustomAssetsGrid(
+                                          customAssets: _customAssets,
+                                          currentAssetId: currentAssetId,
+                                          busy: _busy,
+                                          onSelectAsset: (id) => _changePersonalizationMode('CUSTOM', assetId: id),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: RelaxColors.violet.withValues(alpha: 0.08),
+                                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(15)),
+                                ),
+                                child: Text(
+                                  context.t('Coming soon .... meow~ 🐾'),
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: RelaxColors.violet,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        if (currentMode == 'CUSTOM' && _customAssets.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          Text(
-                            context.t('Kho linh thú tự chọn'),
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          CustomAssetsGrid(
-                            customAssets: _customAssets,
-                            currentAssetId: currentAssetId,
-                            busy: _busy,
-                            onSelectAsset: (id) => _changePersonalizationMode('CUSTOM', assetId: id),
-                          ),
-                        ],
                       ],
                     ),
                   ),

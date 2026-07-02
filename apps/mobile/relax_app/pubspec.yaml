@@ -96,6 +96,11 @@ flutter:
   assets:
     - assets/lang/
     - assets/fonts/
+    - assets/mascot/
+    - assets/hinh_fill_cam_xuc_truoc/
+    - assets/hinh_fill_cam_xuc_sau/
+    - assets/hinh_phuong_thuc/
+    - assets/hinh_trang_thu_gian/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

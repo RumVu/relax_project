@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'widgets/register_form.dart';
 
@@ -82,7 +83,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 480),
-              child: RegisterForm(
+              child: Column(
+                children: [
+                  const CatMascot(size: 80, variant: CatVariant.stand, glow: false),
+                  const SizedBox(height: 20),
+                  RegisterForm(
                 formKey: _formKey,
                 nameCtrl: _nameCtrl,
                 emailCtrl: _emailCtrl,
@@ -93,6 +98,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onTogglePassword: () =>
                     setState(() => _hidePassword = !_hidePassword),
                 onSubmit: _submit,
+              ),
+                ],
               ),
             ),
           ),

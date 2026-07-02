@@ -123,7 +123,7 @@ class _CheckInSheetState extends State<CheckInSheet> {
               ],
             ),
             const SizedBox(height: 4),
-            const CatMascot(size: 80, emoji: '😺', glow: false),
+            const CatMascot(size: 80, variant: CatVariant.stand, glow: false),
             const SizedBox(height: 12),
             Text(
               context.t('Hoạt động vừa rồi giúp bạn thế nào?'),

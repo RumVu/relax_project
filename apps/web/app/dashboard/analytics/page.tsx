@@ -1,6 +1,7 @@
 'use client';
 
 import { BarChart3, Brain, Gauge, RefreshCcw, TrendingDown, Trophy } from 'lucide-react';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   DataTable,
@@ -128,6 +129,9 @@ export default function AnalyticsPage() {
           </div>
         </Card>
       </div>
+        <div className="flex justify-center py-4">
+          <CatMascot variant="sleep" size="lg" className="opacity-60" />
+        </div>
         </div>
       </PremiumGate>
     </DashboardShell>

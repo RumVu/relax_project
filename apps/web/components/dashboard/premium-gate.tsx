@@ -17,6 +17,7 @@
 import { useRouter } from 'next/navigation';
 import { Lock, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 // Anything that includes "CHILL_PLUS" or "PREMIUM" counts as paid. We match
@@ -78,24 +79,26 @@ export function PremiumGate({
           <p className="mt-2 text-sm leading-relaxed text-[var(--app-text)] opacity-85">
             {body ?? t('premium.body')}
           </p>
-          <Button
-            className="mt-5"
-            onClick={() => {
-              if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard/settings')) {
-                const el = document.getElementById('billing');
-                if (el) {
-                  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          <div className="mt-5 flex items-center justify-center gap-3">
+            <Button
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.location.pathname.startsWith('/dashboard/settings')) {
+                  const el = document.getElementById('billing');
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  } else {
+                    router.push('/dashboard/settings#billing');
+                  }
                 } else {
                   router.push('/dashboard/settings#billing');
                 }
-              } else {
-                router.push('/dashboard/settings#billing');
-              }
-            }}
-          >
-            <Sparkles className="h-4 w-4" />
-            {t('premium.cta')}
-          </Button>
+              }}
+            >
+              <Sparkles className="h-4 w-4" />
+              {t('premium.cta')}
+            </Button>
+            <CatMascot variant="right" size="sm" />
+          </div>
         </div>
       </div>
     </div>

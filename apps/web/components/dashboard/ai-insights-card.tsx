@@ -18,6 +18,7 @@ import { apiFetch } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 import { useUiStore } from '@/stores/use-ui-store';
@@ -237,6 +238,9 @@ export function AiInsightsCard() {
             ))}
           </div>
         ) : null}
+        <div className="mt-4 flex justify-end">
+          <CatMascot variant="sleep" size="sm" className="opacity-60" />
+        </div>
       </div>
     </Card>
   );

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle2, Pause, Play, Volume2, Wind } from 'lucide-react';
 import { activityIcons, formatTrackDuration } from './breaks-utils';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   DataTable,
@@ -512,6 +513,9 @@ export default function BreaksPage() {
           />
         </div>
       </Card>
+      <div className="flex justify-center py-2">
+        <CatMascot variant="right" size="md" className="opacity-60" />
+      </div>
     </DashboardShell>
   );
 }

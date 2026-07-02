@@ -6,6 +6,7 @@ import '../../core/api_client.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'helpers/google_auth.dart';
 
@@ -124,6 +125,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         size: 44,
                       ),
                     ),
+                    const SizedBox(height: 16),
+                    const Center(child: CatMascot(size: 80, variant: CatVariant.stand, glow: false)),
+                    const SizedBox(height: 12),
                     Center(
                       child: Text(
                         context.t('Chào mừng tới Relax'),

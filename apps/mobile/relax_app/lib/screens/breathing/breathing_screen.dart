@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/checkin_sheet/checkin_sheet.dart';
 import '../../widgets/journey_prompt/journey_prompt.dart';
 import 'models/breathing_pattern.dart';
@@ -245,7 +246,9 @@ class _BreathingScreenState extends State<BreathingScreen>
                 style: const TextStyle(color: RelaxColors.slate),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            const Center(child: CatMascot(size: 56, variant: CatVariant.sleep, glow: false, opacity: 0.7)),
+            const SizedBox(height: 12),
             PatternPicker(
               selectedIndex: _patternIdx,
               onSelect: (i) {

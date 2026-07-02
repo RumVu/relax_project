@@ -13,6 +13,7 @@ import {
   Trash2,
   Zap,
 } from 'lucide-react';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   DataTable,
@@ -160,11 +161,14 @@ export default function MoodPage() {
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
         <Card>
-          <SectionTitle
-            title={editingId ? t('mood.checkin.editHeading') : t('mood.checkin.heading')}
-            copy={t('mood.checkin.copy')}
-            action={<Plus className="h-5 w-5 text-violet" />}
-          />
+          <div className="flex items-start justify-between">
+            <SectionTitle
+              title={editingId ? t('mood.checkin.editHeading') : t('mood.checkin.heading')}
+              copy={t('mood.checkin.copy')}
+              action={<Plus className="h-5 w-5 text-violet" />}
+            />
+            <CatMascot variant="right" size="sm" className="opacity-70" />
+          </div>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {data.moodOptions.map((mood) => {
               const Icon = iconMap[mood.icon as keyof typeof iconMap] ?? Sparkles;

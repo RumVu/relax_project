@@ -14,6 +14,7 @@ import { Quote, RefreshCcw } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 interface CozyQuote {
@@ -79,27 +80,32 @@ export function CozyQuoteCard({ currentMood }: { currentMood?: string | null }) 
 
   return (
     <Card className="relative overflow-hidden p-0">
-      <div className="flex flex-col gap-4 p-5 text-white" style={bgStyle}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-mist/80">
-            <Quote className="h-4 w-4" />
-            {t('quote.widget.eyebrow')}
+      <div className="flex gap-4 p-5 text-white" style={bgStyle}>
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-mist/80">
+              <Quote className="h-4 w-4" />
+              {t('quote.widget.eyebrow')}
+            </div>
+            <Button
+              disabled={loading}
+              onClick={fetchOne}
+              variant="ghost"
+            >
+              <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="sr-only">{t('quote.widget.refresh')}</span>
+            </Button>
           </div>
-          <Button
-            disabled={loading}
-            onClick={fetchOne}
-            variant="ghost"
-          >
-            <RefreshCcw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-            <span className="sr-only">{t('quote.widget.refresh')}</span>
-          </Button>
+          <p className="text-lg font-semibold leading-snug md:text-xl">
+            {'“'}{display.content}{'”'}
+          </p>
+          {display.author ? (
+            <p className="text-sm font-medium text-mist/70">{'—'} {display.author}</p>
+          ) : null}
         </div>
-        <p className="text-lg font-semibold leading-snug md:text-xl">
-          “{display.content}”
-        </p>
-        {display.author ? (
-          <p className="text-sm font-medium text-mist/70">— {display.author}</p>
-        ) : null}
+        <div className="flex shrink-0 items-end">
+          <CatMascot variant="stand" size="md" className="opacity-90 sm:h-20 sm:w-20" />
+        </div>
       </div>
     </Card>
   );

@@ -5,18 +5,17 @@ import 'package:go_router/go_router.dart';
 import '../../../core/locale_controller.dart';
 import '../../../core/theme.dart';
 
-// Card displaying suggested relaxation methods.
 class MethodsCard extends StatelessWidget {
   const MethodsCard({super.key, required this.name});
 
   final String name;
 
   static const _methods = [
-    ('Thiền định', Icons.self_improvement, '/meditation'),
-    ('Hít thở', Icons.air, '/breathing'),
-    ('Nhật ký', Icons.edit_note, '/journal'),
-    ('Nhạc', Icons.headphones, '/sounds'),
-    ('Podcast', Icons.mic_none, '/podcast'),
+    ('Thiền định', 'assets/hinh_phuong_thuc/hinh-thien.png', '/meditation'),
+    ('Hít thở', 'assets/hinh_phuong_thuc/hinh-hit-tho.png', '/breathing'),
+    ('Nhật ký', 'assets/hinh_phuong_thuc/hinh-viet-nhat-ki.png', '/journal'),
+    ('Nhạc', 'assets/hinh_phuong_thuc/hinh-nghe-nhac.png', '/sounds'),
+    ('Podcast', 'assets/hinh_phuong_thuc/hinh-podcast.png', '/podcast'),
   ];
 
   @override
@@ -49,7 +48,7 @@ class MethodsCard extends StatelessWidget {
                   },
                   child: Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       color: context.surfaceAlt,
                       borderRadius: BorderRadius.circular(14),
@@ -57,7 +56,12 @@ class MethodsCard extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Icon(m.$2, color: RelaxColors.violet, size: 22),
+                        Image.asset(
+                          m.$2,
+                          width: 36,
+                          height: 36,
+                          fit: BoxFit.contain,
+                        ),
                         const SizedBox(height: 4),
                         Text(
                           context.t(m.$1),

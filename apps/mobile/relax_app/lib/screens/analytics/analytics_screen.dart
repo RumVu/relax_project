@@ -7,6 +7,7 @@ import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/mood_line_chart/mood_line_chart.dart';
 import '../../widgets/premium_blur.dart';
+import '../../widgets/cat_mascot.dart';
 import '../../widgets/soft_toast.dart';
 import 'models/mood_labels.dart';
 import 'widgets/activity_effectiveness.dart';
@@ -342,6 +343,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         ),
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    const Center(child: CatMascot(size: 60, variant: CatVariant.sleep, glow: false, opacity: 0.7)),
                   ],
                 ),
               ),
