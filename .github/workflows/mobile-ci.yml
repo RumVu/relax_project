@@ -75,7 +75,7 @@ jobs:
             echo "$KEY_PROPERTIES" > android/key.properties
           fi
       - run: flutter build appbundle --release
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: relax-app-release-aab
           path: apps/mobile/relax_app/build/app/outputs/bundle/release/app-release.aab
