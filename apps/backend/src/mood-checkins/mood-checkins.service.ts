@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { MoodCheckin, MoodType, Prisma, UserRole } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
 import { buildPage } from '../common/pagination/page';
@@ -811,7 +811,16 @@ export class MoodCheckinsService {
 
   async analyzeVoice(userId: string, text: string) {
     await this.usersService.findOne(userId);
+    let ai: GoogleGenAI | null = null;
+    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    if (projectId) {
+      const location =
+        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
+      ai = new GoogleGenAI({ vertexai: true, project: projectId, location });
+    } else if (apiKey) {
+      ai = new GoogleGenAI({ apiKey });
+    }
 
     let mood: MoodType = MoodType.NEUTRAL;
     let intensity = 5;
@@ -823,7 +832,7 @@ export class MoodCheckinsService {
       name: 'Thở đều đặn',
     };
 
-    if (apiKey) {
+    if (ai) {
       try {
         const prompt = [
           `Bạn là chuyên gia phân tích cảm xúc cho ứng dụng Relax.`,
@@ -842,16 +851,18 @@ export class MoodCheckinsService {
           `- Viết tiếng Việt tự nhiên, ấm áp.`,
         ].join('\n');
 
-        const genAI = new GoogleGenerativeAI(apiKey);
-        const model = genAI.getGenerativeModel({
-          model: 'gemini-1.5-flash',
-          generationConfig: {
+        const result = await ai.models.generateContent({
+          model:
+            this.configService.get<string>('GEMINI_MODEL') ||
+            'gemini-2.5-flash',
+          contents: prompt,
+          config: {
             responseMimeType: 'application/json',
             responseSchema: {
-              type: SchemaType.OBJECT,
+              type: Type.OBJECT,
               properties: {
                 mood: {
-                  type: SchemaType.STRING,
+                  type: Type.STRING,
                   format: 'enum',
                   enum: [
                     'HAPPY',
@@ -863,25 +874,25 @@ export class MoodCheckinsService {
                   ],
                 },
                 intensity: {
-                  type: SchemaType.INTEGER,
+                  type: Type.INTEGER,
                 },
                 tags: {
-                  type: SchemaType.ARRAY,
-                  items: { type: SchemaType.STRING },
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
                 },
                 journalDraft: {
-                  type: SchemaType.STRING,
+                  type: Type.STRING,
                 },
                 activitySuggestion: {
-                  type: SchemaType.OBJECT,
+                  type: Type.OBJECT,
                   properties: {
                     type: {
-                      type: SchemaType.STRING,
+                      type: Type.STRING,
                       format: 'enum',
                       enum: ['BreathingExercise', 'AmbientSound'],
                     },
-                    id: { type: SchemaType.STRING },
-                    name: { type: SchemaType.STRING },
+                    id: { type: Type.STRING },
+                    name: { type: Type.STRING },
                   },
                   required: ['type', 'id', 'name'],
                 },
@@ -897,8 +908,7 @@ export class MoodCheckinsService {
           },
         });
 
-        const result = await model.generateContent(prompt);
-        const resText = result.response.text();
+        const resText = result.text ?? '';
         const parsed = parseVoiceMoodAnalysis(JSON.parse(resText) as unknown);
 
         if (parsed.mood) mood = parsed.mood;

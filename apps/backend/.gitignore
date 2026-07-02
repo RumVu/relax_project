@@ -35,6 +35,10 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Google Cloud service account keys
+*-service-account*.json
+relax-project-*.json
+
 # dotenv environment variable files
 .env
 .env.development.local
