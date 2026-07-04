@@ -1,13 +1,15 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { MoodType } from '@prisma/client';
 
 export class WeeklyMoodStatResponseDto {
-  id!: string;
-  userId!: string;
-  weekStart!: Date;
-  avgScore!: number;
-  stressReducePct!: number;
-  streakDays!: number;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty({ type: 'string', format: 'date-time' }) weekStart!: Date;
+  @ApiProperty({ type: 'number' }) avgScore!: number;
+  @ApiProperty({ type: 'number' }) stressReducePct!: number;
+  @ApiProperty({ type: 'integer' }) streakDays!: number;
+  @ApiProperty({ nullable: true, enum: MoodType })
   dominantMood!: MoodType | null;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }

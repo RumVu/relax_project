@@ -1,18 +1,20 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 export class OnboardingSlideResponseDto {
-  id!: string;
-  title!: string;
-  subtitle!: string | null;
-  description!: string | null;
-  imageUrl!: string | null;
-  animationUrl!: string | null;
-  displayOrder!: number;
-  isActive!: boolean;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty() id!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty({ nullable: true }) subtitle!: string | null;
+  @ApiProperty({ nullable: true }) description!: string | null;
+  @ApiProperty({ nullable: true }) imageUrl!: string | null;
+  @ApiProperty({ nullable: true }) animationUrl!: string | null;
+  @ApiProperty({ type: 'integer' }) displayOrder!: number;
+  @ApiProperty() isActive!: boolean;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }
 
 export class OnboardingSlidePageDto extends PaginatedDto {
+  @ApiProperty({ type: () => [OnboardingSlideResponseDto] })
   items!: OnboardingSlideResponseDto[];
 }

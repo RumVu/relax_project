@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   CompanionAction,
   CompanionMood,
@@ -7,21 +8,30 @@ import {
 import { CompanionAssetResponseDto } from '../../companion-assets/dto/companion-asset-response.dto';
 
 export class UserCompanionResponseDto {
-  id!: string;
-  userId!: string;
-  assetId!: string | null;
-  name!: string;
-  type!: CompanionType;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty({ nullable: true }) assetId!: string | null;
+  @ApiProperty() name!: string;
+  @ApiProperty({ enum: CompanionType }) type!: CompanionType;
+  @ApiProperty({ enum: CompanionPersonalizationMode })
   personalizationMode!: CompanionPersonalizationMode;
-  mood!: CompanionMood;
-  action!: CompanionAction;
-  level!: number;
-  affection!: number;
-  energy!: number;
+  @ApiProperty({ enum: CompanionMood }) mood!: CompanionMood;
+  @ApiProperty({ enum: CompanionAction }) action!: CompanionAction;
+  @ApiProperty({ type: 'integer' }) level!: number;
+  @ApiProperty({ type: 'integer' }) affection!: number;
+  @ApiProperty({ type: 'integer' }) energy!: number;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   lastSeenAt!: Date | null;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   lastFedAt!: Date | null;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   lastMoodAt!: Date | null;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
+  @ApiProperty({
+    type: () => CompanionAssetResponseDto,
+    nullable: true,
+    required: false,
+  })
   asset?: CompanionAssetResponseDto | null;
 }

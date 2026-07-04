@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   MoodType,
   RelaxActivityType,
@@ -6,25 +7,29 @@ import {
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 export class RelaxSessionResponseDto {
-  id!: string;
-  userId!: string;
-  activityType!: RelaxActivityType;
-  status!: RelaxSessionStatus;
-  resourceId!: string | null;
-  title!: string;
-  startedAt!: Date;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty({ enum: RelaxActivityType }) activityType!: RelaxActivityType;
+  @ApiProperty({ enum: RelaxSessionStatus }) status!: RelaxSessionStatus;
+  @ApiProperty({ nullable: true }) resourceId!: string | null;
+  @ApiProperty() title!: string;
+  @ApiProperty({ type: 'string', format: 'date-time' }) startedAt!: Date;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   endedAt!: Date | null;
-  duration!: number | null;
-  moodBefore!: MoodType | null;
-  moodAfter!: MoodType | null;
-  reliefLevel!: number | null;
-  stressReliefPercent!: number | null;
-  note!: string | null;
-  nextActionAccepted!: string | null;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty({ nullable: true, type: 'integer' }) duration!: number | null;
+  @ApiProperty({ nullable: true, enum: MoodType }) moodBefore!: MoodType | null;
+  @ApiProperty({ nullable: true, enum: MoodType }) moodAfter!: MoodType | null;
+  @ApiProperty({ nullable: true, type: 'integer' }) reliefLevel!: number | null;
+  @ApiProperty({ nullable: true, type: 'number' }) stressReliefPercent!:
+    | number
+    | null;
+  @ApiProperty({ nullable: true }) note!: string | null;
+  @ApiProperty({ nullable: true }) nextActionAccepted!: string | null;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }
 
 export class RelaxSessionPageDto extends PaginatedDto {
+  @ApiProperty({ type: () => [RelaxSessionResponseDto] })
   items!: RelaxSessionResponseDto[];
 }

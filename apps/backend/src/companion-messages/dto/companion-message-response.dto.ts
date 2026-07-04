@@ -1,20 +1,23 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { CompanionMood, MessageTriggerType, MoodType } from '@prisma/client';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 export class CompanionMessageResponseDto {
-  id!: string;
-  content!: string;
-  triggerType!: MessageTriggerType;
-  mood!: MoodType | null;
+  @ApiProperty() id!: string;
+  @ApiProperty() content!: string;
+  @ApiProperty({ enum: MessageTriggerType }) triggerType!: MessageTriggerType;
+  @ApiProperty({ nullable: true, enum: MoodType }) mood!: MoodType | null;
+  @ApiProperty({ nullable: true, enum: CompanionMood })
   companionMood!: CompanionMood | null;
-  minHour!: number | null;
-  maxHour!: number | null;
-  weight!: number;
-  isActive!: boolean;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty({ nullable: true, type: 'integer' }) minHour!: number | null;
+  @ApiProperty({ nullable: true, type: 'integer' }) maxHour!: number | null;
+  @ApiProperty({ type: 'integer' }) weight!: number;
+  @ApiProperty() isActive!: boolean;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }
 
 export class CompanionMessagePageDto extends PaginatedDto {
+  @ApiProperty({ type: () => [CompanionMessageResponseDto] })
   items!: CompanionMessageResponseDto[];
 }

@@ -46,4 +46,7 @@ if (shouldRunMigrations) {
 }
 
 console.log('[startup] Starting NestJS backend...');
-run(process.execPath, [path.join(backendDir, 'dist', 'main.js')]);
+run(process.execPath, [
+  '--enable-source-maps',
+  path.join(backendDir, 'dist', 'src', 'main.js'),
+]);

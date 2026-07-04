@@ -1,43 +1,47 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { PaymentStatus, SubscriptionStatus } from '@prisma/client';
 
 export class SubscriptionResponseDto {
-  id!: string;
-  userId!: string;
-  tierId!: string | null;
-  status!: SubscriptionStatus;
-  planName!: string;
-  price!: number;
-  currency!: string;
-  startDate!: Date;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty({ nullable: true }) tierId!: string | null;
+  @ApiProperty({ enum: SubscriptionStatus }) status!: SubscriptionStatus;
+  @ApiProperty() planName!: string;
+  @ApiProperty({ type: 'integer' }) price!: number;
+  @ApiProperty() currency!: string;
+  @ApiProperty({ type: 'string', format: 'date-time' }) startDate!: Date;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   endDate!: Date | null;
-  externalSubscriptionId!: string | null;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty({ nullable: true }) externalSubscriptionId!: string | null;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }
 
 export class PaymentResponseDto {
-  id!: string;
-  userId!: string;
-  amount!: number;
-  currency!: string;
-  status!: PaymentStatus;
-  provider!: string | null;
-  method!: string | null;
-  description!: string | null;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty({ type: 'integer' }) amount!: number;
+  @ApiProperty() currency!: string;
+  @ApiProperty({ enum: PaymentStatus }) status!: PaymentStatus;
+  @ApiProperty({ nullable: true }) provider!: string | null;
+  @ApiProperty({ nullable: true }) method!: string | null;
+  @ApiProperty({ nullable: true }) description!: string | null;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }
 
 export class ConfirmPaymentPlanDto {
-  name!: string;
-  title!: string;
-  price!: number;
-  currency!: string;
-  source!: string;
+  @ApiProperty() name!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty({ type: 'integer' }) price!: number;
+  @ApiProperty() currency!: string;
+  @ApiProperty() source!: string;
 }
 
 export class ConfirmPaymentResponseDto {
-  payment!: PaymentResponseDto;
+  @ApiProperty({ type: () => PaymentResponseDto }) payment!: PaymentResponseDto;
+  @ApiProperty({ type: () => SubscriptionResponseDto })
   subscription!: SubscriptionResponseDto;
+  @ApiProperty({ type: () => ConfirmPaymentPlanDto })
   plan!: ConfirmPaymentPlanDto;
 }

@@ -1,39 +1,42 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { NotificationType, PushPlatform, PushProvider } from '@prisma/client';
 import { PaginatedDto } from '../../common/dto/paginated.dto';
 
 export class NotificationResponseDto {
-  id!: string;
-  userId!: string;
-  title!: string;
-  message!: string;
-  type!: NotificationType;
-  relatedEntity!: string | null;
-  relatedId!: string | null;
-  isRead!: boolean;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty() message!: string;
+  @ApiProperty({ enum: NotificationType }) type!: NotificationType;
+  @ApiProperty({ nullable: true }) relatedEntity!: string | null;
+  @ApiProperty({ nullable: true }) relatedId!: string | null;
+  @ApiProperty() isRead!: boolean;
+  @ApiProperty({ nullable: true, type: 'string', format: 'date-time' })
   readAt!: Date | null;
-  createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
 }
 
 export class NotificationPageDto extends PaginatedDto {
+  @ApiProperty({ type: () => [NotificationResponseDto] })
   items!: NotificationResponseDto[];
 }
 
 export class UnreadCountResponseDto {
-  count!: number;
+  @ApiProperty({ type: 'integer' }) count!: number;
 }
 
 export class PushDeviceResponseDto {
-  id!: string;
-  userId!: string;
-  token!: string;
-  platform!: PushPlatform;
-  provider!: PushProvider;
-  deviceId!: string | null;
-  deviceName!: string | null;
-  appVersion!: string | null;
-  timezone!: string | null;
-  enabled!: boolean;
-  lastSeenAt!: Date;
-  createdAt!: Date;
-  updatedAt!: Date;
+  @ApiProperty() id!: string;
+  @ApiProperty() userId!: string;
+  @ApiProperty() token!: string;
+  @ApiProperty({ enum: PushPlatform }) platform!: PushPlatform;
+  @ApiProperty({ enum: PushProvider }) provider!: PushProvider;
+  @ApiProperty({ nullable: true }) deviceId!: string | null;
+  @ApiProperty({ nullable: true }) deviceName!: string | null;
+  @ApiProperty({ nullable: true }) appVersion!: string | null;
+  @ApiProperty({ nullable: true }) timezone!: string | null;
+  @ApiProperty() enabled!: boolean;
+  @ApiProperty({ type: 'string', format: 'date-time' }) lastSeenAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) createdAt!: Date;
+  @ApiProperty({ type: 'string', format: 'date-time' }) updatedAt!: Date;
 }

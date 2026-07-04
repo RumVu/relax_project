@@ -1,30 +1,38 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class WeatherGreetingDto {
-  title!: string;
-  subtitle!: string;
-  iconKey!: string;
+  @ApiProperty() title!: string;
+  @ApiProperty() subtitle!: string;
+  @ApiProperty() iconKey!: string;
 }
 
 export class WeatherLocationDto {
-  latitude!: number;
-  longitude!: number;
-  name!: string | null;
-  timezone!: string;
+  @ApiProperty({ type: 'number' }) latitude!: number;
+  @ApiProperty({ type: 'number' }) longitude!: number;
+  @ApiProperty({ nullable: true }) name!: string | null;
+  @ApiProperty() timezone!: string;
 }
 
 export class WeatherCurrentDataDto {
-  temperature!: number | null;
-  temperatureUnit!: string;
-  weatherCode!: number | null;
-  isDay!: boolean;
-  observedAt!: string | null;
+  @ApiProperty({ nullable: true, type: 'number' }) temperature!: number | null;
+  @ApiProperty() temperatureUnit!: string;
+  @ApiProperty({ nullable: true, type: 'integer' }) weatherCode!: number | null;
+  @ApiProperty() isDay!: boolean;
+  @ApiProperty({ nullable: true }) observedAt!: string | null;
 }
 
 export class WeatherForecastDayDto {
-  date!: string;
-  temperatureMax!: number | null;
-  temperatureMin!: number | null;
-  precipitationProbability!: number | null;
-  weatherCode!: number | null;
+  @ApiProperty() date!: string;
+  @ApiProperty({ nullable: true, type: 'number' }) temperatureMax!:
+    | number
+    | null;
+  @ApiProperty({ nullable: true, type: 'number' }) temperatureMin!:
+    | number
+    | null;
+  @ApiProperty({ nullable: true, type: 'integer' }) precipitationProbability!:
+    | number
+    | null;
+  @ApiProperty({ nullable: true, type: 'integer' }) weatherCode!: number | null;
 }
 
 /**
@@ -34,22 +42,35 @@ export class WeatherForecastDayDto {
  * documented as optional so the OpenAPI schema covers both branches.
  */
 export class WeatherCurrentResponseDto {
-  configured!: boolean;
-  reason?: string;
+  @ApiProperty() configured!: boolean;
+  @ApiProperty({ required: false }) reason?: string;
+  @ApiProperty({ type: () => WeatherGreetingDto, required: false })
   greeting?: WeatherGreetingDto;
-  provider?: string;
+  @ApiProperty({ required: false }) provider?: string;
+  @ApiProperty({ type: () => WeatherLocationDto, required: false })
   location?: WeatherLocationDto;
-  reverseGeocode?: Record<string, unknown> | null;
+  @ApiProperty({ nullable: true, required: false }) reverseGeocode?: Record<
+    string,
+    unknown
+  > | null;
+  @ApiProperty({ type: () => WeatherCurrentDataDto, required: false })
   current?: WeatherCurrentDataDto;
 }
 
 export class WeatherForecastResponseDto {
-  configured!: boolean;
-  reason?: string;
+  @ApiProperty() configured!: boolean;
+  @ApiProperty({ required: false }) reason?: string;
+  @ApiProperty({ type: () => WeatherGreetingDto, required: false })
   greeting?: WeatherGreetingDto;
-  provider?: string;
+  @ApiProperty({ required: false }) provider?: string;
+  @ApiProperty({ type: () => WeatherLocationDto, required: false })
   location?: WeatherLocationDto;
-  reverseGeocode?: Record<string, unknown> | null;
+  @ApiProperty({ nullable: true, required: false }) reverseGeocode?: Record<
+    string,
+    unknown
+  > | null;
+  @ApiProperty({ type: () => WeatherCurrentDataDto, required: false })
   current?: WeatherCurrentDataDto;
+  @ApiProperty({ type: () => [WeatherForecastDayDto] })
   forecast!: WeatherForecastDayDto[];
 }
