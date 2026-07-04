@@ -138,6 +138,7 @@ class _VoiceCheckinScreenState extends State<VoiceCheckinScreen>
     if (!_available) {
       await _initSpeech();
       if (!_available) {
+        if (!mounted) return;
         showSoftToast(
           context,
           message: context.t('Vui lòng cấp quyền micro và nhận dạng giọng nói trong Cài đặt.'),

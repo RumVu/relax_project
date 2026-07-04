@@ -25,8 +25,8 @@ class _MoodCapsuleScreenState extends State<MoodCapsuleScreen> {
   final _noteCtrl = TextEditingController();
   String _activity = 'Đang nghỉ ngơi';
   String _location = 'Ở nhà';
-  String _sound = 'Rain & Thunder';
-  String _quote = 'Hôm nay là một ngày tốt lành để hít thở sâu.';
+  final String _sound = 'Rain & Thunder';
+  final String _quote = 'Hôm nay là một ngày tốt lành để hít thở sâu.';
 
   final List<(String, String, Color)> _moods = [
     ('HAPPY', '😊', RelaxColors.mint),

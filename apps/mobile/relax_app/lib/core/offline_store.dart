@@ -248,6 +248,7 @@ class OfflineStore extends ChangeNotifier {
     return results.any((r) => r != ConnectivityResult.none);
   }
 
+  @override
   void dispose() {
     _connectivitySub?.cancel();
     super.dispose();

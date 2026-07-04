@@ -792,15 +792,17 @@ class _CalendarSyncToggleRowState extends State<_CalendarSyncToggleRow> {
                 setState(() => _syncing = true);
                 await service.toggleSync();
                 setState(() => _syncing = false);
-                if (mounted) {
-                  showSoftToast(
-                    context,
-                    message: service.isSynced 
-                        ? context.t('Đã đồng bộ lịch thành công 📅') 
-                        : context.t('Đã tắt đồng bộ lịch'),
-                    tone: SoftToastTone.success,
-                  );
-                }
+                if (!mounted) return;
+                showSoftToast(
+                  // ignore: use_build_context_synchronously
+                  context,
+                  message: service.isSynced
+                      // ignore: use_build_context_synchronously
+                      ? context.t('Đã đồng bộ lịch thành công 📅')
+                      // ignore: use_build_context_synchronously
+                      : context.t('Đã tắt đồng bộ lịch'),
+                  tone: SoftToastTone.success,
+                );
               },
             ),
       onTap: () {},

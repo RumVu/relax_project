@@ -37,7 +37,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     HapticFeedback.lightImpact();
 
     try {
-      final subject = '[${_type}] ${_subjectCtrl.text.trim().isNotEmpty ? _subjectCtrl.text.trim() : "Phản hồi" }';
+      final subject = '[$_type] ${_subjectCtrl.text.trim().isNotEmpty ? _subjectCtrl.text.trim() : "Phản hồi" }';
       final res = await RelaxApi.instance.post('/feedbacks', body: {
         'subject': subject,
         'message': _messageCtrl.text.trim(),

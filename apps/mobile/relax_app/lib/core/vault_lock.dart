@@ -73,11 +73,13 @@ class VaultLock {
     if (!enabled) return true;
 
     // Try biometric first
+    // ignore: use_build_context_synchronously
     final biometricOk = await unlockBiometric(context);
     if (biometricOk) return true;
 
     // Fallback to PIN dialog
     final result = await showDialog<bool>(
+      // ignore: use_build_context_synchronously
       context: context,
       barrierDismissible: false,
       builder: (ctx) => const _PinDialog(),

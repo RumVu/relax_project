@@ -87,6 +87,7 @@ class _CbtThoughtRecordScreenState extends State<CbtThoughtRecordScreen> {
 
     HapticFeedback.mediumImpact();
     await _cbtBox.add(jsonEncode(entry));
+    if (!mounted) return;
     showSoftToast(context, message: context.t('Đã lưu thought reframe mới 🌟'), tone: SoftToastTone.success);
 
     // Reset Form

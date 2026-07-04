@@ -22,7 +22,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
   int _workMinutes = 25;
   int _shortBreakMinutes = 5;
   int _longBreakMinutes = 15;
-  int _cyclesBeforeLong = 4;
+  final int _cyclesBeforeLong = 4;
 
   _Phase _phase = _Phase.work;
   int _currentCycle = 1;

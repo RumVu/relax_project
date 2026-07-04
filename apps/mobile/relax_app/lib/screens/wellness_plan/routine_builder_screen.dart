@@ -300,7 +300,7 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
                           ),
                         ),
                         title: Text(context.t(s['title']!)),
-                        subtitle: Text('${dur} ${context.t('phút')}', style: TextStyle(fontSize: 11, color: context.mutedText)),
+                        subtitle: Text('$dur ${context.t('phút')}', style: TextStyle(fontSize: 11, color: context.mutedText)),
                         trailing: IconButton(
                           icon: const Icon(Icons.remove_circle, color: RelaxColors.coral, size: 18),
                           onPressed: () {
@@ -337,15 +337,15 @@ class _RoutineBuilderScreenState extends State<RoutineBuilderScreen> {
                       'steps': selectedSteps,
                     };
                     await _box.put(id, jsonEncode(newRoutine));
+                    if (!mounted) return;
+                    // ignore: use_build_context_synchronously
                     Navigator.pop(ctx);
                     _loadRoutines();
-                    if (mounted) {
-                      showSoftToast(
-                        context,
-                        message: context.t('Đã lưu routine mới! 🌿'),
-                        tone: SoftToastTone.success,
-                      );
-                    }
+                    showSoftToast(
+                      context,
+                      message: context.t('Đã lưu routine mới! 🌿'),
+                      tone: SoftToastTone.success,
+                    );
                   },
                   child: Text(context.t('Lưu thói quen')),
                 ),

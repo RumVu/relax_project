@@ -130,7 +130,9 @@ class _LocationScreenState extends State<LocationScreen> {
       if (!enabled) return;
       var perm = await Geolocator.checkPermission();
       if (perm == LocationPermission.denied ||
-          perm == LocationPermission.deniedForever) return;
+          perm == LocationPermission.deniedForever) {
+        return;
+      }
       final p = await Geolocator.getCurrentPosition();
       if (!mounted) return;
       setState(() {
@@ -176,6 +178,7 @@ class _LocationScreenState extends State<LocationScreen> {
     await RelaxApi.instance.patch('/user-preferences/me/preferences', body: {
       'latitude': lat,
       'longitude': lng,
+      // ignore: use_null_aware_elements
       if (address != null) 'locationName': address,
     });
   }

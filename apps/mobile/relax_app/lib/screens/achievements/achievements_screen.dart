@@ -53,8 +53,11 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: context.appText),
           onPressed: () {
-            if (context.canPop()) context.pop();
-            else context.go('/home');
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home');
+            }
           },
         ),
         title: Text(

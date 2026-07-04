@@ -202,7 +202,9 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
         perm = await Geolocator.requestPermission();
       }
       if (perm == LocationPermission.denied ||
-          perm == LocationPermission.deniedForever) return;
+          perm == LocationPermission.deniedForever) {
+        return;
+      }
       final pos = await Geolocator.getCurrentPosition();
 
       // Reverse geocode.
@@ -231,6 +233,7 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           .patch('/user-preferences/me/preferences', body: {
         'latitude': pos.latitude,
         'longitude': pos.longitude,
+        // ignore: use_null_aware_elements
         if (address != null) 'locationName': address,
       });
 
