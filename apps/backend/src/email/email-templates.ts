@@ -63,6 +63,45 @@ export function verifyEmailTemplate(opts: {
   };
 }
 
+export function otpTemplate(opts: {
+  displayName?: string | null;
+  otp: string;
+  purpose: 'registration' | 'password-reset';
+  ttlMinutes: number;
+}) {
+  const name = opts.displayName?.trim() || 'bạn';
+  const isReg = opts.purpose === 'registration';
+  const heading = isReg ? 'Xác thực tài khoản' : 'Đặt lại mật khẩu';
+  const intro = isReg
+    ? `Cảm ơn ${name} đã đăng ký ${BRAND}. Nhập mã OTP bên dưới để xác thực email.`
+    : `Bạn (hoặc ai đó) đã yêu cầu đặt lại mật khẩu cho tài khoản ${BRAND}. Nhập mã OTP bên dưới để tiếp tục.`;
+  const body = `
+    <h2 style="margin:0 0 16px;font-size:20px;">Chào ${name},</h2>
+    <p>${intro}</p>
+    <p style="text-align:center;margin:28px 0;">
+      <span style="display:inline-block;font-family:ui-monospace,Menlo,monospace;background:#eef2ff;padding:16px 32px;border-radius:12px;font-size:32px;font-weight:700;letter-spacing:8px;color:#7357f6;">${opts.otp}</span>
+    </p>
+    <p style="color:#64748b;font-size:13px;">Mã có hiệu lực trong ${opts.ttlMinutes} phút. Nếu không phải bạn yêu cầu, hãy bỏ qua email này.</p>
+  `;
+  const text = [
+    `Chào ${name},`,
+    '',
+    intro,
+    '',
+    `Mã OTP: ${opts.otp}`,
+    '',
+    `Mã có hiệu lực trong ${opts.ttlMinutes} phút.`,
+  ].join('\n');
+  const subject = isReg
+    ? `${opts.otp} — Mã xác thực ${BRAND}`
+    : `${opts.otp} — Đặt lại mật khẩu ${BRAND}`;
+  return {
+    subject,
+    html: shell(`${heading} — ${BRAND}`, body),
+    text,
+  };
+}
+
 export function resetPasswordTemplate(opts: {
   displayName?: string | null;
   token: string;

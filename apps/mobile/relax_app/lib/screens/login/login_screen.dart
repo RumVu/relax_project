@@ -191,7 +191,22 @@ class _LoginScreenState extends State<LoginScreen> {
                         return null;
                       },
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: GestureDetector(
+                        onTap: () => context.go('/forgot-password'),
+                        child: Text(
+                          context.t('Quên mật khẩu?'),
+                          style: const TextStyle(
+                            color: RelaxColors.violet,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(

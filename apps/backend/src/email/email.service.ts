@@ -5,7 +5,11 @@ import { ResendEmailProvider } from './providers/resend.provider';
 import { SendGridEmailProvider } from './providers/sendgrid.provider';
 import { SmtpEmailProvider } from './providers/smtp.provider';
 import { EmailPayload, EmailProvider, EmailSendResult } from './email.types';
-import { resetPasswordTemplate, verifyEmailTemplate } from './email-templates';
+import {
+  otpTemplate,
+  resetPasswordTemplate,
+  verifyEmailTemplate,
+} from './email-templates';
 
 /**
  * EmailService — picks a provider at boot and renders templates.
@@ -126,6 +130,28 @@ export class EmailService implements OnModuleInit {
       html: tmpl.html,
       text: tmpl.text,
       purpose: 'verify-email',
+    });
+  }
+
+  async sendOtp(opts: {
+    to: string;
+    displayName?: string | null;
+    otp: string;
+    purpose: 'registration' | 'password-reset';
+    ttlMinutes: number;
+  }): Promise<EmailSendResult> {
+    const tmpl = otpTemplate({
+      displayName: opts.displayName,
+      otp: opts.otp,
+      purpose: opts.purpose,
+      ttlMinutes: opts.ttlMinutes,
+    });
+    return this.provider.send({
+      to: opts.to,
+      subject: tmpl.subject,
+      html: tmpl.html,
+      text: tmpl.text,
+      purpose: `otp-${opts.purpose}`,
     });
   }
 

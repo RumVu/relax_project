@@ -54,6 +54,7 @@ export function buildEmailDelivery(
 
 const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 const THIRTY_MIN_MS = 1000 * 60 * 30;
+const TEN_MIN_MS = 1000 * 60 * 10;
 
 export function getEmailVerificationTtlMs(
   configService: ConfigService,
@@ -67,4 +68,8 @@ export function getPasswordResetTtlMs(configService: ConfigService): number {
   return Number(
     configService.get<string>('PASSWORD_RESET_TTL_MS') ?? THIRTY_MIN_MS,
   );
+}
+
+export function getOtpTtlMs(configService: ConfigService): number {
+  return Number(configService.get<string>('OTP_TTL_MS') ?? TEN_MIN_MS);
 }

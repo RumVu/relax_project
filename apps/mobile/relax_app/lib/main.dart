@@ -66,6 +66,8 @@ import 'screens/wellness_report/wellness_report_screen.dart';
 import 'screens/gratitude/gratitude_journal_screen.dart';
 import 'screens/focus_timer/focus_timer_screen.dart';
 import 'screens/data_privacy/data_privacy_screen.dart';
+import 'screens/auth/verify_otp_screen.dart';
+import 'screens/auth/forgot_password_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -168,7 +170,7 @@ GoRouter _buildRouter(AuthState auth) {
       }
       final loggedIn = auth.isLoggedIn;
       final path = state.matchedLocation;
-      final atAuth = path == '/login' || path == '/register';
+      final atAuth = path == '/login' || path == '/register' || path.startsWith('/verify-otp') || path == '/forgot-password';
       final atOnboarding = path == '/onboarding';
 
       if (!loggedIn) {
@@ -185,6 +187,18 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/onboarding', const OnboardingScreen()),
       _soft('/login', const LoginScreen()),
       _soft('/register', const RegisterScreen()),
+      _soft('/forgot-password', const ForgotPasswordScreen()),
+      GoRoute(
+        path: '/verify-otp',
+        pageBuilder: (_, s) {
+          final email = s.uri.queryParameters['email'] ?? '';
+          final purpose = s.uri.queryParameters['purpose'] ?? 'registration';
+          return softPage(
+            key: s.pageKey,
+            child: VerifyOtpScreen(email: email, purpose: purpose),
+          );
+        },
+      ),
 
       // Home (tab param)
       GoRoute(

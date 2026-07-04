@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../core/api_client.dart';
-import '../../core/auth_state.dart';
 import '../../core/locale_controller.dart';
 import '../../core/theme.dart';
 import '../../widgets/cat_mascot.dart';
@@ -41,28 +39,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
         message: context.t('Đang tiến hành tạo tài khoản...'),
         tone: SoftToastTone.info);
     setState(() => _busy = true);
-    final auth = context.read<AuthState>();
-    final ok = await auth.register(
-      email: _emailCtrl.text,
-      password: _passwordCtrl.text,
-      name: _nameCtrl.text,
-    );
-    if (!mounted) return;
-    setState(() => _busy = false);
-    if (ok) {
-      final token = await RelaxApi.instance.accessToken;
-      debugPrint('=== [ĐĂNG KÝ THÀNH CÔNG] ===');
-      debugPrint('Backend Access Token: $token');
-      if (mounted) {
+
+    try {
+      final res = await RelaxApi.instance.post('/auth/register', body: {
+        'email': _emailCtrl.text.trim(),
+        'password': _passwordCtrl.text,
+        'name': _nameCtrl.text.trim(),
+      });
+
+      if (!mounted) return;
+      setState(() => _busy = false);
+
+      final data = res.data as Map<String, dynamic>?;
+      if (data != null && data['requiresOtp'] == true) {
+        final email = data['email'] as String? ?? _emailCtrl.text.trim();
         showSoftToast(context,
-            message: context.t('Đăng ký thành công! Đang vào ứng dụng...'),
+            message: context.t('Mã OTP đã gửi tới email của bạn'),
             tone: SoftToastTone.success);
-        context.go('/home');
+        context.go('/verify-otp?email=${Uri.encodeComponent(email)}&purpose=registration');
+      } else {
+        showSoftToast(context,
+            message: context.t('Đăng ký thất bại'),
+            tone: SoftToastTone.error);
       }
-    } else {
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      final msg = e.toString().contains('email already exists')
+          ? 'Email này đã được sử dụng'
+          : 'Đăng ký thất bại';
       showSoftToast(context,
-          message: context.t(auth.error ?? 'Đăng ký thất bại'),
-          tone: SoftToastTone.error);
+          message: context.t(msg), tone: SoftToastTone.error);
     }
   }
 

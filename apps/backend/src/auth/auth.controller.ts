@@ -38,6 +38,9 @@ import { GoogleLoginDto } from './dto/google-login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ForgotPasswordOtpDto } from './dto/forgot-password.dto';
 import { AuthActionResultDto, AuthResponseDto } from './dto/auth-response.dto';
 import { UserResponseDto } from '../users/dto/user-response.dto';
 
@@ -52,25 +55,16 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  @ApiOperation({ summary: 'Register a local user and create a session' })
+  @ApiOperation({ summary: 'Register a local user and send OTP for email verification' })
   @ApiCreatedResponse({
-    type: AuthResponseDto,
-    description: 'User, access token, and HttpOnly refresh cookie.',
+    description: 'Registration accepted, OTP sent to email.',
   })
   @Throttle({
     default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
   })
   @Post('register')
-  register(
-    @Body() dto: RegisterDto,
-    @Headers('user-agent') userAgent: string | undefined,
-    @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    return this.withRefreshCookie(
-      response,
-      this.authService.register(dto, userAgent, getClientIp(request)),
-    );
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
   }
 
   @ApiOperation({ summary: 'Login with email and password' })
@@ -189,6 +183,57 @@ export class AuthController {
     return this.authService.logout(
       dto.refreshToken ?? this.getRefreshTokenCookie(request),
     );
+  }
+
+  @ApiOperation({ summary: 'Verify registration OTP and create a session' })
+  @ApiCreatedResponse({
+    type: AuthResponseDto,
+    description: 'Email verified, user session created.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 10, blockDuration: minutes(5) },
+  })
+  @Post('otp/verify')
+  verifyOtp(
+    @Body() dto: VerifyOtpDto,
+    @Headers('user-agent') userAgent: string | undefined,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return this.withRefreshCookie(
+      response,
+      this.authService.verifyRegistrationOtp(
+        dto,
+        userAgent,
+        getClientIp(request),
+      ),
+    );
+  }
+
+  @ApiOperation({ summary: 'Resend OTP code' })
+  @ApiCreatedResponse({
+    type: AuthActionResultDto,
+    description: 'OTP resent.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 3, blockDuration: minutes(5) },
+  })
+  @Post('otp/resend')
+  resendOtp(@Body() dto: ResendOtpDto) {
+    return this.authService.resendOtp(dto);
+  }
+
+  @ApiOperation({ summary: 'Reset password using OTP code' })
+  @ApiCreatedResponse({
+    type: AuthActionResultDto,
+    description: 'Password reset via OTP.',
+  })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 5, blockDuration: minutes(5) },
+  })
+  @Post('password-reset/otp')
+  resetPasswordWithOtp(@Body() dto: ForgotPasswordOtpDto) {
+    return this.authService.resetPasswordWithOtp(dto);
   }
 
   @ApiOperation({ summary: 'Request a password reset email' })

@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { apiFetch, type AuthResponse, persistAuthSession } from '@/lib/api';
 import { authRoutes } from '@/lib/auth';
@@ -11,6 +12,12 @@ type AuthFormMode = 'login' | 'register';
 
 interface AuthFormProps {
   mode: AuthFormMode;
+}
+
+interface RegisterOtpResponse {
+  success: boolean;
+  requiresOtp: boolean;
+  email: string;
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
@@ -34,21 +41,33 @@ export function AuthForm({ mode }: AuthFormProps) {
     setLoading(true);
 
     try {
-      const auth = await apiFetch<AuthResponse>(
-        isRegister ? '/auth/register' : '/auth/login',
-        {
+      if (isRegister) {
+        const result = await apiFetch<RegisterOtpResponse>(
+          '/auth/register',
+          {
+            method: 'POST',
+            body: JSON.stringify({ email, password, name }),
+          },
+        );
+        if (result.requiresOtp) {
+          router.push(
+            `/auth/verify-otp?email=${encodeURIComponent(result.email)}&purpose=registration`,
+          );
+          return;
+        }
+      } else {
+        const auth = await apiFetch<AuthResponse>('/auth/login', {
           method: 'POST',
-          body: JSON.stringify({
-            email,
-            password,
-            ...(isRegister ? { name } : {}),
-          }),
-        },
-      );
-
-      persistAuthSession(auth);
-      router.push(auth.user.role === 'ADMIN' ? authRoutes.admin : authRoutes.dashboard);
-      router.refresh();
+          body: JSON.stringify({ email, password }),
+        });
+        persistAuthSession(auth);
+        router.push(
+          auth.user.role === 'ADMIN'
+            ? authRoutes.admin
+            : authRoutes.dashboard,
+        );
+        router.refresh();
+      }
     } catch {
       setError(
         isRegister
@@ -96,6 +115,16 @@ export function AuthForm({ mode }: AuthFormProps) {
         <p className="text-xs font-semibold text-slate-600">
           {PASSWORD_REQUIREMENT}
         </p>
+      ) : null}
+      {!isRegister ? (
+        <div className="text-right">
+          <Link
+            className="text-xs font-semibold text-[var(--brand-primary)] hover:underline"
+            href="/auth/forgot-password"
+          >
+            Forgot password?
+          </Link>
+        </div>
       ) : null}
       {error ? <p className="text-sm font-medium text-red-700">{error}</p> : null}
       <Button className="w-full" disabled={loading} type="submit">

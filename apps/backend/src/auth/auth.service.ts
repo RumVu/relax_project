@@ -26,6 +26,9 @@ import { RegisterDto } from './dto/register.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { ForgotPasswordOtpDto } from './dto/forgot-password.dto';
 
 import {
   DUMMY_PASSWORD_HASH,
@@ -41,6 +44,7 @@ import {
 import {
   buildEmailDelivery,
   getEmailVerificationTtlMs,
+  getOtpTtlMs,
   getPasswordResetTtlMs,
 } from './email/email-delivery.helper';
 import { AccountTokensService } from './tokens/account-tokens.service';
@@ -75,7 +79,7 @@ export class AuthService {
   // REGISTER / LOGIN / REFRESH / LOGOUT
   // ============================================================
 
-  async register(dto: RegisterDto, userAgent?: string, ipAddress?: string) {
+  async register(dto: RegisterDto) {
     const existing = await this.usersService.findByEmailWithPassword(dto.email);
     if (existing) {
       throw new ConflictException({
@@ -94,10 +98,22 @@ export class AuthService {
         profile: { create: { displayName: dto.name } },
         preferences: { create: {} },
       },
-      select: { id: true, email: true, role: true, isActive: true },
+      select: { id: true, email: true, name: true, role: true, isActive: true },
     });
 
-    return this.createAuthResponse(user, userAgent, ipAddress);
+    const otpResult = await this.sendOtpForUser(
+      user,
+      AccountTokenType.EMAIL_VERIFICATION,
+      'registration',
+    );
+
+    return {
+      success: true,
+      requiresOtp: true,
+      email: user.email,
+      expiresAt: otpResult.expiresAt,
+      delivery: otpResult.delivery,
+    };
   }
 
   async login(dto: LoginDto, userAgent?: string, ipAddress?: string) {
@@ -637,6 +653,131 @@ export class AuthService {
   }
 
   // ============================================================
+  // OTP VERIFICATION (registration + password reset)
+  // ============================================================
+
+  async verifyRegistrationOtp(
+    dto: VerifyOtpDto,
+    userAgent?: string,
+    ipAddress?: string,
+  ) {
+    const user = await this.usersService.findByEmailWithPassword(dto.email);
+    if (!user) {
+      throw new AppException(
+        ErrorCode.AUTH_TOKEN_INVALID,
+        'Invalid OTP code',
+        401,
+      );
+    }
+
+    await this.accountTokens.consume(
+      dto.code,
+      AccountTokenType.EMAIL_VERIFICATION,
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { emailVerified: true },
+    });
+
+    return this.createAuthResponse(user, userAgent, ipAddress);
+  }
+
+  async resetPasswordWithOtp(dto: ForgotPasswordOtpDto) {
+    const user = await this.usersService.findByEmailWithPassword(dto.email);
+    if (!user) {
+      throw new AppException(
+        ErrorCode.AUTH_TOKEN_INVALID,
+        'Invalid OTP code',
+        401,
+      );
+    }
+
+    await this.accountTokens.consume(
+      dto.code,
+      AccountTokenType.PASSWORD_RESET,
+    );
+
+    const password = await bcrypt.hash(dto.password, 12);
+    await this.prisma.$transaction([
+      this.prisma.session.deleteMany({ where: { userId: user.id } }),
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: { password, authProvider: AuthProvider.LOCAL },
+      }),
+    ]);
+
+    return { success: true, revokedSessions: true };
+  }
+
+  async resendOtp(dto: ResendOtpDto) {
+    const user = await this.usersService.findByEmailWithPassword(dto.email);
+
+    if (
+      !user ||
+      !user.isActive ||
+      user.authProvider !== AuthProvider.LOCAL
+    ) {
+      return {
+        success: true,
+        delivery: buildEmailDelivery(
+          this.configService,
+          dto.purpose === 'registration'
+            ? 'EMAIL_VERIFICATION'
+            : 'PASSWORD_RESET',
+          undefined,
+          this.emailService,
+        ),
+      };
+    }
+
+    const tokenType =
+      dto.purpose === 'registration'
+        ? AccountTokenType.EMAIL_VERIFICATION
+        : AccountTokenType.PASSWORD_RESET;
+
+    const result = await this.sendOtpForUser(user, tokenType, dto.purpose);
+    return { success: true, ...result };
+  }
+
+  private async sendOtpForUser(
+    user: { id: string; email: string; name?: string | null },
+    type: AccountTokenType,
+    purpose: 'registration' | 'password-reset',
+  ) {
+    const ttlMs = getOtpTtlMs(this.configService);
+    const token = await this.accountTokens.createOtp(user.id, type, ttlMs, {
+      email: user.email,
+    });
+
+    await this.emailService
+      .sendOtp({
+        to: user.email,
+        displayName: user.name ?? null,
+        otp: token.plainToken,
+        purpose,
+        ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
+      })
+      .catch((err: unknown) => ({
+        provider: 'unknown',
+        delivered: false,
+        error: err instanceof Error ? err.message : String(err),
+      }));
+
+    return {
+      expiresAt: token.expiresAt,
+      delivery: buildEmailDelivery(
+        this.configService,
+        type === AccountTokenType.EMAIL_VERIFICATION
+          ? 'EMAIL_VERIFICATION'
+          : 'PASSWORD_RESET',
+        token.plainToken,
+        this.emailService,
+      ),
+    };
+  }
+
+  // ============================================================
   // EMAIL VERIFICATION / PASSWORD RESET
   // ============================================================
 
@@ -727,36 +868,13 @@ export class AuthService {
       };
     }
 
-    const ttlMs = getPasswordResetTtlMs(this.configService);
-    const token = await this.accountTokens.create(
-      user.id,
+    const result = await this.sendOtpForUser(
+      user,
       AccountTokenType.PASSWORD_RESET,
-      ttlMs,
-      { email: user.email },
+      'password-reset',
     );
 
-    await this.emailService
-      .sendPasswordReset({
-        to: user.email,
-        displayName: (user as { name?: string | null }).name ?? null,
-        token: token.plainToken,
-        ttlMinutes: Math.max(1, Math.round(ttlMs / 60000)),
-      })
-      .catch((err: unknown) => ({
-        provider: 'unknown',
-        delivered: false,
-        error: err instanceof Error ? err.message : String(err),
-      }));
-
-    return {
-      success: true,
-      delivery: buildEmailDelivery(
-        this.configService,
-        'PASSWORD_RESET',
-        token.plainToken,
-        this.emailService,
-      ),
-    };
+    return { success: true, ...result };
   }
 
   async resetPassword(dto: ResetPasswordDto) {

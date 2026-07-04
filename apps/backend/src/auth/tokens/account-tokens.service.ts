@@ -1,13 +1,13 @@
 /**
  * Account tokens — single-use, hashed, time-limited.
- * Used by email-verification + password-reset.
+ * Used by email-verification + password-reset + OTP codes.
  *
  * Storing only the SHA-256 hash means a database leak can't be turned
  * into a working verification/reset link.
  */
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { AccountTokenType, Prisma } from '@prisma/client';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomInt } from 'node:crypto';
 import { AppException } from '../../common/errors/app.exception';
 import { ErrorCode } from '../../common/errors/error-code';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -47,6 +47,37 @@ export class AccountTokensService {
     });
 
     return { ...token, plainToken };
+  }
+
+  /**
+   * Issue a 6-digit numeric OTP code. Same revocation semantics as
+   * `create()` — previous unconsumed tokens of the same type are deleted.
+   */
+  async createOtp(
+    userId: string,
+    type: AccountTokenType,
+    ttlMs: number,
+    metadata?: Record<string, unknown>,
+  ) {
+    const otp = String(randomInt(100_000, 999_999));
+    const tokenHash = hashToken(otp);
+    const expiresAt = new Date(Date.now() + ttlMs);
+
+    await this.prisma.accountToken.deleteMany({
+      where: { userId, type, consumedAt: null },
+    });
+
+    const token = await this.prisma.accountToken.create({
+      data: {
+        userId,
+        type,
+        tokenHash,
+        expiresAt,
+        metadata: { ...metadata, isOtp: true } as Prisma.InputJsonValue,
+      },
+    });
+
+    return { ...token, plainToken: otp };
   }
 
   /**
