@@ -6,6 +6,7 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Meditations & Sleep APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -71,10 +72,11 @@ describe('Meditations & Sleep APIs (e2e)', () => {
 
   it('runs meditation and sleep session tracking cycles', async () => {
     // 1. Register test user
-    const regRes = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Med Sleep User' })
-      .expect(201);
+    const regRes = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Med Sleep User',
+    });
     const token = regRes.body.accessToken as string;
 
     // 2. Fetch active meditation guides

@@ -45,7 +45,6 @@ import {
   buildEmailDelivery,
   getEmailVerificationTtlMs,
   getOtpTtlMs,
-  getPasswordResetTtlMs,
 } from './email/email-delivery.helper';
 import { AccountTokensService } from './tokens/account-tokens.service';
 import { UserExportService } from './export/user-export.service';
@@ -693,10 +692,7 @@ export class AuthService {
       );
     }
 
-    await this.accountTokens.consume(
-      dto.code,
-      AccountTokenType.PASSWORD_RESET,
-    );
+    await this.accountTokens.consume(dto.code, AccountTokenType.PASSWORD_RESET);
 
     const password = await bcrypt.hash(dto.password, 12);
     await this.prisma.$transaction([
@@ -713,11 +709,7 @@ export class AuthService {
   async resendOtp(dto: ResendOtpDto) {
     const user = await this.usersService.findByEmailWithPassword(dto.email);
 
-    if (
-      !user ||
-      !user.isActive ||
-      user.authProvider !== AuthProvider.LOCAL
-    ) {
+    if (!user || !user.isActive || user.authProvider !== AuthProvider.LOCAL) {
       return {
         success: true,
         delivery: buildEmailDelivery(

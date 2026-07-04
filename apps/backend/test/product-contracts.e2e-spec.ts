@@ -6,6 +6,7 @@ import { CompanionType, UserRole } from '@prisma/client';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 async function waitForAdminLog(
   prisma: PrismaService,
@@ -60,17 +61,19 @@ describe('Product backend contracts (e2e)', () => {
     prisma = app.get(PrismaService);
     await app.init();
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Contract User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Contract User',
+    });
     accessToken = registered.body.accessToken;
     userId = registered.body.user.id;
 
-    const admin = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: adminEmail, password, name: 'Contract Admin' })
-      .expect(201);
+    const admin = await registerAndVerify(app, {
+      email: adminEmail,
+      password,
+      name: 'Contract Admin',
+    });
     adminId = admin.body.user.id;
     await prisma.user.update({
       where: { id: adminId },
@@ -237,14 +240,11 @@ describe('Product backend contracts (e2e)', () => {
       })
       .expect(201);
 
-    const otherRegistered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        email: `${tag}-push-hijack@example.com`,
-        password,
-        name: 'Push Hijack',
-      })
-      .expect(201);
+    const otherRegistered = await registerAndVerify(app, {
+      email: `${tag}-push-hijack@example.com`,
+      password,
+      name: 'Push Hijack',
+    });
     await request(app.getHttpServer())
       .post('/notifications/me/devices')
       .set('Authorization', `Bearer ${otherRegistered.body.accessToken}`)
@@ -346,10 +346,11 @@ describe('Product backend contracts (e2e)', () => {
 
   it('soft deletes and anonymizes an account when requested by the owner', async () => {
     const deleteEmail = `${tag}-delete@example.com`;
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: deleteEmail, password, name: 'Delete Me' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email: deleteEmail,
+      password,
+      name: 'Delete Me',
+    });
 
     await request(app.getHttpServer())
       .delete('/auth/me')

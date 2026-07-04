@@ -6,6 +6,7 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Relax Activities APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -71,10 +72,11 @@ describe('Relax Activities APIs (e2e)', () => {
         );
       });
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Relax User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Relax User',
+    });
     const accessToken = registered.body.accessToken as string;
     const userId = registered.body.user.id as string;
     const startedAt = new Date(Date.now() - 25 * 60 * 1000);

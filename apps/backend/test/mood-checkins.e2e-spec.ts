@@ -8,6 +8,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Mood Check-ins APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -60,10 +61,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
         );
       });
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Mood User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Mood User',
+    });
     const accessToken = registered.body.accessToken as string;
     const userId = registered.body.user.id as string;
 
@@ -144,10 +146,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
       .expect(200)
       .expect(({ body }) => expect(body.id).toBe(created.body.id));
 
-    const otherRegistered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: otherEmail, password, name: 'Other User' })
-      .expect(201);
+    const otherRegistered = await registerAndVerify(app, {
+      email: otherEmail,
+      password,
+      name: 'Other User',
+    });
     const otherToken = otherRegistered.body.accessToken as string;
 
     await request(app.getHttpServer())
@@ -290,10 +293,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
   it('requires auth and validates mood payloads', async () => {
     await request(app.getHttpServer()).get('/mood-checkins/me').expect(401);
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: `${tag}-validation@example.com`, password, name: 'Bad' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email: `${tag}-validation@example.com`,
+      password,
+      name: 'Bad',
+    });
 
     await request(app.getHttpServer())
       .post('/mood-checkins/me')
@@ -306,14 +310,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
   });
 
   it('builds daily mood analytics with previous-period comparison', async () => {
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        email: `${tag}-analytics@example.com`,
-        password,
-        name: 'Analytics User',
-      })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email: `${tag}-analytics@example.com`,
+      password,
+      name: 'Analytics User',
+    });
     const accessToken = registered.body.accessToken as string;
     const userId = registered.body.user.id as string;
     const now = new Date();
@@ -410,14 +411,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
   });
 
   it('groups analytics by the timezone offset for each historical check-in date', async () => {
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        email: `${tag}-dst@example.com`,
-        password,
-        name: 'DST User',
-      })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email: `${tag}-dst@example.com`,
+      password,
+      name: 'DST User',
+    });
     const accessToken = registered.body.accessToken as string;
     const userId = registered.body.user.id as string;
 
@@ -462,14 +460,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
 
   describe('Voice Check-in & Mood Forecast', () => {
     it('analyzes voice text to draft a check-in', async () => {
-      const registered = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: `${tag}-voice-check@example.com`,
-          password,
-          name: 'Voice Check User',
-        })
-        .expect(201);
+      const registered = await registerAndVerify(app, {
+        email: `${tag}-voice-check@example.com`,
+        password,
+        name: 'Voice Check User',
+      });
       const accessToken = registered.body.accessToken as string;
 
       await request(app.getHttpServer())
@@ -485,14 +480,11 @@ describe('Mood Check-ins APIs (e2e)', () => {
     });
 
     it('returns a forecast message', async () => {
-      const registered = await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          email: `${tag}-forecast-check@example.com`,
-          password,
-          name: 'Forecast Check User',
-        })
-        .expect(201);
+      const registered = await registerAndVerify(app, {
+        email: `${tag}-forecast-check@example.com`,
+        password,
+        name: 'Forecast Check User',
+      });
       const accessToken = registered.body.accessToken as string;
 
       await request(app.getHttpServer())

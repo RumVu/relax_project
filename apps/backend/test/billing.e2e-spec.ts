@@ -11,6 +11,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Billing checkout and activation (e2e)', () => {
   let app: INestApplication<App>;
@@ -39,16 +40,18 @@ describe('Billing checkout and activation (e2e)', () => {
     prisma = app.get(PrismaService);
     await app.init();
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Billing E2E' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Billing E2E',
+    });
     accessToken = registered.body.accessToken;
 
-    const otherRegistered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: otherEmail, password, name: 'Billing E2E Other' })
-      .expect(201);
+    const otherRegistered = await registerAndVerify(app, {
+      email: otherEmail,
+      password,
+      name: 'Billing E2E Other',
+    });
     otherToken = otherRegistered.body.accessToken;
   });
 

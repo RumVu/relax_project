@@ -7,6 +7,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Catalog APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -38,14 +39,11 @@ describe('Catalog APIs (e2e)', () => {
     app.useGlobalFilters(new HttpExceptionFilter());
     await app.init();
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        email: adminEmail,
-        password: adminPassword,
-        name: `${tag}-admin`,
-      })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email: adminEmail,
+      password: adminPassword,
+      name: `${tag}-admin`,
+    });
     adminUserId = registered.body.user.id;
     await prisma.user.update({
       where: { id: registered.body.user.id },
@@ -57,14 +55,11 @@ describe('Catalog APIs (e2e)', () => {
       .expect(201);
     adminToken = loggedIn.body.accessToken;
 
-    const registeredUser = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({
-        email: userEmail,
-        password: adminPassword,
-        name: `${tag}-user`,
-      })
-      .expect(201);
+    const registeredUser = await registerAndVerify(app, {
+      email: userEmail,
+      password: adminPassword,
+      name: `${tag}-user`,
+    });
     userToken = registeredUser.body.accessToken;
   });
 

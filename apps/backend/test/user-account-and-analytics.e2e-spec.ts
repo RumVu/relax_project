@@ -6,6 +6,7 @@ import { ThemeMode, UserRole } from '@prisma/client';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 /**
  * Dedicated coverage for the user-profiles, user-preferences and analytics
@@ -45,10 +46,11 @@ describe('User account + analytics APIs (e2e)', () => {
     await app.init();
 
     // Admin user
-    const adminReg = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: adminEmail, password, name: `${tag}-admin` })
-      .expect(201);
+    const adminReg = await registerAndVerify(app, {
+      email: adminEmail,
+      password,
+      name: `${tag}-admin`,
+    });
     await prisma.user.update({
       where: { id: adminReg.body.user.id },
       data: { role: UserRole.ADMIN },
@@ -60,10 +62,11 @@ describe('User account + analytics APIs (e2e)', () => {
     adminToken = adminLogin.body.accessToken;
 
     // Plain user
-    const userReg = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: userEmail, password, name: `${tag}-user` })
-      .expect(201);
+    const userReg = await registerAndVerify(app, {
+      email: userEmail,
+      password,
+      name: `${tag}-user`,
+    });
     userId = userReg.body.user.id;
     userToken = userReg.body.accessToken;
   });

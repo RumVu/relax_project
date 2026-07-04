@@ -6,6 +6,7 @@ import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Gamification & Social APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -71,17 +72,19 @@ describe('Gamification & Social APIs (e2e)', () => {
 
   it('verifies achievements, friend requests, feed posts, and points transactions', async () => {
     // 1. Register User A and User B
-    const regA = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: emailA, password, name: 'User A' })
-      .expect(201);
+    const regA = await registerAndVerify(app, {
+      email: emailA,
+      password,
+      name: 'User A',
+    });
     const tokenA = regA.body.accessToken as string;
     const idA = regA.body.user.id as string;
 
-    const regB = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: emailB, password, name: 'User B' })
-      .expect(201);
+    const regB = await registerAndVerify(app, {
+      email: emailB,
+      password,
+      name: 'User B',
+    });
     const tokenB = regB.body.accessToken as string;
     const idB = regB.body.user.id as string;
 
@@ -227,10 +230,11 @@ describe('Gamification & Social APIs (e2e)', () => {
 
   it('verifies consecutive check-ins, UserStreak cache, and milestone achievement unlock with social feed notification', async () => {
     const emailC = `${tag}-c@example.com`;
-    const regC = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: emailC, password, name: 'User C' })
-      .expect(201);
+    const regC = await registerAndVerify(app, {
+      email: emailC,
+      password,
+      name: 'User C',
+    });
     const tokenC = regC.body.accessToken as string;
     const idC = regC.body.user.id as string;
 

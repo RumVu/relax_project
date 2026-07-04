@@ -8,6 +8,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Reminders APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -44,10 +45,11 @@ describe('Reminders APIs (e2e)', () => {
   });
 
   it('creates, lists, updates, protects, and deletes reminders', async () => {
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Reminder User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Reminder User',
+    });
     const accessToken = registered.body.accessToken as string;
     const userId = registered.body.user.id as string;
 
@@ -113,10 +115,11 @@ describe('Reminders APIs (e2e)', () => {
       .expect(200)
       .expect(({ body }) => expect(body.id).toBe(created.body.id));
 
-    const otherRegistered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: otherEmail, password, name: 'Other User' })
-      .expect(201);
+    const otherRegistered = await registerAndVerify(app, {
+      email: otherEmail,
+      password,
+      name: 'Other User',
+    });
 
     await request(app.getHttpServer())
       .get(`/reminders/${created.body.id}`)

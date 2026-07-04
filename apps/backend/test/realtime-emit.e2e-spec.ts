@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
 import { RealtimeService } from './../src/realtime/realtime.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 // The realtime gateway's actual websocket adapter is wired in main.ts only, so
 // e2e tests do not attach a socket server. Instead this spec spies on the
@@ -42,10 +43,11 @@ describe('Realtime emit wiring (e2e)', () => {
     realtime = app.get(RealtimeService);
     await app.init();
 
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: `${tag}-user` })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: `${tag}-user`,
+    });
     accessToken = registered.body.accessToken;
     userId = registered.body.user.id;
   });

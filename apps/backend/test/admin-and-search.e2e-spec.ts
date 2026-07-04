@@ -6,6 +6,7 @@ import { MoodType, UserRole } from '@prisma/client';
 import { AppModule } from './../src/app.module';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Admin modules and list search/filter (e2e)', () => {
   let app: INestApplication<App>;
@@ -37,10 +38,11 @@ describe('Admin modules and list search/filter (e2e)', () => {
     prisma = app.get(PrismaService);
     await app.init();
 
-    const registeredAdmin = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: adminEmail, password, name: `${tag}-admin` })
-      .expect(201);
+    const registeredAdmin = await registerAndVerify(app, {
+      email: adminEmail,
+      password,
+      name: `${tag}-admin`,
+    });
     await prisma.user.update({
       where: { id: registeredAdmin.body.user.id },
       data: { role: UserRole.ADMIN },
@@ -51,10 +53,11 @@ describe('Admin modules and list search/filter (e2e)', () => {
       .expect(201);
     adminToken = loggedInAdmin.body.accessToken;
 
-    const registeredUser = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: userEmail, password, name: `${tag}-user` })
-      .expect(201);
+    const registeredUser = await registerAndVerify(app, {
+      email: userEmail,
+      password,
+      name: `${tag}-user`,
+    });
     userToken = registeredUser.body.accessToken;
 
     await request(app.getHttpServer())

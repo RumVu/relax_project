@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Weather APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -40,10 +41,11 @@ describe('Weather APIs (e2e)', () => {
   });
 
   it('falls back without location, validates coordinate pairs, and saves location preferences', async () => {
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Weather User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Weather User',
+    });
     const accessToken = registered.body.accessToken as string;
 
     await request(app.getHttpServer())

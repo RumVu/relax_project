@@ -73,7 +73,7 @@ export class AccountTokensService {
         type,
         tokenHash,
         expiresAt,
-        metadata: { ...metadata, isOtp: true } as Prisma.InputJsonValue,
+        metadata: { ...metadata, isOtp: true },
       },
     });
 

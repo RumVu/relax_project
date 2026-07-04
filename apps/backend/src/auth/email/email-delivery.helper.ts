@@ -48,7 +48,10 @@ export function buildEmailDelivery(
     provider,
     configured,
     queued: configured,
-    devToken: !configured && nodeEnv === 'development' ? plainToken : undefined,
+    devToken:
+      !configured && (nodeEnv === 'development' || nodeEnv === 'test')
+        ? plainToken
+        : undefined,
   };
 }
 

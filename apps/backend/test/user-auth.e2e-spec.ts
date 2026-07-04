@@ -8,6 +8,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('User and Auth APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -43,9 +44,25 @@ describe('User and Auth APIs (e2e)', () => {
   });
 
   it('registers, authenticates, updates related user records, and revokes sessions', async () => {
-    const registered = await request(app.getHttpServer())
+    // Step 1: Register returns OTP response (new flow)
+    const registerRes = await request(app.getHttpServer())
       .post('/auth/register')
       .send({ email, password, name: 'E2E User' })
+      .expect(201)
+      .expect(({ body }) => {
+        expect(body.success).toBe(true);
+        expect(body.requiresOtp).toBe(true);
+        expect(body.email).toBe(email);
+        expect(body.expiresAt).toBeTruthy();
+        expect(body.delivery).toBeDefined();
+        expect(body.delivery.devToken).toBeTruthy();
+      });
+
+    // Step 2: Verify OTP to get auth tokens
+    const otp = registerRes.body.delivery.devToken as string;
+    const registered = await request(app.getHttpServer())
+      .post('/auth/otp/verify')
+      .send({ email, code: otp })
       .expect(201)
       .expect(({ body }) => {
         expect(body.accessToken).toBeTruthy();
@@ -207,10 +224,11 @@ describe('User and Auth APIs (e2e)', () => {
   });
 
   it('rejects duplicate registration and invalid login', async () => {
-    await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: `${tag}-duplicate@example.com`, password, name: 'One' })
-      .expect(201);
+    await registerAndVerify(app, {
+      email: `${tag}-duplicate@example.com`,
+      password,
+      name: 'One',
+    });
 
     await request(app.getHttpServer())
       .post('/auth/register')

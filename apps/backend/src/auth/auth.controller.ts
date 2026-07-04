@@ -55,7 +55,9 @@ export class AuthController {
     private readonly configService: ConfigService,
   ) {}
 
-  @ApiOperation({ summary: 'Register a local user and send OTP for email verification' })
+  @ApiOperation({
+    summary: 'Register a local user and send OTP for email verification',
+  })
   @ApiCreatedResponse({
     description: 'Registration accepted, OTP sent to email.',
   })

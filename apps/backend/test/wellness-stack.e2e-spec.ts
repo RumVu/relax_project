@@ -7,6 +7,7 @@ import { AppModule } from './../src/app.module';
 import { ErrorCode } from './../src/common/errors/error-code';
 import { HttpExceptionFilter } from './../src/common/errors/http-exception.filter';
 import { PrismaService } from './../src/prisma/prisma.service';
+import { registerAndVerify } from './helpers/register-and-verify';
 
 describe('Wellness stack APIs (e2e)', () => {
   let app: INestApplication<App>;
@@ -50,10 +51,11 @@ describe('Wellness stack APIs (e2e)', () => {
   });
 
   it('links journals, companion, relax sessions, mood check-ins, and analytics overview', async () => {
-    const registered = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email, password, name: 'Stack User' })
-      .expect(201);
+    const registered = await registerAndVerify(app, {
+      email,
+      password,
+      name: 'Stack User',
+    });
     const accessToken = registered.body.accessToken as string;
 
     await request(app.getHttpServer())
@@ -153,10 +155,11 @@ describe('Wellness stack APIs (e2e)', () => {
         expect(body.summaryCards.totalJournals).toBe(1);
       });
 
-    const other = await request(app.getHttpServer())
-      .post('/auth/register')
-      .send({ email: otherEmail, password, name: 'Other User' })
-      .expect(201);
+    const other = await registerAndVerify(app, {
+      email: otherEmail,
+      password,
+      name: 'Other User',
+    });
 
     await request(app.getHttpServer())
       .get(`/journals/${journal.body.id}`)
