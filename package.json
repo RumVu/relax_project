@@ -24,6 +24,10 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1"
   },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "jsdom": "^25.0.1"
+  },
   "overrides": {
     "postcss": "8.5.15",
     "ws": "8.21.0",

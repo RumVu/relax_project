@@ -1,19 +1,19 @@
-# Project Audit — June 2026
+# Project Audit — July 2026
 
 ## Current Scale
 
 | Category | Count |
 |---|---:|
-| Backend modules (NestJS) | 34 |
-| Postgres tables (Prisma) | 61 |
-| HTTP endpoints | 161 |
-| Backend unit tests | 41 |
-| Backend e2e tests | 87 |
-| Web pages (Next.js routes) | 21 |
-| Web unit tests (Vitest) | 25 |
-| Web e2e tests (Playwright) | 8 |
+| Backend modules (NestJS) | 55 |
+| Postgres tables (Prisma) | 69 |
+| HTTP endpoints | 181 |
+| Backend unit tests | 8 |
+| Backend e2e tests | 124 |
+| Web pages (Next.js routes) | 42 |
+| Web unit tests (Vitest) | 45 |
+| Web e2e tests (Playwright) | 14 |
 | Mobile screens (Flutter) | 30+ |
-| TypeScript files | 304 |
+| TypeScript files | 521 |
 | GitHub Actions | Lint + Web + Backend all green |
 
 ## Mobile App Status
@@ -118,6 +118,16 @@ Backend runs as a long-running process with Socket.IO, BullMQ, Prisma connection
 | Local full-stack | `make up` | Dev offline, full stack locally |
 | LAN sharing | `make share` | Same wifi, no internet needed |
 | Tunnel web | `make tunnel` | Demo local web via trycloudflare |
+
+## Resolved Items (July 2026)
+
+- [x] **Vitest dependency resolution** — `@testing-library/jest-dom` hoisted to root couldn't find `vitest` at `apps/web/node_modules`. Fixed by adding `jsdom` and `jest-dom` to root devDependencies and switching setup to explicit `expect.extend(matchers)`.
+- [x] **Swagger circular dependency** — Response DTOs lacked `@ApiProperty()` decorators; Swagger CLI plugin auto-scanned all DTOs. Fixed by adding decorators and limiting `dtoFileNameSuffix` to input DTOs only.
+- [x] **Backend Docker entry point** — `start-prod.cjs` referenced `dist/main.js` instead of `dist/src/main.js`. Fixed.
+- [x] **CI failures (OTP flow)** — 87 e2e tests broke after OTP registration. Fixed with shared `registerAndVerify()` helper.
+- [x] **Security hygiene** — `.env`, `key.properties`, `*.keystore`, `*-service-account*.json`, `relax-project-*.json` all properly gitignored.
+- [x] **Vercel Analytics 404** — Expected dev-only behaviour; `@vercel/analytics` auto-disables outside Vercel. No fix needed.
+- [x] **Mobile-web dashboard overflow** — `body { overflow-x: hidden }` + `min-w-0` on grid container already prevent horizontal scroll at 390px.
 
 ## Remaining Items
 
