@@ -401,26 +401,13 @@ export class BillingService {
       );
     }
 
-    const sepayConfigured =
-      Boolean(this.configService.get<string>('SEPAY_MERCHANT_ID')) &&
-      Boolean(this.configService.get<string>('SEPAY_SECRET_KEY')) &&
-      Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
-
-    if (payment.provider === 'SEPAY' && sepayConfigured && !isAdminOrWebhook) {
+    if (!isAdminOrWebhook) {
       throw new AppException(
         ErrorCode.AUTH_FORBIDDEN,
-        'Thanh toán qua SePay không thể xác nhận thủ công. Vui lòng chuyển khoản để hệ thống tự động kích hoạt.',
+        'Chỉ admin hoặc webhook mới có thể xác nhận thanh toán.',
         HttpStatus.FORBIDDEN,
       );
     }
-    if (payment.status !== PaymentStatus.PENDING) {
-      throw new AppException(
-        ErrorCode.PAYMENT_NOT_PENDING,
-        'Only a pending payment can be confirmed',
-        HttpStatus.CONFLICT,
-      );
-    }
-
     const plan = await this.resolvePlan(dto.planName);
     if (this.toPaymentAmount(plan.price) !== payment.amount) {
       throw new AppException(
@@ -434,6 +421,17 @@ export class BillingService {
     const endDate = this.computePeriodEnd(startDate, plan.tier?.billingCycle);
 
     const result = await this.prisma.$transaction(async (tx) => {
+      const locked = await tx.payment.findFirst({
+        where: { id: payment.id, status: PaymentStatus.PENDING },
+      });
+      if (!locked) {
+        throw new AppException(
+          ErrorCode.PAYMENT_NOT_PENDING,
+          'Only a pending payment can be confirmed',
+          HttpStatus.CONFLICT,
+        );
+      }
+
       const updatedPayment = await tx.payment.update({
         where: { id: payment.id },
         data: { status: PaymentStatus.COMPLETED },

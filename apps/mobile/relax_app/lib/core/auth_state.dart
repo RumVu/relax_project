@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 
 import 'api_client.dart';
 import 'device_registration.dart';
+import 'offline_store.dart';
 import 'secure_storage.dart';
 
 /// State giữ thông tin user đăng nhập + giúp các màn hình
@@ -226,6 +227,7 @@ class AuthState extends ChangeNotifier {
       // best-effort
     }
     await RelaxApi.instance.clearTokens();
+    await OfflineStore.instance.clearAll();
     _user = null;
     _onLogoutCleanup?.call();
     notifyListeners();
@@ -300,18 +302,12 @@ class AuthState extends ChangeNotifier {
         body['accessToken'] = accessToken;
       }
 
-      debugPrint('AuthState.loginWithGoogle: Đang gửi POST /auth/google...');
       final res = await RelaxApi.instance.post('/auth/google', body: body);
-      debugPrint('AuthState.loginWithGoogle: Backend phản hồi với HTTP Status = ${res.statusCode}');
-      debugPrint('AuthState.loginWithGoogle: Body data = ${res.data}');
 
       if (res.statusCode == 200 || res.statusCode == 201) {
         final access = res.data?['accessToken'] as String?;
         final refresh = res.data?['refreshToken'] as String?;
         if (access != null) {
-          debugPrint('AuthState.loginWithGoogle: Lưu tokens thành công!');
-          debugPrint('  - Access Token: $access');
-          debugPrint('  - Refresh Token: $refresh');
           await RelaxApi.instance.saveTokens(access: access, refresh: refresh);
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)

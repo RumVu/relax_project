@@ -70,12 +70,15 @@ class RelaxApi {
     }
   }
 
-  /// POST wrapper — queues offline if no connectivity.
+  static bool _isSensitivePath(String path) =>
+      path.startsWith('/auth') || path.contains('delete-account');
+
+  /// POST wrapper — queues offline if no connectivity (except sensitive paths).
   Future<Response<dynamic>> post(String path, {dynamic body}) async {
     try {
       return await _dio.post(path, data: body);
     } catch (e) {
-      if (await _isNetworkError(e)) {
+      if (!_isSensitivePath(path) && await _isNetworkError(e)) {
         await OfflineStore.instance.enqueue(method: 'POST', path: path, body: body);
         return Response(
           requestOptions: RequestOptions(path: path),
@@ -91,7 +94,7 @@ class RelaxApi {
     try {
       return await _dio.patch(path, data: body);
     } catch (e) {
-      if (await _isNetworkError(e)) {
+      if (!_isSensitivePath(path) && await _isNetworkError(e)) {
         await OfflineStore.instance.enqueue(method: 'PATCH', path: path, body: body);
         return Response(
           requestOptions: RequestOptions(path: path),
@@ -107,7 +110,7 @@ class RelaxApi {
     try {
       return await _dio.delete(path, data: body);
     } catch (e) {
-      if (await _isNetworkError(e)) {
+      if (!_isSensitivePath(path) && await _isNetworkError(e)) {
         await OfflineStore.instance.enqueue(method: 'DELETE', path: path, body: body);
         return Response(
           requestOptions: RequestOptions(path: path),

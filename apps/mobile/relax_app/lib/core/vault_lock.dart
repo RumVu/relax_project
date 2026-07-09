@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -28,20 +32,38 @@ class VaultLock {
     return box.get('pin') != null;
   }
 
+  static String _generateSalt() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64Encode(bytes);
+  }
+
+  static String _hashPin(String pin, String salt) =>
+      sha256.convert(utf8.encode('$salt:$pin')).toString();
+
   Future<void> setPin(String pin) async {
     final box = await _box;
-    await box.put('pin', pin.hashCode.toString());
+    final salt = _generateSalt();
+    await box.put('pin_salt', salt);
+    await box.put('pin', _hashPin(pin, salt));
   }
 
   Future<void> removePin() async {
     final box = await _box;
     await box.delete('pin');
+    await box.delete('pin_salt');
   }
 
   Future<bool> verify(String pin) async {
     final box = await _box;
     final stored = box.get('pin') as String?;
-    return stored == pin.hashCode.toString();
+    if (stored == null) return false;
+    final salt = box.get('pin_salt') as String?;
+    if (salt == null) {
+      // Legacy: migrate old hashCode-based PIN on next setPin
+      return stored == pin.hashCode.toString();
+    }
+    return stored == _hashPin(pin, salt);
   }
 
   // ---------------------------------------------------------------------------

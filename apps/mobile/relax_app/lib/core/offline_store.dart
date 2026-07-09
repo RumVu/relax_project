@@ -241,6 +241,13 @@ class OfflineStore extends ChangeNotifier {
     flushQueue();
   }
 
+  Future<void> clearAll() async {
+    await _cacheBox.clear();
+    await _queueBox.clear();
+    _queueItems.clear();
+    notifyListeners();
+  }
+
   // ─── Connectivity check ─────────────────────────────────
 
   Future<bool> get isOnline async {

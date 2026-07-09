@@ -63,6 +63,7 @@ dependencies:
   relax_api_client:
     path: lib/generated/api
   local_auth: ^3.0.1
+  crypto: ^3.0.6
 
 dev_dependencies:
   flutter_test:
