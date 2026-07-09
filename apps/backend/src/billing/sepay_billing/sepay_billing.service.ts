@@ -169,10 +169,11 @@ export class SepayBillingService {
       }
     }
 
-    // Fallback B: match PENDING payment trong 24h gần nhất với cùng amount + provider=SEPAY.
-    // Đây là phương án cuối khi SePay PAY code không map được — dựa vào việc mỗi user
-    // hiếm khi có hai pending payment cùng amount cùng lúc.
-    if (!payment && transferAmount) {
+    // Fallback B: match PENDING payment by amount — ONLY in sandbox/dev.
+    // In production, this risks misattributing payments between users.
+    const sepayEnv =
+      this.configService.get<string>('SEPAY_ENV') || 'sandbox';
+    if (!payment && transferAmount && sepayEnv !== 'production') {
       const amount = Number(transferAmount);
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
       const candidatesByAmount = await this.prisma.payment.findMany({
@@ -187,7 +188,7 @@ export class SepayBillingService {
       if (candidatesByAmount.length === 1) {
         payment = candidatesByAmount[0];
         this.logger.log(
-          `SePay webhook matched Payment ${payment.id} via amount-fallback`,
+          `SePay webhook matched Payment ${payment.id} via amount-fallback (sandbox only)`,
         );
       } else if (candidatesByAmount.length > 1) {
         this.logger.warn(

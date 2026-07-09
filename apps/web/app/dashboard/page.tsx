@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import {
   BarChart3,
@@ -14,14 +15,10 @@ import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
   CompanionStatusCard,
   DataTable,
-  DistributionChart,
   MetricCard,
-  MoodAreaDashboardChart,
   ProgressList,
-  RelaxActivityChart,
   SectionTitle,
   WeatherCard,
-  WeeklyStatsChart,
 } from '@/components/dashboard/dashboard-ui';
 import { CozyQuoteCard } from '@/components/dashboard/cozy-quote-card';
 import { QuestPanel } from '@/components/dashboard/quest-panel';
@@ -36,6 +33,23 @@ import { PremiumGate } from '@/components/dashboard/premium-gate';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
+
+const MoodAreaDashboardChart = dynamic(
+  () => import('@/components/dashboard/dashboard-ui').then((m) => m.MoodAreaDashboardChart),
+  { ssr: false },
+);
+const WeeklyStatsChart = dynamic(
+  () => import('@/components/dashboard/dashboard-ui').then((m) => m.WeeklyStatsChart),
+  { ssr: false },
+);
+const DistributionChart = dynamic(
+  () => import('@/components/dashboard/dashboard-ui').then((m) => m.DistributionChart),
+  { ssr: false },
+);
+const RelaxActivityChart = dynamic(
+  () => import('@/components/dashboard/dashboard-ui').then((m) => m.RelaxActivityChart),
+  { ssr: false },
+);
 
 export default function DashboardPage() {
   const router = useRouter();
