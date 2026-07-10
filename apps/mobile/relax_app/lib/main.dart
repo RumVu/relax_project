@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'core/api_client.dart';
 import 'core/audio_controller.dart';
+import 'core/feature_flags.dart';
 import 'core/offline_store.dart';
 import 'core/calendar_integration_service.dart';
 import 'core/auth_state.dart';
@@ -66,8 +67,11 @@ import 'screens/wellness_report/wellness_report_screen.dart';
 import 'screens/gratitude/gratitude_journal_screen.dart';
 import 'screens/focus_timer/focus_timer_screen.dart';
 import 'screens/data_privacy/data_privacy_screen.dart';
+import 'screens/adaptive_plan/adaptive_plan_screen.dart';
 import 'screens/auth/verify_otp_screen.dart';
 import 'screens/auth/forgot_password_screen.dart';
+import 'screens/mood/emotion_wheel_checkin.dart';
+import 'screens/mood/mood_first_aid_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -94,6 +98,7 @@ class _RelaxAppState extends State<RelaxApp> {
     super.initState();
     _auth = AuthState();
     _audio = AudioController();
+    FeatureFlags.instance.load();
     _auth.onLogoutCleanup = () {
       RelaxScreen.resetIntroForLogout();
       _audio.stop();
@@ -122,6 +127,7 @@ class _RelaxAppState extends State<RelaxApp> {
         ChangeNotifierProvider.value(value: _audio),
         ChangeNotifierProvider(create: (_) => LocaleController()),
         ChangeNotifierProvider.value(value: TourController.instance),
+        ChangeNotifierProvider.value(value: FeatureFlags.instance),
       ],
       child: Builder(builder: (context) {
         final theme = context.watch<ThemeController>();
@@ -263,10 +269,12 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/gratitude', const GratitudeJournalScreen()),
       _soft('/focus-timer', const FocusTimerScreen()),
       _soft('/data-privacy', const DataPrivacyScreen()),
+      _soft('/emotion-wheel', const EmotionWheelCheckin()),
+      _soft('/mood-first-aid', const MoodFirstAidScreen()),
+      _soft('/adaptive-plan', const AdaptivePlanScreen()),
 
-      // Raw builder (no transition)
-      GoRoute(path: '/location', builder: (c, s) => const LocationScreen()),
-      GoRoute(path: '/device-info', builder: (c, s) => const DeviceInfoScreen()),
+      _soft('/location', const LocationScreen()),
+      _soft('/device-info', const DeviceInfoScreen()),
     ],
   );
 }
