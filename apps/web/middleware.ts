@@ -14,6 +14,15 @@ export function middleware(request: NextRequest) {
       loginUrl.searchParams.set('redirect', pathname);
       return NextResponse.redirect(loginUrl);
     }
+
+    if (pathname.startsWith('/admin')) {
+      const isAdmin = session.value === 'role:ADMIN';
+      if (!isAdmin) {
+        const dashboardUrl = request.nextUrl.clone();
+        dashboardUrl.pathname = '/dashboard';
+        return NextResponse.redirect(dashboardUrl);
+      }
+    }
   }
 
   return NextResponse.next();

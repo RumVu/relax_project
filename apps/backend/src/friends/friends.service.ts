@@ -20,27 +20,29 @@ export class FriendsService {
       throw new BadRequestException('User not found');
     }
 
-    const existing = await this.prisma.friend.findFirst({
-      where: {
-        OR: [
-          { userId, friendId },
-          { userId: friendId, friendId: userId },
-        ],
-      },
-    });
+    return this.prisma.$transaction(async (tx) => {
+      const existing = await tx.friend.findFirst({
+        where: {
+          OR: [
+            { userId, friendId },
+            { userId: friendId, friendId: userId },
+          ],
+        },
+      });
 
-    if (existing) {
-      throw new BadRequestException(
-        'Friend request already sent or you are already friends',
-      );
-    }
+      if (existing) {
+        throw new BadRequestException(
+          'Friend request already sent or you are already friends',
+        );
+      }
 
-    return this.prisma.friend.create({
-      data: {
-        userId,
-        friendId,
-        status: FriendRequestStatus.PENDING,
-      },
+      return tx.friend.create({
+        data: {
+          userId,
+          friendId,
+          status: FriendRequestStatus.PENDING,
+        },
+      });
     });
   }
 

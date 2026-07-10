@@ -1526,6 +1526,7 @@ model Payment {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([externalPaymentId])
   @@index([userId])
   @@index([status])
   @@map("payments")

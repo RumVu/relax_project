@@ -115,8 +115,8 @@ jobs:
       - name: Install root deps
         run: npm ci
 
-      - name: Rebuild platform binaries (rollup)
-        run: npm rebuild
+      - name: Install platform-specific rollup binary
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu
 
       - name: Check generated OpenAPI types
         run: test -s apps/web/lib/generated/openapi-types.ts && grep -q '"/v1/auth/login"' apps/web/lib/generated/openapi-types.ts

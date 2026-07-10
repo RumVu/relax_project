@@ -89,7 +89,7 @@ export class BillingController {
     @Param('id') id: string,
     @Body() dto: ConfirmPaymentDto,
   ) {
-    const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+    const isAdmin = user.role === 'ADMIN';
     return this.billingService.confirmPayment(user.id, id, dto, isAdmin);
   }
 

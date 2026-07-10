@@ -91,48 +91,50 @@ export class AchievementsService implements OnModuleInit {
     });
     if (!achievement) return;
 
-    const existingUnlock = await this.prisma.userAchievement.findUnique({
-      where: {
-        userId_achievementId: {
-          userId,
-          achievementId: achievement.id,
+    await this.prisma.$transaction(async (tx) => {
+      const existingUnlock = await tx.userAchievement.findUnique({
+        where: {
+          userId_achievementId: {
+            userId,
+            achievementId: achievement.id,
+          },
         },
-      },
-    });
+      });
 
-    if (!existingUnlock) {
-      await this.prisma.userAchievement.create({
+      if (existingUnlock) return;
+
+      await tx.userAchievement.create({
         data: {
           userId,
           achievementId: achievement.id,
         },
       });
 
-      const userPoints = await this.prisma.userPoints.upsert({
+      const userPoints = await tx.userPoints.upsert({
         where: { userId },
         update: { totalPoints: { increment: achievement.points } },
         create: { userId, totalPoints: achievement.points },
       });
 
-      await this.prisma.pointsTransaction.create({
+      await tx.pointsTransaction.create({
         data: {
           userPointsId: userPoints.id,
           amount: achievement.points,
           reason: `Mở khóa thành tựu: ${achievement.title}`,
         },
       });
+    });
 
-      try {
-        await this.feedService.createEntry(
-          userId,
-          'ACHIEVEMENT_UNLOCKED',
-          'Đã mở khóa thành tựu mới',
-          `đã đạt thành tựu: "${achievement.title}" - ${achievement.description ?? ''}`,
-          achievement.id,
-        );
-      } catch {
-        // Do not block unlock logic if feed entry fails
-      }
+    try {
+      await this.feedService.createEntry(
+        userId,
+        'ACHIEVEMENT_UNLOCKED',
+        'Đã mở khóa thành tựu mới',
+        `đã đạt thành tựu: "${achievement.title}" - ${achievement.description ?? ''}`,
+        achievement.id,
+      );
+    } catch {
+      // Do not block unlock logic if feed entry fails
     }
   }
 }
