@@ -98,10 +98,21 @@ docker exec "${CONTAINER}" psql -U "${DB_USER}" -d postgres -c \
   "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = '${DB_NAME}' AND pid <> pg_backend_pid();" \
   > /dev/null 2>&1 || true
 
-# Restore
+# Restore — capture psql exit code through the pipe
+RESTORE_LOG=$(mktemp)
 gunzip -c "${BACKUP_FILE}" | docker exec -i "${CONTAINER}" \
   psql -U "${DB_USER}" -d "${DB_NAME}" --single-transaction -q 2>&1 \
-  | grep -v "^NOTICE:" | grep -v "^SET$" | grep -v "^DROP " | grep -v "^ALTER " | grep -v "^CREATE " || true
+  | grep -v "^NOTICE:" | grep -v "^SET$" | grep -v "^DROP " | grep -v "^ALTER " | grep -v "^CREATE " \
+  > "${RESTORE_LOG}" 2>&1
+RESTORE_EXIT=${PIPESTATUS[1]}
+
+if [ "${RESTORE_EXIT}" -ne 0 ]; then
+  warn "psql restore failed (exit code ${RESTORE_EXIT}):"
+  cat "${RESTORE_LOG}" >&2
+  rm -f "${RESTORE_LOG}"
+  exit 1
+fi
+rm -f "${RESTORE_LOG}"
 
 info "Database restored successfully!"
 

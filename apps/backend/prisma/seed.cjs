@@ -1524,10 +1524,17 @@ async function seedSearchIndex() {
   console.log(`Seeded ${entries.length} search index entries`);
 }
 
-const DEMO_USER_EMAIL = 'demo@digital-break.local';
-const DEMO_USER_PASSWORD = 'Demo123456!';
-const ADMIN_USER_EMAIL = 'dashboard.demo@relax.local';
-const ADMIN_USER_PASSWORD = 'Relax123!@#';
+const DEMO_USER_EMAIL = process.env.SEED_DEMO_EMAIL || 'demo@digital-break.local';
+const DEMO_USER_PASSWORD = process.env.SEED_DEMO_PASSWORD || (process.env.NODE_ENV === 'production' ? undefined : 'Demo123456!');
+const ADMIN_USER_EMAIL = process.env.SEED_ADMIN_EMAIL || 'dashboard.demo@relax.local';
+const ADMIN_USER_PASSWORD = process.env.SEED_ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? undefined : 'Relax123!@#');
+
+if (!DEMO_USER_PASSWORD || !ADMIN_USER_PASSWORD) {
+  throw new Error(
+    'SEED_DEMO_PASSWORD and SEED_ADMIN_PASSWORD must be set via environment variables in production. ' +
+    'Never use hard-coded credentials in a production database.',
+  );
+}
 
 function daysAgo(days, hour = 20, minute = 30) {
   const date = new Date();
@@ -1910,7 +1917,7 @@ async function seedDemoUserData() {
   });
 
   console.log(
-    `Seeded demo user ${DEMO_USER_EMAIL} with password ${DEMO_USER_PASSWORD}`,
+    `Seeded demo user ${DEMO_USER_EMAIL}`,
   );
 }
 
@@ -2003,7 +2010,7 @@ async function seedAdminUser() {
   });
 
   console.log(
-    `Seeded admin user ${ADMIN_USER_EMAIL} with password ${ADMIN_USER_PASSWORD}`,
+    `Seeded admin user ${ADMIN_USER_EMAIL}`,
   );
 }
 

@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 
-import '../../../core/api_client.dart';
 import '../../../core/auth_state.dart';
 import '../../../core/env.dart';
 import '../../../core/locale_controller.dart';
@@ -43,8 +42,8 @@ Future<void> loginWithGoogle(
     final idToken = authDetails.idToken;
     final accessToken = authDetails.accessToken;
 
-    debugPrint('Google ID Token lấy được: $idToken');
-    debugPrint('Google Access Token lấy được: $accessToken');
+    debugPrint('Google ID Token received (length: ${idToken?.length ?? 0})');
+    debugPrint('Google Access Token received (length: ${accessToken?.length ?? 0})');
 
     if (idToken == null) {
       debugPrint(
@@ -67,10 +66,8 @@ Future<void> loginWithGoogle(
     if (context.mounted) {
       setBusy(false);
       if (ok) {
-        final token = await RelaxApi.instance.accessToken;
         if (!context.mounted) return;
         debugPrint('=== [ĐĂNG NHẬP GOOGLE THÀNH CÔNG] ===');
-        debugPrint('Backend Access Token: $token');
         debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
         context.go('/home');
       } else {
@@ -94,24 +91,33 @@ Future<void> loginWithGoogle(
 }
 
 /// DEV bypass: use demo credentials instead of Google Sign-In.
+/// Credentials are read from dart-define at build time — no hardcoded values.
 Future<void> simulateGoogleLogin(
   BuildContext context, {
   required ValueChanged<bool> setBusy,
 }) async {
+  const demoEmail = String.fromEnvironment('DEMO_EMAIL');
+  const demoPassword = String.fromEnvironment('DEMO_PASSWORD');
+  if (demoEmail.isEmpty || demoPassword.isEmpty) {
+    debugPrint('=== [GIẢ LẬP GOOGLE BỊ TẮT]: DEMO_EMAIL/DEMO_PASSWORD chưa được cấu hình ===');
+    if (context.mounted) {
+      showSoftToast(context,
+          message: context.t('Demo login is not configured'),
+          tone: SoftToastTone.error);
+    }
+    return;
+  }
   debugPrint('=== [ĐÃ CHỌN ĐĂNG NHẬP: GIẢ LẬP GOOGLE BYPASS] ===');
   setBusy(true);
   final auth = context.read<AuthState>();
-  final ok =
-      await auth.login('dashboard.demo@relax.local', 'Relax123!@#');
+  final ok = await auth.login(demoEmail, demoPassword);
   if (!context.mounted) return;
   setBusy(false);
   if (ok) {
     debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THÀNH CÔNG] ===');
-    debugPrint('Tiến hành chuyển hướng vào màn hình Home...');
     context.go('/home');
   } else {
-    debugPrint(
-        '=== [ĐĂNG NHẬP GIẢ LẬP THẤT BẠI]: ${auth.error} ===');
+    debugPrint('=== [ĐĂNG NHẬP GIẢ LẬP THẤT BẠI]: ${auth.error} ===');
     showSoftToast(context,
         message: context.t(auth.error ?? 'Đăng nhập giả lập thất bại'),
         tone: SoftToastTone.error);

@@ -1,44 +1,50 @@
-import { IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateCheckoutSessionDto {
   @IsString()
+  @MaxLength(100)
   planName!: string;
 
-  /**
-   * Deprecated compatibility field. The backend always prices from
-   * SubscriptionTier/fallback plan catalog and ignores client-provided amount.
-   */
   @IsOptional()
   @IsNumber()
   @Min(0)
   amount?: number;
 
-  /**
-   * Deprecated compatibility field. The backend always uses the server-side
-   * plan currency.
-   */
   @IsOptional()
   @IsString()
+  @MaxLength(10)
   currency?: string;
 
   @IsOptional()
   @IsString()
-  @IsIn(['STRIPE', 'APP_STORE', 'GOOGLE_PLAY', 'MANUAL', 'SEPAY'])
+  @IsIn(['STRIPE', 'APP_STORE', 'GOOGLE_PLAY', 'SEPAY'])
   provider?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   description?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl({ require_tld: false }, { message: 'successUrl must be a valid URL' })
+  @MaxLength(2048)
   successUrl?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl({ require_tld: false }, { message: 'errorUrl must be a valid URL' })
+  @MaxLength(2048)
   errorUrl?: string;
 
   @IsOptional()
-  @IsString()
+  @IsUrl({ require_tld: false }, { message: 'cancelUrl must be a valid URL' })
+  @MaxLength(2048)
   cancelUrl?: string;
 }

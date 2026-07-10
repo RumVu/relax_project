@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   Headers,
   Patch,
@@ -98,6 +99,9 @@ export class AuthController {
     type: AuthResponseDto,
     description: 'Demo user session with sample data.',
   })
+  @Throttle({
+    default: { ttl: minutes(1), limit: 3, blockDuration: minutes(10) },
+  })
   @Post('demo')
   demo(
     @Body() dto: DemoLoginDto,
@@ -105,6 +109,9 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
+    if (this.configService.get('DEMO_MODE_ENABLED') !== 'true') {
+      throw new ForbiddenException('Demo mode is disabled');
+    }
     return this.withRefreshCookie(
       response,
       this.authService.demoLogin(

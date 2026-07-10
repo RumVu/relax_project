@@ -18,6 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RequirePremium } from '../common/decorators/require-premium.decorator';
 import { AiInsightsService } from './ai-insights.service';
 import { FeedbackInsightDto } from './dto/feedback-insight.dto';
 
@@ -27,6 +28,7 @@ interface AuthedRequest extends Request {
 
 @ApiTags('ai-insights')
 @ApiBearerAuth()
+@RequirePremium()
 @Controller('ai/insights')
 @UseGuards(JwtAuthGuard)
 export class AiInsightsController {

@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:local_auth/local_auth.dart';
 
 import 'locale_controller.dart';
 import 'theme.dart';
@@ -26,40 +32,60 @@ class VaultLock {
     return box.get('pin') != null;
   }
 
+  static String _generateSalt() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return base64Encode(bytes);
+  }
+
+  static String _hashPin(String pin, String salt) =>
+      sha256.convert(utf8.encode('$salt:$pin')).toString();
+
   Future<void> setPin(String pin) async {
     final box = await _box;
-    await box.put('pin', pin.hashCode.toString());
+    final salt = _generateSalt();
+    await box.put('pin_salt', salt);
+    await box.put('pin', _hashPin(pin, salt));
   }
 
   Future<void> removePin() async {
     final box = await _box;
     await box.delete('pin');
+    await box.delete('pin_salt');
   }
 
   Future<bool> verify(String pin) async {
     final box = await _box;
     final stored = box.get('pin') as String?;
-    return stored == pin.hashCode.toString();
+    if (stored == null) return false;
+    final salt = box.get('pin_salt') as String?;
+    if (salt == null) {
+      // Legacy: migrate old hashCode-based PIN on next setPin
+      return stored == pin.hashCode.toString();
+    }
+    return stored == _hashPin(pin, salt);
   }
 
   // ---------------------------------------------------------------------------
-  // Biometric support (stub — needs `local_auth` package)
+  // Biometric support
   // ---------------------------------------------------------------------------
 
-  /// Try biometric authentication.
-  /// TODO: Integrate `local_auth` package for real biometric support.
-  /// For now this always returns false so the caller falls back to PIN.
+  static final _localAuth = LocalAuthentication();
+
   static Future<bool> unlockBiometric(BuildContext context) async {
-    // Stub implementation — always returns false.
-    // When local_auth is added to pubspec.yaml, replace with:
-    //   final localAuth = LocalAuthentication();
-    //   final canCheck = await localAuth.canCheckBiometrics;
-    //   if (!canCheck) return false;
-    //   return localAuth.authenticate(
-    //     localizedReason: 'Mở khóa nhật ký',
-    //     options: const AuthenticationOptions(biometricOnly: true),
-    //   );
-    return false;
+    try {
+      final canCheck = await _localAuth.canCheckBiometrics;
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      if (!canCheck && !isDeviceSupported) return false;
+
+      // ignore: use_build_context_synchronously
+      return await _localAuth.authenticate(
+        localizedReason: context.t('Mở khóa nhật ký'),
+        biometricOnly: true,
+      );
+    } on PlatformException {
+      return false;
+    }
   }
 
   // ---------------------------------------------------------------------------

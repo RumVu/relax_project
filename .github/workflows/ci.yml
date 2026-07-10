@@ -115,6 +115,9 @@ jobs:
       - name: Install root deps
         run: npm ci
 
+      - name: Install platform-specific rollup binary
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu
+
       - name: Check generated OpenAPI types
         run: test -s apps/web/lib/generated/openapi-types.ts && grep -q '"/v1/auth/login"' apps/web/lib/generated/openapi-types.ts
 
@@ -123,6 +126,10 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: http://localhost:6823
         run: npm run build
+
+      - name: Web unit tests
+        working-directory: apps/web
+        run: npm test
 
       - name: Install Playwright browsers
         working-directory: apps/web

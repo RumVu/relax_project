@@ -212,20 +212,28 @@ export class BuddyCircleService {
       );
     }
 
-    await this.prisma.notification.create({
-      data: {
-        userId: 'ADMIN',
-        title: 'Content Report',
-        message: JSON.stringify({
-          reporterId: userId,
-          targetUserId: data.targetUserId,
-          feedEntryId: data.feedEntryId,
-          reason: data.reason,
-          createdAt: new Date().toISOString(),
-        }),
-        type: 'IN_APP',
-      },
+    const admins = await this.prisma.user.findMany({
+      where: { role: 'ADMIN' },
+      select: { id: true },
+      take: 10,
     });
+
+    if (admins.length > 0) {
+      await this.prisma.notification.createMany({
+        data: admins.map((admin) => ({
+          userId: admin.id,
+          title: 'Content Report',
+          message: JSON.stringify({
+            reporterId: userId,
+            targetUserId: data.targetUserId,
+            feedEntryId: data.feedEntryId,
+            reason: data.reason,
+            createdAt: new Date().toISOString(),
+          }),
+          type: 'IN_APP',
+        })),
+      });
+    }
 
     if (data.feedEntryId) {
       await this.prisma.feedEntry.update({

@@ -15,6 +15,11 @@ import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
 const MONTHLY_PERIOD_DAYS = 30;
 const ANNUAL_PERIOD_DAYS = 365;
+const DEFAULT_ALLOWED_REDIRECT_ORIGINS = [
+  'http://localhost:3233',
+  'http://localhost:3000',
+  'https://relax-project-web-dashboard.vercel.app',
+];
 
 // Một pending payment được coi là "đang chờ chuyển khoản" trong 30 phút —
 // đủ thời gian để user quét QR, mở app ngân hàng, xác thực OTP. Sau ngưỡng
@@ -301,12 +306,21 @@ export class BillingService {
 
       const checkoutURL = client.checkout.initCheckoutUrl();
 
-      const successUrl =
-        dto.successUrl || 'http://localhost:3233/billing?status=success';
-      const errorUrl =
-        dto.errorUrl || 'http://localhost:3233/billing?status=error';
-      const cancelUrl =
-        dto.cancelUrl || 'http://localhost:3233/billing?status=cancel';
+      const defaultBase =
+        this.configService.get<string>('WEB_APP_URL') ||
+        'http://localhost:3233';
+      const successUrl = this.validateRedirectUrl(
+        dto.successUrl,
+        `${defaultBase}/billing?status=success`,
+      );
+      const errorUrl = this.validateRedirectUrl(
+        dto.errorUrl,
+        `${defaultBase}/billing?status=error`,
+      );
+      const cancelUrl = this.validateRedirectUrl(
+        dto.cancelUrl,
+        `${defaultBase}/billing?status=cancel`,
+      );
 
       const checkoutFormfields = client.checkout.initOneTimePaymentFields({
         payment_method: 'BANK_TRANSFER',
@@ -401,26 +415,13 @@ export class BillingService {
       );
     }
 
-    const sepayConfigured =
-      Boolean(this.configService.get<string>('SEPAY_MERCHANT_ID')) &&
-      Boolean(this.configService.get<string>('SEPAY_SECRET_KEY')) &&
-      Boolean(this.configService.get<string>('SEPAY_WEBHOOK_API_KEY'));
-
-    if (payment.provider === 'SEPAY' && sepayConfigured && !isAdminOrWebhook) {
+    if (!isAdminOrWebhook) {
       throw new AppException(
         ErrorCode.AUTH_FORBIDDEN,
-        'Thanh toán qua SePay không thể xác nhận thủ công. Vui lòng chuyển khoản để hệ thống tự động kích hoạt.',
+        'Chỉ admin hoặc webhook mới có thể xác nhận thanh toán.',
         HttpStatus.FORBIDDEN,
       );
     }
-    if (payment.status !== PaymentStatus.PENDING) {
-      throw new AppException(
-        ErrorCode.PAYMENT_NOT_PENDING,
-        'Only a pending payment can be confirmed',
-        HttpStatus.CONFLICT,
-      );
-    }
-
     const plan = await this.resolvePlan(dto.planName);
     if (this.toPaymentAmount(plan.price) !== payment.amount) {
       throw new AppException(
@@ -434,6 +435,17 @@ export class BillingService {
     const endDate = this.computePeriodEnd(startDate, plan.tier?.billingCycle);
 
     const result = await this.prisma.$transaction(async (tx) => {
+      const locked = await tx.payment.findFirst({
+        where: { id: payment.id, status: PaymentStatus.PENDING },
+      });
+      if (!locked) {
+        throw new AppException(
+          ErrorCode.PAYMENT_NOT_PENDING,
+          'Only a pending payment can be confirmed',
+          HttpStatus.CONFLICT,
+        );
+      }
+
       const updatedPayment = await tx.payment.update({
         where: { id: payment.id },
         data: { status: PaymentStatus.COMPLETED },
@@ -701,6 +713,26 @@ export class BillingService {
       );
     }
     return payment;
+  }
+
+  private validateRedirectUrl(
+    url: string | undefined,
+    fallback: string,
+  ): string {
+    if (!url) return fallback;
+    try {
+      const parsed = new URL(url);
+      const allowedCsv = this.configService.get<string>(
+        'CHECKOUT_ALLOWED_ORIGINS',
+      );
+      const allowed = allowedCsv
+        ? allowedCsv.split(',').map((o) => o.trim())
+        : DEFAULT_ALLOWED_REDIRECT_ORIGINS;
+      if (allowed.includes(parsed.origin)) return url;
+    } catch {
+      // invalid URL
+    }
+    return fallback;
   }
 
   private toPaymentAmount(value: number) {

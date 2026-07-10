@@ -72,28 +72,22 @@ export class ExperimentsService {
       );
     }
 
-    const existing = await this.prisma.experimentAssignment.findUnique({
-      where: {
-        userId_experimentId: { userId, experimentId: experiment.id },
-      },
-    });
-
-    if (existing) {
-      return { experiment, variant: existing.variant };
-    }
-
     const variants = experiment.variants as string[];
     const variant = variants[Math.floor(Math.random() * variants.length)];
 
-    await this.prisma.experimentAssignment.create({
-      data: {
+    const assignment = await this.prisma.experimentAssignment.upsert({
+      where: {
+        userId_experimentId: { userId, experimentId: experiment.id },
+      },
+      update: {},
+      create: {
         userId,
         experimentId: experiment.id,
         variant,
       },
     });
 
-    return { experiment, variant };
+    return { experiment, variant: assignment.variant };
   }
 
   async getMyAssignments(userId: string) {

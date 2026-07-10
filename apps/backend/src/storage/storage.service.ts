@@ -365,10 +365,24 @@ export class StorageService {
     });
   }
 
-  registerFile(dto: RegisterStorageFileDto, ownerUserId?: string) {
+  async registerFile(dto: RegisterStorageFileDto, ownerUserId?: string) {
     const normalizedPath = ownerUserId
       ? this.normalizeUserUploadPath(ownerUserId, dto.path)
       : this.normalizePath(dto.path);
+
+    if (this.client && this.supabaseBucket) {
+      const { data } = await this.getClient()
+        .storage.from(this.getBucket())
+        .createSignedUrl(normalizedPath, 5);
+      if (!data?.signedUrl) {
+        throw new AppException(
+          ErrorCode.STORAGE_OPERATION_FAILED,
+          `Object not found at path: ${normalizedPath}`,
+          HttpStatus.NOT_FOUND,
+        );
+      }
+    }
+
     const isPublic = dto.isPublic ?? true;
     const publicUrl = isPublic
       ? (dto.publicUrl ?? this.getPublicUrl(normalizedPath).publicUrl)
