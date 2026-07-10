@@ -7,6 +7,8 @@ import { RealtimeService } from './realtime/realtime.service';
 import { RedisService } from './redis/redis.service';
 import { StorageService } from './storage/storage.service';
 import { PrismaService } from './prisma/prisma.service';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 
 describe('AppController', () => {
   let appController: AppController;
@@ -89,7 +91,12 @@ describe('AppController', () => {
           },
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     appController = app.get<AppController>(AppController);
   });

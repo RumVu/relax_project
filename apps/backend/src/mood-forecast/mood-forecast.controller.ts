@@ -1,6 +1,7 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import { RequirePremium } from '../common/decorators/require-premium.decorator';
 import { MoodForecastService } from './mood-forecast.service';
 
 interface AuthedRequest extends Request {
@@ -9,6 +10,7 @@ interface AuthedRequest extends Request {
 
 @Controller('mood-forecast')
 @UseGuards(AuthGuard('jwt'))
+@RequirePremium()
 export class MoodForecastController {
   constructor(private readonly service: MoodForecastService) {}
 

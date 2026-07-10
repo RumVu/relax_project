@@ -71,15 +71,22 @@ const nextConfig = {
             //   connect-src https://accounts.google.com  (token exchange)
             // Without these the GIS button never renders → login page chỉ
             // có form email/password.
-            value:
-              "default-src 'self'; " +
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com; " +
-              "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
-              "img-src 'self' data: blob: https:; " +
-              "media-src 'self' data: blob: https:; " +
-              `connect-src 'self' ${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823'} ${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823').replace(/^http/, 'ws')} https://accounts.google.com https://www.google-analytics.com; ` +
-              "frame-src 'self' https://accounts.google.com; " +
-              "frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://pay.sepay.vn https://*.sepay.vn",
+            value: (() => {
+              const isDev = process.env.NODE_ENV !== 'production';
+              const evalDirective = isDev ? " 'unsafe-eval'" : '';
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:6823';
+              const wsUrl = apiUrl.replace(/^http/, 'ws');
+              return (
+                "default-src 'self'; " +
+                `script-src 'self' 'unsafe-inline'${evalDirective} https://accounts.google.com https://apis.google.com https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com; ` +
+                "style-src 'self' 'unsafe-inline' https://accounts.google.com; " +
+                "img-src 'self' data: blob: https:; " +
+                "media-src 'self' data: blob: https:; " +
+                `connect-src 'self' ${apiUrl} ${wsUrl} https://accounts.google.com https://www.google-analytics.com; ` +
+                "frame-src 'self' https://accounts.google.com; " +
+                "frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://pay.sepay.vn https://*.sepay.vn"
+              );
+            })(),
           },
           {
             key: 'Permissions-Policy',
