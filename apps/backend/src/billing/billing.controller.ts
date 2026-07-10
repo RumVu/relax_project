@@ -89,7 +89,8 @@ export class BillingController {
     @Param('id') id: string,
     @Body() dto: ConfirmPaymentDto,
   ) {
-    return this.billingService.confirmPayment(user.id, id, dto);
+    const isAdmin = user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+    return this.billingService.confirmPayment(user.id, id, dto, isAdmin);
   }
 
   @ApiOperation({ summary: 'Downgrade to a free plan without payment' })

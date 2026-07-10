@@ -171,8 +171,7 @@ export class SepayBillingService {
 
     // Fallback B: match PENDING payment by amount — ONLY in sandbox/dev.
     // In production, this risks misattributing payments between users.
-    const sepayEnv =
-      this.configService.get<string>('SEPAY_ENV') || 'sandbox';
+    const sepayEnv = this.configService.get<string>('SEPAY_ENV') || 'sandbox';
     if (!payment && transferAmount && sepayEnv !== 'production') {
       const amount = Number(transferAmount);
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000);

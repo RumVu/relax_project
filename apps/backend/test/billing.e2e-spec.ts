@@ -47,6 +47,12 @@ describe('Billing checkout and activation (e2e)', () => {
     });
     accessToken = registered.body.accessToken;
 
+    // Promote to ADMIN so confirm tests pass (non-admin confirm is blocked)
+    await prisma.user.update({
+      where: { email },
+      data: { role: 'ADMIN' },
+    });
+
     const otherRegistered = await registerAndVerify(app, {
       email: otherEmail,
       password,
