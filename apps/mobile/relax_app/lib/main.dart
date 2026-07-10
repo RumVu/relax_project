@@ -79,6 +79,7 @@ void main() async {
   await LocalNotifications.init();
   await OfflineStore.instance.init();
   await CalendarIntegrationService.instance.init();
+  FeatureFlags.instance.load();
   runApp(const RelaxApp());
 }
 
@@ -98,7 +99,6 @@ class _RelaxAppState extends State<RelaxApp> {
     super.initState();
     _auth = AuthState();
     _audio = AudioController();
-    FeatureFlags.instance.load();
     _auth.onLogoutCleanup = () {
       RelaxScreen.resetIntroForLogout();
       _audio.stop();
