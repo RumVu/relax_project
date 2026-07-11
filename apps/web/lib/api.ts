@@ -330,9 +330,13 @@ function shouldAttemptRefresh(error: ApiError) {
 }
 
 async function setSessionCookie(role: string) {
+  const token = getStoredAccessToken();
   await fetch('/api/auth/session', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     body: JSON.stringify({ role }),
   }).catch(() => {});
 }

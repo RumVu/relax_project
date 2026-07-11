@@ -1,13 +1,21 @@
 import { Type } from 'class-transformer';
-import { IsDate, IsOptional, IsString, IsUrl } from 'class-validator';
+import {
+  IsDate,
+  IsOptional,
+  IsString,
+  IsUrl,
+  MaxLength,
+} from 'class-validator';
 
 export class UpsertUserProfileDto {
   @IsOptional()
   @IsString()
+  @MaxLength(100)
   displayName?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(500)
   bio?: string;
 
   @IsOptional()

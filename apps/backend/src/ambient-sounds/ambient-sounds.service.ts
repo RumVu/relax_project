@@ -64,7 +64,7 @@ export class AmbientSoundsService {
 
   findByCategory(category: string) {
     return this.prisma.ambientSound.findMany({
-      where: { category },
+      where: { category, isActive: true },
       orderBy: { createdAt: 'desc' },
     });
   }
@@ -109,9 +109,7 @@ export class AmbientSoundsService {
       ];
     }
 
-    if (typeof query.isActive === 'boolean') {
-      where.isActive = query.isActive;
-    }
+    where.isActive = typeof query.isActive === 'boolean' ? query.isActive : true;
 
     const selectedCategory = query.category?.trim().toUpperCase();
     if (query.excludeCategories?.trim()) {

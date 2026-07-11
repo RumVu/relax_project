@@ -1,4 +1,11 @@
-const SECRET = process.env.SESSION_SECRET || 'relax-session-secret-dev';
+function getSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (secret) return secret;
+  if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {
+    console.error('SESSION_SECRET is not set — session cookies are signed with the dev fallback');
+  }
+  return 'relax-session-secret-dev';
+}
 
 function toHex(bytes: Uint8Array): string {
   return Array.from(bytes)
@@ -9,7 +16,7 @@ function toHex(bytes: Uint8Array): string {
 async function getKey(): Promise<CryptoKey> {
   return crypto.subtle.importKey(
     'raw',
-    new TextEncoder().encode(SECRET),
+    new TextEncoder().encode(getSecret()),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign'],

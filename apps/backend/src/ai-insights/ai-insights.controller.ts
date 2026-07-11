@@ -44,7 +44,7 @@ export class AiInsightsController {
     @Req() req: AuthedRequest,
     @Query('limit', new ParseIntPipe({ optional: true })) limit?: number,
   ) {
-    return this.service.getMine(req.user.id, limit ?? 5);
+    return this.service.getMine(req.user.id, Math.min(limit ?? 5, 50));
   }
 
   @Post('me/refresh')

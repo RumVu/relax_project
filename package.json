@@ -28,6 +28,10 @@
     "@testing-library/jest-dom": "^6.9.1",
     "jsdom": "^25.0.1"
   },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
+  },
   "overrides": {
     "postcss": "8.5.15",
     "ws": "8.21.0",

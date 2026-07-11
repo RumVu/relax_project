@@ -79,6 +79,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>relax</string>
 				<string>com.googleusercontent.apps.884741112800-vkq8svs2c4012n457uta7uva4n4mteii</string>
 				<string>com.googleusercontent.apps.884741112800-d02cdshsm4bh34qgrlcmp70r1h2o5lp5</string>
 				<string>com.googleusercontent.apps.884741112800-aq6rsskn13eiv1r3f3e5qbttlj82skcs</string>

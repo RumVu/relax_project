@@ -147,12 +147,19 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
 
   Future<void> _logSession() async {
     try {
-      await RelaxApi.instance.post('/relax-sessions/me', body: {
-        'activitySlug': 'focus-timer',
-        'durationSeconds': _workMinutes * 60,
-        'tags': ['pomodoro', 'cycle-$_completedCycles'],
+      final startRes = await RelaxApi.instance.post('/relax-sessions/start', body: {
+        'activityType': 'MEDITATION',
+        'title': 'Focus Timer',
       });
-    } catch (_) {}
+      final sessionId = startRes.data?['id'] as String?;
+      if (sessionId != null) {
+        await RelaxApi.instance.post('/relax-sessions/$sessionId/finish', body: {
+          'note': 'Pomodoro cycle $_completedCycles',
+        });
+      }
+    } catch (e) {
+      debugPrint('Focus timer: lỗi lưu session: $e');
+    }
   }
 
   String _formatTime(int totalSeconds) {
