@@ -61,7 +61,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           method: 'POST',
           body: JSON.stringify({ email, password }),
         });
-        persistAuthSession(auth);
+        await persistAuthSession(auth);
         router.push(
           auth.user.role === 'ADMIN'
             ? authRoutes.admin

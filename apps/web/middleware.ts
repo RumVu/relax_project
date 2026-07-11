@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifySession } from '@/lib/session-sign';
 
-const AUTH_COOKIE = 'relax_session';
 const LOGIN_PATH = '/auth/login';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
-    const session = request.cookies.get(AUTH_COOKIE);
+    const session = request.cookies.get('relax_session');
     if (!session?.value) {
       const loginUrl = request.nextUrl.clone();
       loginUrl.pathname = LOGIN_PATH;
@@ -15,9 +15,17 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
+    const role = await verifySession(session.value);
+    if (!role) {
+      const loginUrl = request.nextUrl.clone();
+      loginUrl.pathname = LOGIN_PATH;
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete('relax_session');
+      return response;
+    }
+
     if (pathname.startsWith('/admin')) {
-      const isAdmin = session.value === 'role:ADMIN';
-      if (!isAdmin) {
+      if (role !== 'role:ADMIN') {
         const dashboardUrl = request.nextUrl.clone();
         dashboardUrl.pathname = '/dashboard';
         return NextResponse.redirect(dashboardUrl);

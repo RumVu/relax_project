@@ -45,7 +45,7 @@ services:
     environment:
       PORT: ${BACKEND_PORT:-6823}
       NODE_ENV: production
-      RUN_MIGRATIONS_ON_START: ${RUN_MIGRATIONS_ON_START:-true}
+      RUN_MIGRATIONS_ON_START: ${RUN_MIGRATIONS_ON_START:-false}
       DATABASE_URL: ${DATABASE_URL:?DATABASE_URL is required}
       REDIS_ENABLED: ${REDIS_ENABLED:-true}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379}

@@ -95,7 +95,7 @@ jobs:
         run: npm run build
 
       - name: Audit backend deps
-        run: npm audit --workspace apps/backend --audit-level=high || true
+        run: npm audit --omit=dev --workspace apps/backend --audit-level=high
 
   # ---------------------------------------------------------------------------
   # Web: build + Playwright smoke

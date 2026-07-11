@@ -47,7 +47,7 @@ All surfaces share code through an npm workspace monorepo with common packages.
 | **Database** | PostgreSQL 16 |
 | **Cache / Queue** | Redis 7 |
 | **Web** | Next.js 15, React, TailwindCSS, Zustand |
-| **Mobile** | Flutter 3 (Dart), Riverpod-style state |
+| **Mobile** | Flutter 3 (Dart), Provider |
 | **AI** | Google Gemini API (companion insights) |
 | **Storage** | Supabase (file uploads, audio assets) |
 | **Payment** | SePay QR (Vietnam bank gateway) |
@@ -64,7 +64,7 @@ All surfaces share code through an npm workspace monorepo with common packages.
 ```
 digital-cigarette-break/
 ├── apps/
-│   ├── backend/              # NestJS API (46 modules)
+│   ├── backend/              # NestJS API (57 modules)
 │   │   ├── src/
 │   │   │   ├── auth/         # JWT + Google Sign-In
 │   │   │   ├── users/        # User management
@@ -154,7 +154,7 @@ digital-cigarette-break/
                               │  └───────────┬────────────┘  │
                               │              ▼               │
                               │  ┌────────────────────────┐  │
-                              │  │    46 Feature Modules  │  │
+                              │  │    57 Feature Modules  │  │
                               │  │  ┌──────┐ ┌─────────┐  │  │
                               │  │  │Mood  │ │Companion│  │  │
                               │  │  │Check │ │AI Chat  │──┼──┼──► Gemini API
@@ -301,8 +301,8 @@ digital-cigarette-break/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/RumVu/project-relax.git
-cd project-relax
+git clone https://github.com/RumVu/relax_project.git
+cd relax_project
 npm install
 ```
 
@@ -334,7 +334,7 @@ make prisma-seed       # Seed catalog data (sounds, quotes, themes...)
 make backend-dev       # http://localhost:6823
 
 # Terminal 2 — Web Dashboard
-make web-dev           # http://localhost:3000
+make web-dev           # http://localhost:3233
 
 # Terminal 3 — Mobile App (optional)
 make mobile-run-local  # Flutter app targeting localhost
@@ -347,7 +347,7 @@ make mobile-run-local  # Flutter app targeting localhost
 | API Index | `http://localhost:6823` |
 | Swagger UI | `http://localhost:6823/docs` |
 | OpenAPI JSON | `http://localhost:6823/docs-json` |
-| Web Dashboard | `http://localhost:3000` |
+| Web Dashboard | `http://localhost:3233` |
 | Redis Health | `http://localhost:6823/redis/health?deep=true` |
 | Queue Health | `http://localhost:6823/queues/health?deep=true` |
 | Realtime Health | `http://localhost:6823/realtime/health` |
@@ -564,7 +564,7 @@ Detailed design documents live in the `docs/` directory:
 | Service | Port | Protocol |
 |---------|------|----------|
 | Backend API | `6823` | HTTP |
-| Web Dashboard | `3000` | HTTP |
+| Web Dashboard | `3233` | HTTP |
 | PostgreSQL | `5555` | TCP |
 | Redis | `6379` | TCP |
 | Socket.IO | `6823/realtime` | WebSocket |
@@ -576,22 +576,16 @@ Detailed design documents live in the `docs/` directory:
 ```
 main (production)
  │
- ├── feature/*          Feature branches (current: feature/english-and-lana-support)
- ├── hotfix/*           Hotfix branches (merged: hotfix/dashboard-ci-green)
- ├── codex/*            Automated audit/fix branches
- ├── front-mobile-dev   Mobile feature sprint (60+ commits)
- ├── backend-dev        Backend continued development
- ├── layout-fix-i18n    Layout + i18n fixes (merged via PRs #6-9)
- ├── refactor-services  Service refactoring (merged via PR #5)
- ├── cleanup-refactor-ui UI cleanup (merged via PRs #10-11)
- └── final-i18n-music   i18n + music catalog (merged via PR #12)
+ ├── feature/*          Feature branches
+ ├── fix/*              Bug-fix and security-hardening branches
+ └── hotfix/*           Urgent production hotfixes
 ```
 
 ---
 
 ## License
 
-Private project. All rights reserved.
+MIT — see [LICENSE](LICENSE) for details.
 
 ---
 

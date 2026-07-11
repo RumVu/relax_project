@@ -120,7 +120,7 @@ export function AccountMenu() {
       await apiFetch('/auth/logout', { method: 'POST' }).catch(() => undefined);
     } finally {
       clearAccountProfile();
-      clearAuthSession();
+      await clearAuthSession();
       pushToast({ tone: 'success', title: t('account.loggedOut') });
       router.push('/auth/login');
       router.refresh();

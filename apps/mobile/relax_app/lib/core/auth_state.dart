@@ -79,13 +79,22 @@ class AuthState extends ChangeNotifier {
         _user = Map<String, dynamic>.from(res.data as Map);
         debugPrint('Bootstrap: Đăng nhập tự động thành công cho user: ${_user?['email']}');
         await _mergeProfileName();
+        OfflineStore.instance.cacheUser(_user!);
       } else {
         debugPrint('Bootstrap: Token không hợp lệ, tiến hành xóa token...');
         await RelaxApi.instance.clearTokens();
       }
     } catch (e) {
       debugPrint('Bootstrap: Lỗi gọi API /users/me hoặc lỗi kết nối: $e');
-      await RelaxApi.instance.clearTokens();
+      final isAuthError = e is DioException && e.response?.statusCode == 401;
+      if (isAuthError) {
+        debugPrint('Bootstrap: 401 — token hết hạn/bị revoke, xóa token...');
+        await RelaxApi.instance.clearTokens();
+      } else {
+        debugPrint('Bootstrap: Lỗi mạng/timeout — giữ token, vào offline mode');
+        final cached = await OfflineStore.instance.getCachedUser();
+        if (cached != null) _user = cached;
+      }
     } finally {
       debugPrint('Bootstrap: Giữ Splash và hoàn tất...');
       await _enforceMinSplash(startedAt);
