@@ -393,7 +393,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Digital Cigarette Break API')
+    .setTitle('Relax Before Stress Comes API')
     .setDescription(
       'Backend API for auth, users, catalog content, storage, and wellness app configuration.',
     )
@@ -536,7 +536,7 @@ async function bootstrap() {
         persistAuthorization: true,
         operationsSorter: 'method',
       },
-      customSiteTitle: 'Digital Cigarette Break API Docs',
+      customSiteTitle: 'Relax Before Stress Comes API Docs',
     });
   }
 

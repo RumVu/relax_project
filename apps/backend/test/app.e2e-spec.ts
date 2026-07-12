@@ -34,7 +34,7 @@ describe('AppController (e2e)', () => {
       .get('/')
       .expect(200)
       .expect(({ body }) => {
-        expect(body.name).toBe('Digital Cigarette Break API');
+        expect(body.name).toBe('Relax Before Stress Comes API');
         expect(body.docs.swagger).toBe('/docs');
         expect(body.health).toBe('/health');
         expect(body.redis).toBeUndefined();
@@ -47,7 +47,7 @@ describe('AppController (e2e)', () => {
       .get('/api')
       .expect(200)
       .expect(({ body }) => {
-        expect(body.name).toBe('Digital Cigarette Break API');
+        expect(body.name).toBe('Relax Before Stress Comes API');
         expect(body.docs.openApiJson).toBe('/docs-json');
         expect(body.storage).toBeUndefined();
       });
