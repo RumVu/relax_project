@@ -109,7 +109,8 @@ export class AmbientSoundsService {
       ];
     }
 
-    where.isActive = typeof query.isActive === 'boolean' ? query.isActive : true;
+    where.isActive =
+      typeof query.isActive === 'boolean' ? query.isActive : true;
 
     const selectedCategory = query.category?.trim().toUpperCase();
     if (query.excludeCategories?.trim()) {

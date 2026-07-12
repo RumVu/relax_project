@@ -406,8 +406,14 @@ export class AuthService {
       });
     }
 
-    const response = await this.createAuthResponse(session.user, userAgent, ipAddress);
-    await this.prisma.session.delete({ where: { id: session.id } }).catch(() => {});
+    const response = await this.createAuthResponse(
+      session.user,
+      userAgent,
+      ipAddress,
+    );
+    await this.prisma.session
+      .delete({ where: { id: session.id } })
+      .catch(() => {});
     return response;
   }
 
