@@ -48,7 +48,7 @@ export class AppService {
 
   getApiIndex(): ApiIndexResponse {
     return {
-      name: 'Digital Cigarette Break API',
+      name: 'Relax Before Stress Comes API',
       status: 'ok',
       version: this.configService.get<string>('app.version') ?? '1.0.0',
       docs: {

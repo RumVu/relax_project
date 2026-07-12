@@ -104,7 +104,7 @@ describe('AppController', () => {
   describe('root', () => {
     it('should return API index', () => {
       expect(appController.getApiIndex()).toMatchObject({
-        name: 'Digital Cigarette Break API',
+        name: 'Relax Before Stress Comes API',
         status: 'ok',
         docs: {
           swagger: '/docs',

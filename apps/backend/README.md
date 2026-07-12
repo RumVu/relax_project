@@ -1,6 +1,6 @@
-# Digital Cigarette Break Backend
+# Relax Before Stress Comes Backend
 
-NestJS API for the Digital Cigarette Break app. This backend owns auth, users,
+NestJS API for the Relax Before Stress Comes app. This backend owns auth, users,
 profiles, preferences, mood check-ins, journals, relax sessions, companion
 personalization, analytics, weather, storage, notifications, billing stubs, and
 catalog content.

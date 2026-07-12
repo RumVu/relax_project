@@ -12,14 +12,14 @@ import 'widgets/break_reason_picker.dart';
 import 'widgets/break_ritual.dart';
 import 'widgets/break_complete.dart';
 
-/// "I Need a Break" — Digital Cigarette Break.
+/// "I Need a Break" — Relax Before Stress Comes.
 ///
 /// Flow signature:
 ///   1. Chọn lý do cần nghỉ (stress, buồn ngủ, chán, overthink, craving, né xã hội)
 ///   2. Ritual 3-5 phút: breathing + ambient + quote + mini journal
 ///   3. Kết thúc: "Bạn đã vượt qua 1 break 🌿" + mood after
 ///
-/// Đây là identity feature — "Digital Cigarette Break".
+/// Đây là identity feature — "Relax Before Stress Comes".
 class CravingBreakScreen extends StatefulWidget {
   const CravingBreakScreen({super.key});
 
