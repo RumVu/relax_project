@@ -241,7 +241,9 @@ function configureHttpSecurity(
           objectSrc: ["'none'"],
           frameAncestors: ["'none'"],
           formAction: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          scriptSrc: isProduction
+            ? ["'self'", "'unsafe-inline'"]
+            : ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', 'validator.swagger.io'],
           fontSrc: ["'self'", 'data:'],

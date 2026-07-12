@@ -67,7 +67,7 @@ class _CompanionScreenState extends State<CompanionScreen>
       final resOpts = await RelaxApi.instance.get('/user-companions/me/personalization-options');
       _personalizationOptions = resOpts.data is Map ? Map<String, dynamic>.from(resOpts.data as Map) : null;
 
-      final resAssets = await RelaxApi.instance.get('/ambient-sounds/companion-assets');
+      final resAssets = await RelaxApi.instance.get('/companion-assets');
       final assetData = resAssets.data;
       final assetList = assetData is Map ? assetData['items'] : assetData;
       _customAssets = (assetList is List)

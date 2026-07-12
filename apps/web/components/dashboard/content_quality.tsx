@@ -61,15 +61,15 @@ export function ContentQuality() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [qualityRes, statsRes] = await Promise.allSettled([
+      const [qualityRes, overviewRes] = await Promise.allSettled([
         apiFetch<ContentQualityData>('/admin/content-quality'),
-        apiFetch<ContentStats[]>('/admin/content-stats'),
+        apiFetch<{ content?: ContentStats[] }>('/admin/analytics/overview'),
       ]);
       if (qualityRes.status === 'fulfilled') {
         setData(qualityRes.value || { popularSounds: [], ratedItems: [] });
       }
-      if (statsRes.status === 'fulfilled' && Array.isArray(statsRes.value)) {
-        setStats(statsRes.value);
+      if (overviewRes.status === 'fulfilled' && Array.isArray(overviewRes.value?.content)) {
+        setStats(overviewRes.value.content);
       }
     } catch (e) {
       pushToast({

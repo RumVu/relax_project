@@ -118,6 +118,20 @@ class OfflineStore extends ChangeNotifier {
     return jsonDecode(raw);
   }
 
+  void cacheUser(Map<String, dynamic> user) {
+    _cacheBox.put('__current_user__', jsonEncode(user));
+  }
+
+  Future<Map<String, dynamic>?> getCachedUser() async {
+    final raw = _cacheBox.get('__current_user__');
+    if (raw == null) return null;
+    try {
+      return jsonDecode(raw) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
   void clearCache() => _cacheBox.clear();
 
   String _cacheKey(String path, Map<String, dynamic>? query) {

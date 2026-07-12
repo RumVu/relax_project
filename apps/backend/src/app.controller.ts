@@ -1,4 +1,5 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ApiBearerAuth,
   ApiOkResponse,
@@ -62,8 +63,12 @@ export class AppController {
     description: 'Returns database and storage configuration readiness checks.',
   })
   @Get('ready')
-  getReady() {
-    return this.appService.getReady();
+  async getReady(@Res({ passthrough: true }) res: Response) {
+    const result = await this.appService.getReady();
+    if (result.status !== 'ok') {
+      res.status(503);
+    }
+    return result;
   }
 
   @ApiOperation({ summary: 'Get full ops status for admin dashboard' })

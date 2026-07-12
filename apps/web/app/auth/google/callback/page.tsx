@@ -88,7 +88,7 @@ export default function GoogleCallbackPage() {
         method: 'POST',
         body: JSON.stringify({ authorizationCode, redirectUri }),
       });
-      persistAuthSession(auth);
+      await persistAuthSession(auth);
       setState('success');
       setMessage(auth.user.email);
       router.replace(
@@ -113,7 +113,7 @@ export default function GoogleCallbackPage() {
         method: 'POST',
         body: JSON.stringify(paramsRef.current),
       });
-      persistAuthSession(auth);
+      await persistAuthSession(auth);
       setState('success');
       setMessage(auth.user.email);
       router.replace(

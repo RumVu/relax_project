@@ -6,8 +6,6 @@ export const API_VERSION_PREFIX = '/v1';
 const ACCESS_TOKEN_KEY = 'relax_access_token';
 const SESSION_ID_KEY = 'relax_session_id';
 const ROLE_KEY = 'relax_user_role';
-const AUTH_COOKIE_KEY = 'relax_session';
-
 type QueryValue = string | number | boolean | Date | null | undefined;
 
 export interface ApiErrorEnvelope {
@@ -181,7 +179,7 @@ export function extractList<T = unknown>(payload: unknown): T[] {
   return Array.isArray(items) ? (items as T[]) : [];
 }
 
-export function persistAuthSession(auth: AuthResponse) {
+export async function persistAuthSession(auth: AuthResponse) {
   if (typeof window === 'undefined') {
     return;
   }
@@ -193,10 +191,10 @@ export function persistAuthSession(auth: AuthResponse) {
     window.localStorage.removeItem(SESSION_ID_KEY);
   }
   window.localStorage.setItem(ROLE_KEY, auth.user.role);
-  setAuthCookie(auth.user.role);
+  await setSessionCookie(auth.user.role);
 }
 
-export function clearAuthSession() {
+export async function clearAuthSession() {
   if (typeof window === 'undefined') {
     return;
   }
@@ -204,7 +202,7 @@ export function clearAuthSession() {
   window.localStorage.removeItem(ACCESS_TOKEN_KEY);
   window.localStorage.removeItem(SESSION_ID_KEY);
   window.localStorage.removeItem(ROLE_KEY);
-  document.cookie = `${AUTH_COOKIE_KEY}=; Path=/; Max-Age=0; SameSite=Lax`;
+  await fetch('/api/auth/session', { method: 'DELETE' }).catch(() => {});
 }
 
 export function getStoredAccessToken() {
@@ -239,7 +237,7 @@ export function syncAuthRouteCookie() {
   const token = getStoredAccessToken();
   const role = getStoredRole();
   if (token && role) {
-    setAuthCookie(role);
+    void setSessionCookie(role);
   }
 }
 
@@ -258,10 +256,10 @@ export async function refreshAuthSession() {
         { skipAuth: true, retryOnAuthError: false },
         false,
       );
-      persistAuthSession(auth);
+      await persistAuthSession(auth);
       return auth;
     } catch (error) {
-      clearAuthSession();
+      await clearAuthSession();
       throw error;
     } finally {
       refreshPromise = undefined;
@@ -331,10 +329,14 @@ function shouldAttemptRefresh(error: ApiError) {
   );
 }
 
-function setAuthCookie(role: string) {
-  const normalizedRole = role === 'ADMIN' ? 'ADMIN' : 'USER';
-  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${AUTH_COOKIE_KEY}=role:${normalizedRole}; Path=/; Max-Age=${
-    60 * 60 * 24 * 30
-  }; SameSite=Lax${secure}`;
+async function setSessionCookie(role: string) {
+  const token = getStoredAccessToken();
+  await fetch('/api/auth/session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ role }),
+  }).catch(() => {});
 }

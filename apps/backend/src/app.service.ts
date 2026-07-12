@@ -145,11 +145,14 @@ export class AppService {
     );
     const pushConfigured = Boolean(
       this.configService.get<string>('FCM_SERVER_KEY') ||
-      this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT'),
+      this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT') ||
+      this.configService.get<string>('FIREBASE_SERVICE_ACCOUNT_JSON'),
     );
     const emailConfigured = Boolean(
       this.configService.get<string>('SMTP_HOST') ||
-      this.configService.get<string>('SENDGRID_API_KEY'),
+      this.configService.get<string>('SMTP_URL') ||
+      this.configService.get<string>('SENDGRID_API_KEY') ||
+      this.configService.get<string>('RESEND_API_KEY'),
     );
     const billingConfigured = Boolean(
       this.configService.get<string>('SEPAY_MERCHANT_ID') &&

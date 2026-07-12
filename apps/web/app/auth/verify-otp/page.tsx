@@ -66,7 +66,7 @@ export default function VerifyOtpPage() {
           method: 'POST',
           body: JSON.stringify({ email, code: trimmed }),
         });
-        persistAuthSession(auth);
+        await persistAuthSession(auth);
         router.push(
           auth.user.role === 'ADMIN'
             ? authRoutes.admin

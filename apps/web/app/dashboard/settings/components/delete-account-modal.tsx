@@ -56,7 +56,7 @@ export function DeleteAccountModal({
 
       // Clear sessions and redirect
       clearAccountProfile();
-      clearAuthSession();
+      await clearAuthSession();
       onClose();
       router.push('/auth/login');
       router.refresh();

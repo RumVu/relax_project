@@ -1,3 +1,4 @@
+import { createHmac } from 'crypto';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 
 test.describe('Authenticated dashboard surfaces', () => {
@@ -33,10 +34,13 @@ async function signInAs(
   page: Page,
   role: 'ADMIN' | 'USER',
 ) {
+  const secret = process.env.SESSION_SECRET || 'relax-session-secret-dev';
+  const payload = `role:${role}`;
+  const sig = createHmac('sha256', secret).update(payload).digest('hex');
   await context.addCookies([
     {
       name: 'relax_session',
-      value: `role:${role}`,
+      value: `${payload}.${sig}`,
       domain: 'localhost',
       path: '/',
     },

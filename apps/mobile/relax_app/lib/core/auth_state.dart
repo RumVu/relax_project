@@ -79,13 +79,26 @@ class AuthState extends ChangeNotifier {
         _user = Map<String, dynamic>.from(res.data as Map);
         debugPrint('Bootstrap: Đăng nhập tự động thành công cho user: ${_user?['email']}');
         await _mergeProfileName();
-      } else {
-        debugPrint('Bootstrap: Token không hợp lệ, tiến hành xóa token...');
+        OfflineStore.instance.cacheUser(_user!);
+      } else if (res.statusCode == 401) {
+        debugPrint('Bootstrap: 401 — token hết hạn, xóa token...');
         await RelaxApi.instance.clearTokens();
+      } else {
+        debugPrint('Bootstrap: API trả ${res.statusCode} — giữ token, thử offline');
+        final cached = await OfflineStore.instance.getCachedUser();
+        if (cached != null) _user = cached;
       }
     } catch (e) {
       debugPrint('Bootstrap: Lỗi gọi API /users/me hoặc lỗi kết nối: $e');
-      await RelaxApi.instance.clearTokens();
+      final isAuthError = e is DioException && e.response?.statusCode == 401;
+      if (isAuthError) {
+        debugPrint('Bootstrap: 401 — token hết hạn/bị revoke, xóa token...');
+        await RelaxApi.instance.clearTokens();
+      } else {
+        debugPrint('Bootstrap: Lỗi mạng/timeout — giữ token, vào offline mode');
+        final cached = await OfflineStore.instance.getCachedUser();
+        if (cached != null) _user = cached;
+      }
     } finally {
       debugPrint('Bootstrap: Giữ Splash và hoàn tất...');
       await _enforceMinSplash(startedAt);
@@ -157,8 +170,7 @@ class AuthState extends ChangeNotifier {
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)
               : null;
-          // Register device để dashboard Settings → Push devices hiện
-          // máy này. Best-effort, không chặn login.
+          if (_user != null) OfflineStore.instance.cacheUser(_user!);
           unawaited(DeviceRegistration.register());
           notifyListeners();
           return true;
@@ -179,6 +191,7 @@ class AuthState extends ChangeNotifier {
   }) async {
     await RelaxApi.instance.saveTokens(access: accessToken, refresh: refreshToken);
     _user = user;
+    if (_user != null) OfflineStore.instance.cacheUser(_user!);
     notifyListeners();
   }
 
@@ -203,6 +216,7 @@ class AuthState extends ChangeNotifier {
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)
               : null;
+          if (_user != null) OfflineStore.instance.cacheUser(_user!);
           unawaited(DeviceRegistration.register());
           notifyListeners();
           return true;
@@ -285,6 +299,7 @@ class AuthState extends ChangeNotifier {
       if (res.statusCode == 200 && res.data is Map) {
         _user = Map<String, dynamic>.from(res.data as Map);
         await _mergeProfileName();
+        OfflineStore.instance.cacheUser(_user!);
         notifyListeners();
       }
     } catch (_) {}
@@ -312,6 +327,7 @@ class AuthState extends ChangeNotifier {
           _user = res.data?['user'] is Map
               ? Map<String, dynamic>.from(res.data['user'] as Map)
               : null;
+          if (_user != null) OfflineStore.instance.cacheUser(_user!);
           unawaited(DeviceRegistration.register());
           await _mergeProfileName();
           notifyListeners();

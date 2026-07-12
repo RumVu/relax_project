@@ -229,6 +229,7 @@ GoRouter _buildRouter(AuthState auth) {
       _soft('/sleep', const SleepScreen()),
       _soft('/sounds', const SoundsScreen()),
       _soft('/podcast', const SoundsScreen(category: 'PODCAST')),
+      _soft('/podcasts', const SoundsScreen(category: 'PODCAST')),
       _soft('/analytics', const AnalyticsScreen()),
       _soft('/mood-calendar', const MoodCalendarScreen()),
       _soft('/billing', const BillingScreen()),

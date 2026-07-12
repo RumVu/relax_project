@@ -62,12 +62,7 @@ class _BuddyCheckinSheetState extends State<BuddyCheckinSheet> {
 
     setState(() => _sending = true);
     try {
-      await RelaxApi.instance.post('/notifications', body: {
-        'userId': _buddyId,
-        'title': 'Check-in từ bạn',
-        'message': msg,
-        'type': 'IN_APP',
-      });
+      await RelaxApi.instance.post('/buddy-circle/nudge/$_buddyId');
       if (mounted) {
         showSoftToast(context,
             message: context.t('Đã gửi tin nhắn cho {name}', {'name': _buddyName}),

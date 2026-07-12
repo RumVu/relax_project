@@ -55,10 +55,16 @@ COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/backend/package.json ./apps/backend/
 COPY --from=builder /app/package.json ./
 
+RUN npm prune --omit=dev --workspace apps/backend 2>/dev/null; \
+    find node_modules -name '*.md' -o -name '*.map' -o -name 'CHANGELOG*' | head -500 | xargs rm -f 2>/dev/null; \
+    true
+
 EXPOSE 6823
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget --quiet --spider http://127.0.0.1:6823/health || exit 1
+
+USER node
 
 # tini handles signals so SIGTERM cleanly stops Nest + Prisma.
 ENTRYPOINT ["/usr/bin/tini", "--"]
