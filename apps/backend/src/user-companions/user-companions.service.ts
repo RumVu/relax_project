@@ -353,8 +353,8 @@ export class UserCompanionsService {
     const ai = this.buildGenAIClient();
 
     let reply: string;
-    let newMood = companion.mood;
-    let newAction = companion.action;
+    let newMood: CompanionMood;
+    let newAction: CompanionAction;
 
     if (ai) {
       try {
@@ -367,7 +367,6 @@ export class UserCompanionsService {
           message,
           companion.name || 'Linh thú',
           companion.mood,
-          companion.action,
         );
         reply = fallback.reply;
         newMood = fallback.mood;
@@ -378,7 +377,6 @@ export class UserCompanionsService {
         message,
         companion.name || 'Linh thú',
         companion.mood,
-        companion.action,
       );
       reply = fallback.reply;
       newMood = fallback.mood;
@@ -569,12 +567,11 @@ export class UserCompanionsService {
     message: string,
     name: string,
     currentMood: CompanionMood,
-    currentAction: CompanionAction,
   ): { reply: string; mood: CompanionMood; action: CompanionAction } {
     const msg = message.toLowerCase().trim();
-    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let reply: string;
     let mood = currentMood;
-    let action = currentAction;
+    let action: CompanionAction;
 
     if (/chào|hello|hi |alo|hey/.test(msg)) {
       const replies = [

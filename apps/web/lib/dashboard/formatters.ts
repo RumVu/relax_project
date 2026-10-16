@@ -1,5 +1,5 @@
 import { activeLocale, moodLabelByType, moodLabelEnByType, titleize } from './constants';
-import { asNumber, asString } from './coercions';
+import { asString } from './coercions';
 
 export function localeCode() {
   return activeLocale === 'vi' ? 'vi-VN' : 'en-US';

@@ -85,7 +85,6 @@ export function buildUserDashboardData(input: {
     moodDashboard,
     moodAnalytics,
     weeklyStats,
-    journals,
     journalStats,
     preferences,
     sessions,
@@ -112,7 +111,6 @@ export function buildUserDashboardData(input: {
   const currentMoodOption = asRecord(currentMood?.option);
   const currentMoodCheckin = asRecord(currentMood?.checkin);
   const overviewMood = asRecord(overview?.mood);
-  const overviewJournals = asRecord(overview?.journals);
   const overviewRelax = asRecord(overview?.relax);
   const overviewCompanion = asRecord(overview?.companion);
   const summaryCards = asRecord(overview?.summaryCards);
@@ -354,8 +352,7 @@ export function buildUserDashboardData(input: {
       pushDevices: mapPushDevices(pushDevices) ?? base.settings.pushDevices,
       reminders:
         mapReminderTable(reminderItems) ?? base.settings.reminders,
-      billing:
-        mapBilling(asRecord(billing?.subscription)) ?? base.settings.billing,
+      billing: mapBilling(asRecord(billing?.subscription)),
       payments:
         mapPayments(payments) ?? base.settings.payments,
     },

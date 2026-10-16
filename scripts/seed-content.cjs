@@ -12,8 +12,7 @@
  *   DATABASE_URL=postgresql://postgres:123456@localhost:5555/digital_cigarette_break \
  *     node scripts/seed-content.cjs
  */
-const { PrismaClient, MoodType, CompanionMood, MessageTriggerType } =
-  require('@prisma/client');
+const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 

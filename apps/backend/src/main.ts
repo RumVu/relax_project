@@ -14,7 +14,7 @@ import type { OpenAPIObject } from '@nestjs/swagger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger as PinoLogger } from 'nestjs-pino';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { timingSafeEqual } from 'node:crypto';
 import { networkInterfaces } from 'node:os';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
@@ -360,10 +360,18 @@ function parseTrustProxy(value: string): boolean | number | string {
   return value;
 }
 
+// Pads both sides to the same length so timingSafeEqual can run (it throws
+// on length mismatch); the length check comes after the constant-time compare.
 function timingSafeStringEqual(left: string, right: string) {
-  const leftDigest = createHash('sha256').update(left).digest();
-  const rightDigest = createHash('sha256').update(right).digest();
-  return timingSafeEqual(leftDigest, rightDigest);
+  const leftBuf = Buffer.from(left);
+  const rightBuf = Buffer.from(right);
+  const length = Math.max(leftBuf.length, rightBuf.length, 1);
+  const leftPadded = Buffer.alloc(length);
+  const rightPadded = Buffer.alloc(length);
+  leftBuf.copy(leftPadded);
+  rightBuf.copy(rightPadded);
+  const equal = timingSafeEqual(leftPadded, rightPadded);
+  return equal && leftBuf.length === rightBuf.length;
 }
 
 async function bootstrap() {

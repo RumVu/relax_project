@@ -124,7 +124,6 @@ export function MoodForecastPanel() {
           {/* Bar chart */}
           <div className="mt-5 flex items-end gap-2" style={{ height: 120 }}>
             {data.forecast.map((day) => {
-              const h = `${day.predictedScore}%`;
               const barColor =
                 day.riskLevel === 'HIGH'
                   ? 'bg-red-500'

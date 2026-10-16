@@ -4,18 +4,14 @@ import { useEffect, useState, useCallback } from 'react';
 import {
   Activity,
   Beaker,
-  CheckCircle2,
   PauseCircle,
-  PlusCircle,
   RefreshCcw,
   ToggleLeft,
   ToggleRight,
   Users,
-  XCircle,
 } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n/i18n-provider';

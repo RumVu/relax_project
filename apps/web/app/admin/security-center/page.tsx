@@ -11,7 +11,6 @@ import {
   Shield,
   ShieldAlert,
   ShieldCheck,
-  Users,
   XCircle,
 } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
