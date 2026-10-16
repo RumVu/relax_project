@@ -33,6 +33,10 @@ const DEFAULT_PROMPTS: PromptsConfig = {
   recommendationExplanation: 'Giải thích lý do tại sao hoạt động...',
 };
 
+const MAX_PROMPTS = 50;
+const MAX_PROMPT_LENGTH = 8000;
+const PROMPT_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_-]{0,63}$/;
+
 function isPromptsConfig(value: unknown): value is PromptsConfig {
   return (
     typeof value === 'object' &&
@@ -269,7 +273,27 @@ export class AdminDashboardService {
     return DEFAULT_PROMPTS;
   }
 
-  updatePrompts(prompts: Record<string, string>) {
+  updatePrompts(input: Record<string, unknown>) {
+    // The body is written to disk, so only persist identifier-like keys with
+    // bounded string values — never round-trip arbitrary request data.
+    const entries = Object.entries(input ?? {});
+    if (entries.length > MAX_PROMPTS) {
+      return { success: false, error: `At most ${MAX_PROMPTS} prompts` };
+    }
+    const prompts: PromptsConfig = {};
+    for (const [key, value] of entries) {
+      if (!PROMPT_KEY_PATTERN.test(key)) {
+        return { success: false, error: `Invalid prompt key "${key}"` };
+      }
+      if (typeof value !== 'string' || value.length > MAX_PROMPT_LENGTH) {
+        return {
+          success: false,
+          error: `Prompt "${key}" must be a string of at most ${MAX_PROMPT_LENGTH} characters`,
+        };
+      }
+      prompts[key] = value;
+    }
+
     try {
       const filePath = this.getPromptsPath();
       fs.writeFileSync(filePath, JSON.stringify(prompts, null, 2), 'utf8');

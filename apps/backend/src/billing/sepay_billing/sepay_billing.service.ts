@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { timingSafeEqual } from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { PaymentStatus } from '@prisma/client';
 import { SePayPgClient } from 'sepay-pg-node';
@@ -35,13 +36,20 @@ export class SepayBillingService {
       return false;
     }
     // SePay sends: Authorization: Apikey your_api_key
-    const match = authHeader.match(/^Apikey\s+(.+)$/i);
+    const match = authHeader.match(/^Apikey\s+(\S.*)$/i);
     const apiKey = match ? match[1] : authHeader;
     const configuredKey = this.configService.get<string>(
       'SEPAY_WEBHOOK_API_KEY',
     );
+    if (!configuredKey) {
+      return false;
+    }
 
-    return Boolean(configuredKey && apiKey === configuredKey);
+    const provided = Buffer.from(apiKey);
+    const expected = Buffer.from(configuredKey);
+    return (
+      provided.length === expected.length && timingSafeEqual(provided, expected)
+    );
   }
 
   async processWebhook(payload: SePayWebhookPayload) {

@@ -11,6 +11,11 @@ const { execSync } = require('node:child_process');
 const path = require('node:path');
 
 const port = process.env.WEB_PORT || process.env.PORT || '3233';
+// The port is interpolated into shell commands below — accept digits only.
+if (!/^\d{1,5}$/.test(port)) {
+  console.error(`Invalid port "${port}"; expected a number.`);
+  process.exit(1);
+}
 const webDir = path.resolve(__dirname, '..');
 const ancestorPids = new Set();
 

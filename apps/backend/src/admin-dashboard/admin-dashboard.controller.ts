@@ -49,7 +49,7 @@ export class AdminDashboardController {
   @ApiOkResponse({ description: 'AI prompts configuration updated.' })
   @AdminOnly()
   @Post('prompts')
-  updatePrompts(@Body() prompts: Record<string, string>) {
+  updatePrompts(@Body() prompts: Record<string, unknown>) {
     return this.adminDashboardService.updatePrompts(prompts);
   }
 

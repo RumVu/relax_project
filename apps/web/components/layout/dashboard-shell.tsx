@@ -12,7 +12,6 @@ import {
   FileClock,
   Headphones,
   Home,
-  Leaf,
   Menu,
   Moon,
   RefreshCcw,

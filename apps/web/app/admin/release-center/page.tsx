@@ -18,9 +18,8 @@ import {
 } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { API_URL, API_VERSION_PREFIX, apiFetch, getStoredAccessToken } from '@/lib/api';
+import { API_URL, API_VERSION_PREFIX, getStoredAccessToken } from '@/lib/api';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 type ServiceHealth = {

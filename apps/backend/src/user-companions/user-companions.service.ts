@@ -15,6 +15,7 @@ import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-person
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
+import { createGenAIClient, resolveGeminiModel } from '../common/gemini';
 
 @Injectable()
 export class UserCompanionsService {
@@ -344,21 +345,7 @@ export class UserCompanionsService {
   }
 
   private buildGenAIClient(): GoogleGenAI | null {
-    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
-    if (projectId) {
-      const location =
-        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
-      return new GoogleGenAI({
-        vertexai: true,
-        project: projectId,
-        location,
-      });
-    }
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (apiKey) {
-      return new GoogleGenAI({ apiKey });
-    }
-    return null;
+    return createGenAIClient(this.configService);
   }
 
   async chatWithCompanion(userId: string, message: string) {
@@ -366,8 +353,8 @@ export class UserCompanionsService {
     const ai = this.buildGenAIClient();
 
     let reply: string;
-    let newMood = companion.mood;
-    let newAction = companion.action;
+    let newMood: CompanionMood;
+    let newAction: CompanionAction;
 
     if (ai) {
       try {
@@ -380,7 +367,6 @@ export class UserCompanionsService {
           message,
           companion.name || 'Linh thú',
           companion.mood,
-          companion.action,
         );
         reply = fallback.reply;
         newMood = fallback.mood;
@@ -391,7 +377,6 @@ export class UserCompanionsService {
         message,
         companion.name || 'Linh thú',
         companion.mood,
-        companion.action,
       );
       reply = fallback.reply;
       newMood = fallback.mood;
@@ -516,8 +501,7 @@ export class UserCompanionsService {
       `"${message}"`,
     ].join('\n');
 
-    const geminiModel =
-      this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.5-flash';
+    const geminiModel = resolveGeminiModel(this.configService);
 
     const result = await ai.models.generateContent({
       model: geminiModel,
@@ -583,12 +567,11 @@ export class UserCompanionsService {
     message: string,
     name: string,
     currentMood: CompanionMood,
-    currentAction: CompanionAction,
   ): { reply: string; mood: CompanionMood; action: CompanionAction } {
     const msg = message.toLowerCase().trim();
-    let reply = 'Cảm ơn bạn đã trò chuyện với mình nhé! Hôm nay bạn thế nào?';
+    let reply: string;
     let mood = currentMood;
-    let action = currentAction;
+    let action: CompanionAction;
 
     if (/chào|hello|hi |alo|hey/.test(msg)) {
       const replies = [

@@ -6,7 +6,8 @@ import {
 } from '@nestjs/common';
 import { MoodCheckin, MoodType, Prisma, UserRole } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI, Type } from '@google/genai';
+import { Type } from '@google/genai';
+import { createGenAIClient, resolveGeminiModel } from '../common/gemini';
 import { ErrorCode } from '../common/errors/error-code';
 import { AppException } from '../common/errors/app.exception';
 import { buildPage } from '../common/pagination/page';
@@ -811,16 +812,7 @@ export class MoodCheckinsService {
 
   async analyzeVoice(userId: string, text: string) {
     await this.usersService.findOne(userId);
-    let ai: GoogleGenAI | null = null;
-    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (projectId) {
-      const location =
-        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
-      ai = new GoogleGenAI({ vertexai: true, project: projectId, location });
-    } else if (apiKey) {
-      ai = new GoogleGenAI({ apiKey });
-    }
+    const ai = createGenAIClient(this.configService);
 
     let mood: MoodType = MoodType.NEUTRAL;
     let intensity = 5;
@@ -852,9 +844,7 @@ export class MoodCheckinsService {
         ].join('\n');
 
         const result = await ai.models.generateContent({
-          model:
-            this.configService.get<string>('GEMINI_MODEL') ||
-            'gemini-2.5-flash',
+          model: resolveGeminiModel(this.configService),
           contents: prompt,
           config: {
             responseMimeType: 'application/json',
