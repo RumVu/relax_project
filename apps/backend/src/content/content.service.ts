@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { MoodType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+export const MAX_CSV_LENGTH = 5_000_000;
 const MAX_CSV_COLUMNS = 50;
 const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -224,7 +225,12 @@ export class ContentService {
   /**
    * Simple CSV parser — handles quoted fields and newlines within quotes.
    */
-  private parseCsv(csvData: string): Record<string, string>[] {
+  private parseCsv(csvData: unknown): Record<string, string>[] {
+    if (typeof csvData !== 'string' || csvData.length > MAX_CSV_LENGTH) {
+      throw new BadRequestException(
+        `csvData must be a string of at most ${MAX_CSV_LENGTH} characters`,
+      );
+    }
     const lines = csvData
       .split('\n')
       .map((l) => l.trim())
