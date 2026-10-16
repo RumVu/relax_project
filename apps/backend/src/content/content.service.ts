@@ -238,12 +238,15 @@ export class ContentService {
 
     for (let i = 1; i < lines.length; i++) {
       const values = this.splitCsvLine(lines[i]);
-      const row = Object.create(null) as Record<string, string>;
-      headers.forEach((header, j) => {
-        if (UNSAFE_KEYS.has(header)) return;
-        row[header] = values[j]?.trim() ?? '';
-      });
-      rows.push(row);
+      // fromEntries defines own properties (never invokes a __proto__
+      // setter); prototype-ish headers are dropped anyway.
+      rows.push(
+        Object.fromEntries(
+          headers
+            .map((header, j) => [header, values[j]?.trim() ?? ''] as const)
+            .filter(([header]) => !UNSAFE_KEYS.has(header)),
+        ),
+      );
     }
 
     return rows;
