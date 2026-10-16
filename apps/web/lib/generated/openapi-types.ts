@@ -3234,7 +3234,7 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "name": "Digital Cigarette Break API",
+                     *       "name": "Relax Before Stress Comes API",
                      *       "status": "ok",
                      *       "version": "1.0.0",
                      *       "docs": {
@@ -3338,7 +3338,7 @@ export interface operations {
                 content: {
                     /**
                      * @example {
-                     *       "name": "Digital Cigarette Break API",
+                     *       "name": "Relax Before Stress Comes API",
                      *       "status": "ok",
                      *       "version": "1.0.0",
                      *       "docs": {

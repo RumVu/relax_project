@@ -107,7 +107,7 @@ const profileExample = userExample.profile;
 const preferenceExample = userExample.preferences;
 
 const apiIndexExample = {
-  name: 'Digital Cigarette Break API',
+  name: 'Relax Before Stress Comes API',
   status: 'ok',
   version: '1.0.0',
   docs: {

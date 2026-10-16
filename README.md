@@ -9,10 +9,10 @@
   <img src="https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white" />
 </p>
 
-<h1 align="center">Digital Cigarette Break</h1>
+<h1 align="center">Relax Before Stress Comes</h1>
 
 <p align="center">
-  <strong>A mindful wellness platform that turns your smoke break into a healing moment.</strong>
+  <strong>A mindful wellness platform that turns your break into a healing moment.</strong>
   <br />
   Mood tracking, guided breathing, ambient sounds, AI companion, journaling & more.
   <br /><br />
@@ -27,7 +27,7 @@
 
 ## Overview
 
-**Digital Cigarette Break** (Relax) is a full-stack wellness monorepo with three main surfaces:
+**Relax Before Stress Comes** is a full-stack wellness monorepo with three main surfaces:
 
 | Surface | Stack | Purpose |
 |---------|-------|---------|

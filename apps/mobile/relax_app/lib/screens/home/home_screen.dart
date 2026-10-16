@@ -301,7 +301,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-/// Nút "I Need a Break" — Digital Cigarette Break. Nhỏ hơn Calm Now,
+/// Nút "I Need a Break" — Relax Before Stress Comes. Nhỏ hơn Calm Now,
 /// nhưng nổi bật với style riêng.
 class _BreakButton extends StatelessWidget {
   @override

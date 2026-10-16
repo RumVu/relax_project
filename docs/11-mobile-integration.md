@@ -1,7 +1,7 @@
 # Mobile / Client Integration Guide
 
 Contract reference for any client (mobile app, web, third-party) connecting to
-the Digital Cigarette Break backend. Pair this with the live OpenAPI document
+the Relax Before Stress Comes backend. Pair this with the live OpenAPI document
 at `/docs-json` and the provider/runtime matrix in
 `docs/10-operational-readiness.md`.
 

@@ -63,7 +63,7 @@ describe('API versioning (e2e)', () => {
       .get('/')
       .expect(200)
       .expect(({ body }) => {
-        expect(body.name).toBe('Digital Cigarette Break API');
+        expect(body.name).toBe('Relax Before Stress Comes API');
       });
     await request(app.getHttpServer())
       .get('/health')
