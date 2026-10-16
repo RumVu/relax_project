@@ -15,7 +15,7 @@
  * the backend Profile stores. An empty string clears the field.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 interface BirthdayInputProps {

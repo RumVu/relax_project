@@ -28,50 +28,53 @@ if (versionArg.includes('+')) {
 
 console.log(`Synchronizing version to: ${semVer} (Build: ${buildNumber})`);
 
-// 1. Update root package.json
-const rootPkgPath = path.join(rootDir, 'package.json');
-if (fs.existsSync(rootPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
-  pkg.version = semVer;
-  fs.writeFileSync(rootPkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-  console.log(`✓ Updated root package.json version to ${semVer}`);
+// Read + transform + write in one pass. Reading directly (instead of an
+// existsSync() check first) avoids a check-then-use race on the file.
+function updateFile(relPath, transform) {
+  const filePath = path.join(rootDir, relPath);
+  let content;
+  try {
+    content = fs.readFileSync(filePath, 'utf8');
+  } catch (err) {
+    if (err.code === 'ENOENT') return;
+    throw err;
+  }
+  const updated = transform(content);
+  if (updated !== null) fs.writeFileSync(filePath, updated, 'utf8');
 }
 
-// 2. Update apps/backend/package.json
-const backendPkgPath = path.join(rootDir, 'apps/backend/package.json');
-if (fs.existsSync(backendPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(backendPkgPath, 'utf8'));
+function setPackageVersion(content) {
+  const pkg = JSON.parse(content);
   pkg.version = semVer;
-  fs.writeFileSync(backendPkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-  console.log(`✓ Updated apps/backend/package.json version to ${semVer}`);
+  return JSON.stringify(pkg, null, 2) + '\n';
 }
 
-// 3. Update apps/web/package.json
-const webPkgPath = path.join(rootDir, 'apps/web/package.json');
-if (fs.existsSync(webPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(webPkgPath, 'utf8'));
-  pkg.version = semVer;
-  fs.writeFileSync(webPkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-  console.log(`✓ Updated apps/web/package.json version to ${semVer}`);
+// 1-3. Update package.json files
+for (const relPath of [
+  'package.json',
+  'apps/backend/package.json',
+  'apps/web/package.json',
+]) {
+  updateFile(relPath, (content) => {
+    const updated = setPackageVersion(content);
+    console.log(`✓ Updated ${relPath} version to ${semVer}`);
+    return updated;
+  });
 }
 
 // 4. Update apps/mobile/relax_app/pubspec.yaml
-const pubspecPath = path.join(rootDir, 'apps/mobile/relax_app/pubspec.yaml');
-if (fs.existsSync(pubspecPath)) {
-  let pubspec = fs.readFileSync(pubspecPath, 'utf8');
-  
+updateFile('apps/mobile/relax_app/pubspec.yaml', (pubspec) => {
   // Find line: version: x.y.z+n or version: x.y.z-rc.a+n
   const versionRegex = /^version:\s*(.+)$/m;
-  const match = pubspec.match(versionRegex);
-  
-  if (match) {
-    const newVersionString = `${semVer}+${buildNumber}`;
-    pubspec = pubspec.replace(versionRegex, `version: ${newVersionString}`);
-    fs.writeFileSync(pubspecPath, pubspec, 'utf8');
-    console.log(`✓ Updated apps/mobile/relax_app/pubspec.yaml version to ${newVersionString}`);
-  } else {
+  if (!versionRegex.test(pubspec)) {
     console.warn(`✗ Could not find 'version:' line in pubspec.yaml`);
+    return null;
   }
-}
+  const newVersionString = `${semVer}+${buildNumber}`;
+  console.log(
+    `✓ Updated apps/mobile/relax_app/pubspec.yaml version to ${newVersionString}`,
+  );
+  return pubspec.replace(versionRegex, `version: ${newVersionString}`);
+});
 
 console.log('✓ All versions synchronized successfully.');

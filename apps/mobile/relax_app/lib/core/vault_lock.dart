@@ -73,14 +73,16 @@ class VaultLock {
   static final _localAuth = LocalAuthentication();
 
   static Future<bool> unlockBiometric(BuildContext context) async {
+    // Resolve the localized prompt before any await so the context is never
+    // used across an async gap.
+    final reason = context.t('Mở khóa nhật ký');
     try {
       final canCheck = await _localAuth.canCheckBiometrics;
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       if (!canCheck && !isDeviceSupported) return false;
 
-      // ignore: use_build_context_synchronously
       return await _localAuth.authenticate(
-        localizedReason: context.t('Mở khóa nhật ký'),
+        localizedReason: reason,
         biometricOnly: true,
       );
     } on PlatformException {

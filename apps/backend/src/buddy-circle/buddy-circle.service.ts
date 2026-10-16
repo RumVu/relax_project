@@ -3,6 +3,10 @@ import { FriendRequestStatus } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { StartGroupChallengeDto } from './dto/start-group-challenge.dto';
 
+const MAX_EMOJI_LENGTH = 16;
+const EMOJI_PATTERN =
+  /^\p{Extended_Pictographic}(?:\uFE0F|\p{Emoji_Modifier}|\u200D\p{Extended_Pictographic})*$/u;
+
 @Injectable()
 export class BuddyCircleService {
   constructor(private readonly prisma: PrismaService) {}
@@ -169,7 +173,17 @@ export class BuddyCircleService {
   }
 
   /** React to a feed entry (emoji reaction). */
-  async reactToFeed(userId: string, feedEntryId: string, emoji: string) {
+  async reactToFeed(userId: string, feedEntryId: string, emoji: unknown) {
+    // emoji becomes an object key in metadata.reactions — only accept a real
+    // emoji (incl. ZWJ / skin-tone sequences), never e.g. "__proto__".
+    if (
+      typeof emoji !== 'string' ||
+      emoji.length > MAX_EMOJI_LENGTH ||
+      !EMOJI_PATTERN.test(emoji)
+    ) {
+      throw new BadRequestException('Emoji không hợp lệ');
+    }
+
     const entry = await this.prisma.feedEntry.findUnique({
       where: { id: feedEntryId },
     });
@@ -178,10 +192,10 @@ export class BuddyCircleService {
     }
 
     const existing = (entry.metadata as Record<string, unknown>)?.reactions;
-    const reactions =
-      existing && typeof existing === 'object'
-        ? { ...(existing as Record<string, string[]>) }
-        : {};
+    const reactions: Record<string, string[]> = Object.assign(
+      Object.create(null) as Record<string, string[]>,
+      existing && typeof existing === 'object' ? existing : {},
+    );
 
     if (!reactions[emoji]) reactions[emoji] = [];
     if (!reactions[emoji].includes(userId)) {

@@ -14,7 +14,7 @@ import type { OpenAPIObject } from '@nestjs/swagger';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { Logger as PinoLogger } from 'nestjs-pino';
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { networkInterfaces } from 'node:os';
 import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
@@ -360,9 +360,13 @@ function parseTrustProxy(value: string): boolean | number | string {
   return value;
 }
 
+// Per-process key: the HMAC only equalises lengths so timingSafeEqual can
+// compare in constant time — nothing is stored, so a slow KDF isn't needed.
+const COMPARE_KEY = randomBytes(32);
+
 function timingSafeStringEqual(left: string, right: string) {
-  const leftDigest = createHash('sha256').update(left).digest();
-  const rightDigest = createHash('sha256').update(right).digest();
+  const leftDigest = createHmac('sha256', COMPARE_KEY).update(left).digest();
+  const rightDigest = createHmac('sha256', COMPARE_KEY).update(right).digest();
   return timingSafeEqual(leftDigest, rightDigest);
 }
 

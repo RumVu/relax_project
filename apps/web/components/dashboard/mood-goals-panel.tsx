@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { useDashboardStore } from '@/stores/use-dashboard-store';

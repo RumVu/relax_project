@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Activity, CheckCircle, Clock, Database, HardDrive, RefreshCcw, Server, Users, Wifi, XCircle, Zap } from 'lucide-react';
+import { Activity, CheckCircle, Clock, RefreshCcw, Server, Users, XCircle } from 'lucide-react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import { MetricCard, SectionTitle } from '@/components/dashboard/dashboard-ui';
 import { Button } from '@/components/ui/button';

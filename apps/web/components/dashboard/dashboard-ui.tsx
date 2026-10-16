@@ -1,6 +1,6 @@
 'use client';
 
-import { cloneElement, useEffect, useMemo, useRef, useState } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import {
   Area,
@@ -24,14 +24,12 @@ import {
   Database,
   type LucideIcon,
   RefreshCcw,
-  Sparkles,
   Wifi,
   WifiOff,
 } from 'lucide-react';
 import { API_URL, ApiError, apiFetch, getStoredAccessToken, refreshAuthSession } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { useMounted } from '@/hooks/use-mounted';

@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { MoodType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
+const MAX_CSV_COLUMNS = 50;
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
 @Injectable()
 export class ContentService {
   constructor(private readonly prisma: PrismaService) {}
@@ -228,17 +231,18 @@ export class ContentService {
       .filter(Boolean);
     if (lines.length < 2) return [];
 
-    const headers = this.splitCsvLine(lines[0]).map((h) =>
-      h.trim().toLowerCase(),
-    );
+    const headers = this.splitCsvLine(lines[0])
+      .slice(0, MAX_CSV_COLUMNS)
+      .map((h) => h.trim().toLowerCase());
     const rows: Record<string, string>[] = [];
 
     for (let i = 1; i < lines.length; i++) {
       const values = this.splitCsvLine(lines[i]);
-      const row: Record<string, string> = {};
-      for (let j = 0; j < headers.length; j++) {
-        row[headers[j]] = values[j]?.trim() ?? '';
-      }
+      const row = Object.create(null) as Record<string, string>;
+      headers.forEach((header, j) => {
+        if (UNSAFE_KEYS.has(header)) return;
+        row[header] = values[j]?.trim() ?? '';
+      });
       rows.push(row);
     }
 

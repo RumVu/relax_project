@@ -1,6 +1,6 @@
 'use client';
 
-import { BarChart3, Brain, Gauge, RefreshCcw, TrendingDown, Trophy } from 'lucide-react';
+import { Brain, Gauge, TrendingDown, Trophy } from 'lucide-react';
 import { CatMascot } from '@/components/dashboard/cat-mascot';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
 import {
@@ -15,11 +15,9 @@ import {
 import { DashboardFilterBar, useDashboardFilters } from '@/components/dashboard/dashboard-filters';
 import { AiInsightsCard } from '@/components/dashboard/ai-insights-card';
 import { PremiumGate } from '@/components/dashboard/premium-gate';
-import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useUserDashboardData } from '@/lib/live-dashboard';
 import { useDashboardStore } from '@/stores/use-dashboard-store';
-import { useUiStore } from '@/stores/use-ui-store';
 import { useTranslation } from '@/lib/i18n/i18n-provider';
 
 export default function AnalyticsPage() {
@@ -27,8 +25,6 @@ export default function AnalyticsPage() {
   const analyticsFilters = useDashboardFilters('/mood-checkins/me/analytics', 'analytics');
   const refreshNonce = useDashboardStore((state) => state.refreshNonce);
   const accountRole = useDashboardStore((state) => state.accountProfile?.role);
-  const triggerRefresh = useDashboardStore((state) => state.triggerRefresh);
-  const pushToast = useUiStore((state) => state.pushToast);
   const data = useUserDashboardData({
     refreshKey: refreshNonce,
     moodAnalyticsQuery: analyticsFilters.query,
