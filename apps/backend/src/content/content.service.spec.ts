@@ -1,7 +1,8 @@
+import { BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ContentService } from './content.service';
+import { ContentService, MAX_CSV_LENGTH } from './content.service';
 
-type CsvParser = { parseCsv(csv: string): Record<string, string>[] };
+type CsvParser = { parseCsv(csv: unknown): Record<string, string>[] };
 
 describe('ContentService — parseCsv', () => {
   const parser = new ContentService(
@@ -24,5 +25,12 @@ describe('ContentService — parseCsv', () => {
     const header = Array.from({ length: 500 }, (_, i) => `c${i}`).join(',');
     const rows = parser.parseCsv(`${header}\n1`);
     expect(Object.keys(rows[0])).toHaveLength(50);
+  });
+
+  it('rejects non-string or oversized input', () => {
+    expect(() => parser.parseCsv({ length: 1e9 })).toThrow(BadRequestException);
+    expect(() => parser.parseCsv('x'.repeat(MAX_CSV_LENGTH + 1))).toThrow(
+      BadRequestException,
+    );
   });
 });

@@ -1,4 +1,4 @@
-const { execSync } = require('node:child_process');
+const { execFileSync } = require('node:child_process');
 const path = require('node:path');
 
 const port = process.env.PORT || '6823';
@@ -14,9 +14,7 @@ let currentPid = process.pid;
 while (currentPid && !ancestorPids.has(currentPid)) {
   ancestorPids.add(currentPid);
   const ppid = Number(
-    execSync(`ps -o ppid= -p ${currentPid} 2>/dev/null || true`, {
-      encoding: 'utf8',
-    }).trim(),
+    run('ps', ['-o', 'ppid=', '-p', String(currentPid)]).trim(),
   );
   currentPid = Number.isFinite(ppid) ? ppid : 0;
 }
@@ -44,22 +42,30 @@ function killPid(pid, reason) {
   }
 }
 
-function list(command) {
+// execFileSync (no shell) — arguments are never parsed by sh, so env-derived
+// values like the port can't inject commands. Non-zero exits (e.g. lsof with
+// no matches) just yield empty output.
+function run(file, args) {
   try {
-    return execSync(command, { encoding: 'utf8' })
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean);
-  } catch {
-    return [];
+    return execFileSync(file, args, {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+  } catch (err) {
+    return typeof err.stdout === 'string' ? err.stdout : '';
   }
+}
+
+function list(file, args) {
+  return run(file, args)
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
 }
 
 function commandForPid(pid) {
   try {
-    return execSync(`ps -o command= -p ${pid} 2>/dev/null || true`, {
-      encoding: 'utf8',
-    }).trim();
+    return run('ps', ['-o', 'command=', '-p', String(pid)]).trim();
   } catch {
     return '';
   }
@@ -69,7 +75,7 @@ function isDockerProcess(command) {
   return command.includes('/Docker.app/') || command.includes('com.docker.');
 }
 
-for (const line of list(`lsof -ti tcp:${port} 2>/dev/null || true`)) {
+for (const line of list('lsof', ['-ti', `tcp:${port}`])) {
   killPid(Number(line), `port ${port}`);
 }
 
@@ -77,7 +83,7 @@ if (process.exitCode) {
   process.exit(process.exitCode);
 }
 
-for (const line of list(`ps -ax -o pid=,command= 2>/dev/null || true`)) {
+for (const line of list('ps', ['-ax', '-o', 'pid=,command='])) {
   const match = line.match(/^(\d+)\s+(.+)$/);
   if (!match) {
     continue;
