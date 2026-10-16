@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenAI } from '@google/genai';
+import { createGenAIClient, resolveGeminiModel } from '../common/gemini';
 import { MoodType } from '@prisma/client';
 import { AppException } from '../common/errors/app.exception';
 import { ErrorCode } from '../common/errors/error-code';
@@ -35,19 +35,8 @@ export class AiInsightsService {
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    const modelName =
-      this.configService.get<string>('GEMINI_MODEL') ?? 'gemini-2.5-flash';
-
-    let ai: GoogleGenAI | null = null;
-    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (projectId) {
-      const location =
-        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
-      ai = new GoogleGenAI({ vertexai: true, project: projectId, location });
-    } else if (apiKey) {
-      ai = new GoogleGenAI({ apiKey });
-    }
+    const modelName = resolveGeminiModel(this.configService);
+    const ai = createGenAIClient(this.configService);
 
     this.geminiProvider = ai ? new GeminiInsightProvider(ai, modelName) : null;
     if (this.geminiProvider) {
