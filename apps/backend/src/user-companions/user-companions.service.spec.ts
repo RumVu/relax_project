@@ -34,7 +34,7 @@ describe('UserCompanionsService — chatWithCompanion', () => {
   beforeEach(async () => {
     configGet = jest.fn((key: string) => {
       if (key === 'VERTEX_PROJECT_ID') return undefined;
-      if (key === 'GEMINI_MODEL') return 'gemini-2.5-flash';
+      if (key === 'GEMINI_MODEL') return 'gemini-3.8-flash';
       return undefined;
     });
 

@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { GoogleGenAI, Type } from '@google/genai';
+import { DEFAULT_GEMINI_MODEL } from '../../common/gemini';
 import {
   InsightDraft,
   InsightGenerationResult,
@@ -16,7 +17,7 @@ export class GeminiInsightProvider implements InsightProvider {
 
   constructor(ai: GoogleGenAI, modelName?: string) {
     this.ai = ai;
-    this.modelName = modelName ?? 'gemini-2.5-flash';
+    this.modelName = modelName ?? DEFAULT_GEMINI_MODEL;
   }
 
   async generate(

@@ -15,6 +15,7 @@ import { SwitchCompanionPersonalizationDto } from './dto/switch-companion-person
 import { UpsertUserCompanionDto } from './dto/upsert-user-companion.dto';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI, Type } from '@google/genai';
+import { createGenAIClient, resolveGeminiModel } from '../common/gemini';
 
 @Injectable()
 export class UserCompanionsService {
@@ -344,21 +345,7 @@ export class UserCompanionsService {
   }
 
   private buildGenAIClient(): GoogleGenAI | null {
-    const projectId = this.configService.get<string>('VERTEX_PROJECT_ID');
-    if (projectId) {
-      const location =
-        this.configService.get<string>('VERTEX_LOCATION') || 'us-central1';
-      return new GoogleGenAI({
-        vertexai: true,
-        project: projectId,
-        location,
-      });
-    }
-    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (apiKey) {
-      return new GoogleGenAI({ apiKey });
-    }
-    return null;
+    return createGenAIClient(this.configService);
   }
 
   async chatWithCompanion(userId: string, message: string) {
@@ -516,8 +503,7 @@ export class UserCompanionsService {
       `"${message}"`,
     ].join('\n');
 
-    const geminiModel =
-      this.configService.get<string>('GEMINI_MODEL') || 'gemini-2.5-flash';
+    const geminiModel = resolveGeminiModel(this.configService);
 
     const result = await ai.models.generateContent({
       model: geminiModel,
